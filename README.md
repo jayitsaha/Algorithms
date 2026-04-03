@@ -1,0 +1,1 @@
+This is the README.md for the Algorithms directory. It contains various algorithms implemented in different programming languages. Each algorithm is organized in its own folder, and the folder name indicates the algorithm it contains.
