@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remove Duplicates from Sorted Array — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --done-bg:#E6F1FB;  --done-border:#85B7EB;  --done-text:#185FA5;
+    --skip-bg:#f0efe9;  --skip-text:#9c9a92;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --done-bg:#0c2a45;   --done-border:#185FA5;  --done-text:#85B7EB;
+      --skip-bg:#222224;   --skip-text:#555452;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-easy      { background: var(--green-bg); color: var(--green-mid); }
+  .tag-pattern   { background: var(--blue-bg);  color: var(--blue-mid); }
+  .tag-complexity{ background: var(--purple-bg); color: var(--purple-mid); }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 52px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.write  { background: var(--blue-bg);  color: var(--blue-mid); }
+  .ptr-label.read   { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.both   { background: var(--amber-bg); color: var(--amber-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 52px; height: 52px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s;
+  }
+  .cell.write    { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
+  .cell.read     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.both     { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+  .cell.done     { background: var(--done-bg); border-color: var(--done-border); color: var(--done-text); }
+  .cell.skip     { background: var(--skip-bg); border-color: var(--border); color: var(--skip-text); font-style: italic; }
+  .cell.tail     { background: var(--bg2); border-color: var(--border); color: var(--text3); opacity: 0.5; }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 52px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 12px 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.8; overflow-x: auto;
+  }
+  .code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-scan { background: var(--green-bg);  color: var(--green-mid); }
+  .phase-done { background: var(--blue-bg);   color: var(--blue-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-write { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-read  { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-both  { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-done  { background: var(--done-bg);   border-color: var(--done-border); }
+  .ls-skip  { background: var(--skip-bg);   border-color: var(--border); }
+  .ls-tail  { background: var(--bg2);       border-color: var(--border); opacity: 0.5; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Remove Duplicates from Sorted Array</h1>
+    <p class="subtitle">Two-pointer in-place — write pointer collects unique values, read pointer scans ahead.</p>
+    <div class="tags">
+      <span class="tag tag-easy">#26 Easy</span>
+      <span class="tag tag-pattern">Two Pointer</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row" class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div id="var-tracker" class="var-tracker"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 10</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body" class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-write"></div>write ptr</div>
+    <div class="legend-item"><div class="legend-swatch ls-read"></div>read ptr</div>
+    <div class="legend-item"><div class="legend-swatch ls-both"></div>write & read</div>
+    <div class="legend-item"><div class="legend-swatch ls-done"></div>unique placed</div>
+    <div class="legend-item"><div class="legend-swatch ls-skip"></div>duplicate (skip)</div>
+    <div class="legend-item"><div class="legend-swatch ls-tail"></div>don't care</div>
+  </div>
+</div>
+
+<script>
+// nums = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
+const initNums = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4];
+const N = initNums.length;
+
+const codeLines = [
+  'write = 1',
+  'for read in range(1, len(nums)):',
+  '    if nums[read] != nums[read - 1]:',
+  '        nums[write] = nums[read]',
+  '        write += 1',
+  'return write',
+];
+
+const varNames = ['write', 'read', 'k (unique)'];
+
+// Build step data for [0, 0, 1, 1, 1, 2, 2, 3, 3, 4]
+// Trace:
+// init: write=1
+// read=1: nums[1]=0 == nums[0]=0 → skip. write=1
+// read=2: nums[2]=1 != nums[1]=0 → write! nums[1]=1, write=2
+// read=3: nums[3]=1 == nums[2]=1 → skip. write=2
+// read=4: nums[4]=1 == nums[3]=1 → skip. write=2
+// read=5: nums[5]=2 != nums[4]=1 → write! nums[2]=2, write=3
+// read=6: nums[6]=2 == nums[5]=2 → skip. write=3
+// read=7: nums[7]=3 != nums[6]=2 → write! nums[3]=3, write=4
+// read=8: nums[8]=3 == nums[7]=3 → skip. write=4
+// read=9: nums[9]=4 != nums[8]=3 → write! nums[4]=4, write=5
+// return 5 → [0, 1, 2, 3, 4, ...]
+
+const steps = [
+  {
+    display: [0,0,1,1,1,2,2,3,3,4],
+    cells: ['done','normal','normal','normal','normal','normal','normal','normal','normal','normal'],
+    vars: { write: 1, read: '—', 'k (unique)': 1 },
+    changed: [],
+    activeLine: 0,
+    phase: 'init',
+    title: 'Initialise — write = 1',
+    body: 'Index 0 is always unique (nothing to compare against). <span class="code-inline">write = 1</span> — the next slot for a unique value.'
+  },
+  {
+    display: [0,0,1,1,1,2,2,3,3,4],
+    cells: ['done','both','normal','normal','normal','normal','normal','normal','normal','normal'],
+    vars: { write: 1, read: 1, 'k (unique)': 1 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=1 → nums[1]=0, same as nums[0]=0',
+    body: 'Duplicate! <span class="code-inline">nums[1] == nums[0]</span> → <b>skip</b>. write stays at 1.'
+  },
+  {
+    display: [0,0,1,1,1,2,2,3,3,4],
+    cells: ['done','write','read','normal','normal','normal','normal','normal','normal','normal'],
+    vars: { write: 1, read: 2, 'k (unique)': 1 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=2 → nums[2]=1 ≠ nums[1]=0 ✓ new unique!',
+    body: '<span class="code-inline">nums[2] != nums[1]</span> → found a new unique value <b>1</b>.'
+  },
+  {
+    display: [0,1,1,1,1,2,2,3,3,4],
+    cells: ['done','done','read','normal','normal','normal','normal','normal','normal','normal'],
+    vars: { write: 2, read: 2, 'k (unique)': 2 },
+    changed: ['write', 'k (unique)'],
+    activeLine: 3,
+    phase: 'scan',
+    title: 'Write 1 at index 1, write → 2',
+    body: '<span class="code-inline">nums[1] = 1</span>, then <span class="code-inline">write = 2</span>. Unique region: [0, 1, …].'
+  },
+  {
+    display: [0,1,1,1,1,2,2,3,3,4],
+    cells: ['done','done','skip','both','normal','normal','normal','normal','normal','normal'],
+    vars: { write: 2, read: 3, 'k (unique)': 2 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=3 → nums[3]=1, same as nums[2]=1',
+    body: 'Duplicate — skip. <span class="code-inline">read=4</span> next…'
+  },
+  {
+    display: [0,1,1,1,1,2,2,3,3,4],
+    cells: ['done','done','skip','skip','both','normal','normal','normal','normal','normal'],
+    vars: { write: 2, read: 4, 'k (unique)': 2 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=4 → nums[4]=1, same as nums[3]=1',
+    body: 'Still duplicate — skip again.'
+  },
+  {
+    display: [0,1,1,1,1,2,2,3,3,4],
+    cells: ['done','done','write','skip','skip','read','normal','normal','normal','normal'],
+    vars: { write: 2, read: 5, 'k (unique)': 2 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=5 → nums[5]=2 ≠ nums[4]=1 ✓ new unique!',
+    body: 'Found <b>2</b>.'
+  },
+  {
+    display: [0,1,2,1,1,2,2,3,3,4],
+    cells: ['done','done','done','skip','skip','read','normal','normal','normal','normal'],
+    vars: { write: 3, read: 5, 'k (unique)': 3 },
+    changed: ['write', 'k (unique)'],
+    activeLine: 3,
+    phase: 'scan',
+    title: 'Write 2 at index 2, write → 3',
+    body: '<span class="code-inline">nums[2] = 2</span>, <span class="code-inline">write = 3</span>. Unique: [0, 1, 2, …].'
+  },
+  {
+    display: [0,1,2,1,1,2,2,3,3,4],
+    cells: ['done','done','done','write','skip','skip','both','normal','normal','normal'],
+    vars: { write: 3, read: 6, 'k (unique)': 3 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=6 → nums[6]=2, same as nums[5]=2',
+    body: 'Duplicate — skip.'
+  },
+  {
+    display: [0,1,2,1,1,2,2,3,3,4],
+    cells: ['done','done','done','write','skip','skip','skip','read','normal','normal'],
+    vars: { write: 3, read: 7, 'k (unique)': 3 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=7 → nums[7]=3 ≠ nums[6]=2 ✓ new unique!',
+    body: 'Found <b>3</b>.'
+  },
+  {
+    display: [0,1,2,3,1,2,2,3,3,4],
+    cells: ['done','done','done','done','skip','skip','skip','read','normal','normal'],
+    vars: { write: 4, read: 7, 'k (unique)': 4 },
+    changed: ['write', 'k (unique)'],
+    activeLine: 3,
+    phase: 'scan',
+    title: 'Write 3 at index 3, write → 4',
+    body: '<span class="code-inline">nums[3] = 3</span>, <span class="code-inline">write = 4</span>. Unique: [0, 1, 2, 3, …].'
+  },
+  {
+    display: [0,1,2,3,1,2,2,3,3,4],
+    cells: ['done','done','done','done','write','skip','skip','skip','both','normal'],
+    vars: { write: 4, read: 8, 'k (unique)': 4 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=8 → nums[8]=3, same as nums[7]=3',
+    body: 'Duplicate — skip.'
+  },
+  {
+    display: [0,1,2,3,1,2,2,3,3,4],
+    cells: ['done','done','done','done','write','skip','skip','skip','skip','read'],
+    vars: { write: 4, read: 9, 'k (unique)': 4 },
+    changed: ['read'],
+    activeLine: 2,
+    phase: 'scan',
+    title: 'read=9 → nums[9]=4 ≠ nums[8]=3 ✓ new unique!',
+    body: 'Found <b>4</b> — the last unique value.'
+  },
+  {
+    display: [0,1,2,3,4,2,2,3,3,4],
+    cells: ['done','done','done','done','done','tail','tail','tail','tail','tail'],
+    vars: { write: 5, read: 9, 'k (unique)': 5 },
+    changed: ['write', 'k (unique)'],
+    activeLine: 4,
+    phase: 'scan',
+    title: 'Write 4 at index 4, write → 5',
+    body: '<span class="code-inline">nums[4] = 4</span>, <span class="code-inline">write = 5</span>. Everything after index 4 doesn\'t matter.'
+  },
+  {
+    display: [0,1,2,3,4,2,2,3,3,4],
+    cells: ['done','done','done','done','done','tail','tail','tail','tail','tail'],
+    vars: { write: 5, read: '—', 'k (unique)': 5 },
+    changed: [],
+    activeLine: 5,
+    phase: 'done',
+    title: '✓ Done — k = 5, nums = [0, 1, 2, 3, 4, …]',
+    body: '5 unique elements placed in-place. The tail is irrelevant. <b>O(n) time, O(1) space.</b>'
+  }
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+
+  // Array
+  const arrayRow = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i];
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = step.display[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if      (cl === 'write') { pl.className = 'ptr-label write'; pl.textContent = 'write'; }
+    else if (cl === 'read')  { pl.className = 'ptr-label read';  pl.textContent = 'read'; }
+    else if (cl === 'both')  { pl.className = 'ptr-label both';  pl.textContent = 'w & r'; }
+    else                     { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label';
+    il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Variables
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for (const name of varNames) {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (step.changed.includes(name) ? ' changed' : '');
+    box.innerHTML = '<span class="var-name">' + name + '</span><span class="var-val">' + step.vars[name] + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const cl = document.createElement('div');
+    cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+    cl.textContent = line;
+    cp.appendChild(cl);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 'init') { badge.className = 'phase-badge phase-init'; badge.textContent = 'Init'; }
+  else if (step.phase === 'scan') { badge.className = 'phase-badge phase-scan'; badge.textContent = 'Scanning'; }
+  else                            { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => { cur = i; render(); });
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

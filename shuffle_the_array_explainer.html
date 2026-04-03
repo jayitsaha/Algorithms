@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuffle the Array — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-easy      { background: var(--green-bg); color: var(--green-mid); }
+  .tag-pattern   { background: var(--blue-bg);  color: var(--blue-mid); }
+  .tag-complexity{ background: var(--purple-bg); color: var(--purple-mid); }
+
+  /* Section labels */
+  .section-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text3); margin-bottom: 8px;
+  }
+
+  /* Input array */
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 50px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.blue   { background: var(--blue-bg);  color: var(--blue-mid); }
+  .ptr-label.green  { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 50px; height: 50px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s;
+  }
+  .cell.x-half    { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
+  .cell.y-half    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.pick-x    { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); transform: scale(1.08); }
+  .cell.pick-y    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.08); }
+  .cell.done      { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 50px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Divider label */
+  .divider-label {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    margin: 4px 0 2px; font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.5px; font-weight: 600;
+  }
+  .divider-label::before, .divider-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Result array */
+  .result-section { margin-top: 1.25rem; }
+  .result-row { display: flex; gap: 6px; justify-content: center; }
+  .result-cell {
+    width: 50px; height: 50px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 600; font-family: var(--mono);
+    border: 1px dashed var(--border2);
+    background: var(--bg2); color: var(--text3);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, border-style 0.3s;
+  }
+  .result-cell.filled-x {
+    border: 2px solid var(--blue-border); background: var(--blue-bg);
+    color: var(--blue-text); border-style: solid;
+  }
+  .result-cell.filled-y {
+    border: 2px solid var(--green-border); background: var(--green-bg);
+    color: var(--green-text); border-style: solid;
+  }
+  .result-cell.just-placed { transform: scale(1.08); }
+  .result-idx { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 12px 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.8; overflow-x: auto;
+  }
+  .code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init   { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-interleave { background: var(--green-bg); color: var(--green-mid); }
+  .phase-done   { background: var(--blue-bg);   color: var(--blue-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-x     { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-y     { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-empty { background: var(--bg2);       border-color: var(--border2); border-style: dashed; }
+  .ls-done  { background: var(--bg2);       border-color: var(--border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Shuffle the Array</h1>
+    <p class="subtitle">Interleave first half [x₁…xₙ] with second half [y₁…yₙ] → [x₁,y₁,x₂,y₂,…xₙ,yₙ]</p>
+    <div class="tags">
+      <span class="tag tag-easy">#1470 Easy</span>
+      <span class="tag tag-pattern">Array</span>
+      <span class="tag tag-complexity">O(n) / O(n)</span>
+    </div>
+  </div>
+
+  <div class="section-label">Input Array</div>
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row" class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="divider-label">result</div>
+
+  <div class="result-section">
+    <div id="result-row" class="result-row"></div>
+    <div id="result-idx" class="result-idx"></div>
+  </div>
+
+  <div id="var-tracker" class="var-tracker"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 9</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body" class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-x"></div>x half (first n)</div>
+    <div class="legend-item"><div class="legend-swatch ls-y"></div>y half (second n)</div>
+    <div class="legend-item"><div class="legend-swatch ls-empty"></div>empty slot</div>
+    <div class="legend-item"><div class="legend-swatch ls-done"></div>used</div>
+  </div>
+</div>
+
+<script>
+const nums = [2, 5, 1, 3, 4, 7];
+const n = 3;
+const N = nums.length;
+
+const codeLines = [
+  'result = []',
+  'for i in range(n):',
+  '    result.append(nums[i])',
+  '    result.append(nums[i + n])',
+  'return result',
+];
+
+// Steps: each has inputCells, resultCells, resultVals, vars, changed, activeLine, phase, title, body
+const steps = [
+  {
+    inputCells: ['x-half','x-half','x-half','y-half','y-half','y-half'],
+    resultCells: ['empty','empty','empty','empty','empty','empty'],
+    resultVals: ['','','','','',''],
+    vars: { i: '-', 'result.len': 0 },
+    changed: [],
+    activeLine: 0,
+    phase: 'init',
+    title: 'Initialise',
+    body: '<span class="code-inline">result = []</span> — empty list. First 3 elements are the <b>x-half</b>, last 3 are the <b>y-half</b>. <span class="code-inline">n = 3</span>.'
+  },
+  {
+    inputCells: ['pick-x','x-half','x-half','y-half','y-half','y-half'],
+    resultCells: ['empty','empty','empty','empty','empty','empty'],
+    resultVals: ['','','','','',''],
+    vars: { i: 0, 'result.len': 0 },
+    changed: ['i'],
+    activeLine: 1,
+    phase: 'interleave',
+    title: 'i=0 — pick x₁',
+    body: 'Loop starts. <span class="code-inline">i = 0</span>. Pick <span class="code-inline">nums[0] = 2</span> (x₁).'
+  },
+  {
+    inputCells: ['pick-x','x-half','x-half','pick-y','y-half','y-half'],
+    resultCells: ['filled-x just-placed','empty','empty','empty','empty','empty'],
+    resultVals: [2,'','','','',''],
+    vars: { i: 0, 'result.len': 1 },
+    changed: ['result.len'],
+    activeLine: 2,
+    phase: 'interleave',
+    title: 'Append nums[0]=2, then nums[3]=3',
+    body: '<span class="code-inline">result.append(nums[0])</span> → append <b>2</b>. Now pick <span class="code-inline">nums[0+3] = 3</span> (y₁).'
+  },
+  {
+    inputCells: ['done','x-half','x-half','done','y-half','y-half'],
+    resultCells: ['filled-x','filled-y just-placed','empty','empty','empty','empty'],
+    resultVals: [2,3,'','','',''],
+    vars: { i: 0, 'result.len': 2 },
+    changed: ['result.len'],
+    activeLine: 3,
+    phase: 'interleave',
+    title: 'Pair (x₁,y₁) = (2,3) placed',
+    body: '<span class="code-inline">result.append(nums[3])</span> → append <b>3</b>. Result so far: <b>[2, 3]</b>.'
+  },
+  {
+    inputCells: ['done','pick-x','x-half','done','y-half','y-half'],
+    resultCells: ['filled-x','filled-y','empty','empty','empty','empty'],
+    resultVals: [2,3,'','','',''],
+    vars: { i: 1, 'result.len': 2 },
+    changed: ['i'],
+    activeLine: 1,
+    phase: 'interleave',
+    title: 'i=1 — pick x₂',
+    body: 'Next iteration. <span class="code-inline">i = 1</span>. Pick <span class="code-inline">nums[1] = 5</span> (x₂).'
+  },
+  {
+    inputCells: ['done','pick-x','x-half','done','pick-y','y-half'],
+    resultCells: ['filled-x','filled-y','filled-x just-placed','empty','empty','empty'],
+    resultVals: [2,3,5,'','',''],
+    vars: { i: 1, 'result.len': 3 },
+    changed: ['result.len'],
+    activeLine: 2,
+    phase: 'interleave',
+    title: 'Append nums[1]=5, then nums[4]=4',
+    body: '<span class="code-inline">result.append(nums[1])</span> → append <b>5</b>. Now pick <span class="code-inline">nums[1+3] = 4</span> (y₂).'
+  },
+  {
+    inputCells: ['done','done','x-half','done','done','y-half'],
+    resultCells: ['filled-x','filled-y','filled-x','filled-y just-placed','empty','empty'],
+    resultVals: [2,3,5,4,'',''],
+    vars: { i: 1, 'result.len': 4 },
+    changed: ['result.len'],
+    activeLine: 3,
+    phase: 'interleave',
+    title: 'Pair (x₂,y₂) = (5,4) placed',
+    body: '<span class="code-inline">result.append(nums[4])</span> → append <b>4</b>. Result: <b>[2, 3, 5, 4]</b>.'
+  },
+  {
+    inputCells: ['done','done','pick-x','done','done','y-half'],
+    resultCells: ['filled-x','filled-y','filled-x','filled-y','empty','empty'],
+    resultVals: [2,3,5,4,'',''],
+    vars: { i: 2, 'result.len': 4 },
+    changed: ['i'],
+    activeLine: 1,
+    phase: 'interleave',
+    title: 'i=2 — pick x₃',
+    body: 'Last iteration. <span class="code-inline">i = 2</span>. Pick <span class="code-inline">nums[2] = 1</span> (x₃).'
+  },
+  {
+    inputCells: ['done','done','pick-x','done','done','pick-y'],
+    resultCells: ['filled-x','filled-y','filled-x','filled-y','filled-x just-placed','empty'],
+    resultVals: [2,3,5,4,1,''],
+    vars: { i: 2, 'result.len': 5 },
+    changed: ['result.len'],
+    activeLine: 2,
+    phase: 'interleave',
+    title: 'Append nums[2]=1, then nums[5]=7',
+    body: '<span class="code-inline">result.append(nums[2])</span> → append <b>1</b>. Now pick <span class="code-inline">nums[2+3] = 7</span> (y₃).'
+  },
+  {
+    inputCells: ['done','done','done','done','done','done'],
+    resultCells: ['filled-x','filled-y','filled-x','filled-y','filled-x','filled-y just-placed'],
+    resultVals: [2,3,5,4,1,7],
+    vars: { i: 2, 'result.len': 6 },
+    changed: ['result.len'],
+    activeLine: 3,
+    phase: 'interleave',
+    title: 'Pair (x₃,y₃) = (1,7) placed',
+    body: '<span class="code-inline">result.append(nums[5])</span> → append <b>7</b>. Result: <b>[2, 3, 5, 4, 1, 7]</b>.'
+  },
+  {
+    inputCells: ['done','done','done','done','done','done'],
+    resultCells: ['filled-x','filled-y','filled-x','filled-y','filled-x','filled-y'],
+    resultVals: [2,3,5,4,1,7],
+    vars: { i: '-', 'result.len': 6 },
+    changed: [],
+    activeLine: 4,
+    phase: 'done',
+    title: '✓ Done — [2, 3, 5, 4, 1, 7]',
+    body: 'All pairs interleaved. Each x paired with its corresponding y. <b>O(n) time, O(n) space.</b>'
+  }
+];
+
+let cur = 0;
+const varNames = ['i', 'result.len'];
+
+function render() {
+  const step = steps[cur];
+
+  // Input array
+  const arrayRow = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.inputCells[i];
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if (cl === 'pick-x')      { pl.className = 'ptr-label blue'; pl.textContent = 'x' + (i < n ? '₁₂₃'[i] : ''); }
+    else if (cl === 'pick-y') { pl.className = 'ptr-label green'; pl.textContent = 'y' + (i >= n ? '₁₂₃'[i - n] : ''); }
+    else                      { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label';
+    il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Result array
+  const resultRow = document.getElementById('result-row');
+  const resultIdx = document.getElementById('result-idx');
+  resultRow.innerHTML = resultIdx.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const rc = document.createElement('div');
+    const cl = step.resultCells[i];
+    rc.className = 'result-cell ' + cl;
+    rc.textContent = step.resultVals[i];
+    resultRow.appendChild(rc);
+
+    const ri = document.createElement('div');
+    ri.className = 'idx-label';
+    ri.textContent = i;
+    resultIdx.appendChild(ri);
+  }
+
+  // Variable tracker
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for (const name of varNames) {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (step.changed.includes(name) ? ' changed' : '');
+    box.innerHTML = '<span class="var-name">' + name + '</span><span class="var-val">' + step.vars[name] + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const cl = document.createElement('div');
+    cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+    cl.textContent = line;
+    cp.appendChild(cl);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if (step.phase === 'init')           { badge.className = 'phase-badge phase-init'; badge.textContent = 'Init'; }
+  else if (step.phase === 'interleave'){ badge.className = 'phase-badge phase-interleave'; badge.textContent = 'Interleave'; }
+  else                                 { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => { cur = i; render(); });
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
