@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move Zeroes — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;
+    --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text2: #6b6b65;
+    --text3: #9c9a92;
+    --blue-bg: #E6F1FB; --blue-border: #85B7EB; --blue-text: #042C53; --blue-mid: #185FA5;
+    --green-bg: #EAF3DE; --green-border: #97C459; --green-text: #173404; --green-mid: #3B6D11;
+    --amber-bg: #FAEEDA; --amber-border: #EF9F27; --amber-text: #412402; --amber-mid: #854F0B;
+    --done-nz-bg: #E6F1FB; --done-nz-border: #85B7EB; --done-nz-text: #185FA5;
+    --done-z-bg: #f0efe9; --done-z-text: #9c9a92;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #18181a; --bg2: #222224; --surface: #2a2a2d;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --text: #e8e6de; --text2: #9c9a92; --text3: #666460;
+      --blue-bg: #0c2a45; --blue-border: #378ADD; --blue-text: #B5D4F4; --blue-mid: #85B7EB;
+      --green-bg: #172a0a; --green-border: #639922; --green-text: #C0DD97; --green-mid: #97C459;
+      --amber-bg: #2e1c05; --amber-border: #BA7517; --amber-text: #FAC775; --amber-mid: #EF9F27;
+      --done-nz-bg: #0c2a45; --done-nz-border: #185FA5; --done-nz-text: #85B7EB;
+      --done-z-bg: #222224; --done-z-text: #555452;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .header { margin-bottom: 1.75rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header p  { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 58px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.write  { background: var(--blue-bg);  color: var(--blue-mid);  }
+  .ptr-label.read   { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.both   { background: var(--amber-bg); color: var(--amber-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 8px; justify-content: center; }
+  .cell {
+    width: 58px; height: 58px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+  }
+  .cell.write    { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text);  }
+  .cell.read     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.both     { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+  .cell.done-nz  { background: var(--done-nz-bg); border-color: var(--done-nz-border); color: var(--done-nz-text); }
+  .cell.done-zero{ background: var(--done-z-bg);  border-color: var(--border);          color: var(--done-z-text); font-style: italic; }
+
+  .idx-labels { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
+  .idx-label { width: 58px; text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.5rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 90px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-1    { background: var(--green-bg); color: var(--green-mid); }
+  .phase-2    { background: var(--amber-bg); color: var(--amber-mid); }
+  .phase-done { background: var(--blue-bg);  color: var(--blue-mid);  }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+  .btn.primary:hover:not(:disabled) { background: #B5D4F4; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-write { background: var(--blue-bg);  border-color: var(--blue-border); }
+  .ls-read  { background: var(--green-bg); border-color: var(--green-border); }
+  .ls-both  { background: var(--amber-bg); border-color: var(--amber-border); }
+  .ls-nz    { background: var(--done-nz-bg); border-color: var(--done-nz-border); }
+  .ls-z     { background: var(--done-z-bg); border-color: var(--border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Move Zeroes</h1>
+    <p>Two-pointer in-place algorithm — step through each operation to see exactly what changes.</p>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row"  class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-1">Phase 1</span>
+      <span id="step-num" class="step-num">Step 0 of 11</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body"  class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-write"></div>write ptr</div>
+    <div class="legend-item"><div class="legend-swatch ls-read"></div>read ptr</div>
+    <div class="legend-item"><div class="legend-swatch ls-both"></div>overlap</div>
+    <div class="legend-item"><div class="legend-swatch ls-nz"></div>placed non-zero</div>
+    <div class="legend-item"><div class="legend-swatch ls-z"></div>filled zero</div>
+  </div>
+</div>
+
+<script>
+const displayNums = [0,1,0,3,12];
+const N = displayNums.length;
+
+const steps = [
+  {
+    cells: ['normal','normal','normal','normal','normal'], phase:1,
+    title: 'Initialise',
+    body: '<span class="code-inline">write = 0</span> — write pointer waits at index 0 for the first non-zero value.'
+  },
+  {
+    cells: ['read','normal','normal','normal','normal'], phase:1,
+    title: 'read=0 → nums[0] = 0',
+    body: 'It\'s a zero. <b>Skip</b> — <span class="code-inline">write</span> stays at 0, <span class="code-inline">read</span> will advance.'
+  },
+  {
+    cells: ['normal','both','normal','normal','normal'], phase:1,
+    title: 'read=1 → nums[1] = 1  ✓',
+    body: 'Non-zero found! <span class="code-inline">nums[write=0] = 1</span>, then <span class="code-inline">write++</span>.'
+  },
+  {
+    overwrite:[0], cells: ['done-nz','write','normal','normal','normal'], phase:1,
+    title: 'After writing 1',
+    body: 'Index 0 is now 1. write advances to 1, ready for the next non-zero.'
+  },
+  {
+    overwrite:[0], cells: ['done-nz','normal','read','normal','normal'], phase:1,
+    title: 'read=2 → nums[2] = 0',
+    body: 'Zero again. <b>Skip</b> — write stays at 1.'
+  },
+  {
+    overwrite:[0], cells: ['done-nz','both','normal','normal','normal'], phase:1,
+    title: 'read=3 → nums[3] = 3  ✓',
+    body: 'Non-zero found! <span class="code-inline">nums[write=1] = 3</span>, then <span class="code-inline">write++</span>.'
+  },
+  {
+    overwrite:[0,1], cells: ['done-nz','done-nz','write','normal','normal'], phase:1,
+    title: 'After writing 3',
+    body: 'Index 1 is now 3. write advances to 2.'
+  },
+  {
+    overwrite:[0,1], cells: ['done-nz','done-nz','both','normal','normal'], phase:1,
+    title: 'read=4 → nums[4] = 12  ✓',
+    body: 'Non-zero found! <span class="code-inline">nums[write=2] = 12</span>, then <span class="code-inline">write++</span>.'
+  },
+  {
+    overwrite:[0,1,2], cells: ['done-nz','done-nz','done-nz','normal','normal'], phase:1,
+    title: 'Phase 1 complete — write=3',
+    body: 'All non-zeros packed: [1, 3, 12, …]. Phase 2 fills everything from index 3 onwards with zeros.'
+  },
+  {
+    overwrite:[0,1,2], fillZero:[3], cells: ['done-nz','done-nz','done-nz','done-zero','normal'], phase:2,
+    title: 'Phase 2: fill index 3',
+    body: '<span class="code-inline">nums[3] = 0</span>'
+  },
+  {
+    overwrite:[0,1,2], fillZero:[3,4], cells: ['done-nz','done-nz','done-nz','done-zero','done-zero'], phase:2,
+    title: 'Phase 2: fill index 4',
+    body: '<span class="code-inline">nums[4] = 0</span> — all positions filled.'
+  },
+  {
+    overwrite:[0,1,2], fillZero:[3,4], cells: ['done-nz','done-nz','done-nz','done-zero','done-zero'], phase:'done',
+    title: '✓ Done — [1, 3, 12, 0, 0]',
+    body: 'Non-zeros preserved in order. Zeros pushed to the end. <b>O(n) time, O(1) space.</b>'
+  },
+];
+
+let cur = 0;
+
+function getVal(step, i) {
+  if (step.fillZero && step.fillZero.includes(i)) return 0;
+  if (step.overwrite && step.overwrite.includes(i)) {
+    return displayNums.filter(x => x !== 0)[i];
+  }
+  return displayNums[i];
+}
+
+function render() {
+  const step = steps[cur];
+  const arrayRow  = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i] || 'normal';
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = getVal(step, i);
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if      (cl === 'write')   { pl.className = 'ptr-label write';  pl.textContent = 'write'; }
+    else if (cl === 'read')    { pl.className = 'ptr-label read';   pl.textContent = 'read';  }
+    else if (cl === 'both')    { pl.className = 'ptr-label both';   pl.textContent = 'w & r'; }
+    else                       { pl.className = 'ptr-label hidden'; pl.textContent = '';       }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label'; il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 1)      { badge.className = 'phase-badge phase-1';    badge.textContent = 'Phase 1 — collect non-zeros'; }
+  else if (step.phase === 2)      { badge.className = 'phase-badge phase-2';    badge.textContent = 'Phase 2 — fill zeros'; }
+  else                            { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent   = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML    = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    prog.appendChild(d);
+  });
+}
+
+function go(dir)  { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset()  { cur = 0; render(); }
+
+render();
+</script>
+</body>
+</html>

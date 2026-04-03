@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Max Consecutive Ones — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-easy { background: var(--green-bg); color: var(--green-mid); }
+  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 58px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.scan   { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 8px; justify-content: center; }
+  .cell {
+    width: 58px; height: 58px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.scan     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.05); }
+  .cell.run      { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text);  }
+  .cell.best     { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+  .cell.reset    { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); }
+  .cell.done     { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+
+  .idx-labels { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
+  .idx-label { width: 58px; text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker {
+    display: flex; gap: 12px; justify-content: center; margin-top: 1.25rem;
+  }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px;
+    transition: background 0.3s, border-color 0.3s;
+    border: 1px solid transparent;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-name {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text3);
+  }
+  .var-val {
+    font-family: var(--mono); font-size: 18px; font-weight: 600;
+    color: var(--text); min-width: 20px; text-align: center;
+  }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active {
+    background: var(--green-bg);
+    color: var(--green-text);
+    font-weight: 500;
+  }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-scan  { background: var(--green-bg); color: var(--green-mid); }
+  .phase-done  { background: var(--blue-bg);  color: var(--blue-mid);  }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-scan { background: var(--green-bg); border-color: var(--green-border); }
+  .ls-run  { background: var(--blue-bg);  border-color: var(--blue-border); }
+  .ls-best { background: var(--amber-bg); border-color: var(--amber-border); }
+  .ls-reset{ background: var(--red-bg);   border-color: var(--red-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Max Consecutive Ones</h1>
+    <p class="subtitle">Single pass — increment counter on 1, reset on 0, track max.</p>
+    <div class="tags">
+      <span class="tag tag-easy">#485 Easy</span>
+      <span class="tag tag-pattern">Greedy</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row"  class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="var-tracker">
+    <div class="var-box" id="vb-count">
+      <span class="var-name">count</span>
+      <span class="var-val" id="v-count">0</span>
+    </div>
+    <div class="var-box" id="vb-max">
+      <span class="var-name">max_count</span>
+      <span class="var-val" id="v-max">0</span>
+    </div>
+  </div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-scan">Scanning</span>
+      <span id="step-num" class="step-num">Step 0 of 9</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body"  class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-scan"></div>scanning</div>
+    <div class="legend-item"><div class="legend-swatch ls-run"></div>current run</div>
+    <div class="legend-item"><div class="legend-swatch ls-best"></div>best run</div>
+    <div class="legend-item"><div class="legend-swatch ls-reset"></div>reset (zero)</div>
+  </div>
+</div>
+
+<script>
+const nums = [1, 1, 0, 1, 1, 1];
+const N = nums.length;
+
+const codeLines = [
+  'count = 0',
+  'max_count = 0',
+  '',
+  'for num in nums:',
+  '    if num == 1:',
+  '        count += 1',
+  '        max_count = max(max_count, count)',
+  '    else:',
+  '        count = 0',
+  '',
+  'return max_count',
+];
+
+// Steps: cells array, count, maxCount, activeLine (0-indexed into codeLines), changedVars
+const steps = [
+  {
+    cells: ['normal','normal','normal','normal','normal','normal'],
+    count: 0, maxCount: 0, activeLine: [0,1], changed: [],
+    phase: 'init', title: 'Initialise',
+    body: '<span class="code-inline">count = 0</span>, <span class="code-inline">max_count = 0</span>. Ready to scan left to right.'
+  },
+  {
+    cells: ['scan','normal','normal','normal','normal','normal'],
+    count: 1, maxCount: 1, activeLine: [5,6], changed: ['count','max'],
+    phase: 'scan', title: 'nums[0] = 1  ✓',
+    body: 'It\'s a 1! <span class="code-inline">count = 0+1 = 1</span>. Update <span class="code-inline">max_count = max(0, 1) = 1</span>.'
+  },
+  {
+    cells: ['run','scan','normal','normal','normal','normal'],
+    count: 2, maxCount: 2, activeLine: [5,6], changed: ['count','max'],
+    phase: 'scan', title: 'nums[1] = 1  ✓',
+    body: 'Another 1! <span class="code-inline">count = 1+1 = 2</span>. Update <span class="code-inline">max_count = max(1, 2) = 2</span>. Run length: 2.'
+  },
+  {
+    cells: ['done','done','reset','normal','normal','normal'],
+    count: 0, maxCount: 2, activeLine: [8], changed: ['count'],
+    phase: 'scan', title: 'nums[2] = 0  ✗ reset',
+    body: 'Zero hit! <span class="code-inline">count = 0</span> — run broken. <span class="code-inline">max_count</span> stays at 2 (our best so far).'
+  },
+  {
+    cells: ['done','done','done','scan','normal','normal'],
+    count: 1, maxCount: 2, activeLine: [5,6], changed: ['count'],
+    phase: 'scan', title: 'nums[3] = 1  ✓',
+    body: 'New run starts! <span class="code-inline">count = 0+1 = 1</span>. <span class="code-inline">max(2, 1) = 2</span> — max unchanged.'
+  },
+  {
+    cells: ['done','done','done','run','scan','normal'],
+    count: 2, maxCount: 2, activeLine: [5,6], changed: ['count'],
+    phase: 'scan', title: 'nums[4] = 1  ✓',
+    body: '<span class="code-inline">count = 1+1 = 2</span>. <span class="code-inline">max(2, 2) = 2</span> — tied with best, not yet surpassed.'
+  },
+  {
+    cells: ['done','done','done','run','run','scan'],
+    count: 3, maxCount: 3, activeLine: [5,6], changed: ['count','max'],
+    phase: 'scan', title: 'nums[5] = 1  ✓ new best!',
+    body: '<span class="code-inline">count = 2+1 = 3</span>. <span class="code-inline">max(2, 3) = 3</span> — <b>new maximum!</b> This run of three 1s is the longest.'
+  },
+  {
+    cells: ['done','done','done','best','best','best'],
+    count: 3, maxCount: 3, activeLine: [10], changed: [],
+    phase: 'done', title: '✓ Done — max_count = 3',
+    body: 'The longest consecutive run of 1s has length <b>3</b> (indices 3–5). <b>O(n) time, O(1) space.</b>'
+  },
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+  const arrayRow  = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i] || 'normal';
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if (cl === 'scan') { pl.className = 'ptr-label scan'; pl.textContent = 'scan'; }
+    else               { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label'; il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Variables
+  document.getElementById('v-count').textContent = step.count;
+  document.getElementById('v-max').textContent = step.maxCount;
+  document.getElementById('vb-count').className = 'var-box' + (step.changed.includes('count') ? ' changed' : '');
+  document.getElementById('vb-max').className = 'var-box' + (step.changed.includes('max') ? ' changed' : '');
+
+  // Code panel
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (step.activeLine.includes(i) ? ' active' : '');
+    div.textContent = line || '\u00A0';
+    codePanel.appendChild(div);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if (step.phase === 'init')      { badge.className = 'phase-badge phase-scan'; badge.textContent = 'Initialise'; }
+  else if (step.phase === 'scan') { badge.className = 'phase-badge phase-scan'; badge.textContent = 'Scanning'; }
+  else                            { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.onclick = () => { cur = i; render(); };
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  if (e.key === 'r' || e.key === 'R') { reset(); }
+});
+
+render();
+</script>
+</body>
+</html>

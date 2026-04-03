@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Third Maximum Number — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 660px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+
+  /* Source array */
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); margin-bottom: 6px; text-align: center;
+  }
+  .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 58px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.scan   { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.skip   { background: var(--red-bg); color: var(--red-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 8px; justify-content: center; }
+  .cell {
+    width: 58px; height: 58px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.scan     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.05); }
+  .cell.skip     { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); }
+  .cell.done     { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+  .cell.deduped  { border: 2px solid var(--red-border); background: var(--red-bg); color: var(--red-text); opacity: 0.6; text-decoration: line-through; }
+  .cell.normal   { }
+
+  .idx-labels { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
+  .idx-label { width: 58px; text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  /* Top-3 tracker */
+  .top3-section { margin-top: 1.5rem; }
+  .top3-row {
+    display: flex; gap: 12px; justify-content: center; margin-top: 6px;
+  }
+  .top3-slot {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 16px; border-radius: var(--radius);
+    background: var(--bg2); border: 1px solid transparent;
+    min-width: 80px;
+    transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  }
+  .top3-slot.changed {
+    border-color: var(--amber-border); background: var(--amber-bg);
+    transform: scale(1.05);
+  }
+  .top3-slot.result {
+    border-color: var(--green-border); background: var(--green-bg);
+    transform: scale(1.08);
+  }
+  .slot-rank {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text3);
+  }
+  .slot-val {
+    font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text);
+  }
+  .slot-val.none { color: var(--text3); font-style: italic; font-size: 14px; }
+
+  /* Dedup section */
+  .dedup-info {
+    margin-top: 1rem;
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    padding: 8px 14px;
+    background: var(--bg2); border-radius: var(--radius);
+    font-size: 12px; color: var(--text2);
+  }
+  .dedup-info .arrow { color: var(--text3); }
+  .dedup-chip {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--surface); border: 0.5px solid var(--border2);
+  }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active {
+    background: var(--purple-bg);
+    color: var(--purple-text);
+    font-weight: 500;
+  }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-dedup { background: var(--red-bg);    color: var(--red-mid); }
+  .phase-scan  { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-done  { background: var(--green-bg);  color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--purple-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-scan  { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-skip  { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-slot  { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-result{ background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-proc  { background: var(--purple-bg); border-color: var(--purple-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Third Maximum Number</h1>
+    <p class="subtitle">Track top-3 distinct maximums with None sentinels — handles INT_MIN edge case.</p>
+    <div class="tags">
+      <span class="tag tag-medium">#414 Medium</span>
+      <span class="tag tag-pattern">Greedy</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div class="section-label">Input Array</div>
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row"  class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div id="dedup-info" class="dedup-info" style="display:none;"></div>
+
+  <div class="top3-section">
+    <div class="section-label">Top-3 Tracker</div>
+    <div class="top3-row">
+      <div class="top3-slot" id="slot-1st">
+        <span class="slot-rank">1st</span>
+        <span class="slot-val none" id="val-1st">None</span>
+      </div>
+      <div class="top3-slot" id="slot-2nd">
+        <span class="slot-rank">2nd</span>
+        <span class="slot-val none" id="val-2nd">None</span>
+      </div>
+      <div class="top3-slot" id="slot-3rd">
+        <span class="slot-rank">3rd</span>
+        <span class="slot-val none" id="val-3rd">None</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-scan">Setup</span>
+      <span id="step-num" class="step-num">Step 0 of 8</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body"  class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-proc"></div>processing</div>
+    <div class="legend-item"><div class="legend-swatch ls-skip"></div>duplicate (skip)</div>
+    <div class="legend-item"><div class="legend-swatch ls-slot"></div>slot updated</div>
+    <div class="legend-item"><div class="legend-swatch ls-result"></div>result</div>
+  </div>
+</div>
+
+<script>
+const nums = [2, 2, 3, 1];
+const N = nums.length;
+// After dedup: unique = {1, 2, 3}, processed in order: 2, 3, 1
+
+const codeLines = [
+  'first = second = third = None',
+  '',
+  'for num in set(nums):',
+  '    if first is None or num > first:',
+  '        first, second, third = num, first, second',
+  '    elif second is None or num > second:',
+  '        second, third = num, second',
+  '    elif third is None or num > third:',
+  '        third = num',
+  '',
+  'return third if third is not None else first',
+];
+
+const steps = [
+  {
+    cells: ['normal','normal','normal','normal'],
+    ptrs: [null, null, null, null],
+    first: null, second: null, third: null,
+    changedSlots: [], resultSlot: null,
+    activeLine: [0], phase: 'init',
+    showDedup: false,
+    title: 'Initialise',
+    body: 'Set <span class="code-inline">first = second = third = None</span>. These track the top 3 distinct values. Using <span class="code-inline">None</span> instead of <span class="code-inline">float(\'-inf\')</span> avoids the INT_MIN edge case.'
+  },
+  {
+    cells: ['normal','deduped','normal','normal'],
+    ptrs: [null, 'skip', null, null],
+    first: null, second: null, third: null,
+    changedSlots: [], resultSlot: null,
+    activeLine: [2], phase: 'dedup',
+    showDedup: true,
+    dedupText: '[2, 2, 3, 1] → set → {2, 3, 1}',
+    title: 'Deduplicate with set()',
+    body: '<span class="code-inline">set(nums)</span> removes the duplicate <b>2</b>. We\'ll process unique values: <b>2, 3, 1</b>. The strikethrough shows which element was redundant.'
+  },
+  {
+    cells: ['scan','deduped','done','done'],
+    ptrs: ['scan', null, null, null],
+    first: 2, second: null, third: null,
+    changedSlots: ['1st'], resultSlot: null,
+    activeLine: [3,4], phase: 'scan',
+    showDedup: false,
+    title: 'Process 2 → num > first?',
+    body: '<span class="code-inline">first is None</span> → condition true. <span class="code-inline">first, second, third = 2, None, None</span>. The value 2 takes the 1st slot.'
+  },
+  {
+    cells: ['done','deduped','scan','done'],
+    ptrs: [null, null, 'scan', null],
+    first: 3, second: 2, third: null,
+    changedSlots: ['1st', '2nd'], resultSlot: null,
+    activeLine: [3,4], phase: 'scan',
+    showDedup: false,
+    title: 'Process 3 → num > first?',
+    body: '<span class="code-inline">3 > first(2)</span> → <b>yes!</b> Everything cascades down: <span class="code-inline">first=3, second=2, third=None</span>. The previous 1st (2) slides to 2nd.'
+  },
+  {
+    cells: ['done','deduped','done','scan'],
+    ptrs: [null, null, null, 'scan'],
+    first: 3, second: 2, third: null,
+    changedSlots: [], resultSlot: null,
+    activeLine: [3], phase: 'scan',
+    showDedup: false,
+    title: 'Process 1 → num > first?',
+    body: '<span class="code-inline">1 > first(3)</span> → no. Check the next condition…'
+  },
+  {
+    cells: ['done','deduped','done','scan'],
+    ptrs: [null, null, null, 'scan'],
+    first: 3, second: 2, third: null,
+    changedSlots: [], resultSlot: null,
+    activeLine: [5], phase: 'scan',
+    showDedup: false,
+    title: 'Process 1 → num > second?',
+    body: '<span class="code-inline">1 > second(2)</span> → no. Check the last condition…'
+  },
+  {
+    cells: ['done','deduped','done','scan'],
+    ptrs: [null, null, null, 'scan'],
+    first: 3, second: 2, third: 1,
+    changedSlots: ['3rd'], resultSlot: null,
+    activeLine: [7,8], phase: 'scan',
+    showDedup: false,
+    title: 'Process 1 → num > third?',
+    body: '<span class="code-inline">third is None</span> → condition true. <span class="code-inline">third = 1</span>. The value 1 fills the last empty slot.'
+  },
+  {
+    cells: ['done','deduped','done','done'],
+    ptrs: [null, null, null, null],
+    first: 3, second: 2, third: 1,
+    changedSlots: [], resultSlot: null,
+    activeLine: [10], phase: 'check',
+    showDedup: false,
+    title: 'Check: is third None?',
+    body: '<span class="code-inline">third = 1</span>, which is not <span class="code-inline">None</span> → the 3rd distinct maximum exists! Return <span class="code-inline">third</span>.'
+  },
+  {
+    cells: ['done','deduped','done','done'],
+    ptrs: [null, null, null, null],
+    first: 3, second: 2, third: 1,
+    changedSlots: [], resultSlot: '3rd',
+    activeLine: [10], phase: 'done',
+    showDedup: false,
+    title: '✓ Done — return 1',
+    body: 'Top 3: <b>3 > 2 > 1</b>. Third maximum is <b>1</b>. <b>O(n) time, O(1) space.</b><br>If fewer than 3 distinct values existed, we\'d return <span class="code-inline">first</span> (the overall max) instead.'
+  },
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+  const arrayRow  = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i] || 'normal';
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const ptrType = step.ptrs[i];
+    const pl = document.createElement('div');
+    if      (ptrType === 'scan') { pl.className = 'ptr-label scan'; pl.textContent = 'num'; }
+    else if (ptrType === 'skip') { pl.className = 'ptr-label skip'; pl.textContent = 'dup'; }
+    else                         { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label'; il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Dedup info
+  const dedupEl = document.getElementById('dedup-info');
+  if (step.showDedup) {
+    dedupEl.style.display = 'flex';
+    dedupEl.innerHTML = step.dedupText.split('→').map((s,i) =>
+      i === 0 ? '<span class="dedup-chip">' + s.trim() + '</span>'
+              : '<span class="arrow">→</span><span class="dedup-chip">' + s.trim() + '</span>'
+    ).join('');
+  } else {
+    dedupEl.style.display = 'none';
+  }
+
+  // Top-3 slots
+  function setSlot(id, val, changed, isResult) {
+    const slot = document.getElementById('slot-' + id);
+    const valEl = document.getElementById('val-' + id);
+    slot.className = 'top3-slot' + (isResult ? ' result' : changed ? ' changed' : '');
+    if (val === null) {
+      valEl.className = 'slot-val none';
+      valEl.textContent = 'None';
+    } else {
+      valEl.className = 'slot-val';
+      valEl.textContent = val;
+    }
+  }
+  setSlot('1st', step.first,  step.changedSlots.includes('1st'), step.resultSlot === '1st');
+  setSlot('2nd', step.second, step.changedSlots.includes('2nd'), step.resultSlot === '2nd');
+  setSlot('3rd', step.third,  step.changedSlots.includes('3rd'), step.resultSlot === '3rd');
+
+  // Code panel
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (step.activeLine.includes(i) ? ' active' : '');
+    div.textContent = line || '\u00A0';
+    codePanel.appendChild(div);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 'init')  { badge.className = 'phase-badge phase-scan';  badge.textContent = 'Initialise'; }
+  else if (step.phase === 'dedup') { badge.className = 'phase-badge phase-dedup'; badge.textContent = 'Dedup'; }
+  else if (step.phase === 'scan')  { badge.className = 'phase-badge phase-scan';  badge.textContent = 'Processing'; }
+  else if (step.phase === 'check') { badge.className = 'phase-badge phase-scan';  badge.textContent = 'Return check'; }
+  else                             { badge.className = 'phase-badge phase-done';  badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.onclick = () => { cur = i; render(); };
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  if (e.key === 'r' || e.key === 'R') { reset(); }
+});
+
+render();
+</script>
+</body>
+</html>
