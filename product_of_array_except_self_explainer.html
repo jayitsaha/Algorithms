@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product of Array Except Self — Visual Explainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f5;        --bg2: #f0efe9;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+      --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+      --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+      --radius: 10px;      --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+        --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+        --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+        --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+        --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+        --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+        --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+    .container { max-width: 900px; width: 100%; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text2); font-size: 0.95rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+    .tag {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+    }
+    .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+    .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+    .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Arrays visualization */
+    .arrays-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .array-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .array-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .array-row {
+      display: flex;
+      gap: 6px;
+      position: relative;
+    }
+    .pointer-row {
+      display: flex;
+      gap: 6px;
+      height: 28px;
+      position: relative;
+    }
+    .pointer-slot {
+      width: 56px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .pointer {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    .pointer-blue { background: var(--blue-bg); color: var(--blue-mid); border: 1px solid var(--blue-border); }
+    .pointer-green { background: var(--green-bg); color: var(--green-mid); border: 1px solid var(--green-border); }
+    .pointer-purple { background: var(--purple-bg); color: var(--purple-mid); border: 1px solid var(--purple-border); }
+    
+    .cell {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border2);
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      background: var(--surface);
+    }
+    .cell.blue { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+    .cell.green { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .cell.amber { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    .cell.purple { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+    .cell.done { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .cell.computing { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    
+    .idx-row {
+      display: flex;
+      gap: 6px;
+    }
+    .idx {
+      width: 56px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+
+    /* Variable tracker */
+    .var-tracker {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .var-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      border: 1px solid transparent;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .var-box.changed {
+      border-color: var(--amber-border);
+      background: var(--amber-bg);
+    }
+    .var-name {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text3);
+    }
+    .var-val {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* Code panel */
+    .code-panel {
+      margin-top: 1.25rem;
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .code-line {
+      padding: 1px 6px;
+      border-radius: 4px;
+      transition: background 0.25s;
+      white-space: pre;
+      color: var(--text2);
+    }
+    .code-line.active {
+      background: var(--green-bg);
+      color: var(--green-text);
+      font-weight: 500;
+    }
+
+    /* Info card */
+    .info-card {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.5rem;
+    }
+    .phase-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .phase-init { background: var(--purple-bg); color: var(--purple-mid); }
+    .phase-prefix { background: var(--blue-bg); color: var(--blue-mid); }
+    .phase-suffix { background: var(--green-bg); color: var(--green-mid); }
+    .phase-done { background: var(--green-bg); color: var(--green-mid); }
+    .step-counter {
+      font-size: 12px;
+      color: var(--text3);
+      font-weight: 500;
+    }
+    .info-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .info-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+
+    /* Progress dots */
+    .progress {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border2);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .dot:hover { transform: scale(1.2); }
+    .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+    .dot.done { background: var(--green-mid); }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+    button {
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover { background: var(--bg2); }
+    button:active { transform: scale(0.98); }
+    button.primary {
+      background: var(--blue-mid);
+      color: white;
+      border-color: var(--blue-mid);
+    }
+    button.primary:hover { opacity: 0.9; }
+
+    .kbd-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 0.75rem;
+    }
+    kbd {
+      font-family: var(--mono);
+      background: var(--bg2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+    .legend-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid;
+    }
+    .legend-box.blue { background: var(--blue-bg); border-color: var(--blue-border); }
+    .legend-box.green { background: var(--green-bg); border-color: var(--green-border); }
+    .legend-box.amber { background: var(--amber-bg); border-color: var(--amber-border); }
+    .legend-box.purple { background: var(--purple-bg); border-color: var(--purple-border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Product of Array Except Self</h1>
+      <p class="subtitle">LeetCode #238 — Prefix-Suffix Products</p>
+      <div class="tags">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-pattern">Prefix-Suffix Products</span>
+        <span class="tag tag-complexity">O(n) Time</span>
+        <span class="tag tag-complexity">O(1) Space</span>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="arrays-container">
+        <!-- Input Array -->
+        <div class="array-section">
+          <div class="array-label">Input: nums</div>
+          <div class="pointer-row" id="input-pointers"></div>
+          <div class="array-row" id="input-array"></div>
+          <div class="idx-row" id="input-idx"></div>
+        </div>
+        
+        <!-- Output Array -->
+        <div class="array-section">
+          <div class="array-label">Output: answer</div>
+          <div class="array-row" id="output-array"></div>
+          <div class="idx-row" id="output-idx"></div>
+        </div>
+      </div>
+
+      <div class="var-tracker" id="var-tracker"></div>
+
+      <div class="code-panel" id="code-panel"></div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="phase-badge" id="phase-badge">Init</span>
+          <span class="step-counter" id="step-counter">Step 0 / 0</span>
+        </div>
+        <div class="info-title" id="info-title">Starting state</div>
+        <div class="info-desc" id="info-desc">Let's build the product array using prefix and suffix products.</div>
+      </div>
+
+      <div class="progress" id="progress"></div>
+
+      <div class="controls">
+        <button onclick="go(-1)">← Prev</button>
+        <button onclick="reset()">Reset</button>
+        <button class="primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use <kbd>←</kbd> <kbd>→</kbd> arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box blue"></div> Prefix pass (i)</div>
+        <div class="legend-item"><div class="legend-box green"></div> Suffix pass (j)</div>
+        <div class="legend-item"><div class="legend-box amber"></div> Computing</div>
+        <div class="legend-item"><div class="legend-box purple"></div> Complete</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const nums = [1, 2, 3, 4];
+const n = nums.length;
+
+const code = [
+  "def productExceptSelf(nums):",
+  "    n = len(nums)",
+  "    answer = [1] * n",
+  "    ",
+  "    # Pass 1: Prefix products",
+  "    prefix = 1",
+  "    for i in range(n):",
+  "        answer[i] = prefix",
+  "        prefix *= nums[i]",
+  "    ",
+  "    # Pass 2: Suffix products",
+  "    suffix = 1",
+  "    for j in range(n - 1, -1, -1):",
+  "        answer[j] *= suffix",
+  "        suffix *= nums[j]",
+  "    ",
+  "    return answer"
+];
+
+const steps = [
+  // Step 0: Initial state
+  {
+    phase: "init", phaseClass: "phase-init",
+    title: "Initialize output array with 1s",
+    desc: "We'll build the answer in-place. Start with answer = [1, 1, 1, 1]. Each position will accumulate prefix × suffix.",
+    inputCells: ["", "", "", ""],
+    outputCells: [1, 1, 1, 1],
+    vars: { prefix: 1, suffix: 1, i: "-", j: "-" },
+    changed: [],
+    activeLine: 2,
+    iPtr: -1, jPtr: -1
+  },
+  // Pass 1: Prefix products
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 0",
+    desc: "answer[0] = prefix = 1 (nothing to the left). Then prefix *= nums[0] = 1 × 1 = 1.",
+    inputCells: ["blue", "", "", ""],
+    outputCells: [1, 1, 1, 1],
+    outputHighlight: [0],
+    vars: { prefix: 1, suffix: 1, i: 0, j: "-" },
+    changed: ["i"],
+    activeLine: 7,
+    iPtr: 0, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 0 (update prefix)",
+    desc: "answer[0] = 1 ✓. Now prefix *= nums[0] = 1 × 1 = 1. Moving to next index.",
+    inputCells: ["blue", "", "", ""],
+    outputCells: [1, 1, 1, 1],
+    outputHighlight: [0],
+    vars: { prefix: 1, suffix: 1, i: 0, j: "-" },
+    changed: [],
+    activeLine: 8,
+    iPtr: 0, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 1",
+    desc: "answer[1] = prefix = 1 (product of elements before index 1). Then prefix *= nums[1] = 1 × 2 = 2.",
+    inputCells: ["", "blue", "", ""],
+    outputCells: [1, 1, 1, 1],
+    outputHighlight: [1],
+    vars: { prefix: 1, suffix: 1, i: 1, j: "-" },
+    changed: ["i"],
+    activeLine: 7,
+    iPtr: 1, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 1 (update prefix)",
+    desc: "answer[1] = 1 ✓. Now prefix *= nums[1] = 1 × 2 = 2.",
+    inputCells: ["", "blue", "", ""],
+    outputCells: [1, 1, 1, 1],
+    outputHighlight: [1],
+    vars: { prefix: 2, suffix: 1, i: 1, j: "-" },
+    changed: ["prefix"],
+    activeLine: 8,
+    iPtr: 1, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 2",
+    desc: "answer[2] = prefix = 2 (product of 1 × 2 = 2). This is the product of all elements before index 2.",
+    inputCells: ["", "", "blue", ""],
+    outputCells: [1, 1, 2, 1],
+    outputHighlight: [2],
+    vars: { prefix: 2, suffix: 1, i: 2, j: "-" },
+    changed: ["i"],
+    activeLine: 7,
+    iPtr: 2, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 2 (update prefix)",
+    desc: "answer[2] = 2 ✓. Now prefix *= nums[2] = 2 × 3 = 6.",
+    inputCells: ["", "", "blue", ""],
+    outputCells: [1, 1, 2, 1],
+    outputHighlight: [2],
+    vars: { prefix: 6, suffix: 1, i: 2, j: "-" },
+    changed: ["prefix"],
+    activeLine: 8,
+    iPtr: 2, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 3",
+    desc: "answer[3] = prefix = 6 (product of 1 × 2 × 3 = 6). This is the product of all elements before index 3.",
+    inputCells: ["", "", "", "blue"],
+    outputCells: [1, 1, 2, 6],
+    outputHighlight: [3],
+    vars: { prefix: 6, suffix: 1, i: 3, j: "-" },
+    changed: ["i"],
+    activeLine: 7,
+    iPtr: 3, jPtr: -1
+  },
+  {
+    phase: "prefix", phaseClass: "phase-prefix",
+    title: "Prefix Pass: i = 3 (update prefix)",
+    desc: "answer[3] = 6 ✓. prefix *= nums[3] = 6 × 4 = 24. Prefix pass complete! Now answer holds all prefix products.",
+    inputCells: ["", "", "", "blue"],
+    outputCells: [1, 1, 2, 6],
+    outputHighlight: [3],
+    vars: { prefix: 24, suffix: 1, i: 3, j: "-" },
+    changed: ["prefix"],
+    activeLine: 8,
+    iPtr: 3, jPtr: -1
+  },
+  // Pass 2: Suffix products
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 3",
+    desc: "Now multiply by suffix products going right-to-left. answer[3] *= suffix = 6 × 1 = 6. Then suffix *= nums[3] = 1 × 4 = 4.",
+    inputCells: ["", "", "", "green"],
+    outputCells: [1, 1, 2, 6],
+    outputHighlight: [3],
+    vars: { prefix: 24, suffix: 1, i: "-", j: 3 },
+    changed: ["j"],
+    activeLine: 13,
+    iPtr: -1, jPtr: 3
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 3 (update suffix)",
+    desc: "answer[3] = 6 ✓ (1×2×3 × 1 = 6). suffix *= nums[3] = 1 × 4 = 4.",
+    inputCells: ["", "", "", "green"],
+    outputCells: [1, 1, 2, 6],
+    outputHighlight: [3],
+    vars: { prefix: 24, suffix: 4, i: "-", j: 3 },
+    changed: ["suffix"],
+    activeLine: 14,
+    iPtr: -1, jPtr: 3
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 2",
+    desc: "answer[2] *= suffix = 2 × 4 = 8. Product of all except nums[2] = 1×2 × 4 = 8.",
+    inputCells: ["", "", "green", ""],
+    outputCells: [1, 1, 8, 6],
+    outputHighlight: [2],
+    vars: { prefix: 24, suffix: 4, i: "-", j: 2 },
+    changed: ["j"],
+    activeLine: 13,
+    iPtr: -1, jPtr: 2
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 2 (update suffix)",
+    desc: "answer[2] = 8 ✓. suffix *= nums[2] = 4 × 3 = 12.",
+    inputCells: ["", "", "green", ""],
+    outputCells: [1, 1, 8, 6],
+    outputHighlight: [2],
+    vars: { prefix: 24, suffix: 12, i: "-", j: 2 },
+    changed: ["suffix"],
+    activeLine: 14,
+    iPtr: -1, jPtr: 2
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 1",
+    desc: "answer[1] *= suffix = 1 × 12 = 12. Product of all except nums[1] = 1 × 3×4 = 12.",
+    inputCells: ["", "green", "", ""],
+    outputCells: [1, 12, 8, 6],
+    outputHighlight: [1],
+    vars: { prefix: 24, suffix: 12, i: "-", j: 1 },
+    changed: ["j"],
+    activeLine: 13,
+    iPtr: -1, jPtr: 1
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 1 (update suffix)",
+    desc: "answer[1] = 12 ✓. suffix *= nums[1] = 12 × 2 = 24.",
+    inputCells: ["", "green", "", ""],
+    outputCells: [1, 12, 8, 6],
+    outputHighlight: [1],
+    vars: { prefix: 24, suffix: 24, i: "-", j: 1 },
+    changed: ["suffix"],
+    activeLine: 14,
+    iPtr: -1, jPtr: 1
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 0",
+    desc: "answer[0] *= suffix = 1 × 24 = 24. Product of all except nums[0] = 2×3×4 = 24.",
+    inputCells: ["green", "", "", ""],
+    outputCells: [24, 12, 8, 6],
+    outputHighlight: [0],
+    vars: { prefix: 24, suffix: 24, i: "-", j: 0 },
+    changed: ["j"],
+    activeLine: 13,
+    iPtr: -1, jPtr: 0
+  },
+  {
+    phase: "suffix", phaseClass: "phase-suffix",
+    title: "Suffix Pass: j = 0 (update suffix)",
+    desc: "answer[0] = 24 ✓. suffix *= nums[0] = 24 × 1 = 24. Suffix pass complete!",
+    inputCells: ["green", "", "", ""],
+    outputCells: [24, 12, 8, 6],
+    outputHighlight: [0],
+    vars: { prefix: 24, suffix: 24, i: "-", j: 0 },
+    changed: [],
+    activeLine: 14,
+    iPtr: -1, jPtr: 0
+  },
+  // Done
+  {
+    phase: "done", phaseClass: "phase-done",
+    title: "Complete! 🎉",
+    desc: "answer = [24, 12, 8, 6]. Verify: 2×3×4=24 ✓, 1×3×4=12 ✓, 1×2×4=8 ✓, 1×2×3=6 ✓. O(n) time, O(1) extra space!",
+    inputCells: ["purple", "purple", "purple", "purple"],
+    outputCells: [24, 12, 8, 6],
+    outputHighlight: [0, 1, 2, 3],
+    vars: { prefix: 24, suffix: 24, i: "-", j: "-" },
+    changed: [],
+    activeLine: 16,
+    iPtr: -1, jPtr: -1
+  }
+];
+
+let currentStep = 0;
+
+function render() {
+  const step = steps[currentStep];
+  
+  // Render input array with pointers
+  const inputPointers = document.getElementById('input-pointers');
+  const inputArray = document.getElementById('input-array');
+  const inputIdx = document.getElementById('input-idx');
+  
+  inputPointers.innerHTML = nums.map((_, i) => {
+    let ptrs = [];
+    if (step.iPtr === i) ptrs.push('<span class="pointer pointer-blue">i</span>');
+    if (step.jPtr === i) ptrs.push('<span class="pointer pointer-green">j</span>');
+    return `<div class="pointer-slot">${ptrs.join('')}</div>`;
+  }).join('');
+  
+  inputArray.innerHTML = nums.map((val, i) => {
+    const cls = step.inputCells[i] || '';
+    return `<div class="cell ${cls}">${val}</div>`;
+  }).join('');
+  
+  inputIdx.innerHTML = nums.map((_, i) => `<div class="idx">${i}</div>`).join('');
+  
+  // Render output array
+  const outputArray = document.getElementById('output-array');
+  const outputIdx = document.getElementById('output-idx');
+  
+  outputArray.innerHTML = step.outputCells.map((val, i) => {
+    let cls = '';
+    if (step.outputHighlight && step.outputHighlight.includes(i)) {
+      cls = step.phaseClass === 'phase-prefix' ? 'blue' : 
+            step.phaseClass === 'phase-suffix' ? 'green' : 
+            step.phaseClass === 'phase-done' ? 'purple' : 'amber';
+    }
+    return `<div class="cell ${cls}">${val}</div>`;
+  }).join('');
+  
+  outputIdx.innerHTML = step.outputCells.map((_, i) => `<div class="idx">${i}</div>`).join('');
+  
+  // Render variables
+  const varTracker = document.getElementById('var-tracker');
+  varTracker.innerHTML = Object.entries(step.vars).map(([name, val]) => {
+    const changed = step.changed && step.changed.includes(name) ? 'changed' : '';
+    return `<div class="var-box ${changed}"><span class="var-name">${name}</span><span class="var-val">${val}</span></div>`;
+  }).join('');
+  
+  // Render code
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = code.map((line, i) => {
+    const active = i === step.activeLine ? 'active' : '';
+    return `<div class="code-line ${active}">${line || ' '}</div>`;
+  }).join('');
+  
+  // Render info
+  document.getElementById('phase-badge').textContent = step.phase.charAt(0).toUpperCase() + step.phase.slice(1);
+  document.getElementById('phase-badge').className = 'phase-badge ' + step.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${currentStep} / ${steps.length - 1}`;
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-desc').textContent = step.desc;
+  
+  // Render progress dots
+  const progress = document.getElementById('progress');
+  progress.innerHTML = steps.map((_, i) => {
+    const cls = i === currentStep ? 'active' : i < currentStep ? 'done' : '';
+    return `<div class="dot ${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+}
+
+function go(dir) {
+  const next = currentStep + dir;
+  if (next >= 0 && next < steps.length) {
+    currentStep = next;
+    render();
+  }
+}
+
+function goTo(idx) {
+  currentStep = idx;
+  render();
+}
+
+function reset() {
+  currentStep = 0;
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
