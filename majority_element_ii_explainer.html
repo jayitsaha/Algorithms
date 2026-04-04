@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Majority Element II — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium     { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern    { background: var(--blue-bg);  color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 54px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.green  { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 54px; height: 54px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s;
+  }
+  .cell.current   { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.06); }
+  .cell.cand1     { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
+  .cell.cand2     { border: 2px solid var(--purple-border);background: var(--purple-bg);color: var(--purple-text); }
+  .cell.cancel    { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); }
+  .cell.done      { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+  .cell.winner    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.verify    { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 54px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 6px 12px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-box.blue    { border-color: var(--blue-border); background: var(--blue-bg); }
+  .var-box.purple  { border-color: var(--purple-border); background: var(--purple-bg); }
+  .var-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); min-width: 18px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 10px 14px; font-family: var(--mono); font-size: 10.5px; line-height: 1.75; overflow-x: auto;
+  }
+  .code-line { padding: 1px 5px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init   { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-vote   { background: var(--green-bg);  color: var(--green-mid); }
+  .phase-verify { background: var(--amber-bg);  color: var(--amber-mid); }
+  .phase-done   { background: var(--blue-bg);   color: var(--blue-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-current { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-cand1   { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-cand2   { background: var(--purple-bg); border-color: var(--purple-border); }
+  .ls-cancel  { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-verify  { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-done    { background: var(--bg2);       border-color: var(--border); }
+  .ls-winner  { background: var(--green-bg);  border-color: var(--green-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Majority Element II</h1>
+    <p class="subtitle">Extended Boyer-Moore Voting — track two candidates; at most 2 elements can appear &gt; n/3 times.</p>
+    <div class="tags">
+      <span class="tag tag-medium">#229 Medium</span>
+      <span class="tag tag-pattern">Boyer-Moore Voting</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row" class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div id="var-tracker" class="var-tracker"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 13</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body" class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-current"></div>current</div>
+    <div class="legend-item"><div class="legend-swatch ls-cand1"></div>candidate1</div>
+    <div class="legend-item"><div class="legend-swatch ls-cand2"></div>candidate2</div>
+    <div class="legend-item"><div class="legend-swatch ls-cancel"></div>cancel</div>
+    <div class="legend-item"><div class="legend-swatch ls-verify"></div>verify</div>
+    <div class="legend-item"><div class="legend-swatch ls-winner"></div>result</div>
+  </div>
+</div>
+
+<script>
+const nums = [3, 2, 3, 2, 1, 2, 3];
+const N = nums.length;
+
+const codeLines = [
+  'c1, c2, cnt1, cnt2 = None, None, 0, 0',
+  'for num in nums:           # Pass 1: Vote',
+  '    if num == c1:          cnt1 += 1',
+  '    elif num == c2:        cnt2 += 1',
+  '    elif cnt1 == 0: c1, cnt1 = num, 1',
+  '    elif cnt2 == 0: c2, cnt2 = num, 1',
+  '    else:           cnt1 -= 1; cnt2 -= 1',
+  'return [c for c in (c1,c2) # Pass 2: Verify',
+  '        if nums.count(c) > len(nums)//3]',
+];
+
+const varNames = ['c1', 'cnt1', 'c2', 'cnt2'];
+const varColors = { c1: 'blue', cnt1: 'blue', c2: 'purple', cnt2: 'purple' };
+
+// Steps trace extended Boyer-Moore on [3, 2, 3, 2, 1, 2, 3]
+// n=7, need > 7/3 ≈ 2.33, so > 2 occurrences
+const steps = [
+  {
+    cells:   ['normal','normal','normal','normal','normal','normal','normal'],
+    vars:    { c1: '—', cnt1: 0, c2: '—', cnt2: 0 },
+    changed: [],
+    activeLine: 0,
+    phase: 'init',
+    title: 'Initialise two candidates',
+    body: 'We track <b>two candidates</b> with two counts. At most 2 elements can appear &gt; n/3 times (since 3 × n/3 = n). Here n=7, so we need &gt; 2 occurrences.'
+  },
+  {
+    cells:   ['current','normal','normal','normal','normal','normal','normal'],
+    vars:    { c1: 3, cnt1: 1, c2: '—', cnt2: 0 },
+    changed: ['c1', 'cnt1'],
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=3 → cnt1 was 0, assign c1=3',
+    body: '<span class="code-inline">cnt1 == 0</span> → set <span class="code-inline">c1 = 3, cnt1 = 1</span>. First candidate found.'
+  },
+  {
+    cells:   ['cand1','current','normal','normal','normal','normal','normal'],
+    vars:    { c1: 3, cnt1: 1, c2: 2, cnt2: 1 },
+    changed: ['c2', 'cnt2'],
+    activeLine: 5,
+    phase: 'vote',
+    title: 'num=2 → cnt2 was 0, assign c2=2',
+    body: '<span class="code-inline">num ≠ c1</span> and <span class="code-inline">cnt2 == 0</span> → set <span class="code-inline">c2 = 2, cnt2 = 1</span>. Second candidate found.'
+  },
+  {
+    cells:   ['cand1','cand2','current','normal','normal','normal','normal'],
+    vars:    { c1: 3, cnt1: 2, c2: 2, cnt2: 1 },
+    changed: ['cnt1'],
+    activeLine: 2,
+    phase: 'vote',
+    title: 'num=3 → matches c1, vote for it',
+    body: '<span class="code-inline">num == c1</span> → <span class="code-inline">cnt1 = 2</span>. Candidate 1 gains a vote.'
+  },
+  {
+    cells:   ['cand1','cand2','cand1','current','normal','normal','normal'],
+    vars:    { c1: 3, cnt1: 2, c2: 2, cnt2: 2 },
+    changed: ['cnt2'],
+    activeLine: 3,
+    phase: 'vote',
+    title: 'num=2 → matches c2, vote for it',
+    body: '<span class="code-inline">num == c2</span> → <span class="code-inline">cnt2 = 2</span>. Candidate 2 gains a vote.'
+  },
+  {
+    cells:   ['cand1','cand2','cand1','cand2','cancel','normal','normal'],
+    vars:    { c1: 3, cnt1: 1, c2: 2, cnt2: 1 },
+    changed: ['cnt1', 'cnt2'],
+    activeLine: 6,
+    phase: 'vote',
+    title: 'num=1 → differs from both, cancel votes',
+    body: '<span class="code-inline">num ≠ c1, num ≠ c2</span> and both counts &gt; 0 → decrement both: <span class="code-inline">cnt1 = 1, cnt2 = 1</span>. The 1 "cancels" one vote from each candidate.'
+  },
+  {
+    cells:   ['cand1','cand2','cand1','cand2','done','current','normal'],
+    vars:    { c1: 3, cnt1: 1, c2: 2, cnt2: 2 },
+    changed: ['cnt2'],
+    activeLine: 3,
+    phase: 'vote',
+    title: 'num=2 → matches c2, vote for it',
+    body: '<span class="code-inline">num == c2</span> → <span class="code-inline">cnt2 = 2</span>. Candidate 2 regains votes.'
+  },
+  {
+    cells:   ['cand1','cand2','cand1','cand2','done','cand2','current'],
+    vars:    { c1: 3, cnt1: 2, c2: 2, cnt2: 2 },
+    changed: ['cnt1'],
+    activeLine: 2,
+    phase: 'vote',
+    title: 'num=3 → matches c1, vote for it',
+    body: '<span class="code-inline">num == c1</span> → <span class="code-inline">cnt1 = 2</span>. Pass 1 complete! Candidates: c1=3, c2=2.'
+  },
+  {
+    cells:   ['cand1','cand2','cand1','cand2','done','cand2','cand1'],
+    vars:    { c1: 3, cnt1: 2, c2: 2, cnt2: 2 },
+    changed: [],
+    activeLine: 7,
+    phase: 'verify',
+    title: 'Pass 2 — Verify candidates',
+    body: 'Candidates c1=3 and c2=2 might not actually appear &gt; n/3 times. We must count and verify. This is why the problem is harder than Majority Element I.'
+  },
+  {
+    cells:   ['verify','normal','verify','normal','normal','normal','verify'],
+    vars:    { c1: 3, cnt1: 3, c2: 2, cnt2: '—' },
+    changed: ['cnt1'],
+    activeLine: 8,
+    phase: 'verify',
+    title: 'Count c1=3 → appears 3 times',
+    body: 'Count of 3 in array = <b>3</b>. Is 3 &gt; 7/3 = 2.33? <b>Yes!</b> 3 is a majority element.'
+  },
+  {
+    cells:   ['normal','verify','normal','verify','normal','verify','normal'],
+    vars:    { c1: 3, cnt1: 3, c2: 2, cnt2: 3 },
+    changed: ['cnt2'],
+    activeLine: 8,
+    phase: 'verify',
+    title: 'Count c2=2 → appears 3 times',
+    body: 'Count of 2 in array = <b>3</b>. Is 3 &gt; 7/3 = 2.33? <b>Yes!</b> 2 is also a majority element.'
+  },
+  {
+    cells:   ['winner','winner','winner','winner','done','winner','winner'],
+    vars:    { c1: 3, cnt1: 3, c2: 2, cnt2: 3 },
+    changed: [],
+    activeLine: 8,
+    phase: 'done',
+    title: '✓ Done — Result: [3, 2]',
+    body: 'Both candidates verified! <b>Result: [3, 2]</b>. Each appears 3 times (> ⌊7/3⌋ = 2). <b>O(n) time, O(1) space.</b>'
+  }
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+
+  // Array
+  const arrayRow = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i];
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if (cl === 'current') { pl.className = 'ptr-label green'; pl.textContent = 'num'; }
+    else if (cl === 'cancel') { pl.className = 'ptr-label green'; pl.textContent = 'num'; }
+    else { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label';
+    il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Variables
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for (const name of varNames) {
+    const box = document.createElement('div');
+    let boxClass = 'var-box';
+    if (step.changed.includes(name)) boxClass += ' changed';
+    else if (varColors[name]) boxClass += ' ' + varColors[name];
+    box.className = boxClass;
+    box.innerHTML = '<span class="var-name">' + name + '</span><span class="var-val">' + step.vars[name] + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const cl = document.createElement('div');
+    cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+    cl.textContent = line;
+    cp.appendChild(cl);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 'init')   { badge.className = 'phase-badge phase-init'; badge.textContent = 'Init'; }
+  else if (step.phase === 'vote')   { badge.className = 'phase-badge phase-vote'; badge.textContent = 'Pass 1: Vote'; }
+  else if (step.phase === 'verify') { badge.className = 'phase-badge phase-verify'; badge.textContent = 'Pass 2: Verify'; }
+  else                              { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => { cur = i; render(); });
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
