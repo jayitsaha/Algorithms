@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotate Array (Cyclic) — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#0a3a3a;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium     { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern    { background: var(--blue-bg);  color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 54px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.blue   { background: var(--blue-bg); color: var(--blue-mid); }
+  .ptr-label.green  { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.amber  { background: var(--amber-bg); color: var(--amber-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 54px; height: 54px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s;
+  }
+  .cell.current   { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); transform: scale(1.06); }
+  .cell.target    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.06); }
+  .cell.placed    { border: 2px solid var(--purple-border);background: var(--purple-bg);color: var(--purple-text); }
+  .cell.start     { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+  .cell.done      { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 54px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Cycle visualization */
+  .cycle-section { margin-top: 1.25rem; }
+  .cycle-header { 
+    font-size: 11px; font-weight: 600; text-transform: uppercase; 
+    letter-spacing: 0.5px; color: var(--text3); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cycle-badge {
+    font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px;
+    background: var(--cyan-bg); color: var(--cyan-mid);
+  }
+  .cycle-container {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    background: var(--bg2); border-radius: var(--radius); padding: 12px 16px;
+    min-height: 44px;
+  }
+  .cycle-item {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 14px; color: var(--text2);
+  }
+  .cycle-idx {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .cycle-idx.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); }
+  .cycle-idx.done   { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+  .cycle-arrow { color: var(--text3); font-size: 12px; }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 6px 12px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-box.blue    { border-color: var(--blue-border); background: var(--blue-bg); }
+  .var-box.green   { border-color: var(--green-border); background: var(--green-bg); }
+  .var-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); min-width: 18px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 10px 14px; font-family: var(--mono); font-size: 10px; line-height: 1.7; overflow-x: auto;
+  }
+  .code-line { padding: 1px 5px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init   { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-cycle  { background: var(--blue-bg);   color: var(--blue-mid); }
+  .phase-place  { background: var(--green-bg);  color: var(--green-mid); }
+  .phase-done   { background: var(--green-bg);  color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-current { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-target  { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-placed  { background: var(--purple-bg); border-color: var(--purple-border); }
+  .ls-start   { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-done    { background: var(--green-bg);  border-color: var(--green-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Rotate Array — Cyclic Replacements</h1>
+    <p class="subtitle">Place each element at its final position directly, following the cycle until returning to start.</p>
+    <div class="tags">
+      <span class="tag tag-medium">#189 Medium</span>
+      <span class="tag tag-pattern">Cyclic</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row" class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="cycle-section">
+    <div class="cycle-header">
+      <span>Cycle Path</span>
+      <span id="cycle-badge" class="cycle-badge">0 → 3 → 6 → 2 → 5 → 1 → 4 → 0</span>
+    </div>
+    <div id="cycle-container" class="cycle-container"></div>
+  </div>
+
+  <div id="var-tracker" class="var-tracker"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 10</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body" class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-current"></div>current idx</div>
+    <div class="legend-item"><div class="legend-swatch ls-target"></div>target idx</div>
+    <div class="legend-item"><div class="legend-swatch ls-placed"></div>placed</div>
+    <div class="legend-item"><div class="legend-swatch ls-start"></div>cycle start</div>
+    <div class="legend-item"><div class="legend-swatch ls-done"></div>final</div>
+  </div>
+</div>
+
+<script>
+// Example: [1,2,3,4,5,6,7], k=3 → [5,6,7,1,2,3,4]
+// With k=3 and n=7, GCD(7,3)=1, so ONE cycle covers all elements
+// Cycle: 0 → 3 → 6 → 2 → 5 → 1 → 4 → 0
+const K = 3;
+const N = 7;
+const cycleIndices = [0, 3, 6, 2, 5, 1, 4]; // the order we visit
+
+const codeLines = [
+  'def rotate(nums, k):',
+  '    n, k = len(nums), k % len(nums)',
+  '    count, start = 0, 0',
+  '    while count < n:',
+  '        current, prev = start, nums[start]',
+  '        while True:',
+  '            next_idx = (current + k) % n',
+  '            nums[next_idx], prev = prev, nums[next_idx]',
+  '            current = next_idx',
+  '            count += 1',
+  '            if current == start: break',
+  '        start += 1  # next cycle (if GCD > 1)',
+];
+
+const varNames = ['prev', 'current', 'next', 'count'];
+
+const steps = [
+  {
+    arr: [1,2,3,4,5,6,7],
+    cells: ['normal','normal','normal','normal','normal','normal','normal'],
+    vars: { prev: '—', current: '—', next: '—', count: 0 },
+    changed: [],
+    activeLine: 2,
+    phase: 'init',
+    cycleProgress: [],
+    title: 'Initialize — k=3, n=7',
+    body: 'With k=3, each element moves to <span class="code-inline">(i+3) % 7</span>. GCD(7,3)=1, meaning <b>one cycle</b> visits all 7 elements: 0→3→6→2→5→1→4→0.'
+  },
+  {
+    arr: [1,2,3,4,5,6,7],
+    cells: ['start','normal','normal','normal','normal','normal','normal'],
+    vars: { prev: 1, current: 0, next: '—', count: 0 },
+    changed: ['prev', 'current'],
+    activeLine: 4,
+    phase: 'cycle',
+    cycleProgress: [{idx: 0, state: 'active'}],
+    title: 'Start cycle at index 0',
+    body: 'Save <span class="code-inline">prev = nums[0] = 1</span>. This value will be placed at its target position (index 3).'
+  },
+  {
+    arr: [1,2,3,4,5,6,7],
+    cells: ['current','normal','normal','target','normal','normal','normal'],
+    vars: { prev: 1, current: 0, next: 3, count: 0 },
+    changed: ['next'],
+    activeLine: 6,
+    phase: 'cycle',
+    cycleProgress: [{idx: 0, state: 'active'}],
+    title: 'Calculate target: (0+3) % 7 = 3',
+    body: 'Element at index 0 should go to index 3. <span class="code-inline">next_idx = (0 + 3) % 7 = 3</span>.'
+  },
+  {
+    arr: [1,2,3,1,5,6,7],
+    cells: ['placed','normal','normal','target','normal','normal','normal'],
+    vars: { prev: 4, current: 3, next: 3, count: 1 },
+    changed: ['prev', 'current', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'active'}],
+    title: 'Place 1 at index 3, save 4',
+    body: 'Swap: <span class="code-inline">nums[3]=1</span>, save <span class="code-inline">prev=4</span>. Move <span class="code-inline">current=3</span>. Count=1.'
+  },
+  {
+    arr: [1,2,3,1,5,6,4],
+    cells: ['placed','normal','normal','placed','normal','normal','target'],
+    vars: { prev: 7, current: 6, next: 6, count: 2 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'active'}],
+    title: 'Place 4 at index 6, save 7',
+    body: '<span class="code-inline">next_idx = (3+3)%7 = 6</span>. Place 4, save 7. Count=2.'
+  },
+  {
+    arr: [1,2,7,1,5,6,4],
+    cells: ['placed','normal','target','placed','normal','normal','placed'],
+    vars: { prev: 3, current: 2, next: 2, count: 3 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'active'}],
+    title: 'Place 7 at index 2, save 3',
+    body: '<span class="code-inline">next_idx = (6+3)%7 = 2</span>. Place 7, save 3. Count=3.'
+  },
+  {
+    arr: [1,2,7,1,5,3,4],
+    cells: ['placed','normal','placed','placed','normal','target','placed'],
+    vars: { prev: 6, current: 5, next: 5, count: 4 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'done'}, {idx: 5, state: 'active'}],
+    title: 'Place 3 at index 5, save 6',
+    body: '<span class="code-inline">next_idx = (2+3)%7 = 5</span>. Place 3, save 6. Count=4.'
+  },
+  {
+    arr: [1,6,7,1,5,3,4],
+    cells: ['placed','target','placed','placed','normal','placed','placed'],
+    vars: { prev: 2, current: 1, next: 1, count: 5 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'done'}, {idx: 5, state: 'done'}, {idx: 1, state: 'active'}],
+    title: 'Place 6 at index 1, save 2',
+    body: '<span class="code-inline">next_idx = (5+3)%7 = 1</span>. Place 6, save 2. Count=5.'
+  },
+  {
+    arr: [1,6,7,1,2,3,4],
+    cells: ['placed','placed','placed','placed','target','placed','placed'],
+    vars: { prev: 5, current: 4, next: 4, count: 6 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'done'}, {idx: 5, state: 'done'}, {idx: 1, state: 'done'}, {idx: 4, state: 'active'}],
+    title: 'Place 2 at index 4, save 5',
+    body: '<span class="code-inline">next_idx = (1+3)%7 = 4</span>. Place 2, save 5. Count=6.'
+  },
+  {
+    arr: [5,6,7,1,2,3,4],
+    cells: ['target','placed','placed','placed','placed','placed','placed'],
+    vars: { prev: 1, current: 0, next: 0, count: 7 },
+    changed: ['prev', 'current', 'next', 'count'],
+    activeLine: 7,
+    phase: 'place',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'done'}, {idx: 5, state: 'done'}, {idx: 1, state: 'done'}, {idx: 4, state: 'done'}],
+    title: 'Place 5 at index 0 — back to start!',
+    body: '<span class="code-inline">next_idx = (4+3)%7 = 0</span>. Place 5. <span class="code-inline">current == start</span> → cycle complete! Count=7=n.'
+  },
+  {
+    arr: [5,6,7,1,2,3,4],
+    cells: ['done','done','done','done','done','done','done'],
+    vars: { prev: '—', current: '—', next: '—', count: 7 },
+    changed: [],
+    activeLine: 10,
+    phase: 'done',
+    cycleProgress: [{idx: 0, state: 'done'}, {idx: 3, state: 'done'}, {idx: 6, state: 'done'}, {idx: 2, state: 'done'}, {idx: 5, state: 'done'}, {idx: 1, state: 'done'}, {idx: 4, state: 'done'}],
+    title: '✓ Done — Single cycle covered all elements!',
+    body: 'All 7 elements placed in one cycle: 0→3→6→2→5→1→4→0. Result: [5,6,7,1,2,3,4]. <b>O(n) time, O(1) space</b> — only one temp variable needed!'
+  }
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+
+  // Array
+  const arrayRow = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i];
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = step.arr[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if (cl === 'current' || cl === 'start') { 
+      pl.className = 'ptr-label blue'; pl.textContent = 'curr'; 
+    } else if (cl === 'target') { 
+      pl.className = 'ptr-label green'; pl.textContent = 'next'; 
+    } else { 
+      pl.className = 'ptr-label hidden'; pl.textContent = ''; 
+    }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label';
+    il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Cycle visualization
+  const cc = document.getElementById('cycle-container');
+  cc.innerHTML = '';
+  if (step.cycleProgress.length > 0) {
+    step.cycleProgress.forEach((item, i) => {
+      const ci = document.createElement('div');
+      ci.className = 'cycle-item';
+      
+      const idx = document.createElement('div');
+      idx.className = 'cycle-idx ' + (item.state === 'active' ? 'active' : item.state === 'done' ? 'done' : '');
+      idx.textContent = item.idx;
+      ci.appendChild(idx);
+      
+      if (i < step.cycleProgress.length - 1) {
+        const arrow = document.createElement('span');
+        arrow.className = 'cycle-arrow';
+        arrow.textContent = '→';
+        ci.appendChild(arrow);
+      }
+      
+      cc.appendChild(ci);
+    });
+  } else {
+    cc.innerHTML = '<span style="color: var(--text3); font-size: 12px;">Cycle will appear here as we traverse</span>';
+  }
+
+  // Variables
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for (const name of varNames) {
+    const box = document.createElement('div');
+    let boxClass = 'var-box';
+    if (step.changed.includes(name)) boxClass += ' changed';
+    box.className = boxClass;
+    box.innerHTML = '<span class="var-name">' + name + '</span><span class="var-val">' + step.vars[name] + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const cl = document.createElement('div');
+    cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+    cl.textContent = line;
+    cp.appendChild(cl);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 'init')  { badge.className = 'phase-badge phase-init';  badge.textContent = 'Init'; }
+  else if (step.phase === 'cycle') { badge.className = 'phase-badge phase-cycle'; badge.textContent = 'Cycling'; }
+  else if (step.phase === 'place') { badge.className = 'phase-badge phase-place'; badge.textContent = 'Placing'; }
+  else                             { badge.className = 'phase-badge phase-done';  badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => { cur = i; render(); });
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
