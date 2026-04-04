@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Majority Element n/k — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#0a3a3a;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium     { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern    { background: var(--blue-bg);  color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-k          { background: var(--cyan-bg);  color: var(--cyan-mid); }
+
+  /* Array */
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 44px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.green  { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 44px; height: 44px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.25s;
+  }
+  .cell.current   { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.06); }
+  .cell.cand      { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
+  .cell.cancel    { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); }
+  .cell.done      { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+  .cell.winner    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.verify    { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 44px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Candidates dict visualization */
+  .dict-section { margin-top: 1.25rem; }
+  .dict-header { 
+    font-size: 11px; font-weight: 600; text-transform: uppercase; 
+    letter-spacing: 0.5px; color: var(--text3); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dict-header .max-slots {
+    font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px;
+    background: var(--cyan-bg); color: var(--cyan-mid);
+  }
+  .dict-container {
+    display: flex; gap: 8px; flex-wrap: wrap; min-height: 48px;
+    background: var(--bg2); border-radius: var(--radius); padding: 10px 14px;
+  }
+  .dict-entry {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border-radius: 6px; padding: 6px 12px;
+    border: 1px solid var(--border); transition: all 0.3s;
+  }
+  .dict-entry.new { border-color: var(--green-border); background: var(--green-bg); }
+  .dict-entry.increment { border-color: var(--blue-border); background: var(--blue-bg); }
+  .dict-entry.decrement { border-color: var(--red-border); background: var(--red-bg); }
+  .dict-entry.removed { opacity: 0.4; text-decoration: line-through; }
+  .dict-key { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); }
+  .dict-arrow { color: var(--text3); font-size: 12px; }
+  .dict-val { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--text2); }
+  .dict-empty { font-size: 12px; color: var(--text3); font-style: italic; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 10px 14px; font-family: var(--mono); font-size: 10px; line-height: 1.7; overflow-x: auto;
+  }
+  .code-line { padding: 1px 5px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init   { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-vote   { background: var(--green-bg);  color: var(--green-mid); }
+  .phase-verify { background: var(--amber-bg);  color: var(--amber-mid); }
+  .phase-done   { background: var(--blue-bg);   color: var(--blue-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--green-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-current { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-cand    { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-cancel  { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-verify  { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-done    { background: var(--bg2);       border-color: var(--border); }
+  .ls-winner  { background: var(--green-bg);  border-color: var(--green-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Majority Element n/k (Generalized)</h1>
+    <p class="subtitle">Boyer-Moore with a dictionary — find all elements appearing &gt; n/k times. Dict holds at most k-1 entries.</p>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">Boyer-Moore Voting</span>
+      <span class="tag tag-k">k = 4</span>
+      <span class="tag tag-complexity">O(nk) / O(k)</span>
+    </div>
+  </div>
+
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row" class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="dict-section">
+    <div class="dict-header">
+      <span>candidates dict</span>
+      <span class="max-slots">max k-1 = 3 slots</span>
+    </div>
+    <div id="dict-container" class="dict-container"></div>
+  </div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 16</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body" class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-current"></div>current</div>
+    <div class="legend-item"><div class="legend-swatch ls-cand"></div>in dict</div>
+    <div class="legend-item"><div class="legend-swatch ls-cancel"></div>triggers cancel</div>
+    <div class="legend-item"><div class="legend-swatch ls-verify"></div>verify</div>
+    <div class="legend-item"><div class="legend-swatch ls-winner"></div>result</div>
+  </div>
+</div>
+
+<script>
+// Example: nums = [1,1,1,2,2,2,3,3,4], k=4
+// n=9, threshold = 9/4 = 2, need > 2 occurrences (i.e., >= 3)
+// At most k-1 = 3 candidates can appear > n/4 times
+const nums = [1, 1, 1, 2, 2, 2, 3, 3, 4];
+const K = 4;
+const N = nums.length;
+
+const codeLines = [
+  'def majorityElementK(nums, k):',
+  '    candidates = {}  # max k-1 entries',
+  '    for num in nums:',
+  '        if num in candidates:',
+  '            candidates[num] += 1',
+  '        elif len(candidates) < k - 1:',
+  '            candidates[num] = 1',
+  '        else:  # dict full, decrement all',
+  '            for c in list(candidates):',
+  '                candidates[c] -= 1',
+  '                if candidates[c] == 0: del candidates[c]',
+  '    # Pass 2: Verify',
+  '    return [c for c in candidates',
+  '            if nums.count(c) > len(nums)//k]',
+];
+
+// Steps trace for [1,1,1,2,2,2,3,3,4] with k=4
+const steps = [
+  {
+    cells: ['normal','normal','normal','normal','normal','normal','normal','normal','normal'],
+    dict: {},
+    dictState: {},
+    activeLine: 1,
+    phase: 'init',
+    title: 'Initialize empty candidates dict',
+    body: '<span class="code-inline">k = 4</span>, so we can track at most <b>k-1 = 3</b> candidates. n=9, threshold = ⌊9/4⌋ = 2, need > 2 occurrences.'
+  },
+  {
+    cells: ['current','normal','normal','normal','normal','normal','normal','normal','normal'],
+    dict: {1: 1},
+    dictState: {1: 'new'},
+    activeLine: 6,
+    phase: 'vote',
+    title: 'num=1 → dict has room, add it',
+    body: '<span class="code-inline">len(dict) = 0 < 3</span> → add <span class="code-inline">candidates[1] = 1</span>.'
+  },
+  {
+    cells: ['cand','current','normal','normal','normal','normal','normal','normal','normal'],
+    dict: {1: 2},
+    dictState: {1: 'increment'},
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=1 → already in dict, increment',
+    body: '<span class="code-inline">1 in candidates</span> → <span class="code-inline">candidates[1] = 2</span>.'
+  },
+  {
+    cells: ['cand','cand','current','normal','normal','normal','normal','normal','normal'],
+    dict: {1: 3},
+    dictState: {1: 'increment'},
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=1 → increment again',
+    body: '<span class="code-inline">candidates[1] = 3</span>. Strong candidate!'
+  },
+  {
+    cells: ['cand','cand','cand','current','normal','normal','normal','normal','normal'],
+    dict: {1: 3, 2: 1},
+    dictState: {1: '', 2: 'new'},
+    activeLine: 6,
+    phase: 'vote',
+    title: 'num=2 → dict has room, add it',
+    body: '<span class="code-inline">len(dict) = 1 < 3</span> → add <span class="code-inline">candidates[2] = 1</span>.'
+  },
+  {
+    cells: ['cand','cand','cand','cand','current','normal','normal','normal','normal'],
+    dict: {1: 3, 2: 2},
+    dictState: {1: '', 2: 'increment'},
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=2 → already in dict, increment',
+    body: '<span class="code-inline">candidates[2] = 2</span>.'
+  },
+  {
+    cells: ['cand','cand','cand','cand','cand','current','normal','normal','normal'],
+    dict: {1: 3, 2: 3},
+    dictState: {1: '', 2: 'increment'},
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=2 → increment again',
+    body: '<span class="code-inline">candidates[2] = 3</span>. Another strong candidate!'
+  },
+  {
+    cells: ['cand','cand','cand','cand','cand','cand','current','normal','normal'],
+    dict: {1: 3, 2: 3, 3: 1},
+    dictState: {1: '', 2: '', 3: 'new'},
+    activeLine: 6,
+    phase: 'vote',
+    title: 'num=3 → dict has room (2 < 3), add it',
+    body: '<span class="code-inline">len(dict) = 2 < 3</span> → add <span class="code-inline">candidates[3] = 1</span>. Dict now full!'
+  },
+  {
+    cells: ['cand','cand','cand','cand','cand','cand','cand','current','normal'],
+    dict: {1: 3, 2: 3, 3: 2},
+    dictState: {1: '', 2: '', 3: 'increment'},
+    activeLine: 4,
+    phase: 'vote',
+    title: 'num=3 → already in dict, increment',
+    body: '<span class="code-inline">candidates[3] = 2</span>.'
+  },
+  {
+    cells: ['cand','cand','cand','cand','cand','cand','cand','cand','cancel'],
+    dict: {1: 3, 2: 3, 3: 2},
+    dictState: {1: '', 2: '', 3: ''},
+    activeLine: 7,
+    phase: 'vote',
+    title: 'num=4 → not in dict, dict is FULL!',
+    body: '<span class="code-inline">4 not in candidates</span> and <span class="code-inline">len(dict) = 3 = k-1</span>. Cannot add! Must decrement all counts.'
+  },
+  {
+    cells: ['cand','cand','cand','cand','cand','cand','cand','cand','cancel'],
+    dict: {1: 2, 2: 2, 3: 1},
+    dictState: {1: 'decrement', 2: 'decrement', 3: 'decrement'},
+    activeLine: 9,
+    phase: 'vote',
+    title: 'Decrement all counts by 1',
+    body: 'All counts decremented: <span class="code-inline">{1:2, 2:2, 3:1}</span>. The 4 "used up" one vote from each candidate. None hit 0, so none removed.'
+  },
+  {
+    cells: ['done','done','done','done','done','done','done','done','done'],
+    dict: {1: 2, 2: 2, 3: 1},
+    dictState: {},
+    activeLine: 11,
+    phase: 'verify',
+    title: 'Pass 1 complete — now verify',
+    body: 'Candidates: {1:2, 2:2, 3:1}. These counts are NOT actual frequencies! We must count each in the original array.'
+  },
+  {
+    cells: ['verify','verify','verify','normal','normal','normal','normal','normal','normal'],
+    dict: {1: 3, 2: 2, 3: 1},
+    dictState: {1: 'increment'},
+    activeLine: 13,
+    phase: 'verify',
+    title: 'Verify candidate 1 → count = 3',
+    body: '1 appears <b>3 times</b>. Is 3 > 9/4 = 2? <b>Yes!</b> ✓ Include in result.'
+  },
+  {
+    cells: ['normal','normal','normal','verify','verify','verify','normal','normal','normal'],
+    dict: {1: 3, 2: 3, 3: 1},
+    dictState: {2: 'increment'},
+    activeLine: 13,
+    phase: 'verify',
+    title: 'Verify candidate 2 → count = 3',
+    body: '2 appears <b>3 times</b>. Is 3 > 2? <b>Yes!</b> ✓ Include in result.'
+  },
+  {
+    cells: ['normal','normal','normal','normal','normal','normal','verify','verify','normal'],
+    dict: {1: 3, 2: 3, 3: 2},
+    dictState: {3: 'decrement'},
+    activeLine: 13,
+    phase: 'verify',
+    title: 'Verify candidate 3 → count = 2',
+    body: '3 appears <b>2 times</b>. Is 2 > 2? <b>No!</b> ✗ Exclude from result. This is why verification is essential!'
+  },
+  {
+    cells: ['winner','winner','winner','winner','winner','winner','done','done','done'],
+    dict: {1: 3, 2: 3},
+    dictState: {},
+    activeLine: 13,
+    phase: 'done',
+    title: '✓ Done — Result: [1, 2]',
+    body: 'Only 1 and 2 appear > ⌊n/k⌋ = 2 times. <b>Result: [1, 2]</b>. Space used: O(k) = O(4) slots, not O(d) = O(4 distinct) like a full hashmap.'
+  }
+];
+
+let cur = 0;
+
+function render() {
+  const step = steps[cur];
+
+  // Array
+  const arrayRow = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = step.cells[i];
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const pl = document.createElement('div');
+    if (cl === 'current' || cl === 'cancel') { pl.className = 'ptr-label green'; pl.textContent = 'num'; }
+    else { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label';
+    il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Dict visualization
+  const dc = document.getElementById('dict-container');
+  dc.innerHTML = '';
+  const keys = Object.keys(step.dict);
+  if (keys.length === 0) {
+    dc.innerHTML = '<span class="dict-empty">{ empty }</span>';
+  } else {
+    for (const k of keys) {
+      const entry = document.createElement('div');
+      const state = step.dictState[k] || '';
+      entry.className = 'dict-entry' + (state ? ' ' + state : '');
+      entry.innerHTML = `<span class="dict-key">${k}</span><span class="dict-arrow">→</span><span class="dict-val">${step.dict[k]}</span>`;
+      dc.appendChild(entry);
+    }
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const cl = document.createElement('div');
+    cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+    cl.textContent = line;
+    cp.appendChild(cl);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  if      (step.phase === 'init')   { badge.className = 'phase-badge phase-init'; badge.textContent = 'Init'; }
+  else if (step.phase === 'vote')   { badge.className = 'phase-badge phase-vote'; badge.textContent = 'Pass 1: Vote'; }
+  else if (step.phase === 'verify') { badge.className = 'phase-badge phase-verify'; badge.textContent = 'Pass 2: Verify'; }
+  else                              { badge.className = 'phase-badge phase-done'; badge.textContent = 'Done'; }
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-body').innerHTML = step.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => { cur = i; render(); });
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
