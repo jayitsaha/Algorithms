@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Remove Duplicates from Sorted Array II – Visual Explainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:2rem}
+.container{max-width:800px;margin:0 auto}
+header{text-align:center;margin-bottom:2rem}
+h1{font-size:1.75rem;font-weight:700;margin-bottom:0.25rem}
+.subtitle{color:var(--text2);font-size:0.95rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem}
+.phase-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:4px 10px;border-radius:6px;margin-bottom:0.75rem}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-scan{background:var(--green-bg);color:var(--green-mid)}
+.phase-skip{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-copy{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-done{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:12px;color:var(--text3);margin-bottom:0.5rem}
+.step-title{font-size:1.1rem;font-weight:600;margin-bottom:0.5rem}
+.step-desc{color:var(--text2);font-size:0.95rem;line-height:1.6}
+.array-viz{display:flex;justify-content:center;gap:6px;margin:1.25rem 0}
+.cell-wrapper{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cell{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.25rem;font-weight:600;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);position:relative;transition:all 0.3s ease}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.write{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.read{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.both{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.cell.compare{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.done{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.skip{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.cell.inactive{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.index{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.ptr-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 8px;border-radius:4px;position:absolute;top:-28px;white-space:nowrap}
+.ptr-write{background:var(--blue-mid);color:white}
+.ptr-read{background:var(--green-mid);color:white}
+.ptr-compare{background:var(--purple-mid);color:white}
+.var-tracker{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:1.25rem 0}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:2px solid transparent;transition:all 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:24px;text-align:center}
+.code-panel{margin:1.25rem 0;background:var(--bg2);border-radius:var(--radius);padding:14px 18px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto}
+.code-line{padding:2px 8px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);display:block}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500}
+.progress-dots{display:flex;gap:6px;justify-content:center;margin:1rem 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border2);transition:all 0.25s}
+.dot.active{background:var(--blue-mid);transform:scale(1.3)}
+.dot.done{background:var(--green-mid)}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1.25rem}
+.btn{font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 24px;border-radius:var(--radius);border:none;cursor:pointer;transition:all 0.2s}
+.btn-primary{background:var(--blue-mid);color:white}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--border)}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:0.75rem}
+kbd{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:2px 6px;font-family:var(--mono);font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:1.5rem;padding:1rem;background:var(--bg2);border-radius:var(--radius)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-box{width:18px;height:18px;border-radius:4px;border:2px solid}
+.legend-box.write{background:var(--blue-bg);border-color:var(--blue-border)}
+.legend-box.read{background:var(--green-bg);border-color:var(--green-border)}
+.legend-box.both{background:var(--amber-bg);border-color:var(--amber-border)}
+.legend-box.compare{background:var(--purple-bg);border-color:var(--purple-border)}
+.legend-box.done{background:var(--green-bg);border-color:var(--green-border)}
+.legend-box.skip{background:var(--red-bg);border-color:var(--red-border)}
+.legend-box.inactive{background:var(--bg2);border-color:var(--border)}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Remove Duplicates from Sorted Array II</h1>
+    <p class="subtitle">Keep each element at most twice using Two Pointers with Count</p>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">Two Pointers</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Space</span>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="phase-badge phase-init" id="phase">Initialization</div>
+    <div class="step-counter" id="step-counter">Step 0 of 10</div>
+    <h2 class="step-title" id="step-title">Initial State</h2>
+    <p class="step-desc" id="step-desc">Starting with the sorted array [1, 1, 1, 2, 2, 3]. Our goal: keep at most 2 copies of each element.</p>
+  </div>
+
+  <div class="array-viz" id="array-viz"></div>
+
+  <div class="var-tracker" id="var-tracker"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="progress-dots" id="dots"></div>
+
+  <div class="controls">
+    <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
+    <button class="btn btn-secondary" id="resetBtn" onclick="reset()">Reset</button>
+    <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+  </div>
+  <div class="kbd-hint">Use <kbd>←</kbd> <kbd>→</kbd> arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box write"></div><span>write pointer</span></div>
+    <div class="legend-item"><div class="legend-box read"></div><span>read pointer</span></div>
+    <div class="legend-item"><div class="legend-box both"></div><span>both pointers</span></div>
+    <div class="legend-item"><div class="legend-box compare"></div><span>comparing with write-2</span></div>
+    <div class="legend-item"><div class="legend-box done"></div><span>valid result</span></div>
+    <div class="legend-item"><div class="legend-box skip"></div><span>skipped (3rd duplicate)</span></div>
+    <div class="legend-item"><div class="legend-box inactive"></div><span>beyond result</span></div>
+  </div>
+</div>
+
+<script>
+const CODE = [
+  "def removeDuplicates(nums):",
+  "    if len(nums) <= 2:",
+  "        return len(nums)",
+  "    ",
+  "    write = 2  # First 2 elements always valid",
+  "    ",
+  "    for read in range(2, len(nums)):",
+  "        if nums[read] != nums[write - 2]:",
+  "            nums[write] = nums[read]",
+  "            write += 1",
+  "    ",
+  "    return write"
+];
+
+const steps = [
+  {
+    phase: "init", phaseText: "Initialization",
+    title: "Initial State",
+    desc: "Sorted array [1, 1, 1, 2, 2, 3]. Each element can appear at most twice. We'll use two pointers: 'write' marks where to place the next valid element, 'read' scans through the array.",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["normal","normal","normal","normal","normal","normal"],
+    pointers: {},
+    vars: { write: "-", read: "-", k: "-" },
+    changed: [],
+    activeLine: 0
+  },
+  {
+    phase: "init", phaseText: "Key Insight",
+    title: "The Magic Check: nums[read] != nums[write-2]",
+    desc: "Since array is sorted, if nums[read] differs from nums[write-2], we can safely include it. This ensures at most 2 occurrences of any value in the result.",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["normal","normal","normal","normal","normal","normal"],
+    pointers: {},
+    vars: { write: "-", read: "-", k: "-" },
+    changed: [],
+    activeLine: 0
+  },
+  {
+    phase: "init", phaseText: "Initialization",
+    title: "Set write = 2 (First 2 elements always valid)",
+    desc: "The first two elements are always valid regardless of their values. We start write at index 2, ready to potentially overwrite from there.",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["done","done","write","normal","normal","normal"],
+    pointers: { 2: "write" },
+    vars: { write: 2, read: "-", k: "-" },
+    changed: ["write"],
+    activeLine: 4
+  },
+  {
+    phase: "scan", phaseText: "Scanning",
+    title: "read = 2: Check nums[2]=1 vs nums[write-2]=nums[0]=1",
+    desc: "Starting the loop. Read points to index 2 (value 1). Compare with nums[write-2] = nums[0] = 1. They're EQUAL!",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["compare","done","both","normal","normal","normal"],
+    pointers: { 0: "w-2", 2: "w, r" },
+    vars: { write: 2, read: 2, k: "-" },
+    changed: ["read"],
+    activeLine: 6
+  },
+  {
+    phase: "skip", phaseText: "Skip",
+    title: "1 == 1 → Skip! This would be the 3rd '1'",
+    desc: "nums[read]=1 equals nums[write-2]=1. Including this would create a third occurrence of 1. Skip it — write stays at 2, move read to 3.",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["done","done","skip","normal","normal","normal"],
+    pointers: { 2: "skip!" },
+    vars: { write: 2, read: 2, k: "-" },
+    changed: [],
+    activeLine: 7
+  },
+  {
+    phase: "scan", phaseText: "Scanning",
+    title: "read = 3: Check nums[3]=2 vs nums[write-2]=nums[0]=1",
+    desc: "Read at index 3 (value 2). Compare with nums[write-2] = nums[0] = 1. They're DIFFERENT (2 ≠ 1)!",
+    arr: [1, 1, 1, 2, 2, 3],
+    states: ["compare","done","write","read","normal","normal"],
+    pointers: { 0: "w-2", 2: "write", 3: "read" },
+    vars: { write: 2, read: 3, k: "-" },
+    changed: ["read"],
+    activeLine: 7
+  },
+  {
+    phase: "copy", phaseText: "Copy",
+    title: "2 ≠ 1 → Copy nums[3] to nums[2], write++",
+    desc: "Different values means safe to include. Copy 2 to position 2 (overwriting the third 1). Increment write to 3.",
+    arr: [1, 1, 2, 2, 2, 3],
+    states: ["done","done","done","read","normal","normal"],
+    pointers: { 3: "w, r" },
+    vars: { write: 3, read: 3, k: "-" },
+    changed: ["write"],
+    activeLine: 9
+  },
+  {
+    phase: "scan", phaseText: "Scanning",
+    title: "read = 4: Check nums[4]=2 vs nums[write-2]=nums[1]=1",
+    desc: "Read at index 4 (value 2). Compare with nums[write-2] = nums[1] = 1. They're DIFFERENT (2 ≠ 1)!",
+    arr: [1, 1, 2, 2, 2, 3],
+    states: ["done","compare","done","write","read","normal"],
+    pointers: { 1: "w-2", 3: "write", 4: "read" },
+    vars: { write: 3, read: 4, k: "-" },
+    changed: ["read"],
+    activeLine: 7
+  },
+  {
+    phase: "copy", phaseText: "Copy",
+    title: "2 ≠ 1 → Copy nums[4] to nums[3], write++",
+    desc: "Include second occurrence of 2. Copy 2 to position 3 (it's already 2, but that's fine). Increment write to 4.",
+    arr: [1, 1, 2, 2, 2, 3],
+    states: ["done","done","done","done","read","normal"],
+    pointers: { 4: "w, r" },
+    vars: { write: 4, read: 4, k: "-" },
+    changed: ["write"],
+    activeLine: 9
+  },
+  {
+    phase: "scan", phaseText: "Scanning",
+    title: "read = 5: Check nums[5]=3 vs nums[write-2]=nums[2]=2",
+    desc: "Read at index 5 (value 3). Compare with nums[write-2] = nums[2] = 2. They're DIFFERENT (3 ≠ 2)!",
+    arr: [1, 1, 2, 2, 2, 3],
+    states: ["done","done","compare","done","write","read"],
+    pointers: { 2: "w-2", 4: "write", 5: "read" },
+    vars: { write: 4, read: 5, k: "-" },
+    changed: ["read"],
+    activeLine: 7
+  },
+  {
+    phase: "copy", phaseText: "Copy",
+    title: "3 ≠ 2 → Copy nums[5] to nums[4], write++",
+    desc: "Include first occurrence of 3. Copy 3 to position 4 (overwriting the third 2). Increment write to 5.",
+    arr: [1, 1, 2, 2, 3, 3],
+    states: ["done","done","done","done","done","read"],
+    pointers: { 5: "w, r" },
+    vars: { write: 5, read: 5, k: "-" },
+    changed: ["write"],
+    activeLine: 9
+  },
+  {
+    phase: "done", phaseText: "Complete",
+    title: "Loop complete! Return write = 5",
+    desc: "Finished scanning. The first 5 elements [1, 1, 2, 2, 3] contain our result with at most 2 copies of each unique value. Return k = 5.",
+    arr: [1, 1, 2, 2, 3, 3],
+    states: ["done","done","done","done","done","inactive"],
+    pointers: {},
+    vars: { write: 5, read: "-", k: 5 },
+    changed: ["k"],
+    activeLine: 11
+  }
+];
+
+let idx = 0;
+
+function render() {
+  const s = steps[idx];
+  
+  // Phase badge
+  const phaseEl = document.getElementById('phase');
+  phaseEl.textContent = s.phaseText;
+  phaseEl.className = 'phase-badge phase-' + s.phase;
+  
+  // Step info
+  document.getElementById('step-counter').textContent = `Step ${idx} of ${steps.length - 1}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  
+  // Array visualization
+  const arrViz = document.getElementById('array-viz');
+  arrViz.innerHTML = '';
+  s.arr.forEach((val, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cell-wrapper';
+    
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + s.states[i];
+    cell.textContent = val;
+    
+    if (s.pointers[i]) {
+      const ptr = document.createElement('div');
+      ptr.className = 'ptr-label';
+      const label = s.pointers[i].toLowerCase();
+      if (label.includes('w') && label.includes('r')) {
+        ptr.classList.add('ptr-write');
+      } else if (label.includes('w') || label.includes('skip')) {
+        ptr.classList.add('ptr-write');
+      } else if (label.includes('r')) {
+        ptr.classList.add('ptr-read');
+      } else {
+        ptr.classList.add('ptr-compare');
+      }
+      ptr.textContent = s.pointers[i];
+      cell.appendChild(ptr);
+    }
+    
+    const idx_el = document.createElement('div');
+    idx_el.className = 'index';
+    idx_el.textContent = i;
+    
+    wrapper.appendChild(cell);
+    wrapper.appendChild(idx_el);
+    arrViz.appendChild(wrapper);
+  });
+  
+  // Variables
+  const varTracker = document.getElementById('var-tracker');
+  varTracker.innerHTML = '';
+  for (const [name, val] of Object.entries(s.vars)) {
+    const box = document.createElement('div');
+    box.className = 'var-box';
+    if (s.changed.includes(name)) box.classList.add('changed');
+    box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+    varTracker.appendChild(box);
+  }
+  
+  // Code panel
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = '';
+  CODE.forEach((line, i) => {
+    const lineEl = document.createElement('span');
+    lineEl.className = 'code-line';
+    if (i === s.activeLine) lineEl.classList.add('active');
+    lineEl.textContent = line || ' ';
+    codePanel.appendChild(lineEl);
+  });
+  
+  // Progress dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  steps.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < idx) dot.classList.add('done');
+    if (i === idx) dot.classList.add('active');
+    dots.appendChild(dot);
+  });
+  
+  // Buttons
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === steps.length - 1;
+}
+
+function go(delta) {
+  const newIdx = idx + delta;
+  if (newIdx >= 0 && newIdx < steps.length) {
+    idx = newIdx;
+    render();
+  }
+}
+
+function reset() {
+  idx = 0;
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
