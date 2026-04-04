@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best Time to Buy and Sell Stock II — Visual Explainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f5; --bg2: #f0efe9;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18; --text2: #6b6b65; --text3: #9c9a92;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+      --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+      --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+      --radius: 10px; --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+        --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+        --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+        --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+        --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+        --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+        --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text2); font-size: 0.95rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+    .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+    .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+    .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+    .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+
+    /* Price Chart Visualization */
+    .chart-container { position: relative; height: 200px; margin: 1rem 0; }
+    .chart-area { display: flex; align-items: flex-end; justify-content: space-around; height: 160px; padding: 0 10px; }
+    .bar-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bar {
+      width: 50px; border-radius: 6px 6px 0 0;
+      background: var(--bg2); border: 2px solid var(--border2);
+      transition: all 0.3s ease;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 6px; font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--text);
+    }
+    .bar.buy { background: var(--green-bg); border-color: var(--green-border); }
+    .bar.sell { background: var(--red-bg); border-color: var(--red-border); }
+    .bar.hold { background: var(--blue-bg); border-color: var(--blue-border); }
+    .bar.profit-zone { background: var(--amber-bg); border-color: var(--amber-border); }
+    .day-label { font-size: 11px; color: var(--text3); font-weight: 500; }
+    .action-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; min-height: 16px; }
+    .action-label.buy { color: var(--green-mid); }
+    .action-label.sell { color: var(--red-mid); }
+    .action-label.hold { color: var(--blue-mid); }
+
+    /* Profit connector lines */
+    .connector-layer { position: absolute; top: 0; left: 0; right: 0; height: 160px; pointer-events: none; }
+    .connector-layer svg { width: 100%; height: 100%; }
+    .profit-line { stroke: var(--green-mid); stroke-width: 3; stroke-dasharray: 6 4; fill: none; opacity: 0.7; }
+    .profit-area { fill: var(--green-bg); opacity: 0.3; }
+
+    /* Variable Tracker */
+    .var-tracker { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
+    .var-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg2); border-radius: var(--radius);
+      padding: 8px 14px; border: 1px solid transparent;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+    .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+    .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 24px; text-align: center; }
+
+    /* Code Panel */
+    .code-panel {
+      margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+      padding: 12px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.8; overflow-x: auto;
+    }
+    .code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+    .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+    /* Info Card */
+    .info-card { background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 1rem; }
+    .info-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem; }
+    .phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; }
+    .phase-init { background: var(--purple-bg); color: var(--purple-mid); }
+    .phase-scan { background: var(--blue-bg); color: var(--blue-mid); }
+    .phase-profit { background: var(--green-bg); color: var(--green-mid); }
+    .phase-skip { background: var(--amber-bg); color: var(--amber-mid); }
+    .phase-done { background: var(--green-bg); color: var(--green-mid); }
+    .step-counter { font-size: 11px; color: var(--text3); font-weight: 500; }
+    .info-title { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .info-text { color: var(--text2); font-size: 0.9rem; line-height: 1.5; margin-top: 0.25rem; }
+
+    /* Progress Dots */
+    .progress-wrap { display: flex; justify-content: center; gap: 6px; margin-top: 1rem; flex-wrap: wrap; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border2); transition: all 0.25s; cursor: pointer; }
+    .dot:hover { transform: scale(1.2); }
+    .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+    .dot.done { background: var(--green-mid); }
+
+    /* Controls */
+    .controls { display: flex; justify-content: center; gap: 10px; margin-top: 1rem; }
+    .btn {
+      font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 8px 18px;
+      border-radius: var(--radius); border: 1px solid var(--border2); background: var(--surface);
+      color: var(--text); cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: var(--bg2); border-color: var(--blue-border); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-mid); }
+    .btn-primary:hover { background: var(--blue-border); color: white; }
+    .kbd-hint { text-align: center; margin-top: 0.75rem; font-size: 11px; color: var(--text3); }
+
+    /* Legend */
+    .legend { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+    .legend-color.buy { background: var(--green-bg); border-color: var(--green-border); }
+    .legend-color.sell { background: var(--red-bg); border-color: var(--red-border); }
+    .legend-color.hold { background: var(--blue-bg); border-color: var(--blue-border); }
+    .legend-color.profit { background: var(--amber-bg); border-color: var(--amber-border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Best Time to Buy and Sell Stock II</h1>
+      <p class="subtitle">LeetCode #122 — Greedy / Sum All Positive Differences</p>
+      <div class="tags">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-pattern">Greedy</span>
+        <span class="tag tag-pattern">Sum Positive Diffs</span>
+        <span class="tag tag-complexity">O(n) Time</span>
+        <span class="tag tag-complexity">O(1) Space</span>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="chart-container">
+        <div class="chart-area" id="chart"></div>
+      </div>
+
+      <div class="var-tracker" id="vars"></div>
+
+      <div class="code-panel" id="codePanel"></div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="phase-badge" id="phase">INIT</span>
+          <span class="step-counter" id="stepCounter">Step 0 / 0</span>
+        </div>
+        <div class="info-title" id="infoTitle">Initialize</div>
+        <div class="info-text" id="infoText">Starting the algorithm...</div>
+      </div>
+
+      <div class="progress-wrap" id="dots"></div>
+
+      <div class="controls">
+        <button class="btn" id="prevBtn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="legend-color buy"></span> Buy Day</div>
+        <div class="legend-item"><span class="legend-color sell"></span> Sell Day</div>
+        <div class="legend-item"><span class="legend-color hold"></span> Holding</div>
+        <div class="legend-item"><span class="legend-color profit"></span> Profit Added</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const prices = [7, 1, 5, 3, 6, 4];
+    const maxPrice = Math.max(...prices);
+
+    const codeLines = [
+      'def maxProfit(prices):',
+      '    profit = 0',
+      '    for i in range(1, len(prices)):',
+      '        if prices[i] > prices[i-1]:',
+      '            profit += prices[i] - prices[i-1]',
+      '    return profit'
+    ];
+
+    const steps = [
+      {
+        phase: 'init', phaseClass: 'phase-init',
+        title: 'Initialize profit = 0',
+        text: 'We\'ll scan left to right and collect every upward price movement. Key insight: buying at every valley and selling at every peak gives the same result as summing all positive differences.',
+        vars: { i: '-', profit: 0, 'prices[i-1]': '-', 'prices[i]': '-', diff: '-' },
+        changed: ['profit'],
+        activeLine: 1,
+        bars: [null, null, null, null, null, null],
+        actions: ['', '', '', '', '', '']
+      },
+      {
+        phase: 'scan', phaseClass: 'phase-scan',
+        title: 'i = 1: Compare prices[1] vs prices[0]',
+        text: 'prices[1] = 1, prices[0] = 7. Difference = 1 - 7 = -6. Price went DOWN, so no profit — skip.',
+        vars: { i: 1, profit: 0, 'prices[i-1]': 7, 'prices[i]': 1, diff: -6 },
+        changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
+        activeLine: 3,
+        bars: [null, 'skip', null, null, null, null],
+        actions: ['', 'skip', '', '', '', '']
+      },
+      {
+        phase: 'profit', phaseClass: 'phase-profit',
+        title: 'i = 2: Compare prices[2] vs prices[1]',
+        text: 'prices[2] = 5, prices[1] = 1. Difference = 5 - 1 = +4. Price went UP! Add 4 to profit. (Like buying at 1, selling at 5)',
+        vars: { i: 2, profit: 4, 'prices[i-1]': 1, 'prices[i]': 5, diff: '+4' },
+        changed: ['i', 'prices[i-1]', 'prices[i]', 'diff', 'profit'],
+        activeLine: 4,
+        bars: [null, 'buy', 'sell', null, null, null],
+        actions: ['', 'buy', 'sell', '', '', ''],
+        profitSegment: [1, 2]
+      },
+      {
+        phase: 'skip', phaseClass: 'phase-skip',
+        title: 'i = 3: Compare prices[3] vs prices[2]',
+        text: 'prices[3] = 3, prices[2] = 5. Difference = 3 - 5 = -2. Price went DOWN, skip.',
+        vars: { i: 3, profit: 4, 'prices[i-1]': 5, 'prices[i]': 3, diff: -2 },
+        changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
+        activeLine: 3,
+        bars: [null, 'buy', 'sell', 'skip', null, null],
+        actions: ['', 'buy', 'sell', 'skip', '', '']
+      },
+      {
+        phase: 'profit', phaseClass: 'phase-profit',
+        title: 'i = 4: Compare prices[4] vs prices[3]',
+        text: 'prices[4] = 6, prices[3] = 3. Difference = 6 - 3 = +3. Price went UP! Add 3 to profit. Total: 4 + 3 = 7.',
+        vars: { i: 4, profit: 7, 'prices[i-1]': 3, 'prices[i]': 6, diff: '+3' },
+        changed: ['i', 'prices[i-1]', 'prices[i]', 'diff', 'profit'],
+        activeLine: 4,
+        bars: [null, 'buy', 'sell', 'buy', 'sell', null],
+        actions: ['', 'buy', 'sell', 'buy', 'sell', ''],
+        profitSegment: [3, 4]
+      },
+      {
+        phase: 'skip', phaseClass: 'phase-skip',
+        title: 'i = 5: Compare prices[5] vs prices[4]',
+        text: 'prices[5] = 4, prices[4] = 6. Difference = 4 - 6 = -2. Price went DOWN, skip.',
+        vars: { i: 5, profit: 7, 'prices[i-1]': 6, 'prices[i]': 4, diff: -2 },
+        changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
+        activeLine: 3,
+        bars: [null, 'buy', 'sell', 'buy', 'sell', 'skip'],
+        actions: ['', 'buy', 'sell', 'buy', 'sell', 'skip']
+      },
+      {
+        phase: 'done', phaseClass: 'phase-done',
+        title: 'Loop complete — Return profit = 7',
+        text: 'We collected all upward movements: +4 (day 1→2) and +3 (day 3→4). Maximum profit = 7. This is equivalent to: Buy at 1, sell at 5 (+4), buy at 3, sell at 6 (+3).',
+        vars: { i: 'done', profit: 7, 'prices[i-1]': '-', 'prices[i]': '-', diff: '-' },
+        changed: ['profit'],
+        activeLine: 5,
+        bars: ['done', 'buy', 'sell', 'buy', 'sell', 'done'],
+        actions: ['', 'buy', 'sell', 'buy', 'sell', '']
+      }
+    ];
+
+    let current = 0;
+
+    function renderChart(step) {
+      const chart = document.getElementById('chart');
+      chart.innerHTML = '';
+      
+      const s = steps[step];
+      
+      for (let d = 0; d < prices.length; d++) {
+        const barGroup = document.createElement('div');
+        barGroup.className = 'bar-group';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const height = 30 + (prices[d] / maxPrice) * 110;
+        bar.style.height = height + 'px';
+        bar.textContent = prices[d];
+
+        if (s.bars[d] === 'buy') bar.classList.add('buy');
+        else if (s.bars[d] === 'sell') bar.classList.add('sell');
+        else if (s.bars[d] === 'hold') bar.classList.add('hold');
+        else if (s.bars[d] === 'skip') bar.classList.add('');
+
+        const dayLabel = document.createElement('div');
+        dayLabel.className = 'day-label';
+        dayLabel.textContent = 'Day ' + d;
+
+        const actionLabel = document.createElement('div');
+        actionLabel.className = 'action-label';
+        if (s.actions[d] === 'buy') {
+          actionLabel.textContent = '↑ BUY';
+          actionLabel.classList.add('buy');
+        } else if (s.actions[d] === 'sell') {
+          actionLabel.textContent = '↓ SELL';
+          actionLabel.classList.add('sell');
+        } else if (s.actions[d] === 'hold') {
+          actionLabel.textContent = 'HOLD';
+          actionLabel.classList.add('hold');
+        } else if (s.actions[d] === 'skip') {
+          actionLabel.textContent = '—';
+        }
+
+        barGroup.appendChild(actionLabel);
+        barGroup.appendChild(bar);
+        barGroup.appendChild(dayLabel);
+        chart.appendChild(barGroup);
+      }
+    }
+
+    function renderVars(step) {
+      const s = steps[step];
+      const container = document.getElementById('vars');
+      container.innerHTML = '';
+      
+      for (const [name, val] of Object.entries(s.vars)) {
+        const box = document.createElement('div');
+        box.className = 'var-box';
+        if (s.changed && s.changed.includes(name)) box.classList.add('changed');
+        
+        box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+        container.appendChild(box);
+      }
+    }
+
+    function renderCode(step) {
+      const s = steps[step];
+      const panel = document.getElementById('codePanel');
+      panel.innerHTML = codeLines.map((line, i) => {
+        const active = i === s.activeLine ? ' active' : '';
+        return `<div class="code-line${active}">${line}</div>`;
+      }).join('');
+    }
+
+    function renderInfo(step) {
+      const s = steps[step];
+      document.getElementById('phase').textContent = s.phase.toUpperCase();
+      document.getElementById('phase').className = 'phase-badge ' + s.phaseClass;
+      document.getElementById('stepCounter').textContent = `Step ${step + 1} / ${steps.length}`;
+      document.getElementById('infoTitle').textContent = s.title;
+      document.getElementById('infoText').textContent = s.text;
+    }
+
+    function renderDots() {
+      const container = document.getElementById('dots');
+      container.innerHTML = '';
+      for (let i = 0; i < steps.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === current) dot.classList.add('active');
+        else if (i < current) dot.classList.add('done');
+        dot.onclick = () => { current = i; render(); };
+        container.appendChild(dot);
+      }
+    }
+
+    function render() {
+      renderChart(current);
+      renderVars(current);
+      renderCode(current);
+      renderInfo(current);
+      renderDots();
+      document.getElementById('prevBtn').disabled = current === 0;
+      document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    }
+
+    function go(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < steps.length) {
+        current = next;
+        render();
+      }
+    }
+
+    function reset() {
+      current = 0;
+      render();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'r' || e.key === 'R') reset();
+    });
+
+    render();
+  </script>
+</body>
+</html>
