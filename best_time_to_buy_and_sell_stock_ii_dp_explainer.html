@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best Time to Buy and Sell Stock II (State Machine DP) — Visual Explainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f5; --bg2: #f0efe9;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18; --text2: #6b6b65; --text3: #9c9a92;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+      --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+      --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+      --radius: 10px; --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+        --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+        --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+        --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+        --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+        --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+        --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text2); font-size: 0.95rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+    .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+    .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+    .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+    .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+
+    /* State Machine Visualization */
+    .state-machine { display: flex; justify-content: center; gap: 80px; margin: 2rem 0; position: relative; }
+    .state-box {
+      width: 140px; height: 100px; border-radius: var(--radius-lg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 3px solid var(--border2); background: var(--bg2);
+      transition: all 0.3s ease;
+    }
+    .state-box.active { transform: scale(1.1); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .state-box.hold { border-color: var(--blue-border); }
+    .state-box.hold.active { background: var(--blue-bg); border-color: var(--blue-mid); }
+    .state-box.cash { border-color: var(--green-border); }
+    .state-box.cash.active { background: var(--green-bg); border-color: var(--green-mid); }
+    .state-name { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .state-value { font-family: var(--mono); font-size: 24px; font-weight: 700; }
+    .state-desc { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+    /* Transition arrows */
+    .transitions { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 100px; }
+    .transition-arrow { position: absolute; font-size: 11px; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+    .transition-arrow.buy { top: 0; left: 50%; transform: translateX(-50%); color: var(--blue-mid); }
+    .transition-arrow.sell { bottom: 0; left: 50%; transform: translateX(-50%); color: var(--green-mid); }
+    .transition-arrow.active { font-size: 13px; font-weight: 700; }
+    .transition-arrow .arrow { font-size: 16px; }
+
+    /* Price Bar */
+    .price-row { display: flex; justify-content: center; gap: 12px; margin: 1.5rem 0; }
+    .price-cell {
+      width: 60px; height: 60px; border-radius: var(--radius);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg2); border: 2px solid var(--border2);
+      transition: all 0.3s ease;
+    }
+    .price-cell.current { background: var(--purple-bg); border-color: var(--purple-mid); box-shadow: 0 0 0 3px var(--purple-border); }
+    .price-cell.past { opacity: 0.5; }
+    .price-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+    .price-day { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+    /* Decision Box */
+    .decision-box {
+      background: var(--bg2); border-radius: var(--radius); padding: 1rem;
+      margin: 1rem 0; text-align: center;
+    }
+    .decision-title { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .decision-options { display: flex; justify-content: center; gap: 20px; }
+    .decision-opt {
+      padding: 8px 16px; border-radius: var(--radius); font-size: 12px; font-weight: 600;
+      background: var(--surface); border: 2px solid var(--border2);
+    }
+    .decision-opt.selected { background: var(--green-bg); border-color: var(--green-mid); color: var(--green-text); }
+    .decision-opt .val { font-family: var(--mono); font-size: 14px; display: block; margin-top: 2px; }
+
+    /* Variable Tracker */
+    .var-tracker { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
+    .var-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg2); border-radius: var(--radius);
+      padding: 8px 14px; border: 1px solid transparent;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+    .var-box.hold-var { border-color: var(--blue-border); background: var(--blue-bg); }
+    .var-box.cash-var { border-color: var(--green-border); background: var(--green-bg); }
+    .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+    .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 30px; text-align: center; }
+
+    /* Code Panel */
+    .code-panel {
+      margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+      padding: 12px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.8; overflow-x: auto;
+    }
+    .code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+    .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+    /* Info Card */
+    .info-card { background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 1rem; }
+    .info-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem; }
+    .phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; }
+    .phase-init { background: var(--purple-bg); color: var(--purple-mid); }
+    .phase-hold { background: var(--blue-bg); color: var(--blue-mid); }
+    .phase-cash { background: var(--green-bg); color: var(--green-mid); }
+    .phase-done { background: var(--green-bg); color: var(--green-mid); }
+    .step-counter { font-size: 11px; color: var(--text3); font-weight: 500; }
+    .info-title { font-weight: 600; font-size: 1rem; color: var(--text); }
+    .info-text { color: var(--text2); font-size: 0.9rem; line-height: 1.5; margin-top: 0.25rem; }
+
+    /* Progress Dots */
+    .progress-wrap { display: flex; justify-content: center; gap: 6px; margin-top: 1rem; flex-wrap: wrap; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border2); transition: all 0.25s; cursor: pointer; }
+    .dot:hover { transform: scale(1.2); }
+    .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+    .dot.done { background: var(--green-mid); }
+
+    /* Controls */
+    .controls { display: flex; justify-content: center; gap: 10px; margin-top: 1rem; }
+    .btn {
+      font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 8px 18px;
+      border-radius: var(--radius); border: 1px solid var(--border2); background: var(--surface);
+      color: var(--text); cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: var(--bg2); border-color: var(--blue-border); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-mid); }
+    .btn-primary:hover { background: var(--blue-border); color: white; }
+    .kbd-hint { text-align: center; margin-top: 0.75rem; font-size: 11px; color: var(--text3); }
+
+    /* Legend */
+    .legend { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+    .legend-color.hold { background: var(--blue-bg); border-color: var(--blue-border); }
+    .legend-color.cash { background: var(--green-bg); border-color: var(--green-border); }
+    .legend-color.current { background: var(--purple-bg); border-color: var(--purple-border); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Best Time to Buy and Sell Stock II</h1>
+      <p class="subtitle">LeetCode #122 — State Machine DP Approach</p>
+      <div class="tags">
+        <span class="tag tag-medium">Medium</span>
+        <span class="tag tag-pattern">State Machine DP</span>
+        <span class="tag tag-pattern">Two States</span>
+        <span class="tag tag-complexity">O(n) Time</span>
+        <span class="tag tag-complexity">O(1) Space</span>
+      </div>
+    </header>
+
+    <div class="card">
+      <!-- State Machine Diagram -->
+      <div class="state-machine">
+        <div class="state-box hold" id="holdState">
+          <div class="state-name">Hold</div>
+          <div class="state-value" id="holdVal">-7</div>
+          <div class="state-desc">Holding stock</div>
+        </div>
+        <div class="transitions">
+          <div class="transition-arrow buy" id="buyArrow">
+            <span class="arrow">←</span> BUY
+          </div>
+          <div class="transition-arrow sell" id="sellArrow">
+            SELL <span class="arrow">→</span>
+          </div>
+        </div>
+        <div class="state-box cash" id="cashState">
+          <div class="state-name">Cash</div>
+          <div class="state-value" id="cashVal">0</div>
+          <div class="state-desc">No stock</div>
+        </div>
+      </div>
+
+      <!-- Price Row -->
+      <div class="price-row" id="priceRow"></div>
+
+      <!-- Decision Box -->
+      <div class="decision-box" id="decisionBox">
+        <div class="decision-title">Decision at this step</div>
+        <div class="decision-options" id="decisionOptions"></div>
+      </div>
+
+      <div class="var-tracker" id="vars"></div>
+
+      <div class="code-panel" id="codePanel"></div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="phase-badge" id="phase">INIT</span>
+          <span class="step-counter" id="stepCounter">Step 0 / 0</span>
+        </div>
+        <div class="info-title" id="infoTitle">Initialize</div>
+        <div class="info-text" id="infoText">Starting the algorithm...</div>
+      </div>
+
+      <div class="progress-wrap" id="dots"></div>
+
+      <div class="controls">
+        <button class="btn" id="prevBtn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="legend-color hold"></span> Holding Stock</div>
+        <div class="legend-item"><span class="legend-color cash"></span> Not Holding</div>
+        <div class="legend-item"><span class="legend-color current"></span> Current Price</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const prices = [7, 1, 5, 3, 6, 4];
+
+    const codeLines = [
+      'def maxProfit(prices):',
+      '    hold = -prices[0]  # Max profit if holding',
+      '    cash = 0           # Max profit if not holding',
+      '    for price in prices[1:]:',
+      '        hold = max(hold, cash - price)',
+      '        cash = max(cash, hold + price)',
+      '    return cash'
+    ];
+
+    const steps = [
+      {
+        phase: 'init', phaseClass: 'phase-init',
+        title: 'Initialize: hold = -7, cash = 0',
+        text: 'Two states: "hold" = max profit if currently holding stock, "cash" = max profit if not holding. Start by buying at day 0: hold = -7 (spent $7). Cash = 0 (no transactions).',
+        hold: -7, cash: 0, currentDay: 0,
+        activeState: 'both', transition: null,
+        activeLine: 2,
+        decision: null
+      },
+      {
+        phase: 'hold', phaseClass: 'phase-hold',
+        title: 'Day 1 (price=1): Update hold state',
+        text: 'hold = max(keep holding: -7, buy today: cash - 1 = 0 - 1 = -1). Since -1 > -7, we update hold = -1. This means: sell yesterday\'s stock (back to 0), then buy today at $1.',
+        hold: -1, cash: 0, currentDay: 1,
+        activeState: 'hold', transition: 'buy',
+        activeLine: 4,
+        decision: { type: 'hold', opts: [{label: 'Keep holding', val: -7}, {label: 'Buy today', val: -1, selected: true}] }
+      },
+      {
+        phase: 'cash', phaseClass: 'phase-cash',
+        title: 'Day 1 (price=1): Update cash state',
+        text: 'cash = max(stay cash: 0, sell today: hold + 1 = -1 + 1 = 0). Both equal 0, so cash stays 0. No advantage to selling yet.',
+        hold: -1, cash: 0, currentDay: 1,
+        activeState: 'cash', transition: null,
+        activeLine: 5,
+        decision: { type: 'cash', opts: [{label: 'Stay cash', val: 0, selected: true}, {label: 'Sell today', val: 0}] }
+      },
+      {
+        phase: 'hold', phaseClass: 'phase-hold',
+        title: 'Day 2 (price=5): Update hold state',
+        text: 'hold = max(keep holding: -1, buy today: cash - 5 = 0 - 5 = -5). Since -1 > -5, keep hold = -1. Better to stay from day 1 purchase.',
+        hold: -1, cash: 0, currentDay: 2,
+        activeState: 'hold', transition: null,
+        activeLine: 4,
+        decision: { type: 'hold', opts: [{label: 'Keep holding', val: -1, selected: true}, {label: 'Buy today', val: -5}] }
+      },
+      {
+        phase: 'cash', phaseClass: 'phase-cash',
+        title: 'Day 2 (price=5): Update cash state',
+        text: 'cash = max(stay cash: 0, sell today: hold + 5 = -1 + 5 = 4). Since 4 > 0, cash = 4. We lock in profit: bought at $1, sold at $5 = +$4.',
+        hold: -1, cash: 4, currentDay: 2,
+        activeState: 'cash', transition: 'sell',
+        activeLine: 5,
+        decision: { type: 'cash', opts: [{label: 'Stay cash', val: 0}, {label: 'Sell today', val: 4, selected: true}] }
+      },
+      {
+        phase: 'hold', phaseClass: 'phase-hold',
+        title: 'Day 3 (price=3): Update hold state',
+        text: 'hold = max(keep holding: -1, buy today: cash - 3 = 4 - 3 = 1). Since 1 > -1, hold = 1. After taking profit of $4, buy back in at $3.',
+        hold: 1, cash: 4, currentDay: 3,
+        activeState: 'hold', transition: 'buy',
+        activeLine: 4,
+        decision: { type: 'hold', opts: [{label: 'Keep holding', val: -1}, {label: 'Buy today', val: 1, selected: true}] }
+      },
+      {
+        phase: 'cash', phaseClass: 'phase-cash',
+        title: 'Day 3 (price=3): Update cash state',
+        text: 'cash = max(stay cash: 4, sell today: hold + 3 = 1 + 3 = 4). Both equal 4, cash stays 4. No improvement from selling.',
+        hold: 1, cash: 4, currentDay: 3,
+        activeState: 'cash', transition: null,
+        activeLine: 5,
+        decision: { type: 'cash', opts: [{label: 'Stay cash', val: 4, selected: true}, {label: 'Sell today', val: 4}] }
+      },
+      {
+        phase: 'hold', phaseClass: 'phase-hold',
+        title: 'Day 4 (price=6): Update hold state',
+        text: 'hold = max(keep holding: 1, buy today: cash - 6 = 4 - 6 = -2). Since 1 > -2, keep hold = 1. Stay with day 3 purchase.',
+        hold: 1, cash: 4, currentDay: 4,
+        activeState: 'hold', transition: null,
+        activeLine: 4,
+        decision: { type: 'hold', opts: [{label: 'Keep holding', val: 1, selected: true}, {label: 'Buy today', val: -2}] }
+      },
+      {
+        phase: 'cash', phaseClass: 'phase-cash',
+        title: 'Day 4 (price=6): Update cash state',
+        text: 'cash = max(stay cash: 4, sell today: hold + 6 = 1 + 6 = 7). Since 7 > 4, cash = 7. Sell at $6 for another $3 profit!',
+        hold: 1, cash: 7, currentDay: 4,
+        activeState: 'cash', transition: 'sell',
+        activeLine: 5,
+        decision: { type: 'cash', opts: [{label: 'Stay cash', val: 4}, {label: 'Sell today', val: 7, selected: true}] }
+      },
+      {
+        phase: 'hold', phaseClass: 'phase-hold',
+        title: 'Day 5 (price=4): Update hold state',
+        text: 'hold = max(keep holding: 1, buy today: cash - 4 = 7 - 4 = 3). Since 3 > 1, hold = 3. Could buy again at $4.',
+        hold: 3, cash: 7, currentDay: 5,
+        activeState: 'hold', transition: 'buy',
+        activeLine: 4,
+        decision: { type: 'hold', opts: [{label: 'Keep holding', val: 1}, {label: 'Buy today', val: 3, selected: true}] }
+      },
+      {
+        phase: 'cash', phaseClass: 'phase-cash',
+        title: 'Day 5 (price=4): Update cash state',
+        text: 'cash = max(stay cash: 7, sell today: hold + 4 = 3 + 4 = 7). Both equal 7, cash stays 7. No improvement.',
+        hold: 3, cash: 7, currentDay: 5,
+        activeState: 'cash', transition: null,
+        activeLine: 5,
+        decision: { type: 'cash', opts: [{label: 'Stay cash', val: 7, selected: true}, {label: 'Sell today', val: 7}] }
+      },
+      {
+        phase: 'done', phaseClass: 'phase-done',
+        title: 'Loop complete — Return cash = 7',
+        text: 'Final answer: cash = 7. This matches the greedy solution! The state machine tracked optimal decisions at each step: buy at $1, sell at $5 (+$4), buy at $3, sell at $6 (+$3) = $7 total.',
+        hold: 3, cash: 7, currentDay: -1,
+        activeState: 'cash', transition: null,
+        activeLine: 6,
+        decision: null
+      }
+    ];
+
+    let current = 0;
+
+    function renderStates(step) {
+      const s = steps[step];
+      const holdState = document.getElementById('holdState');
+      const cashState = document.getElementById('cashState');
+      const holdVal = document.getElementById('holdVal');
+      const cashVal = document.getElementById('cashVal');
+      const buyArrow = document.getElementById('buyArrow');
+      const sellArrow = document.getElementById('sellArrow');
+
+      holdVal.textContent = s.hold;
+      cashVal.textContent = s.cash;
+
+      holdState.classList.remove('active');
+      cashState.classList.remove('active');
+      buyArrow.classList.remove('active');
+      sellArrow.classList.remove('active');
+
+      if (s.activeState === 'hold' || s.activeState === 'both') holdState.classList.add('active');
+      if (s.activeState === 'cash' || s.activeState === 'both') cashState.classList.add('active');
+      if (s.transition === 'buy') buyArrow.classList.add('active');
+      if (s.transition === 'sell') sellArrow.classList.add('active');
+    }
+
+    function renderPrices(step) {
+      const s = steps[step];
+      const row = document.getElementById('priceRow');
+      row.innerHTML = '';
+      
+      for (let i = 0; i < prices.length; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'price-cell';
+        if (i === s.currentDay) cell.classList.add('current');
+        else if (i < s.currentDay) cell.classList.add('past');
+        
+        cell.innerHTML = `<div class="price-val">${prices[i]}</div><div class="price-day">Day ${i}</div>`;
+        row.appendChild(cell);
+      }
+    }
+
+    function renderDecision(step) {
+      const s = steps[step];
+      const box = document.getElementById('decisionBox');
+      const opts = document.getElementById('decisionOptions');
+      
+      if (!s.decision) {
+        box.style.display = 'none';
+        return;
+      }
+      
+      box.style.display = 'block';
+      opts.innerHTML = '';
+      
+      for (const opt of s.decision.opts) {
+        const div = document.createElement('div');
+        div.className = 'decision-opt';
+        if (opt.selected) div.classList.add('selected');
+        div.innerHTML = `${opt.label}<span class="val">${opt.val}</span>`;
+        opts.appendChild(div);
+      }
+    }
+
+    function renderVars(step) {
+      const s = steps[step];
+      const container = document.getElementById('vars');
+      container.innerHTML = '';
+      
+      const vars = [
+        { name: 'price', val: s.currentDay >= 0 ? prices[s.currentDay] : '-', cls: 'changed' },
+        { name: 'hold', val: s.hold, cls: s.activeState === 'hold' ? 'hold-var' : '' },
+        { name: 'cash', val: s.cash, cls: s.activeState === 'cash' ? 'cash-var' : '' }
+      ];
+      
+      for (const v of vars) {
+        const box = document.createElement('div');
+        box.className = 'var-box ' + v.cls;
+        box.innerHTML = `<span class="var-name">${v.name}</span><span class="var-val">${v.val}</span>`;
+        container.appendChild(box);
+      }
+    }
+
+    function renderCode(step) {
+      const s = steps[step];
+      const panel = document.getElementById('codePanel');
+      panel.innerHTML = codeLines.map((line, i) => {
+        const active = i === s.activeLine ? ' active' : '';
+        return `<div class="code-line${active}">${line}</div>`;
+      }).join('');
+    }
+
+    function renderInfo(step) {
+      const s = steps[step];
+      document.getElementById('phase').textContent = s.phase.toUpperCase();
+      document.getElementById('phase').className = 'phase-badge ' + s.phaseClass;
+      document.getElementById('stepCounter').textContent = `Step ${step + 1} / ${steps.length}`;
+      document.getElementById('infoTitle').textContent = s.title;
+      document.getElementById('infoText').textContent = s.text;
+    }
+
+    function renderDots() {
+      const container = document.getElementById('dots');
+      container.innerHTML = '';
+      for (let i = 0; i < steps.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === current) dot.classList.add('active');
+        else if (i < current) dot.classList.add('done');
+        dot.onclick = () => { current = i; render(); };
+        container.appendChild(dot);
+      }
+    }
+
+    function render() {
+      renderStates(current);
+      renderPrices(current);
+      renderDecision(current);
+      renderVars(current);
+      renderCode(current);
+      renderInfo(current);
+      renderDots();
+      document.getElementById('prevBtn').disabled = current === 0;
+      document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    }
+
+    function go(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < steps.length) {
+        current = next;
+        render();
+      }
+    }
+
+    function reset() {
+      current = 0;
+      render();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'r' || e.key === 'R') reset();
+    });
+
+    render();
+  </script>
+</body>
+</html>

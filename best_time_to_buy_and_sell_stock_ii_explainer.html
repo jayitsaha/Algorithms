@@ -62,6 +62,8 @@
     .bar.sell { background: var(--red-bg); border-color: var(--red-border); }
     .bar.hold { background: var(--blue-bg); border-color: var(--blue-border); }
     .bar.profit-zone { background: var(--amber-bg); border-color: var(--amber-border); }
+    .bar.compare { background: var(--purple-bg); border-color: var(--purple-border); box-shadow: 0 0 0 2px var(--purple-mid); }
+    .bar.skip-compare { background: var(--amber-bg); border-color: var(--amber-border); opacity: 0.7; }
     .day-label { font-size: 11px; color: var(--text3); font-weight: 500; }
     .action-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; min-height: 16px; }
     .action-label.buy { color: var(--green-mid); }
@@ -135,6 +137,7 @@
     .legend-color.sell { background: var(--red-bg); border-color: var(--red-border); }
     .legend-color.hold { background: var(--blue-bg); border-color: var(--blue-border); }
     .legend-color.profit { background: var(--amber-bg); border-color: var(--amber-border); }
+    .legend-color.compare { background: var(--purple-bg); border-color: var(--purple-border); }
   </style>
 </head>
 <body>
@@ -181,8 +184,7 @@
       <div class="legend">
         <div class="legend-item"><span class="legend-color buy"></span> Buy Day</div>
         <div class="legend-item"><span class="legend-color sell"></span> Sell Day</div>
-        <div class="legend-item"><span class="legend-color hold"></span> Holding</div>
-        <div class="legend-item"><span class="legend-color profit"></span> Profit Added</div>
+        <div class="legend-item"><span class="legend-color compare"></span> Comparing</div>
       </div>
     </div>
   </div>
@@ -218,8 +220,8 @@
         vars: { i: 1, profit: 0, 'prices[i-1]': 7, 'prices[i]': 1, diff: -6 },
         changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
         activeLine: 3,
-        bars: [null, 'skip', null, null, null, null],
-        actions: ['', 'skip', '', '', '', '']
+        bars: ['compare', 'compare', null, null, null, null],
+        actions: ['prev', 'curr', '', '', '', '']
       },
       {
         phase: 'profit', phaseClass: 'phase-profit',
@@ -239,8 +241,8 @@
         vars: { i: 3, profit: 4, 'prices[i-1]': 5, 'prices[i]': 3, diff: -2 },
         changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
         activeLine: 3,
-        bars: [null, 'buy', 'sell', 'skip', null, null],
-        actions: ['', 'buy', 'sell', 'skip', '', '']
+        bars: [null, 'buy', 'compare', 'compare', null, null],
+        actions: ['', 'buy', 'prev', 'curr', '', '']
       },
       {
         phase: 'profit', phaseClass: 'phase-profit',
@@ -260,8 +262,8 @@
         vars: { i: 5, profit: 7, 'prices[i-1]': 6, 'prices[i]': 4, diff: -2 },
         changed: ['i', 'prices[i-1]', 'prices[i]', 'diff'],
         activeLine: 3,
-        bars: [null, 'buy', 'sell', 'buy', 'sell', 'skip'],
-        actions: ['', 'buy', 'sell', 'buy', 'sell', 'skip']
+        bars: [null, 'buy', 'sell', 'buy', 'compare', 'compare'],
+        actions: ['', 'buy', 'sell', 'buy', 'prev', 'curr']
       },
       {
         phase: 'done', phaseClass: 'phase-done',
@@ -296,7 +298,8 @@
         if (s.bars[d] === 'buy') bar.classList.add('buy');
         else if (s.bars[d] === 'sell') bar.classList.add('sell');
         else if (s.bars[d] === 'hold') bar.classList.add('hold');
-        else if (s.bars[d] === 'skip') bar.classList.add('');
+        else if (s.bars[d] === 'compare') bar.classList.add('compare');
+        else if (s.bars[d] === 'skip') bar.classList.add('skip-compare');
 
         const dayLabel = document.createElement('div');
         dayLabel.className = 'day-label';
@@ -315,6 +318,12 @@
           actionLabel.classList.add('hold');
         } else if (s.actions[d] === 'skip') {
           actionLabel.textContent = '—';
+        } else if (s.actions[d] === 'prev') {
+          actionLabel.textContent = 'i-1';
+          actionLabel.style.color = 'var(--purple-mid)';
+        } else if (s.actions[d] === 'curr') {
+          actionLabel.textContent = 'i';
+          actionLabel.style.color = 'var(--purple-mid)';
         }
 
         barGroup.appendChild(actionLabel);
