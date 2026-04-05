@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Increasing Triplet Subsequence (Prefix Min / Suffix Max) — Interactive Explainer</title>
+<title>Increasing Triplet Subsequence (Prefix Min / Suffix Max) — Deep Dive Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,7 +21,7 @@
     --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
     --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
     --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
-    --cyan-bg:#E0F5F5;  --cyan-border:#6DC5C5;  --cyan-text:#0A3636;  --cyan-mid:#1A8F8F;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
     --radius: 10px;      --radius-lg: 14px;
   }
 
@@ -33,51 +35,135 @@
       --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
       --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
       --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
-      --cyan-bg:#0a2e2e;   --cyan-border:#3AA5A5;  --cyan-text:#A0E0E0;  --cyan-mid:#6DC5C5;
+      --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
     }
   }
 
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 900px; margin: 0 auto; }
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 2rem 2rem 1.75rem;
-    width: 100%;
-    max-width: 740px;
-  }
-
-  .header { margin-bottom: 1.5rem; }
-  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
-  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
-  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .tag {
-    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 3px 9px; border-radius: 20px;
-  }
+  header { text-align: center; margin-bottom: 2rem; }
+  header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  header .subtitle { color: var(--text2); font-size: 0.95rem; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
   .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
-  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
-  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
   .tag-approach { background: var(--cyan-bg); color: var(--cyan-mid); }
 
+  /* Card sections */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--purple-bg); color: var(--purple-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.1rem; font-weight: 600; }
+
+  /* Concept boxes */
+  .concept-box {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin: 1rem 0;
+    border-left: 4px solid var(--purple-border);
+  }
+  .concept-box.insight { border-left-color: var(--amber-border); background: var(--amber-bg); }
+  .concept-box.warning { border-left-color: var(--red-border); background: var(--red-bg); }
+  .concept-box.key-concept { border-left-color: var(--blue-border); background: var(--blue-bg); }
+  .concept-box-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+  .concept-box p, .concept-box ul { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+  .concept-box ul { margin: 0.5rem 0 0 1.5rem; }
+
+  /* Algorithm steps */
+  .algorithm-steps { display: flex; flex-direction: column; gap: 12px; margin: 1rem 0; }
+  .algo-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .algo-step-num {
+    width: 26px; height: 26px; background: var(--blue-bg); color: var(--blue-mid);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; flex-shrink: 0;
+  }
+  .algo-step-text { color: var(--text); line-height: 1.5; }
+
+  /* Strategy steps */
+  .strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+  .strategy-step {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+    border-radius: var(--radius); border: 1px solid var(--purple-border);
+  }
+  .step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+  .strategy-step p { font-size: 0.9rem; color: var(--text2); line-height: 1.5; }
+
+  .interview-script {
+    margin-top: 1.5rem; padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .script-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+  .script-content {
+    font-family: var(--mono); font-size: 12px; line-height: 1.9;
+    color: var(--text2); padding: 12px; background: var(--surface);
+    border-radius: var(--radius); border-left: 3px solid var(--green-mid);
+  }
+
+  /* DP Pillars / Info boxes */
+  .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 1rem 0; }
+  .info-pillar {
+    background: var(--bg2); border-radius: var(--radius); padding: 1rem;
+    border-left: 4px solid var(--blue-border);
+  }
+  .info-pillar.prefix { border-left-color: var(--blue-border); }
+  .info-pillar.suffix { border-left-color: var(--cyan-border); }
+  .info-pillar h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .info-pillar p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  /* Recurrence Box */
+  .recurrence-box {
+    background: var(--cyan-bg); border: 2px solid var(--cyan-border);
+    border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0;
+  }
+  .recurrence-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    color: var(--cyan-mid); margin-bottom: 10px; letter-spacing: 0.5px;
+  }
+  .recurrence-formula { font-family: var(--mono); font-size: 13px; line-height: 2; }
+  .recurrence-line { padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+  .recurrence-line.active { background: var(--amber-bg); font-weight: 600; }
+  .var-prefix { color: var(--blue-mid); font-weight: 600; }
+  .var-suffix { color: var(--cyan-mid); font-weight: 600; }
+
+  /* Takeaways */
+  .takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+  .takeaway {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--green-bg); border-radius: var(--radius);
+    font-size: 13px; color: var(--green-text);
+  }
+
+  /* Related Problems */
+  .related-problems { margin-top: 1rem; }
+  .related-problems h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .related-problems ul { margin: 0 0 0 1.5rem; font-size: 13px; color: var(--text2); line-height: 1.8; }
+
+  /* Visualization Section Styles */
   .section-label {
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
     color: var(--text3); margin-bottom: 6px; text-align: center;
   }
 
-  /* Array rows */
   .array-section { margin-bottom: 1rem; }
   .array-section + .array-section { margin-top: 0.75rem; }
 
@@ -156,11 +242,8 @@
     white-space: pre;
     color: var(--text2);
   }
-  .code-line.active {
-    background: var(--green-bg);
-    color: var(--green-text);
-    font-weight: 500;
-  }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+  .code-comment { color: var(--text3); }
 
   /* Info box */
   .info-box {
@@ -193,35 +276,37 @@
   /* Progress dots */
   .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
   .dot {
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 8px; height: 8px; border-radius: 50%;
     background: var(--border2); transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
   }
+  .dot:hover { transform: scale(1.2); }
   .dot.active { background: var(--purple-mid); transform: scale(1.3); }
 
   /* Controls */
   .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; }
   .btn {
-    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
-    font-family: var(--sans); border: 0.5px solid var(--border2);
+    padding: 10px 22px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    font-family: var(--sans); border: 1px solid var(--border2);
     background: var(--surface); color: var(--text);
     cursor: pointer; transition: background 0.15s, opacity 0.15s;
   }
   .btn:hover:not(:disabled) { background: var(--bg2); }
   .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
-  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-mid); }
+  .btn.primary:hover:not(:disabled) { background: var(--purple-border); color: white; }
   .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
 
   /* Legend */
   .legend {
-    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-    margin-top: 1rem; padding-top: 1rem;
-    border-top: 0.5px solid var(--border);
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 1px solid var(--border);
   }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
   .legend-swatch {
-    width: 12px; height: 12px; border-radius: 3px;
-    border: 1.5px solid transparent;
+    width: 14px; height: 14px; border-radius: 4px;
+    border: 2px solid transparent;
   }
   .ls-scan    { background: var(--green-bg);  border-color: var(--green-border); }
   .ls-prefix  { background: var(--blue-bg);   border-color: var(--blue-border); }
@@ -232,17 +317,218 @@
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="header">
+<div class="container">
+  <header>
     <h1>Increasing Triplet Subsequence</h1>
-    <p class="subtitle">Build prefix minimums and suffix maximums, then scan for a valid middle element.</p>
+    <p class="subtitle">Prefix Min / Suffix Max Approach — Deep Dive</p>
     <div class="tags">
       <span class="tag tag-medium">#334 Medium</span>
       <span class="tag tag-approach">Prefix Min / Suffix Max</span>
-      <span class="tag tag-pattern">Array Manipulation</span>
-      <span class="tag tag-complexity">O(n) / O(n)</span>
+      <span class="tag tag-pattern">Array Precomputation</span>
+      <span class="tag tag-complexity">O(n) Time · O(n) Space</span>
+    </div>
+  </header>
+
+  <!-- SECTION 1: Understanding the Problem -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">1</span>
+      <span class="section-title">Understanding the Problem</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      Given an array <code style="background: var(--bg2); padding: 2px 6px; border-radius: 4px;">nums</code>, determine if there exist three indices <strong>i &lt; j &lt; k</strong> such that <strong>nums[i] &lt; nums[j] &lt; nums[k]</strong>.
+    </p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>For any middle element <code>nums[j]</code> to be part of a valid triplet, two conditions must be true:</p>
+      <ul>
+        <li><strong>Something smaller exists to the LEFT</strong> — at least one element in <code>nums[0..j-1]</code> is smaller than <code>nums[j]</code></li>
+        <li><strong>Something larger exists to the RIGHT</strong> — at least one element in <code>nums[j+1..n-1]</code> is larger than <code>nums[j]</code></li>
+      </ul>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-top: 1rem;">
+      If we <strong>precompute</strong> the minimum to the left and maximum to the right for each position, we can check each middle in O(1) time!
+    </p>
+  </div>
+
+  <!-- SECTION 2: The Algorithm -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">2</span>
+      <span class="section-title">The Algorithm: Prefix Min / Suffix Max</span>
+    </div>
+
+    <div class="info-boxes">
+      <div class="info-pillar prefix">
+        <h4 style="color: var(--blue-mid);">📊 prefix_min[i]</h4>
+        <p>The <strong>smallest value</strong> in <code>nums[0..i]</code>. Answers: "What's the minimum value I've seen so far from the left?"</p>
+      </div>
+      <div class="info-pillar suffix">
+        <h4 style="color: var(--cyan-mid);">📊 suffix_max[i]</h4>
+        <p>The <strong>largest value</strong> in <code>nums[i..n-1]</code>. Answers: "What's the maximum value remaining to the right?"</p>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="algo-step-num">1</span>
+        <span class="algo-step-text"><strong>Build prefix_min[]</strong> — Scan left-to-right, tracking running minimum</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">2</span>
+        <span class="algo-step-text"><strong>Build suffix_max[]</strong> — Scan right-to-left, tracking running maximum</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">3</span>
+        <span class="algo-step-text"><strong>Check each middle j</strong> — For j from 1 to n-2: if <code>prefix_min[j-1] &lt; nums[j] &lt; suffix_max[j+1]</code>, return True</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relations</div>
+      <div class="recurrence-formula">
+        <div class="recurrence-line">
+          <span class="var-prefix">prefix_min[i]</span> = min(<span class="var-prefix">prefix_min[i-1]</span>, nums[i])
+        </div>
+        <div style="font-size: 11px; color: var(--text3); margin: 2px 0 8px 20px;">
+          ↳ Smallest so far = min(previous smallest, current value)
+        </div>
+        <div class="recurrence-line">
+          <span class="var-suffix">suffix_max[i]</span> = max(<span class="var-suffix">suffix_max[i+1]</span>, nums[i])
+        </div>
+        <div style="font-size: 11px; color: var(--text3); margin: 2px 0 0 20px;">
+          ↳ Largest remaining = max(next largest, current value)
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- SECTION 3: Why It Works -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">3</span>
+      <span class="section-title">Why It Works: The Invariant</span>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p style="margin-bottom: 0.75rem;"><strong>For any index j:</strong></p>
+      <ul>
+        <li><code>prefix_min[j-1]</code> is the minimum of ALL elements strictly to the left of j</li>
+        <li><code>suffix_max[j+1]</code> is the maximum of ALL elements strictly to the right of j</li>
+      </ul>
+      <p style="margin-top: 0.75rem;">
+        If <code>prefix_min[j-1] < nums[j] < suffix_max[j+1]</code>, then there <strong>MUST exist</strong> indices i and k such that nums[i] < nums[j] < nums[k].
+      </p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Check j from 1 to n-2?</div>
+      <p>
+        The first element (j=0) has nothing to its left — no valid i exists.
+        The last element (j=n-1) has nothing to its right — no valid k exists.
+        Only middle indices can be the "j" of a triplet!
+      </p>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-top: 1rem;">
+      <strong>Edge Cases:</strong> If no valid middle exists, we've checked every possibility in O(n) time — return False.
+    </p>
+  </div>
+
+  <!-- SECTION 4: The Code -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">4</span>
+      <span class="section-title">The Code (Annotated)</span>
+    </div>
+
+    <div class="code-panel" style="margin-top: 0;">
+      <div class="code-line"><span class="code-comment"># Build auxiliary arrays for O(1) lookups at each position</span></div>
+      <div class="code-line">def increasingTriplet(nums):</div>
+      <div class="code-line">    n = len(nums)</div>
+      <div class="code-line">    prefix_min = [0] * n  <span class="code-comment"># prefix_min[i] = min of nums[0..i]</span></div>
+      <div class="code-line">    suffix_max = [0] * n  <span class="code-comment"># suffix_max[i] = max of nums[i..n-1]</span></div>
+      <div class="code-line"></div>
+      <div class="code-line">    <span class="code-comment"># Pass 1: Build prefix minimums (left-to-right)</span></div>
+      <div class="code-line">    prefix_min[0] = nums[0]</div>
+      <div class="code-line">    for i in range(1, n):</div>
+      <div class="code-line">        prefix_min[i] = min(prefix_min[i-1], nums[i])</div>
+      <div class="code-line"></div>
+      <div class="code-line">    <span class="code-comment"># Pass 2: Build suffix maximums (right-to-left)</span></div>
+      <div class="code-line">    suffix_max[-1] = nums[-1]</div>
+      <div class="code-line">    for i in range(n-2, -1, -1):</div>
+      <div class="code-line">        suffix_max[i] = max(suffix_max[i+1], nums[i])</div>
+      <div class="code-line"></div>
+      <div class="code-line">    <span class="code-comment"># Pass 3: Check each middle element</span></div>
+      <div class="code-line">    for j in range(1, n-1):</div>
+      <div class="code-line">        if prefix_min[j-1] < nums[j] < suffix_max[j+1]:</div>
+      <div class="code-line">            return True  <span class="code-comment"># Found valid triplet!</span></div>
+      <div class="code-line"></div>
+      <div class="code-line">    return False  <span class="code-comment"># No triplet exists</span></div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 1rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 150px; background: var(--purple-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--purple-mid); text-transform: uppercase; font-weight: 600;">Time</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(n)</div>
+        <div style="font-size: 11px; color: var(--text3);">3 passes through array</div>
+      </div>
+      <div style="flex: 1; min-width: 150px; background: var(--blue-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--blue-mid); text-transform: uppercase; font-weight: 600;">Space</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(n)</div>
+        <div style="font-size: 11px; color: var(--text3);">Two auxiliary arrays</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Interview Strategy -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">5</span>
+      <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    </div>
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Looking for a subsequence with relative ordering" → Consider what information each position needs about elements before/after it.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Bottleneck</div>
+        <p>For each middle element, we need to know: "Is there something smaller to the left? Something larger to the right?" Checking naively is O(n) per element → O(n²) total.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Precomputation Insight</div>
+        <p>Precompute these answers once! Running min from left, running max from right. Now each middle check is O(1).</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Mention the Trade-off</div>
+        <p>"This uses O(n) space. There's also an O(1) space solution using two variables, but this prefix/suffix approach is more intuitive and easier to verify correct."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <div class="script-title">🗣️ What to Say to the Interviewer</div>
+      <div class="script-content">
+"For each position j to be a valid middle element, I need to know if there's a smaller value to its left and a larger value to its right.
+
+If I precompute prefix_min[i] = minimum of nums[0..i] and suffix_max[i] = maximum of nums[i..n-1], then I can check each middle position in O(1).
+
+This gives O(n) time with O(n) space. There's also an O(1) space approach tracking just two smallest values, but I'll start with this clearer solution first."
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Interactive Walkthrough -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">6</span>
+      <span class="section-title">Interactive Walkthrough</span>
+    </div>
 
   <!-- nums row -->
   <div class="array-section">
@@ -295,7 +581,56 @@
     <div class="legend-item"><div class="legend-swatch ls-skip"></div>fail</div>
     <div class="legend-item"><div class="legend-swatch ls-found"></div>triplet!</div>
   </div>
-</div>
+  </div> <!-- end Section 6 card -->
+
+  <!-- SECTION 7: Summary & Extensions -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">7</span>
+      <span class="section-title">Summary & Key Takeaways</span>
+    </div>
+
+    <div class="takeaways">
+      <div class="takeaway">✓ Prefix/suffix precomputation converts O(n) per-query lookups into O(1)</div>
+      <div class="takeaway">✓ For triplets: check if "something smaller left" AND "something larger right"</div>
+      <div class="takeaway">✓ Three passes: build prefix_min → build suffix_max → scan for valid middle</div>
+      <div class="takeaway">✓ O(n) time, O(n) space — clear and easy to verify</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Need min/max from "everything to the left" or "everything to the right"</li>
+        <li>Problem asks about subsequences with relative ordering</li>
+        <li>O(n) space is acceptable for clarity</li>
+        <li>When simpler to code than O(1) space alternatives</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>LC 42 - Trapping Rain Water</strong> — Classic prefix max / suffix max</li>
+        <li><strong>LC 238 - Product of Array Except Self</strong> — Prefix/suffix products</li>
+        <li><strong>LC 456 - 132 Pattern</strong> — Similar triplet with different ordering</li>
+        <li><strong>LC 300 - Longest Increasing Subsequence</strong> — DP approach for longer sequences</li>
+      </ul>
+    </div>
+
+    <div class="concept-box" style="margin-top: 1rem;">
+      <div class="concept-box-title">💡 Comparison: This vs O(1) Space Solution</div>
+      <p style="margin-bottom: 0.5rem;">
+        There's also an O(1) space solution that tracks just <code>first</code> and <code>second</code> smallest values.
+        It's more efficient but trickier to understand (why does updating <code>first</code> not break the invariant?).
+      </p>
+      <p>
+        <strong>Interview tip:</strong> Start with this prefix/suffix approach — it's correct, clear, and demonstrates precomputation.
+        Then mention "we can optimize to O(1) space" if time permits.
+      </p>
+    </div>
+  </div>
+
+</div> <!-- end container -->
 
 <script>
 const nums = [2, 1, 5, 0, 4, 6];

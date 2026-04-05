@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Increasing Triplet Subsequence — Interactive Explainer</title>
+<title>Increasing Triplet Subsequence — Two Smallest Values Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,6 +21,7 @@
     --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
     --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
     --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
     --radius: 10px;      --radius-lg: 14px;
   }
 
@@ -32,50 +35,139 @@
       --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
       --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
       --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
     }
   }
 
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 900px; margin: 0 auto; }
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-  }
+  header { text-align: center; margin-bottom: 2rem; }
+  header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  header .subtitle { color: var(--text2); font-size: 0.95rem; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+  .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
 
+  /* Card sections */
   .card {
     background: var(--surface);
-    border: 0.5px solid var(--border);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 2rem 2rem 1.75rem;
-    width: 100%;
-    max-width: 720px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
-  .header { margin-bottom: 1.5rem; }
-  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
-  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
-  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .tag {
-    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 3px 9px; border-radius: 20px;
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
   }
-  .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
-  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
-  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+  .section-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--purple-bg); color: var(--purple-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.1rem; font-weight: 600; }
 
-  /* Section label */
+  /* Concept boxes */
+  .concept-box {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin: 1rem 0;
+    border-left: 4px solid var(--purple-border);
+  }
+  .concept-box.insight { border-left-color: var(--amber-border); background: var(--amber-bg); }
+  .concept-box.warning { border-left-color: var(--red-border); background: var(--red-bg); }
+  .concept-box.key-concept { border-left-color: var(--blue-border); background: var(--blue-bg); }
+  .concept-box.danger { border-left-color: var(--red-border); background: var(--red-bg); }
+  .concept-box-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+  .concept-box p, .concept-box ul { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+  .concept-box ul { margin: 0.5rem 0 0 1.5rem; }
+
+  /* Algorithm steps */
+  .algorithm-steps { display: flex; flex-direction: column; gap: 12px; margin: 1rem 0; }
+  .algo-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .algo-step-num {
+    width: 26px; height: 26px; background: var(--blue-bg); color: var(--blue-mid);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; flex-shrink: 0;
+  }
+  .algo-step-text { color: var(--text); line-height: 1.5; }
+
+  /* Decision tree */
+  .decision-tree {
+    background: var(--bg2); border-radius: var(--radius-lg); padding: 1.25rem; margin: 1rem 0;
+  }
+  .decision-node {
+    background: var(--surface); border-radius: var(--radius); padding: 12px 16px;
+    margin: 8px 0; border: 1px solid var(--border);
+  }
+  .decision-condition { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .decision-branches { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+  .decision-branch {
+    flex: 1; min-width: 140px; padding: 10px 12px; border-radius: var(--radius);
+    font-size: 13px; text-align: center;
+  }
+  .branch-yes { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green-text); }
+  .branch-no { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber-text); }
+
+  /* Strategy steps */
+  .strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+  .strategy-step {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+    border-radius: var(--radius); border: 1px solid var(--purple-border);
+  }
+  .step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+  .strategy-step p { font-size: 0.9rem; color: var(--text2); line-height: 1.5; }
+
+  .interview-script {
+    margin-top: 1.5rem; padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .script-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+  .script-content {
+    font-family: var(--mono); font-size: 12px; line-height: 1.9;
+    color: var(--text2); padding: 12px; background: var(--surface);
+    border-radius: var(--radius); border-left: 3px solid var(--green-mid);
+  }
+
+  /* Recurrence Box */
+  .recurrence-box {
+    background: var(--cyan-bg); border: 2px solid var(--cyan-border);
+    border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0;
+  }
+  .recurrence-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    color: var(--cyan-mid); margin-bottom: 10px; letter-spacing: 0.5px;
+  }
+  .recurrence-formula { font-family: var(--mono); font-size: 13px; line-height: 2; }
+  .var-first { color: var(--blue-mid); font-weight: 600; }
+  .var-second { color: var(--purple-mid); font-weight: 600; }
+
+  /* Takeaways */
+  .takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+  .takeaway {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--green-bg); border-radius: var(--radius);
+    font-size: 13px; color: var(--green-text);
+  }
+
+  /* Related Problems */
+  .related-problems { margin-top: 1rem; }
+  .related-problems h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .related-problems ul { margin: 0 0 0 1.5rem; font-size: 13px; color: var(--text2); line-height: 1.8; }
+
+  /* Visualization Section Styles */
   .section-label {
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
     color: var(--text3); margin-bottom: 6px; text-align: center;
   }
 
-  /* Pointer labels */
   .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
   .ptr-label {
     width: 58px; height: 22px; display: flex; align-items: center; justify-content: center;
@@ -85,7 +177,6 @@
   .ptr-label.scan   { background: var(--green-bg); color: var(--green-mid); }
   .ptr-label.hidden { opacity: 0; }
 
-  /* Array row */
   .array-row { display: flex; gap: 8px; justify-content: center; }
   .cell {
     width: 58px; height: 58px; border-radius: var(--radius);
@@ -100,13 +191,10 @@
   .cell.first   { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
   .cell.second  { border: 2px solid var(--purple-border);background: var(--purple-bg);color: var(--purple-text); }
   .cell.found   { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); transform: scale(1.08); }
-  .cell.normal  { }
 
-  /* Index labels */
   .idx-labels { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
   .idx-label { width: 58px; text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); }
 
-  /* Variable tracker */
   .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
   .var-box {
     display: flex; align-items: center; gap: 8px;
@@ -120,7 +208,6 @@
   .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
   .var-val.inf { color: var(--text3); font-style: italic; font-size: 14px; }
 
-  /* Code panel */
   .code-panel {
     margin-top: 1.25rem;
     background: var(--bg2);
@@ -138,13 +225,9 @@
     white-space: pre;
     color: var(--text2);
   }
-  .code-line.active {
-    background: var(--green-bg);
-    color: var(--green-text);
-    font-weight: 500;
-  }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+  .code-comment { color: var(--text3); }
 
-  /* Info box */
   .info-box {
     margin-top: 1.25rem;
     background: var(--bg2);
@@ -171,38 +254,37 @@
     border: 0.5px solid var(--border2); color: var(--text);
   }
 
-  /* Progress dots */
   .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
   .dot {
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 8px; height: 8px; border-radius: 50%;
     background: var(--border2); transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
   }
+  .dot:hover { transform: scale(1.2); }
   .dot.active { background: var(--purple-mid); transform: scale(1.3); }
 
-  /* Controls */
   .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
   .btn {
-    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
-    font-family: var(--sans); border: 0.5px solid var(--border2);
+    padding: 10px 22px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    font-family: var(--sans); border: 1px solid var(--border2);
     background: var(--surface); color: var(--text);
     cursor: pointer; transition: background 0.15s, opacity 0.15s;
   }
   .btn:hover:not(:disabled) { background: var(--bg2); }
   .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
-  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-mid); }
+  .btn.primary:hover:not(:disabled) { background: var(--purple-border); color: white; }
   .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
 
-  /* Legend */
   .legend {
     display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
     margin-top: 1.25rem; padding-top: 1rem;
-    border-top: 0.5px solid var(--border);
+    border-top: 1px solid var(--border);
   }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
   .legend-swatch {
-    width: 12px; height: 12px; border-radius: 3px;
-    border: 1.5px solid transparent;
+    width: 14px; height: 14px; border-radius: 4px;
+    border: 2px solid transparent;
   }
   .ls-scan   { background: var(--green-bg);  border-color: var(--green-border); }
   .ls-first  { background: var(--blue-bg);   border-color: var(--blue-border); }
@@ -212,16 +294,204 @@
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="header">
+<div class="container">
+  <header>
     <h1>Increasing Triplet Subsequence</h1>
-    <p class="subtitle">Track two smallest values — if anything exceeds both, the triplet exists.</p>
+    <p class="subtitle">O(1) Space Solution: Track Two Smallest Values</p>
     <div class="tags">
       <span class="tag tag-medium">#334 Medium</span>
-      <span class="tag tag-pattern">Maintain Two Smallest</span>
-      <span class="tag tag-complexity">O(n) / O(1)</span>
+      <span class="tag tag-pattern">Greedy / Two Variables</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Space</span>
+    </div>
+  </header>
+
+  <!-- SECTION 1: Understanding the Problem -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">1</span>
+      <span class="section-title">Understanding the Problem</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      Given an array <code style="background: var(--bg2); padding: 2px 6px; border-radius: 4px;">nums</code>, determine if there exist three indices <strong>i &lt; j &lt; k</strong> such that <strong>nums[i] &lt; nums[j] &lt; nums[k]</strong>.
+    </p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We don't need to find the <em>actual</em> triplet — just prove one <em>exists</em>. This means we can track just enough information to know if a valid third element appears:</p>
+      <ul>
+        <li><strong style="color: var(--blue-mid);">first</strong> — The smallest value seen so far</li>
+        <li><strong style="color: var(--purple-mid);">second</strong> — The smallest value that's greater than some earlier element</li>
+      </ul>
+      <p style="margin-top: 0.5rem;">If any value exceeds <code>second</code>, that's our third element — triplet exists!</p>
     </div>
   </div>
+
+  <!-- SECTION 2: The Algorithm -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">2</span>
+      <span class="section-title">The Algorithm: Maintain Two Smallest</span>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="algo-step-num">1</span>
+        <span class="algo-step-text">Initialize <code>first = second = ∞</code></span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">2</span>
+        <span class="algo-step-text">For each <code>num</code> in array, check in order:</span>
+      </div>
+    </div>
+
+    <div class="decision-tree">
+      <div class="decision-node">
+        <div class="decision-condition">Is num ≤ first?</div>
+        <div class="decision-branches">
+          <div class="decision-branch branch-yes">✓ Update first = num<br><small>New smallest so far</small></div>
+          <div class="decision-branch branch-no">→ Check next condition</div>
+        </div>
+      </div>
+      <div class="decision-node">
+        <div class="decision-condition">Is num ≤ second?</div>
+        <div class="decision-branches">
+          <div class="decision-branch branch-yes">✓ Update second = num<br><small>New second smallest</small></div>
+          <div class="decision-branch branch-no">→ Check next condition</div>
+        </div>
+      </div>
+      <div class="decision-node">
+        <div class="decision-condition">num > second > first?</div>
+        <div class="decision-branches">
+          <div class="decision-branch branch-yes" style="background: var(--red-bg); border-color: var(--red-border); color: var(--red-text);">🎉 Return True!<br><small>Triplet found</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Why It Works -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">3</span>
+      <span class="section-title">Why It Works: The Hidden Invariant</span>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Critical Invariant</div>
+      <p><strong>If <code>second</code> has a finite value, it GUARANTEES that some smaller value appeared before it in the array.</strong></p>
+      <p style="margin-top: 0.5rem;">We don't need to remember <em>which</em> value — just that one exists. This is what makes O(1) space possible.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Tricky Case: Updating first After second Is Set</div>
+      <p style="margin-bottom: 0.75rem;">
+        This confuses many people! Watch what happens with input <code>[2, 1, 5, 0, 4, 6]</code>:
+      </p>
+      <ul style="list-style: none; margin: 0; padding: 0;">
+        <li style="margin-bottom: 4px;">• After num=5: <code>first=1, second=5</code> — pair (1,5) established</li>
+        <li style="margin-bottom: 4px;">• After num=0: <code>first=0, second=5</code> — <strong>first changes but second stays!</strong></li>
+        <li style="margin-bottom: 4px;">• After num=6: <code>6 > second(5)</code> — Triplet found!</li>
+      </ul>
+      <p style="margin-top: 0.75rem;">
+        <strong>Why is this correct?</strong> Even though first=0 now, the old <code>second=5</code> still "remembers" there was a value (the old first=1) before it. The triplet (1, 5, 6) still exists in the array!
+      </p>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Logic</div>
+      <div class="recurrence-formula">
+        <div><span class="var-first">first</span> = smallest value seen so far</div>
+        <div><span class="var-second">second</span> = smallest value that is GREATER than some earlier value</div>
+        <div style="margin-top: 8px; padding: 8px; background: var(--surface); border-radius: 4px;">
+          If <code>num > second</code> → triplet (?, second_history, num) exists
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: The Code -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">4</span>
+      <span class="section-title">The Code (Annotated)</span>
+    </div>
+
+    <div class="code-panel" style="margin-top: 0;">
+      <div class="code-line"><span class="code-comment"># Track two smallest values with special invariant</span></div>
+      <div class="code-line">def increasingTriplet(nums):</div>
+      <div class="code-line">    first = second = float('inf')  <span class="code-comment"># Start with infinity</span></div>
+      <div class="code-line"></div>
+      <div class="code-line">    for num in nums:</div>
+      <div class="code-line">        if num <= first:</div>
+      <div class="code-line">            first = num      <span class="code-comment"># Smallest so far</span></div>
+      <div class="code-line">        elif num <= second:</div>
+      <div class="code-line">            second = num     <span class="code-comment"># 2nd smallest (with history!)</span></div>
+      <div class="code-line">        else:</div>
+      <div class="code-line">            return True      <span class="code-comment"># num > second > (some past value)</span></div>
+      <div class="code-line"></div>
+      <div class="code-line">    return False             <span class="code-comment"># No triplet found</span></div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 1rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 150px; background: var(--purple-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--purple-mid); text-transform: uppercase; font-weight: 600;">Time</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(n)</div>
+        <div style="font-size: 11px; color: var(--text3);">Single pass through array</div>
+      </div>
+      <div style="flex: 1; min-width: 150px; background: var(--green-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--green-mid); text-transform: uppercase; font-weight: 600;">Space</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(1)</div>
+        <div style="font-size: 11px; color: var(--text3);">Just two variables!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Interview Strategy -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">5</span>
+      <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    </div>
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Start Simple</div>
+        <p>"The brute force is O(n³) — check all triplets. Can we do better? We only need to PROVE a triplet exists, not find it."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Reduce the Problem</div>
+        <p>"For each element to be a valid 'middle', we need something smaller before and larger after. What's the minimum information to track?"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: The Two-Variable Insight</div>
+        <p>"If I track the smallest value (first) and smallest-greater-than-first (second), any value > second completes the triplet."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Address the Tricky Part</div>
+        <p>"Even if first gets updated later, second still remembers there was something before it. The invariant holds!"</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <div class="script-title">🗣️ What to Say to the Interviewer</div>
+      <div class="script-content">
+"Instead of finding the actual triplet, I'll track enough information to prove one exists.
+
+I maintain two variables: 'first' is the smallest seen so far, 'second' is the smallest value that's greater than some previous value.
+
+The key insight: if second ever gets set, it GUARANTEES something smaller existed before it. So if any later value exceeds second, we have our triplet.
+
+Even if first gets updated after second is set, the invariant holds — second still 'remembers' its history."
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Interactive Walkthrough -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">6</span>
+      <span class="section-title">Interactive Walkthrough</span>
+    </div>
 
   <div class="section-label">Input Array</div>
   <div id="ptr-labels" class="ptr-labels"></div>
@@ -270,7 +540,59 @@
     <div class="legend-item"><div class="legend-swatch ls-found"></div>triplet found!</div>
     <div class="legend-item"><div class="legend-swatch ls-done"></div>processed</div>
   </div>
-</div>
+  </div> <!-- end Section 6 card -->
+
+  <!-- SECTION 7: Summary & Extensions -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">7</span>
+      <span class="section-title">Summary & Key Takeaways</span>
+    </div>
+
+    <div class="takeaways">
+      <div class="takeaway">✓ Track <strong>first</strong> (smallest) and <strong>second</strong> (smallest that's > something earlier)</div>
+      <div class="takeaway">✓ <strong>second</strong> implicitly "remembers" there was a smaller value before it</div>
+      <div class="takeaway">✓ Updating <strong>first</strong> after <strong>second</strong> is set doesn't break the invariant</div>
+      <div class="takeaway">✓ O(n) time, O(1) space — optimal solution</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Finding increasing/decreasing subsequences of fixed length</li>
+        <li>Problems where you need to prove existence, not find actual elements</li>
+        <li>When O(1) space is required</li>
+        <li>Tracking "has something smaller appeared before?" implicitly</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>LC 456 - 132 Pattern</strong> — Similar concept with different ordering (use monotonic stack)</li>
+        <li><strong>LC 300 - Longest Increasing Subsequence</strong> — Generalization for any length (DP/binary search)</li>
+        <li><strong>LC 673 - Number of Longest Increasing Subsequence</strong> — Count all LIS</li>
+        <li><strong>LC 354 - Russian Doll Envelopes</strong> — 2D LIS variant</li>
+      </ul>
+    </div>
+
+    <div class="concept-box" style="margin-top: 1rem;">
+      <div class="concept-box-title">💡 Alternative: Prefix Min / Suffix Max</div>
+      <p style="margin-bottom: 0.5rem;">
+        There's also an O(n) time, O(n) space solution that precomputes:
+      </p>
+      <ul>
+        <li><code>prefix_min[i]</code> = smallest value in nums[0..i]</li>
+        <li><code>suffix_max[i]</code> = largest value in nums[i..n-1]</li>
+      </ul>
+      <p style="margin-top: 0.5rem;">
+        Then check each middle: if <code>prefix_min[j-1] < nums[j] < suffix_max[j+1]</code>, triplet exists.
+        Easier to reason about, but uses extra space.
+      </p>
+    </div>
+  </div>
+
+</div> <!-- end container -->
 
 <script>
 const nums = [2, 1, 5, 0, 4, 6];
