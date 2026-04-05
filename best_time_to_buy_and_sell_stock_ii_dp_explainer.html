@@ -612,10 +612,174 @@
       </div>
     </div>
 
-    <!-- SECTION 6: Interactive Walkthrough -->
+    <!-- SECTION 6: Interview Strategy -->
     <div class="card">
       <div class="section-header">
         <span class="section-number">6</span>
+        <span class="section-title">🎤 Interview Strategy: How to Think This Up Live</span>
+      </div>
+
+      <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1.25rem;">
+        This is the hardest part — how do you <em>derive</em> this solution in a 45-minute interview? Here's the exact mental framework:
+      </p>
+
+      <!-- Step 1: Pattern Recognition -->
+      <div style="background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; border: 1px solid var(--purple-border);">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 0.75rem; color: var(--purple-mid);">
+          📍 Step 1: Recognize the Pattern
+        </div>
+        <p style="color: var(--text1); line-height: 1.5; margin-bottom: 1rem;">
+          Ask yourself: <strong>"Am I in one of multiple possible STATES at any point?"</strong>
+        </p>
+        <div style="background: var(--surface); padding: 12px; border-radius: var(--radius); margin-bottom: 0.75rem;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">🚦 The Signal: Binary Constraints</div>
+          <ul style="margin: 0; padding-left: 20px; color: var(--text2); font-size: 13px; line-height: 1.8;">
+            <li>"You can only hold <strong>one stock at a time</strong>" → I'm either holding OR not</li>
+            <li>"Must sell before buying again" → Two distinct states with transitions</li>
+            <li>"With cooldown" → Adds a third state (cooldown)</li>
+            <li>"At most K transactions" → States × K</li>
+          </ul>
+        </div>
+        <div style="padding: 10px; background: var(--amber-bg); border-radius: var(--radius); font-size: 13px;">
+          <strong>💡 Interview Cue:</strong> If you see "at most one" / "can't buy until you sell" / "cooldown period" → <strong>think State Machine DP</strong>
+        </div>
+      </div>
+
+      <!-- Step 2: Define States -->
+      <div style="background: var(--bg2); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 0.75rem; color: var(--text1);">
+          📝 Step 2: Define Your States Clearly
+        </div>
+        <p style="color: var(--text2); line-height: 1.5; margin-bottom: 1rem;">
+          Write it out explicitly. Say it to the interviewer:
+        </p>
+        <div style="font-family: var(--mono); background: var(--surface); padding: 16px; border-radius: var(--radius); font-size: 13px; line-height: 2;">
+          <div style="color: var(--text3);">// At the END of each day, I'm in one of these states:</div>
+          <div><span style="color: var(--blue-mid);">hold[i]</span> = Best profit achievable if I <strong>end day i holding stock</strong></div>
+          <div><span style="color: var(--green-mid);">cash[i]</span> = Best profit achievable if I <strong>end day i NOT holding stock</strong></div>
+        </div>
+        <div style="margin-top: 0.75rem; padding: 10px; background: var(--red-bg); border-radius: var(--radius); font-size: 12px; border: 1px solid var(--red-border);">
+          <strong>⚠️ Critical:</strong> States describe WHERE YOU END UP, not what action you took. This is the key insight most people miss!
+        </div>
+      </div>
+
+      <!-- Step 3: Draw Transitions -->
+      <div style="background: var(--bg2); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 0.75rem; color: var(--text1);">
+          🔄 Step 3: Ask "How Can I Get To Each State?"
+        </div>
+        <p style="color: var(--text2); line-height: 1.5; margin-bottom: 1rem;">
+          For EACH state, list ALL ways to arrive there from the previous day:
+        </p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem;">
+          <div style="background: var(--blue-bg); padding: 14px; border-radius: var(--radius); border: 1px solid var(--blue-border);">
+            <div style="font-size: 13px; font-weight: 600; color: var(--blue-mid); margin-bottom: 8px;">
+              "How do I END today HOLDING?"
+            </div>
+            <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8; color: var(--text2);">
+              <li>I was holding yesterday, do nothing → <code>hold[i-1]</code></li>
+              <li>I had cash yesterday, buy today → <code>cash[i-1] - price</code></li>
+            </ul>
+          </div>
+          <div style="background: var(--green-bg); padding: 14px; border-radius: var(--radius); border: 1px solid var(--green-border);">
+            <div style="font-size: 13px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px;">
+              "How do I END today NOT holding?"
+            </div>
+            <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8; color: var(--text2);">
+              <li>I wasn't holding yesterday, do nothing → <code>cash[i-1]</code></li>
+              <li>I was holding yesterday, sell today → <code>hold[i-1] + price</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: The Math Intuition -->
+      <div style="background: linear-gradient(135deg, var(--amber-bg) 0%, var(--surface) 100%); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; border: 2px solid var(--amber-border);">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 0.75rem; color: var(--amber-mid);">
+          🧠 Step 4: Making "hold + price" Click
+        </div>
+        <p style="color: var(--text1); line-height: 1.6; margin-bottom: 1rem;">
+          <strong>This is the unintuitive part. Here's the mental model that makes it obvious:</strong>
+        </p>
+
+        <div style="background: var(--surface); padding: 16px; border-radius: var(--radius); margin-bottom: 1rem;">
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">🎯 Think of <code style="background: var(--blue-bg); padding: 2px 6px; border-radius: 3px;">hold</code> as your "paper profit" while holding</div>
+          <div style="font-size: 13px; color: var(--text2); line-height: 1.8;">
+            If <code>hold = -2</code>, it means: "I've spent $2 net to get this stock."<br>
+            If <code>hold = 3</code>, it means: "I've locked in $3 profit AND I'm holding a stock."<br><br>
+            <strong>It's your REALIZED profit so far + your position.</strong>
+          </div>
+        </div>
+
+        <div style="background: var(--green-bg); padding: 16px; border-radius: var(--radius); border: 1px solid var(--green-border);">
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--green-mid);">
+            💰 When you sell: <code>hold + price</code>
+          </div>
+          <div style="font-size: 13px; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">
+              <strong>Example:</strong> <code>hold = -2</code>, today's price = $5
+            </div>
+            <ul style="margin: 0; padding-left: 20px;">
+              <li>I spent $2 to get this stock (that's why hold = -2)</li>
+              <li>I sell it for $5 (I RECEIVE $5)</li>
+              <li>My new cash = -2 + 5 = <strong>$3 profit</strong> ✓</li>
+            </ul>
+            <div style="margin-top: 10px; padding: 10px; background: var(--surface); border-radius: var(--radius);">
+              <strong>The insight:</strong> <code>hold</code> already has the cost "baked in" as a negative. Adding price gives you the net!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analogy Box -->
+      <div class="concept-box insight">
+        <div class="concept-box-title">📊 Analogy: Portfolio Balance Sheet</div>
+        <div style="font-size: 13px; line-height: 1.8;">
+          Think of it like a brokerage account statement:
+          <ul style="margin: 8px 0; padding-left: 20px;">
+            <li><code>cash</code> = <strong>Cash Balance</strong> (realized money in account)</li>
+            <li><code>hold</code> = <strong>Total Account Value</strong> while holding a position<br>
+                <span style="color: var(--text3); font-size: 12px;">(could be negative if you just bought and haven't profited yet)</span></li>
+          </ul>
+          When you sell at <code>price</code>:
+          <div style="font-family: var(--mono); background: var(--surface); padding: 8px; border-radius: 4px; margin-top: 8px;">
+            new_cash = account_value + sale_proceeds = hold + price
+          </div>
+        </div>
+      </div>
+
+      <!-- Interview Script -->
+      <div style="background: var(--bg2); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 1rem;">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 0.75rem;">
+          🗣️ What to Say to the Interviewer
+        </div>
+        <div style="font-family: var(--mono); background: var(--surface); padding: 16px; border-radius: var(--radius); font-size: 12px; line-height: 2.2; color: var(--text2);">
+          <div style="color: var(--green-mid);">"I notice I can only hold one stock at a time, so at any point</div>
+          <div style="color: var(--green-mid);">I'm in one of two states: holding or not holding."</div>
+          <div style="color: var(--blue-mid); margin-top: 8px;">"Let me define what each state means..."</div>
+          <div style="color: var(--blue-mid);">"hold[i] = best profit if I END day i with stock in hand"</div>
+          <div style="color: var(--purple-mid); margin-top: 8px;">"To end up holding, I either kept holding OR bought today."</div>
+          <div style="color: var(--purple-mid);">"Buying costs money, so that's cash - price."</div>
+          <div style="color: var(--amber-mid); margin-top: 8px;">"To end up with cash, I either stayed cash OR sold today."</div>
+          <div style="color: var(--amber-mid);">"Selling adds money, so that's hold + price."</div>
+        </div>
+      </div>
+
+      <!-- Quick Reference -->
+      <div style="background: linear-gradient(135deg, var(--green-bg) 0%, var(--blue-bg) 100%); border-radius: var(--radius-lg); padding: 1rem; margin-top: 1rem; border: 1px solid var(--green-border);">
+        <div style="font-weight: 600; margin-bottom: 0.5rem;">⚡ Quick Mental Check</div>
+        <div style="font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div><strong>Buying?</strong> Money leaves → <code>SUBTRACT price</code></div>
+          <div><strong>Selling?</strong> Money enters → <code>ADD price</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 7: Interactive Walkthrough -->
+    <div class="card">
+      <div class="section-header">
+        <span class="section-number">7</span>
         <span class="section-title">Interactive Walkthrough</span>
       </div>
 
@@ -712,10 +876,10 @@
       </div>
     </div>
 
-    <!-- SECTION 7: Summary -->
+    <!-- SECTION 8: Summary -->
     <div class="card">
       <div class="section-header">
-        <span class="section-number">7</span>
+        <span class="section-number">8</span>
         <span class="section-title">Summary & Key Takeaways</span>
       </div>
 
