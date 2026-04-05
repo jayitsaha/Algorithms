@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Increasing Triplet Subsequence — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); margin-bottom: 6px; text-align: center;
+  }
+
+  /* Pointer labels */
+  .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 58px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.scan   { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden { opacity: 0; }
+
+  /* Array row */
+  .array-row { display: flex; gap: 8px; justify-content: center; }
+  .cell {
+    width: 58px; height: 58px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.scan    { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.05); }
+  .cell.done    { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+  .cell.first   { border: 2px solid var(--blue-border);  background: var(--blue-bg);  color: var(--blue-text); }
+  .cell.second  { border: 2px solid var(--purple-border);background: var(--purple-bg);color: var(--purple-text); }
+  .cell.found   { border: 2px solid var(--red-border);   background: var(--red-bg);   color: var(--red-text); transform: scale(1.08); }
+  .cell.normal  { }
+
+  /* Index labels */
+  .idx-labels { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
+  .idx-label { width: 58px; text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-box.found-highlight { border-color: var(--red-border); background: var(--red-bg); }
+  .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+  .var-val.inf { color: var(--text3); font-style: italic; font-size: 14px; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active {
+    background: var(--green-bg);
+    color: var(--green-text);
+    font-weight: 500;
+  }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1.25rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 80px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init    { background: var(--blue-bg);    color: var(--blue-mid); }
+  .phase-scan    { background: var(--purple-bg);  color: var(--purple-mid); }
+  .phase-update  { background: var(--amber-bg);   color: var(--amber-mid); }
+  .phase-found   { background: var(--red-bg);     color: var(--red-mid); }
+  .phase-done    { background: var(--green-bg);   color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11.5px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--purple-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1.25rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-scan   { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-first  { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-second { background: var(--purple-bg); border-color: var(--purple-border); }
+  .ls-found  { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-done   { background: var(--bg2);       border-color: var(--border2); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Increasing Triplet Subsequence</h1>
+    <p class="subtitle">Track two smallest values — if anything exceeds both, the triplet exists.</p>
+    <div class="tags">
+      <span class="tag tag-medium">#334 Medium</span>
+      <span class="tag tag-pattern">Maintain Two Smallest</span>
+      <span class="tag tag-complexity">O(n) / O(1)</span>
+    </div>
+  </div>
+
+  <div class="section-label">Input Array</div>
+  <div id="ptr-labels" class="ptr-labels"></div>
+  <div id="array-row"  class="array-row"></div>
+  <div id="idx-labels" class="idx-labels"></div>
+
+  <div class="var-tracker">
+    <div class="var-box" id="vbox-first">
+      <span class="var-name">first</span>
+      <span class="var-val inf" id="vval-first">∞</span>
+    </div>
+    <div class="var-box" id="vbox-second">
+      <span class="var-name">second</span>
+      <span class="var-val inf" id="vval-second">∞</span>
+    </div>
+    <div class="var-box" id="vbox-result">
+      <span class="var-name">result</span>
+      <span class="var-val" id="vval-result">—</span>
+    </div>
+  </div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num">Step 0 of 14</span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body"  class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-scan"></div>scanning</div>
+    <div class="legend-item"><div class="legend-swatch ls-first"></div>= first</div>
+    <div class="legend-item"><div class="legend-swatch ls-second"></div>= second</div>
+    <div class="legend-item"><div class="legend-swatch ls-found"></div>triplet found!</div>
+    <div class="legend-item"><div class="legend-swatch ls-done"></div>processed</div>
+  </div>
+</div>
+
+<script>
+const nums = [2, 1, 5, 0, 4, 6];
+const N = nums.length;
+
+const codeLines = [
+  'def increasingTriplet(nums):',
+  '    first = second = float("inf")',
+  '',
+  '    for num in nums:',
+  '        if num <= first:',
+  '            first = num',
+  '        elif num <= second:',
+  '            second = num',
+  '        else:',
+  '            return True',
+  '',
+  '    return False',
+];
+
+// Input: [2, 1, 5, 0, 4, 6]
+// Trace:
+//   num=2: 2 <= inf → first=2
+//   num=1: 1 <= 2   → first=1
+//   num=5: 5 > 1, 5 <= inf → second=5
+//   num=0: 0 <= 1   → first=0  (second still=5, triplet (1,5,?) remembered)
+//   num=4: 4 > 0, 4 <= 5 → second=4
+//   num=6: 6 > 0, 6 > 4 → return True!  triplet exists (0,4,6) or (1,5,6)
+
+const INF = '∞';
+
+const steps = [
+  {
+    cells: Array(N).fill('normal'),
+    ptrs: Array(N).fill(null),
+    first: INF, second: INF, result: '—',
+    changed: [], phase: 'init', activeLine: [1],
+    title: 'Initialise',
+    body: 'Set <span class="code-inline">first = second = float("inf")</span>. We\'ll track the two smallest values seen so far. If any value exceeds both, returning <span class="code-inline">True</span>.'
+  },
+  {
+    cells: ['scan','normal','normal','normal','normal','normal'],
+    ptrs: ['num',null,null,null,null,null],
+    first: INF, second: INF, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 2',
+    body: '<span class="code-inline">num = 2</span>. Is <span class="code-inline">2 ≤ first(∞)</span>? <b>Yes</b> — update first.'
+  },
+  {
+    cells: ['first','normal','normal','normal','normal','normal'],
+    ptrs: [null,null,null,null,null,null],
+    first: 2, second: INF, result: '—',
+    changed: ['first'], phase: 'update', activeLine: [5],
+    title: 'first = 2',
+    body: '<span class="code-inline">first = 2</span>. The smallest value so far is 2. We need to find <span class="code-inline">second > first</span>, then <span class="code-inline">third > second</span>.'
+  },
+  {
+    cells: ['done','scan','normal','normal','normal','normal'],
+    ptrs: [null,'num',null,null,null,null],
+    first: 2, second: INF, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 1',
+    body: '<span class="code-inline">num = 1</span>. Is <span class="code-inline">1 ≤ first(2)</span>? <b>Yes</b> — we found an even smaller first!'
+  },
+  {
+    cells: ['done','first','normal','normal','normal','normal'],
+    ptrs: [null,null,null,null,null,null],
+    first: 1, second: INF, result: '—',
+    changed: ['first'], phase: 'update', activeLine: [5],
+    title: 'first = 1',
+    body: '<span class="code-inline">first = 1</span>. Updated to the new minimum. Still haven\'t found a valid second value yet.'
+  },
+  {
+    cells: ['done','done','scan','normal','normal','normal'],
+    ptrs: [null,null,'num',null,null,null],
+    first: 1, second: INF, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 5',
+    body: '<span class="code-inline">num = 5</span>. Is <span class="code-inline">5 ≤ first(1)</span>? <b>No</b>. Check next: is <span class="code-inline">5 ≤ second(∞)</span>? <b>Yes</b> — update second.'
+  },
+  {
+    cells: ['done','done','second','normal','normal','normal'],
+    ptrs: [null,null,null,null,null,null],
+    first: 1, second: 5, result: '—',
+    changed: ['second'], phase: 'update', activeLine: [6,7],
+    title: 'second = 5',
+    body: '<span class="code-inline">second = 5</span>. Now we have a pair: <b>first=1, second=5</b>. Any value > 5 will complete the triplet!'
+  },
+  {
+    cells: ['done','done','done','scan','normal','normal'],
+    ptrs: [null,null,null,'num',null,null],
+    first: 1, second: 5, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 0',
+    body: '<span class="code-inline">num = 0</span>. Is <span class="code-inline">0 ≤ first(1)</span>? <b>Yes</b> — update first. But wait — doesn\'t this break the pair?'
+  },
+  {
+    cells: ['done','done','done','first','normal','normal'],
+    ptrs: [null,null,null,null,null,null],
+    first: 0, second: 5, result: '—',
+    changed: ['first'], phase: 'update', activeLine: [5],
+    title: 'first = 0 (key insight!)',
+    body: '<span class="code-inline">first = 0</span>, but <span class="code-inline">second</span> stays <b>5</b>. This is safe! The pair (1, 5) still exists in history. <span class="code-inline">second = 5</span> guarantees there was a smaller value before it. Updating first just allows for finding a <em>better</em> triplet going forward.'
+  },
+  {
+    cells: ['done','done','done','done','scan','normal'],
+    ptrs: [null,null,null,null,'num',null],
+    first: 0, second: 5, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 4',
+    body: '<span class="code-inline">num = 4</span>. Is <span class="code-inline">4 ≤ first(0)</span>? <b>No</b>. Is <span class="code-inline">4 ≤ second(5)</span>? <b>Yes</b> — update second.'
+  },
+  {
+    cells: ['done','done','done','done','second','normal'],
+    ptrs: [null,null,null,null,null,null],
+    first: 0, second: 4, result: '—',
+    changed: ['second'], phase: 'update', activeLine: [6,7],
+    title: 'second = 4',
+    body: '<span class="code-inline">second = 4</span>. Now we have an even tighter pair: <b>first=0, second=4</b>. Any value > 4 completes the triplet. The bar is lower now!'
+  },
+  {
+    cells: ['done','done','done','done','done','scan'],
+    ptrs: [null,null,null,null,null,'num'],
+    first: 0, second: 4, result: '—',
+    changed: [], phase: 'scan', activeLine: [3,4],
+    title: 'Scan num = 6',
+    body: '<span class="code-inline">num = 6</span>. Is <span class="code-inline">6 ≤ first(0)</span>? <b>No</b>. Is <span class="code-inline">6 ≤ second(4)</span>? <b>No</b>. That means <span class="code-inline">num > second > first</span> — <b>triplet found!</b>'
+  },
+  {
+    cells: ['done','done','done','first','second','found'],
+    ptrs: [null,null,null,null,null,'num'],
+    first: 0, second: 4, result: 'True',
+    changed: ['result'], phase: 'found', activeLine: [8,9],
+    title: '🎉 Triplet Found!',
+    body: '<span class="code-inline">6 > second(4) > first(0)</span> — Return <span class="code-inline">True</span>! The increasing triplet is <b>[0, 4, 6]</b> at indices (3, 4, 5).'
+  },
+  {
+    cells: ['done','done','done','first','second','found'],
+    ptrs: [null,null,null,null,null,null],
+    first: 0, second: 4, result: 'True ✓',
+    changed: [], phase: 'done', activeLine: [9],
+    title: '✓ Done — return True',
+    body: 'Found an increasing triplet in <b>O(n) time, O(1) space</b>. The key: <span class="code-inline">second</span> implicitly remembers that a smaller value existed before it — we don\'t need to track <em>which</em> value, just that one existed.'
+  },
+];
+
+let cur = 0;
+
+function render() {
+  const s = steps[cur];
+
+  // Array row
+  const arrayRow  = document.getElementById('array-row');
+  const ptrLabels = document.getElementById('ptr-labels');
+  const idxLabels = document.getElementById('idx-labels');
+  arrayRow.innerHTML = ptrLabels.innerHTML = idxLabels.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cl = s.cells[i] || 'normal';
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + cl;
+    cell.textContent = nums[i];
+    arrayRow.appendChild(cell);
+
+    const ptrType = s.ptrs[i];
+    const pl = document.createElement('div');
+    if (ptrType === 'num') { pl.className = 'ptr-label scan'; pl.textContent = 'num'; }
+    else                   { pl.className = 'ptr-label hidden'; pl.textContent = ''; }
+    ptrLabels.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label'; il.textContent = i;
+    idxLabels.appendChild(il);
+  }
+
+  // Variable tracker
+  function setVar(name, val, changed, isFound) {
+    const box = document.getElementById('vbox-' + name);
+    const valEl = document.getElementById('vval-' + name);
+    box.className = 'var-box' + (isFound ? ' found-highlight' : changed ? ' changed' : '');
+    if (val === INF) {
+      valEl.className = 'var-val inf'; valEl.textContent = '∞';
+    } else {
+      valEl.className = 'var-val'; valEl.textContent = val;
+    }
+  }
+  setVar('first',  s.first,  s.changed.includes('first'),  false);
+  setVar('second', s.second, s.changed.includes('second'), false);
+  setVar('result', s.result, s.changed.includes('result'), s.phase === 'found' || s.phase === 'done');
+
+  // Code panel
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (s.activeLine.includes(i) ? ' active' : '');
+    div.textContent = line || '\u00A0';
+    codePanel.appendChild(div);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  const phaseMap = {
+    'init':   ['phase-init',   'Init'],
+    'scan':   ['phase-scan',   'Scanning'],
+    'update': ['phase-update', 'Update'],
+    'found':  ['phase-found',  'Found!'],
+    'done':   ['phase-done',   'Done'],
+  };
+  const [cls, label] = phaseMap[s.phase] || ['phase-scan', 'Scan'];
+  badge.className = 'phase-badge ' + cls;
+  badge.textContent = label;
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-body').innerHTML = s.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.onclick = () => { cur = i; render(); };
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  if (e.key === 'r' || e.key === 'R') { reset(); }
+});
+
+render();
+</script>
+</body>
+</html>

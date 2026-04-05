@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Increasing Triplet Subsequence (Prefix Min / Suffix Max) — Interactive Explainer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F5F5;  --cyan-border:#6DC5C5;  --cyan-text:#0A3636;  --cyan-mid:#1A8F8F;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#0a2e2e;   --cyan-border:#3AA5A5;  --cyan-text:#A0E0E0;  --cyan-mid:#6DC5C5;
+    }
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2rem 1.75rem;
+    width: 100%;
+    max-width: 740px;
+  }
+
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .header .tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-medium { background: var(--amber-bg); color: var(--amber-mid); }
+  .tag-pattern { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-complexity { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-approach { background: var(--cyan-bg); color: var(--cyan-mid); }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); margin-bottom: 6px; text-align: center;
+  }
+
+  /* Array rows */
+  .array-section { margin-bottom: 1rem; }
+  .array-section + .array-section { margin-top: 0.75rem; }
+
+  .ptr-labels { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 52px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.ptr-i     { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.ptr-j     { background: var(--purple-bg); color: var(--purple-mid); }
+  .ptr-label.ptr-build { background: var(--blue-bg); color: var(--blue-mid); }
+  .ptr-label.hidden    { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 52px; height: 48px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.scan     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.05); }
+  .cell.active   { border: 2px solid var(--purple-border); background: var(--purple-bg); color: var(--purple-text); transform: scale(1.05); }
+  .cell.build    { border: 2px solid var(--blue-border); background: var(--blue-bg); color: var(--blue-text); }
+  .cell.build-active { border: 2px solid var(--blue-border); background: var(--blue-bg); color: var(--blue-text); transform: scale(1.05); }
+  .cell.build-cyan { border: 2px solid var(--cyan-border); background: var(--cyan-bg); color: var(--cyan-text); }
+  .cell.build-cyan-active { border: 2px solid var(--cyan-border); background: var(--cyan-bg); color: var(--cyan-text); transform: scale(1.05); }
+  .cell.done     { background: var(--bg2); border-color: var(--border); color: var(--text3); }
+  .cell.empty    { color: var(--text3); font-style: italic; font-size: 14px; border-style: dashed; }
+  .cell.found    { border: 2px solid var(--red-border); background: var(--red-bg); color: var(--red-text); transform: scale(1.08); }
+  .cell.triplet-i { border: 2px solid var(--blue-border); background: var(--blue-bg); color: var(--blue-text); transform: scale(1.05); }
+  .cell.triplet-j { border: 2px solid var(--purple-border); background: var(--purple-bg); color: var(--purple-text); transform: scale(1.05); }
+  .cell.triplet-k { border: 2px solid var(--red-border); background: var(--red-bg); color: var(--red-text); transform: scale(1.08); }
+  .cell.skip     { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); }
+  .cell.normal   { }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 52px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Comparison panel */
+  .compare-panel {
+    margin-top: 1rem;
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    padding: 10px 16px;
+    background: var(--bg2); border-radius: var(--radius);
+    font-family: var(--mono); font-size: 14px;
+    transition: opacity 0.3s;
+  }
+  .compare-panel.hidden { opacity: 0; height: 0; margin: 0; padding: 0; overflow: hidden; }
+  .cmp-val { font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .cmp-val.blue { background: var(--blue-bg); color: var(--blue-mid); }
+  .cmp-val.purple { background: var(--purple-bg); color: var(--purple-mid); }
+  .cmp-val.cyan { background: var(--cyan-bg); color: var(--cyan-mid); }
+  .cmp-op { color: var(--text3); font-weight: 500; }
+  .cmp-result { font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .cmp-result.yes { background: var(--green-bg); color: var(--green-mid); }
+  .cmp-result.no  { background: var(--red-bg); color: var(--red-mid); }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active {
+    background: var(--green-bg);
+    color: var(--green-text);
+    font-weight: 500;
+  }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 72px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init    { background: var(--amber-bg);  color: var(--amber-mid); }
+  .phase-prefix  { background: var(--blue-bg);   color: var(--blue-mid); }
+  .phase-suffix  { background: var(--cyan-bg);   color: var(--cyan-mid); }
+  .phase-check   { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-found   { background: var(--red-bg);    color: var(--red-mid); }
+  .phase-done    { background: var(--green-bg);  color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: var(--purple-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; }
+  .btn {
+    padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    font-family: var(--sans); border: 0.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+  .btn.primary:hover:not(:disabled) { opacity: 0.85; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1.5px solid transparent;
+  }
+  .ls-scan    { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-prefix  { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-suffix  { background: var(--cyan-bg);   border-color: var(--cyan-border); }
+  .ls-check   { background: var(--purple-bg); border-color: var(--purple-border); }
+  .ls-found   { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-skip    { background: var(--amber-bg);  border-color: var(--amber-border); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Increasing Triplet Subsequence</h1>
+    <p class="subtitle">Build prefix minimums and suffix maximums, then scan for a valid middle element.</p>
+    <div class="tags">
+      <span class="tag tag-medium">#334 Medium</span>
+      <span class="tag tag-approach">Prefix Min / Suffix Max</span>
+      <span class="tag tag-pattern">Array Manipulation</span>
+      <span class="tag tag-complexity">O(n) / O(n)</span>
+    </div>
+  </div>
+
+  <!-- nums row -->
+  <div class="array-section">
+    <div class="section-label">nums</div>
+    <div id="ptr-nums" class="ptr-labels"></div>
+    <div id="row-nums" class="array-row"></div>
+    <div id="idx-nums" class="idx-labels"></div>
+  </div>
+
+  <!-- prefix_min row -->
+  <div class="array-section">
+    <div class="section-label">prefix_min</div>
+    <div id="row-prefix" class="array-row"></div>
+  </div>
+
+  <!-- suffix_max row -->
+  <div class="array-section">
+    <div class="section-label">suffix_max</div>
+    <div id="row-suffix" class="array-row"></div>
+  </div>
+
+  <!-- Comparison panel -->
+  <div id="compare-panel" class="compare-panel hidden"></div>
+
+  <div class="code-panel" id="code-panel"></div>
+
+  <div class="info-box">
+    <div class="phase-row">
+      <span id="phase-badge" class="phase-badge phase-init">Init</span>
+      <span id="step-num" class="step-num"></span>
+    </div>
+    <div id="info-title" class="info-title"></div>
+    <div id="info-body"  class="info-body"></div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+    <button class="btn primary" id="btn-next" onclick="go(1)">Next →</button>
+    <button class="btn" onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch ls-scan"></div>scanning</div>
+    <div class="legend-item"><div class="legend-swatch ls-prefix"></div>prefix_min</div>
+    <div class="legend-item"><div class="legend-swatch ls-suffix"></div>suffix_max</div>
+    <div class="legend-item"><div class="legend-swatch ls-check"></div>checking j</div>
+    <div class="legend-item"><div class="legend-swatch ls-skip"></div>fail</div>
+    <div class="legend-item"><div class="legend-swatch ls-found"></div>triplet!</div>
+  </div>
+</div>
+
+<script>
+const nums = [2, 1, 5, 0, 4, 6];
+const N = nums.length;
+// prefix_min: [2, 1, 1, 0, 0, 0]
+// suffix_max: [6, 6, 6, 6, 6, 6]
+// Check j=1: prefix_min[0]=2 < nums[1]=1? No
+// Check j=2: prefix_min[1]=1 < nums[2]=5 < suffix_max[3]=6? Yes!
+
+const Q = '?';
+
+const codeLines = [
+  'def increasingTriplet(nums):',
+  '    n = len(nums)',
+  '    prefix_min = [0] * n',
+  '    suffix_max = [0] * n',
+  '',
+  '    prefix_min[0] = nums[0]',
+  '    for i in range(1, n):',
+  '        prefix_min[i] = min(prefix_min[i-1], nums[i])',
+  '',
+  '    suffix_max[-1] = nums[-1]',
+  '    for i in range(n-2, -1, -1):',
+  '        suffix_max[i] = max(suffix_max[i+1], nums[i])',
+  '',
+  '    for j in range(1, n-1):',
+  '        if prefix_min[j-1] < nums[j] < suffix_max[j+1]:',
+  '            return True',
+  '',
+  '    return False',
+];
+
+const steps = [
+  // Step 0: Init
+  {
+    numsClass: Array(N).fill('normal'),
+    numsPtr: Array(N).fill(null),
+    prefix: [Q, Q, Q, Q, Q, Q],
+    prefixClass: Array(N).fill('empty'),
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'init', activeLine: [1, 2, 3],
+    title: 'Initialise',
+    body: 'We\'ll build two auxiliary arrays: <span class="code-inline">prefix_min[i]</span> = smallest value in nums[0..i], and <span class="code-inline">suffix_max[i]</span> = largest value in nums[i..n-1]. Then check each middle index.'
+  },
+  // Step 1: prefix_min[0] = 2
+  {
+    numsClass: ['scan','normal','normal','normal','normal','normal'],
+    numsPtr: ['i', null, null, null, null, null],
+    prefix: [2, Q, Q, Q, Q, Q],
+    prefixClass: ['build-active','empty','empty','empty','empty','empty'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [5],
+    title: 'prefix_min[0] = nums[0] = 2',
+    body: 'Base case: the minimum of nums[0..0] is just nums[0] = <b>2</b>.'
+  },
+  // Step 2: prefix_min[1] = min(2,1) = 1
+  {
+    numsClass: ['done','scan','normal','normal','normal','normal'],
+    numsPtr: [null, 'i', null, null, null, null],
+    prefix: [2, 1, Q, Q, Q, Q],
+    prefixClass: ['build','build-active','empty','empty','empty','empty'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [6, 7],
+    title: 'prefix_min[1] = min(2, 1) = 1',
+    body: '<span class="code-inline">min(prefix_min[0], nums[1]) = min(2, 1) = 1</span>. The smallest value in the first two elements is <b>1</b>.'
+  },
+  // Step 3: prefix_min[2] = min(1,5) = 1
+  {
+    numsClass: ['done','done','scan','normal','normal','normal'],
+    numsPtr: [null, null, 'i', null, null, null],
+    prefix: [2, 1, 1, Q, Q, Q],
+    prefixClass: ['build','build','build-active','empty','empty','empty'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [6, 7],
+    title: 'prefix_min[2] = min(1, 5) = 1',
+    body: '<span class="code-inline">min(1, 5) = 1</span>. 5 is larger, so the running minimum stays <b>1</b>.'
+  },
+  // Step 4: prefix_min[3] = min(1,0) = 0
+  {
+    numsClass: ['done','done','done','scan','normal','normal'],
+    numsPtr: [null, null, null, 'i', null, null],
+    prefix: [2, 1, 1, 0, Q, Q],
+    prefixClass: ['build','build','build','build-active','empty','empty'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [6, 7],
+    title: 'prefix_min[3] = min(1, 0) = 0',
+    body: '<span class="code-inline">min(1, 0) = 0</span>. Found a new minimum! Prefix min drops to <b>0</b>.'
+  },
+  // Step 5: prefix_min[4] = min(0,4) = 0
+  {
+    numsClass: ['done','done','done','done','scan','normal'],
+    numsPtr: [null, null, null, null, 'i', null],
+    prefix: [2, 1, 1, 0, 0, Q],
+    prefixClass: ['build','build','build','build','build-active','empty'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [6, 7],
+    title: 'prefix_min[4] = min(0, 4) = 0',
+    body: '<span class="code-inline">min(0, 4) = 0</span>. Running minimum stays <b>0</b>.'
+  },
+  // Step 6: prefix_min[5] = min(0,6) = 0 — complete
+  {
+    numsClass: ['done','done','done','done','done','scan'],
+    numsPtr: [null, null, null, null, null, 'i'],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: ['build','build','build','build','build','build-active'],
+    suffix: [Q, Q, Q, Q, Q, Q],
+    suffixClass: Array(N).fill('empty'),
+    compare: null,
+    phase: 'prefix', activeLine: [6, 7],
+    title: 'prefix_min[5] = min(0, 6) = 0 ✓',
+    body: 'prefix_min complete! <b>[2, 1, 1, 0, 0, 0]</b>. For any index i, prefix_min[i] gives the smallest value from the left up to i. Now build suffix_max from the right.'
+  },
+  // Step 7: suffix_max[5] = 6
+  {
+    numsClass: ['normal','normal','normal','normal','normal','scan'],
+    numsPtr: [null, null, null, null, null, 'i'],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [Q, Q, Q, Q, Q, 6],
+    suffixClass: ['empty','empty','empty','empty','empty','build-cyan-active'],
+    compare: null,
+    phase: 'suffix', activeLine: [9],
+    title: 'suffix_max[5] = nums[5] = 6',
+    body: 'Base case: the maximum of nums[5..5] is just nums[5] = <b>6</b>. Now scan right-to-left.'
+  },
+  // Step 8: suffix_max[4] = max(6,4) = 6
+  {
+    numsClass: ['normal','normal','normal','normal','scan','done'],
+    numsPtr: [null, null, null, null, 'i', null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [Q, Q, Q, Q, 6, 6],
+    suffixClass: ['empty','empty','empty','empty','build-cyan-active','build-cyan'],
+    compare: null,
+    phase: 'suffix', activeLine: [10, 11],
+    title: 'suffix_max[4] = max(6, 4) = 6',
+    body: '<span class="code-inline">max(suffix_max[5], nums[4]) = max(6, 4) = 6</span>. The largest from index 4 onward is <b>6</b>.'
+  },
+  // Step 9: suffix_max[3] = max(6,0) = 6
+  {
+    numsClass: ['normal','normal','normal','scan','done','done'],
+    numsPtr: [null, null, null, 'i', null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [Q, Q, Q, 6, 6, 6],
+    suffixClass: ['empty','empty','empty','build-cyan-active','build-cyan','build-cyan'],
+    compare: null,
+    phase: 'suffix', activeLine: [10, 11],
+    title: 'suffix_max[3] = max(6, 0) = 6',
+    body: '<span class="code-inline">max(6, 0) = 6</span>. Maximum from index 3 onward stays <b>6</b>.'
+  },
+  // Step 10: suffix_max[2] = max(6,5) = 6
+  {
+    numsClass: ['normal','normal','scan','done','done','done'],
+    numsPtr: [null, null, 'i', null, null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [Q, Q, 6, 6, 6, 6],
+    suffixClass: ['empty','empty','build-cyan-active','build-cyan','build-cyan','build-cyan'],
+    compare: null,
+    phase: 'suffix', activeLine: [10, 11],
+    title: 'suffix_max[2] = max(6, 5) = 6',
+    body: '<span class="code-inline">max(6, 5) = 6</span>. Still <b>6</b>.'
+  },
+  // Step 11: suffix_max[1] = max(6,1) = 6
+  {
+    numsClass: ['normal','scan','done','done','done','done'],
+    numsPtr: [null, 'i', null, null, null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [Q, 6, 6, 6, 6, 6],
+    suffixClass: ['empty','build-cyan-active','build-cyan','build-cyan','build-cyan','build-cyan'],
+    compare: null,
+    phase: 'suffix', activeLine: [10, 11],
+    title: 'suffix_max[1] = max(6, 1) = 6',
+    body: '<span class="code-inline">max(6, 1) = 6</span>. Still <b>6</b>.'
+  },
+  // Step 12: suffix_max[0] = max(6,2) = 6 — complete
+  {
+    numsClass: ['scan','done','done','done','done','done'],
+    numsPtr: ['i', null, null, null, null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [6, 6, 6, 6, 6, 6],
+    suffixClass: ['build-cyan-active','build-cyan','build-cyan','build-cyan','build-cyan','build-cyan'],
+    compare: null,
+    phase: 'suffix', activeLine: [10, 11],
+    title: 'suffix_max[0] = max(6, 2) = 6 ✓',
+    body: 'suffix_max complete! <b>[6, 6, 6, 6, 6, 6]</b>. Now for each middle index j (1 to n-2), check if <span class="code-inline">prefix_min[j-1] < nums[j] < suffix_max[j+1]</span>.'
+  },
+  // Step 13: Check j=1 — fail
+  {
+    numsClass: ['normal','active','normal','normal','normal','normal'],
+    numsPtr: [null, 'j', null, null, null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: ['build-active','build','build','build','build','build'],
+    suffix: [6, 6, 6, 6, 6, 6],
+    suffixClass: ['build-cyan','build-cyan','build-cyan-active','build-cyan','build-cyan','build-cyan'],
+    compare: { left: 2, mid: 1, right: 6, pass: false },
+    phase: 'check', activeLine: [13, 14],
+    title: 'Check j=1: prefix_min[0]=2 < nums[1]=1?',
+    body: 'Is <span class="code-inline">prefix_min[0] < nums[1] < suffix_max[2]</span>? That\'s <b>2 < 1</b>… <b>No!</b> The minimum to the left (2) is not less than nums[1] (1). This middle doesn\'t work.'
+  },
+  // Step 14: Check j=2 — success!
+  {
+    numsClass: ['normal','normal','active','normal','normal','normal'],
+    numsPtr: [null, null, 'j', null, null, null],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: ['build','build-active','build','build','build','build'],
+    suffix: [6, 6, 6, 6, 6, 6],
+    suffixClass: ['build-cyan','build-cyan','build-cyan','build-cyan-active','build-cyan','build-cyan'],
+    compare: { left: 1, mid: 5, right: 6, pass: true },
+    phase: 'found', activeLine: [14, 15],
+    title: '🎉 Check j=2: 1 < 5 < 6 — YES!',
+    body: 'Is <span class="code-inline">prefix_min[1] < nums[2] < suffix_max[3]</span>? That\'s <b>1 < 5 < 6</b> — <b>Yes!</b> There exists a value smaller than 5 to the left (at least one ≤1) and larger than 5 to the right (at least one ≥6). Triplet found!'
+  },
+  // Step 15: Done
+  {
+    numsClass: ['normal','triplet-i','triplet-j','normal','normal','triplet-k'],
+    numsPtr: [null, 'i', 'j', null, null, 'k'],
+    prefix: [2, 1, 1, 0, 0, 0],
+    prefixClass: Array(N).fill('build'),
+    suffix: [6, 6, 6, 6, 6, 6],
+    suffixClass: Array(N).fill('build-cyan'),
+    compare: null,
+    phase: 'done', activeLine: [15],
+    title: '✓ Done — return True',
+    body: 'Found triplet: <b>nums[1]=1 < nums[2]=5 < nums[5]=6</b>. The prefix/suffix approach is O(n) time with O(n) space — easier to reason about than the two-variable trick, and a great starting point in an interview before optimising.'
+  },
+];
+
+let cur = 0;
+
+function render() {
+  const s = steps[cur];
+
+  // Nums row
+  const rowNums = document.getElementById('row-nums');
+  const ptrNums = document.getElementById('ptr-nums');
+  const idxNums = document.getElementById('idx-nums');
+  rowNums.innerHTML = ptrNums.innerHTML = idxNums.innerHTML = '';
+
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + (s.numsClass[i] || 'normal');
+    cell.textContent = nums[i];
+    rowNums.appendChild(cell);
+
+    const pl = document.createElement('div');
+    const pt = s.numsPtr[i];
+    if (pt) {
+      const pclass = pt === 'i' ? 'ptr-i ptr-build' : pt === 'j' ? 'ptr-j' : 'ptr-i';
+      pl.className = 'ptr-label ' + pclass;
+      pl.textContent = pt;
+    } else {
+      pl.className = 'ptr-label hidden';
+    }
+    ptrNums.appendChild(pl);
+
+    const il = document.createElement('div');
+    il.className = 'idx-label'; il.textContent = i;
+    idxNums.appendChild(il);
+  }
+
+  // Prefix row
+  const rowPrefix = document.getElementById('row-prefix');
+  rowPrefix.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + (s.prefixClass[i] || 'empty');
+    cell.textContent = s.prefix[i] === Q ? '?' : s.prefix[i];
+    if (s.prefix[i] === Q) cell.classList.add('empty');
+    rowPrefix.appendChild(cell);
+  }
+
+  // Suffix row
+  const rowSuffix = document.getElementById('row-suffix');
+  rowSuffix.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + (s.suffixClass[i] || 'empty');
+    cell.textContent = s.suffix[i] === Q ? '?' : s.suffix[i];
+    if (s.suffix[i] === Q) cell.classList.add('empty');
+    rowSuffix.appendChild(cell);
+  }
+
+  // Comparison panel
+  const cmpPanel = document.getElementById('compare-panel');
+  if (s.compare) {
+    cmpPanel.className = 'compare-panel';
+    const c = s.compare;
+    cmpPanel.innerHTML =
+      '<span class="cmp-val blue">' + c.left + '</span>' +
+      '<span class="cmp-op">&lt;</span>' +
+      '<span class="cmp-val purple">' + c.mid + '</span>' +
+      '<span class="cmp-op">&lt;</span>' +
+      '<span class="cmp-val cyan">' + c.right + '</span>' +
+      '<span class="cmp-op">→</span>' +
+      '<span class="cmp-result ' + (c.pass ? 'yes' : 'no') + '">' + (c.pass ? '✓ YES' : '✗ NO') + '</span>';
+  } else {
+    cmpPanel.className = 'compare-panel hidden';
+    cmpPanel.innerHTML = '';
+  }
+
+  // Code panel
+  const codePanel = document.getElementById('code-panel');
+  codePanel.innerHTML = '';
+  codeLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (s.activeLine.includes(i) ? ' active' : '');
+    div.textContent = line || '\u00A0';
+    codePanel.appendChild(div);
+  });
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  const phaseMap = {
+    'init':   ['phase-init',   'Setup'],
+    'prefix': ['phase-prefix', 'Build Prefix'],
+    'suffix': ['phase-suffix', 'Build Suffix'],
+    'check':  ['phase-check',  'Check j'],
+    'found':  ['phase-found',  'Found!'],
+    'done':   ['phase-done',   'Done'],
+  };
+  const [cls, label] = phaseMap[s.phase] || ['phase-init', 'Init'];
+  badge.className = 'phase-badge ' + cls;
+  badge.textContent = label;
+
+  document.getElementById('step-num').textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-body').innerHTML = s.body;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Progress dots
+  const prog = document.getElementById('progress');
+  prog.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : '');
+    d.style.cursor = 'pointer';
+    d.onclick = () => { cur = i; render(); };
+    prog.appendChild(d);
+  });
+}
+
+function go(dir) { cur = Math.max(0, Math.min(steps.length - 1, cur + dir)); render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  if (e.key === 'r' || e.key === 'R') { reset(); }
+});
+
+render();
+</script>
+</body>
+</html>
