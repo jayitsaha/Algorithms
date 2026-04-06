@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#392 · Is Subsequence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+
+/* ── Layout ── */
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:15px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.code-comment{color:var(--text3)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:2rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.string-section{margin-bottom:1.5rem}
+.string-section:last-child{margin-bottom:0}
+.string-label-row{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+
+.ptr-row{display:flex;gap:4px;min-height:22px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:52px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;line-height:1.4}
+.ptr-i{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-j{background:var(--green-bg);color:var(--green-mid)}
+
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:52px;height:52px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:20px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s,transform 0.15s;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.found{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.skip{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.done{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:3px}
+.idx-slot{width:52px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 16px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:24px;text-align:center}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-skip{background:var(--bg2);color:var(--text3);border:1px solid var(--border2)}
+.phase-result{background:var(--blue-bg);color:var(--blue-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.65}
+
+/* ── Progress Dots / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:8px;margin:1.25rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:16px;height:16px;border-radius:4px;border:1.5px solid}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+.sw-skip{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13.5px}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
+.good{color:var(--green-mid);font-weight:600}
+.bad{color:var(--red-mid);font-weight:600}
+.cmp-table tr.highlight-row td{background:var(--green-bg)}
+
+/* ── Examples ── */
+.example-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:520px){.example-grid{grid-template-columns:1fr}}
+.example-box{padding:14px;border-radius:var(--radius);background:var(--bg2)}
+.example-box.ex-yes{border:1.5px solid var(--green-border)}
+.example-box.ex-no{border:1.5px solid var(--red-border)}
+.ex-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.example-box.ex-yes .ex-title{color:var(--green-mid)}
+.example-box.ex-no .ex-title{color:var(--red-mid)}
+.ex-str{font-family:var(--mono);font-size:14px;margin:3px 0;color:var(--text)}
+.ex-chars{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.ex-ch{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;border:1.5px solid}
+.ex-ch.m{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.ex-ch.x{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.ex-ch.n{background:var(--surface);border-color:var(--border2);color:var(--text2)}
+.ex-note{font-size:12px;margin-top:8px}
+.example-box.ex-yes .ex-note{color:var(--green-mid)}
+.example-box.ex-no .ex-note{color:var(--red-mid)}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.takeaway::before{content:'✓';font-weight:700;flex-shrink:0}
+
+/* ── Related Problems ── */
+.related-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0.75rem 0}
+.related-list li{padding:9px 13px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;color:var(--text2)}
+.related-list li strong{color:var(--text)}
+
+/* ── Misc ── */
+hr{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+p{margin:0.5rem 0;color:var(--text2);font-size:14.5px}
+strong{color:var(--text)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 5px;border-radius:4px;color:var(--text)}
+h3{font-size:15px;font-weight:700;color:var(--text);margin:1.25rem 0 0.5rem}
+h4{font-size:13.5px;font-weight:700;color:var(--text);margin:0.75rem 0 0.25rem}
+ul{padding-left:1.25rem;color:var(--text2);font-size:14px}
+ul li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header>
+  <div class="problem-number">#392 · LeetCode Easy</div>
+  <h1>Is Subsequence</h1>
+  <p class="subtitle">Check if every character in <code>s</code> appears in <code>t</code> in the same relative order</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Two Pointers (Greedy Match)</span>
+    <span class="tag tag-complexity">Time: O(|t|)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — UNDERSTANDING THE PROBLEM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s1','i1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon" id="i1">▲</span>
+  </div>
+  <div class="section-content" id="s1">
+
+    <p>Given two strings <code>s</code> and <code>t</code>, return <code>True</code> if <code>s</code> is a <strong>subsequence</strong> of <code>t</code>.</p>
+    <p>A subsequence means you can form <code>s</code> by <em>deleting some (or zero) characters</em> from <code>t</code> — but you <strong>must keep the remaining characters in their original order</strong>.</p>
+    <p>Think of it like highlighting letters in a long sentence: you can skip letters freely, but you must read the page left-to-right.</p>
+
+    <div class="example-grid">
+      <div class="example-box ex-yes">
+        <div class="ex-title">✓ is a subsequence</div>
+        <div class="ex-str">s = "ace"</div>
+        <div class="ex-str">t = "a<u>b</u>c<u>d</u>e"</div>
+        <div class="ex-chars">
+          <div class="ex-ch m">a</div>
+          <div class="ex-ch n">b</div>
+          <div class="ex-ch m">c</div>
+          <div class="ex-ch n">d</div>
+          <div class="ex-ch m">e</div>
+        </div>
+        <p class="ex-note">Indices 0 → 2 → 4 — order preserved ✓</p>
+      </div>
+      <div class="example-box ex-no">
+        <div class="ex-title">✗ NOT a subsequence</div>
+        <div class="ex-str">s = "aec"</div>
+        <div class="ex-str">t = "abcde"</div>
+        <div class="ex-chars">
+          <div class="ex-ch m">a</div>
+          <div class="ex-ch n">b</div>
+          <div class="ex-ch n">c</div>
+          <div class="ex-ch n">d</div>
+          <div class="ex-ch x">e</div>
+        </div>
+        <p class="ex-note">'e' is at index 4, but 'c' must come AFTER it — impossible!</p>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We don't need to try every possible way to match characters. Because <code>s</code> must appear <em>in order</em>, we can <strong>greedily match from left to right</strong>. The moment we find a match in <code>t</code>, we take it — it's never beneficial to delay.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Subsequence ≠ Substring</div>
+      <p>A <strong>substring</strong> requires characters to be <em>contiguous</em> ("abc" in "xabcd"). A <strong>subsequence</strong> only requires the characters to appear in order — they can be spread apart with gaps. This problem is about subsequence.</p>
+    </div>
+
+  </div><!-- end section-content -->
+</div><!-- end card -->
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s2','i2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Pointer Greedy Match</span>
+    <span class="collapse-icon" id="i2">▲</span>
+  </div>
+  <div class="section-content" id="s2">
+
+    <p>We use a <strong>single pointer <code>i</code></strong> into <code>s</code> (the pattern we want to match), and <strong>scan through every character of <code>t</code></strong> with a for-loop. Each character of <code>t</code> either advances <code>i</code> (match!) or is skipped.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Initialize <code>i = 0</code>. This is our "next character of <code>s</code> to find" pointer.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">Scan every character <code>char</code> in <code>t</code> from left to right.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text">If <code>char == s[i]</code> (and <code>i &lt; len(s)</code>) — match found! Advance <code>i += 1</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text">If no match — skip <code>char</code> and continue to the next character in <code>t</code>. <code>i</code> stays put.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text">After the full scan: if <code>i == len(s)</code>, every character of <code>s</code> was found in order → <code>True</code>. Otherwise <code>False</code>.</span>
+      </div>
+    </div>
+
+    <h3>Why Not Brute Force?</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Idea</th><th>Time</th><th>Space</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Generate All Subsequences of t</td>
+          <td>Check if s is among them</td>
+          <td class="bad">O(2^|t|)</td>
+          <td class="bad">O(2^|t|)</td>
+        </tr>
+        <tr>
+          <td>Nested Loops</td>
+          <td>For each char in s, linearly scan remaining t</td>
+          <td class="bad">O(|s|·|t|)</td>
+          <td class="good">O(1)</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>Greedy Two-Pointer ✓</strong></td>
+          <td>Single pass through t, advance s-pointer on match</td>
+          <td class="good">O(|t|)</td>
+          <td class="good">O(1)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Taking the Earliest Match is Always Optimal</div>
+      <p>Suppose character <code>'c'</code> appears at both position 2 and position 7 in <code>t</code>. Should we skip position 2 and use position 7?</p>
+      <p>No — using position 2 is always at least as good. It matches the same character AND leaves more of <code>t</code> available (positions 3–end) for the remaining characters of <code>s</code>. Waiting can only reduce our options. This is the <strong>greedy exchange argument</strong>.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY IT WORKS
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s3','i3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon" id="i3">▲</span>
+  </div>
+  <div class="section-content" id="s3">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Loop Invariant</div>
+      <p>At any point during the loop, <code>i</code> is the length of the <em>longest prefix of <code>s</code></em> that has been matched as a subsequence within the portion of <code>t</code> already scanned — using the earliest possible positions greedy.</p>
+    </div>
+
+    <h3>Proof by Exchange Argument</h3>
+    <p><strong>Claim:</strong> Greedily taking the leftmost available match for each character is always optimal.</p>
+    <p><strong>Proof:</strong> Suppose an optimal solution matches <code>s[0]</code> at position <code>p</code> in <code>t</code>, but there exists an earlier position <code>q &lt; p</code> where <code>t[q] = s[0]</code>. If we swap to use position <code>q</code> instead, we still match <code>s[0]</code>, but now positions <code>q+1 … |t|-1</code> remain — a <em>superset</em> of positions <code>p+1 … |t|-1</code>. So the greedy choice is never worse. By induction, it extends to all characters.</p>
+
+    <h3>Edge Cases — All Handled Naturally</h3>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong><code>s = ""</code> (empty):</strong> <code>i=0</code> already equals <code>len(s)=0</code> before the loop even starts → returns <code>True</code>. Empty string is a subsequence of everything.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong><code>t = ""</code> and <code>s</code> is non-empty:</strong> The for loop doesn't execute. <code>i=0</code> ≠ <code>len(s)</code> → returns <code>False</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong><code>len(s) > len(t)</code>:</strong> Can't match more characters than t has. <code>i</code> simply never reaches <code>len(s)</code> → returns <code>False</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong><code>s == t</code>:</strong> Every character matches in order → <code>i</code> increments every step → returns <code>True</code>.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — THE CODE (ANNOTATED)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s4','i4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon" id="i4">▲</span>
+  </div>
+  <div class="section-content" id="s4">
+
+    <h3>Solution 1 — Optimal: Two-Pointer Greedy Match  <span style="font-size:12px;color:var(--green-mid);font-weight:600">← Interview Pick</span></h3>
+
+    <div class="code-panel">
+<div class="code-line"><span class="code-comment"># i: pointer into s — which character of s we need to match next</span></div>
+<div class="code-line">def isSubsequence(s: str, t: str) -> bool:</div>
+<div class="code-line">    i = 0  <span class="code-comment"># start at beginning of s</span></div>
+<div class="code-line">    for char in t:  <span class="code-comment"># scan every character of t exactly once</span></div>
+<div class="code-line">        if i &lt; len(s) and char == s[i]:  <span class="code-comment"># guard: i in bounds + match</span></div>
+<div class="code-line">            i += 1  <span class="code-comment"># matched! advance to next needed character in s</span></div>
+<div class="code-line">    return i == len(s)  <span class="code-comment"># True if all chars of s were matched</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why the <code>i &lt; len(s)</code> Guard?</div>
+      <p>Once <code>i</code> reaches <code>len(s)</code>, we've matched everything — but the for-loop still continues scanning <code>t</code>. Without the guard, <code>s[i]</code> would raise an <code>IndexError</code> on the next iteration. Alternatively, you could <code>break</code> early for a micro-optimisation, but the guard is cleaner and Pythonic.</p>
+    </div>
+
+    <hr>
+    <h3>Solution 2 — Follow-Up: Binary Search for Multiple Queries</h3>
+    <p>If we need to check <em>many</em> patterns against the same large <code>t</code>, precompute every character's positions and binary-search per lookup.</p>
+
+    <div class="code-panel">
+<div class="code-line">from collections import defaultdict</div>
+<div class="code-line">import bisect</div>
+<div class="code-line"></div>
+<div class="code-line">def preprocess(t: str) -> dict:</div>
+<div class="code-line">    positions = defaultdict(list)  <span class="code-comment"># char → sorted list of indices in t</span></div>
+<div class="code-line">    for i, c in enumerate(t):       <span class="code-comment"># O(|t|) once</span></div>
+<div class="code-line">        positions[c].append(i)</div>
+<div class="code-line">    return positions</div>
+<div class="code-line"></div>
+<div class="code-line">def isSubsequence_multi(s: str, positions: dict) -> bool:</div>
+<div class="code-line">    curr = -1  <span class="code-comment"># last matched position in t (must find AFTER this)</span></div>
+<div class="code-line">    for c in s:</div>
+<div class="code-line">        if c not in positions: return False  <span class="code-comment"># char never appears in t</span></div>
+<div class="code-line">        <span class="code-comment"># find first occurrence of c strictly after position curr</span></div>
+<div class="code-line">        idx = bisect.bisect_right(positions[c], curr)</div>
+<div class="code-line">        if idx == len(positions[c]): return False  <span class="code-comment"># no more c's left</span></div>
+<div class="code-line">        curr = positions[c][idx]  <span class="code-comment"># advance past this match</span></div>
+<div class="code-line">    return True</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 When Does Binary Search Win?</div>
+      <p>For a <em>single</em> query, the O(|t|) greedy is unbeatable. The binary search version pays off when you have <strong>k queries against the same t</strong>: O(|t|) preprocessing once, then O(|s| log |t|) per query instead of O(|t|). Total cost: O(|t| + k·|s|·log|t|) vs O(k·|t|) — binary search wins when |s| ≪ |t|.</p>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr class="highlight-row"><td><strong>Greedy Two-Pointer</strong></td><td class="good">O(|t|)</td><td class="good">O(1)</td><td>Single query</td></tr>
+        <tr><td>Binary Search</td><td>O(|t| + |s|·log|t|)</td><td>O(|t|)</td><td>Many queries on same t</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s5','i5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon" id="i5">▲</span>
+  </div>
+  <div class="section-content" id="s5">
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Recognise the Pattern</div>
+        <p>The words "subsequence" and "relative order preserved" are your signals. Any time you need to match characters across two strings <em>in order</em>, think: <strong>one pointer per string, advance the pattern pointer only on a match</strong>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — Define What Each Pointer Means</div>
+        <p>Pointer <code>i</code> into <code>s</code>: "which character am I looking for next?" The for-loop over <code>t</code> plays the role of <code>j</code>: "where am I currently scanning?" This two-role separation is the key design decision.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — Articulate the Greedy Argument</div>
+        <p>When you find a match, take it immediately. Waiting for a later occurrence of the same character in <code>t</code> can only reduce what's available for subsequent characters. This is the exchange argument, and it's worth stating aloud.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Anticipate the Follow-Up</div>
+        <p>Almost every interviewer who asks this problem will follow up with: <em>"What if there are 10,000 queries against the same t?"</em> Answer: precompute a position map for each character in <code>t</code>, then binary search per character of <code>s</code>. Mentioning this proactively earns bonus points.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Since s must appear in t in relative order, I can use a single pointer into s..."<br>
+"I'll scan t left-to-right. Each time I see t[j] == s[i], I advance i."<br>
+"The greedy choice is correct — taking the earliest match leaves the most of t available."<br>
+"This is O(|t|) time and O(1) space — one linear scan."<br>
+"For the follow-up with k queries: precompute char → positions, binary search each char of s."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-Up Questions to Expect</div>
+      <ul>
+        <li>What if you have 10⁹ queries against the same t? → Binary search / precompute</li>
+        <li>Count the number of distinct subsequences in t that equal s? → DP (hard variant)</li>
+        <li>Find the minimum window in t containing s as a subsequence? → Sliding window</li>
+        <li>Shortest Way to Form String? → Count min copies of s needed</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s6','i6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon" id="i6">▲</span>
+  </div>
+  <div class="section-content" id="s6">
+
+    <p style="font-size:13px;color:var(--text3);margin-bottom:4px">Tracing: <code>s = "ace"</code>, <code>t = "abcde"</code> → Expected: <code>True</code></p>
+
+    <!-- ── Visualization ── -->
+    <div class="viz-area">
+
+      <!-- s row -->
+      <div class="string-section">
+        <div class="string-label-row">Pattern to match → s</div>
+        <div class="ptr-row" id="s-ptrs"></div>
+        <div class="cells-row" id="s-cells"></div>
+        <div class="idx-row" id="s-idxs"></div>
+      </div>
+
+      <!-- divider hint -->
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin:0.75rem 0;font-weight:600;letter-spacing:0.5px">SEARCH INSIDE ↓</div>
+
+      <!-- t row -->
+      <div class="string-section">
+        <div class="string-label-row">Source string → t</div>
+        <div class="ptr-row" id="t-ptrs"></div>
+        <div class="cells-row" id="t-cells"></div>
+        <div class="idx-row" id="t-idxs"></div>
+      </div>
+
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker" id="var-tracker"></div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="code-display">
+      <div class="code-line" id="cl0">def isSubsequence(s: str, t: str) -> bool:</div>
+      <div class="code-line" id="cl1">    i = 0</div>
+      <div class="code-line" id="cl2">    for char in t:</div>
+      <div class="code-line" id="cl3">        if i &lt; len(s) and char == s[i]:</div>
+      <div class="code-line" id="cl4">            i += 1</div>
+      <div class="code-line" id="cl5">    return i == len(s)</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="step-counter" id="step-ctr">Step 1 of 7</div>
+      <div id="phase-badge" class="phase-badge phase-init">INITIALIZE</div>
+      <div class="step-title" id="step-title">Set i = 0</div>
+      <div class="step-body" id="step-body"></div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys · R to reset</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div>Currently examining (j)</div>
+      <div class="legend-item"><div class="legend-swatch sw-found"></div>Matched ✓</div>
+      <div class="legend-item"><div class="legend-swatch sw-skip"></div>Scanned, skipped</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div>Not yet visited</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s7','i7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon" id="i7">▲</span>
+  </div>
+  <div class="section-content" id="s7">
+
+    <div class="takeaways">
+      <div class="takeaway">Single pointer <code>i</code> into <code>s</code> + one linear scan of <code>t</code> = O(|t|) time, O(1) space</div>
+      <div class="takeaway">Greedy: always take the earliest possible match — never delay</div>
+      <div class="takeaway">Empty <code>s</code> → always <code>True</code>; empty <code>t</code> with non-empty <code>s</code> → always <code>False</code></div>
+      <div class="takeaway">For k queries against same <code>t</code>: precompute positions + binary search</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognise This Pattern</div>
+      <ul>
+        <li>"Is X a subsequence of Y?" — classic greedy two-pointer</li>
+        <li>"Match characters in order across two strings"</li>
+        <li>"Relative order must be preserved"</li>
+        <li>One string significantly shorter than the other</li>
+      </ul>
+    </div>
+
+    <h3>Related Problems</h3>
+    <ul class="related-list">
+      <li><strong>Longest Common Subsequence</strong> (Medium) — Find the longest shared subsequence between two strings; same "in-order matching" idea but via DP</li>
+      <li><strong>Number of Matching Subsequences</strong> (Medium) — Match many patterns against same text; bin-search variant of this exact algorithm</li>
+      <li><strong>Distinct Subsequences</strong> (Hard) — Count the number of ways to form t as a subsequence of s; DP extension</li>
+      <li><strong>Minimum Window Subsequence</strong> (Hard) — Find the shortest window in t that contains s as a subsequence; two greedy passes</li>
+      <li><strong>Shortest Way to Form String</strong> (Medium) — Count minimum copies of s needed to form t; repeated greedy matching</li>
+      <li><strong>Valid Palindrome</strong> (Easy) — Two-pointer on a single string; same left-to-right scanning intuition</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p><strong>Main Pattern:</strong> String Processing &nbsp;·&nbsp; <strong>Sub-Pattern:</strong> Two Pointers (Greedy Match)<br>
+      Source: DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 (Basic String Operations)</p>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+const S_STR = "ace";
+const T_STR = "abcde";
+
+// ── Step Definitions ──
+// sCells / tCells: array of cell state strings ('normal','active','found','skip')
+// iPtr: index in s where the "i" pointer label appears (-1 = hidden)
+// jPtr: index in t where the "j" pointer label appears (-1 = hidden)
+// vars: { i, matched }
+// changed: which var names changed THIS step (highlight amber)
+// activeLine: code line index (0-based) to highlight
+// phaseClass, phaseLabel: badge styling
+// title, text: info card content
+
+const STEPS = [
+  {
+    sCells: ['active','normal','normal'],
+    tCells: ['normal','normal','normal','normal','normal'],
+    iPtr: 0, jPtr: -1,
+    vars: { i: 0, matched: '0 / 3' },
+    changed: [],
+    activeLine: 1,
+    phaseClass: 'phase-init', phaseLabel: 'INITIALIZE',
+    title: 'Set i = 0',
+    text: 'Initialize pointer i=0. This points to s[0]=\'a\' — the first character we need to find in t. The for-loop over t hasn\'t started yet. We\'re about to scan t left-to-right looking for \'a\', then \'c\', then \'e\'.'
+  },
+  {
+    sCells: ['found','active','normal'],
+    tCells: ['found','normal','normal','normal','normal'],
+    iPtr: 1, jPtr: 0,
+    vars: { i: 1, matched: '1 / 3' },
+    changed: ['i','matched'],
+    activeLine: 4,
+    phaseClass: 'phase-match', phaseLabel: 'MATCH ✓',
+    title: "t[0]='a' matches s[0]='a'",
+    text: "First character of t is 'a', which equals s[i]='a'. Match! We increment i to 1. Now i points to s[1]='c' — that's the next character we need to find. One down, two to go!"
+  },
+  {
+    sCells: ['found','active','normal'],
+    tCells: ['found','skip','normal','normal','normal'],
+    iPtr: 1, jPtr: 1,
+    vars: { i: 1, matched: '1 / 3' },
+    changed: [],
+    activeLine: 3,
+    phaseClass: 'phase-skip', phaseLabel: 'SKIP',
+    title: "t[1]='b' ≠ s[1]='c'",
+    text: "t[1]='b' does not match s[i]='c'. The condition is false — i stays at 1. We simply continue scanning t. The 'b' is ignored. Only the loop's implicit j-pointer advances."
+  },
+  {
+    sCells: ['found','found','active'],
+    tCells: ['found','skip','found','normal','normal'],
+    iPtr: 2, jPtr: 2,
+    vars: { i: 2, matched: '2 / 3' },
+    changed: ['i','matched'],
+    activeLine: 4,
+    phaseClass: 'phase-match', phaseLabel: 'MATCH ✓',
+    title: "t[2]='c' matches s[1]='c'",
+    text: "t[2]='c' equals s[i]='c'. Match! Increment i to 2. Now we need s[2]='e'. Notice: we skipped 'b' (index 1) and it didn't hurt us. The greedy algorithm found the earliest 'c' at position 2, leaving positions 3–4 for future matches."
+  },
+  {
+    sCells: ['found','found','active'],
+    tCells: ['found','skip','found','skip','normal'],
+    iPtr: 2, jPtr: 3,
+    vars: { i: 2, matched: '2 / 3' },
+    changed: [],
+    activeLine: 3,
+    phaseClass: 'phase-skip', phaseLabel: 'SKIP',
+    title: "t[3]='d' ≠ s[2]='e'",
+    text: "t[3]='d' does not match s[i]='e'. Skip. i remains 2. We keep scanning — maybe 'e' appears further right in t."
+  },
+  {
+    sCells: ['found','found','found'],
+    tCells: ['found','skip','found','skip','found'],
+    iPtr: 3, jPtr: 4,
+    vars: { i: 3, matched: '3 / 3' },
+    changed: ['i','matched'],
+    activeLine: 4,
+    phaseClass: 'phase-match', phaseLabel: 'MATCH ✓',
+    title: "t[4]='e' matches s[2]='e'",
+    text: "t[4]='e' equals s[i]='e'. Final match! Increment i to 3. i now equals len(s)=3 — all characters of s='ace' have been found in t='abcde' in the correct order: a→t[0], c→t[2], e→t[4]."
+  },
+  {
+    sCells: ['found','found','found'],
+    tCells: ['found','skip','found','skip','found'],
+    iPtr: 3, jPtr: -1,
+    vars: { i: 3, matched: '3 / 3' },
+    changed: [],
+    activeLine: 5,
+    phaseClass: 'phase-result', phaseLabel: 'RESULT ✅ TRUE',
+    title: 'return i == len(s)  →  True',
+    text: "The for-loop over t has ended. i=3 equals len(s)=3, so we return True. Every character of s was matched in order inside t. \"ace\" IS a subsequence of \"abcde\"."
+  }
+];
+
+// ── Render State ──
+let cur = 0;
+
+function render() {
+  const step = STEPS[cur];
+
+  // --- s cells ---
+  const sPtrs  = document.getElementById('s-ptrs');
+  const sCells = document.getElementById('s-cells');
+  const sIdxs  = document.getElementById('s-idxs');
+  sPtrs.innerHTML = sCells.innerHTML = sIdxs.innerHTML = '';
+
+  for (let k = 0; k < S_STR.length; k++) {
+    // pointer slot
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot';
+    if (k === step.iPtr) {
+      ps.innerHTML = '<span class="ptr-lbl ptr-i">i</span>';
+    }
+    sPtrs.appendChild(ps);
+
+    // cell
+    const c = document.createElement('div');
+    c.className = 'cell ' + step.sCells[k];
+    c.textContent = S_STR[k];
+    sCells.appendChild(c);
+
+    // index
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    sIdxs.appendChild(ix);
+  }
+
+  // --- t cells ---
+  const tPtrs  = document.getElementById('t-ptrs');
+  const tCells = document.getElementById('t-cells');
+  const tIdxs  = document.getElementById('t-idxs');
+  tPtrs.innerHTML = tCells.innerHTML = tIdxs.innerHTML = '';
+
+  for (let k = 0; k < T_STR.length; k++) {
+    // pointer slot
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot';
+    if (k === step.jPtr) {
+      ps.innerHTML = '<span class="ptr-lbl ptr-j">j</span>';
+    }
+    tPtrs.appendChild(ps);
+
+    // cell
+    const c = document.createElement('div');
+    c.className = 'cell ' + step.tCells[k];
+    c.textContent = T_STR[k];
+    tCells.appendChild(c);
+
+    // index
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    tIdxs.appendChild(ix);
+  }
+
+  // --- variable tracker ---
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  [
+    { name: 'i',       val: step.vars.i },
+    { name: 'matched', val: step.vars.matched }
+  ].forEach(v => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (step.changed.includes(v.name) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${v.name}</span><span class="var-val">${v.val}</span>`;
+    vt.appendChild(box);
+  });
+
+  // --- code panel highlights ---
+  for (let l = 0; l <= 5; l++) {
+    const el = document.getElementById('cl' + l);
+    if (el) el.classList.toggle('active', l === step.activeLine);
+  }
+
+  // --- info card ---
+  document.getElementById('step-ctr').textContent =
+    `Step ${cur + 1} of ${STEPS.length}`;
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent  = step.text;
+
+  // --- progress dots ---
+  const dotsEl = document.getElementById('dots');
+  dotsEl.innerHTML = '';
+  STEPS.forEach((_, idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (idx === cur ? ' active' : idx < cur ? ' visited' : '');
+    d.onclick = () => { cur = idx; render(); };
+    dotsEl.appendChild(d);
+  });
+
+  // --- button states ---
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, cur + dir));
+  render();
+}
+
+function reset() { cur = 0; render(); }
+
+// Collapsible sections
+function toggle(contentId, iconId) {
+  const el   = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  const collapsed = el.classList.toggle('collapsed');
+  icon.textContent = collapsed ? '▼' : '▲';
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Boot
+render();
+</script>
+</body>
+</html>

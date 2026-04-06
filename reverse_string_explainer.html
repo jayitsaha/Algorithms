@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse String — Deep Dive Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+    }
+  }
+
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 2rem; }
+  header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  header .subtitle { color: var(--text2); font-size: 0.95rem; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+  .tag-easy { background: var(--green-bg); color: var(--green-mid); }
+  .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-approach { background: var(--cyan-bg); color: var(--cyan-mid); }
+
+  /* Card sections */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--purple-bg); color: var(--purple-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.1rem; font-weight: 600; }
+
+  /* Concept boxes */
+  .concept-box {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin: 1rem 0;
+    border-left: 4px solid var(--purple-border);
+  }
+  .concept-box.insight { border-left-color: var(--amber-border); background: var(--amber-bg); }
+  .concept-box.warning { border-left-color: var(--red-border); background: var(--red-bg); }
+  .concept-box.key-concept { border-left-color: var(--blue-border); background: var(--blue-bg); }
+  .concept-box-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+  .concept-box p, .concept-box ul { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+  .concept-box ul { margin: 0.5rem 0 0 1.5rem; }
+
+  /* Algorithm steps */
+  .algorithm-steps { display: flex; flex-direction: column; gap: 12px; margin: 1rem 0; }
+  .algo-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .algo-step-num {
+    width: 26px; height: 26px; background: var(--blue-bg); color: var(--blue-mid);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; flex-shrink: 0;
+  }
+  .algo-step-text { color: var(--text); line-height: 1.5; }
+
+  /* Strategy steps */
+  .strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+  .strategy-step {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+    border-radius: var(--radius); border: 1px solid var(--purple-border);
+  }
+  .step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+  .strategy-step p { font-size: 0.9rem; color: var(--text2); line-height: 1.5; }
+
+  .interview-script {
+    margin-top: 1.5rem; padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .script-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+  .script-content {
+    font-family: var(--mono); font-size: 12px; line-height: 1.9;
+    color: var(--text2); padding: 12px; background: var(--surface);
+    border-radius: var(--radius); border-left: 3px solid var(--green-mid);
+  }
+
+  /* Takeaways */
+  .takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+  .takeaway {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--green-bg); border-radius: var(--radius);
+    font-size: 13px; color: var(--green-text);
+  }
+
+  /* Related Problems */
+  .related-problems { margin-top: 1rem; }
+  .related-problems h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .related-problems ul { margin: 0 0 0 1.5rem; font-size: 13px; color: var(--text2); line-height: 1.8; }
+
+  /* Example diagram */
+  .example-diagram {
+    display: flex; flex-direction: column; gap: 8px; margin: 1rem 0;
+    padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .diagram-row {
+    display: flex; align-items: center; gap: 6px; justify-content: center;
+  }
+  .diagram-cell {
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 18px; font-weight: 600;
+    border-radius: 8px; background: var(--surface); border: 2px solid var(--border);
+  }
+  .diagram-cell.left { border-color: var(--blue-border); background: var(--blue-bg); color: var(--blue-text); }
+  .diagram-cell.right { border-color: var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .diagram-cell.done { border-color: var(--purple-border); background: var(--purple-bg); color: var(--purple-text); }
+  .diagram-arrow { font-size: 20px; color: var(--text3); margin: 0 8px; }
+
+  /* Visualization Section Styles */
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); margin-bottom: 6px; text-align: center;
+  }
+
+  .array-section { margin-bottom: 1rem; }
+
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 52px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.ptr-left  { background: var(--blue-bg); color: var(--blue-mid); }
+  .ptr-label.ptr-right { background: var(--green-bg); color: var(--green-mid); }
+  .ptr-label.hidden    { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 52px; height: 52px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; font-family: var(--mono);
+    border: 2px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.left   { border-color: var(--blue-border); background: var(--blue-bg); color: var(--blue-text); transform: scale(1.08); }
+  .cell.right  { border-color: var(--green-border); background: var(--green-bg); color: var(--green-text); transform: scale(1.08); }
+  .cell.swap   { border-color: var(--amber-border); background: var(--amber-bg); color: var(--amber-text); transform: scale(1.12); }
+  .cell.done   { border-color: var(--purple-border); background: var(--purple-bg); color: var(--purple-text); }
+  .cell.normal { }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 52px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+  .code-comment { color: var(--text3); }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 72px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init  { background: var(--cyan-bg);   color: var(--cyan-mid); }
+  .phase-swap  { background: var(--amber-bg);  color: var(--amber-mid); }
+  .phase-move  { background: var(--blue-bg);   color: var(--blue-mid); }
+  .phase-done  { background: var(--green-bg);  color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .dot:hover { transform: scale(1.2); }
+  .dot.active { background: var(--purple-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; }
+  .btn {
+    padding: 10px 22px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    font-family: var(--sans); border: 1px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-mid); }
+  .btn.primary:hover:not(:disabled) { background: var(--purple-border); color: white; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 14px; height: 14px; border-radius: 4px;
+    border: 2px solid transparent;
+  }
+  .ls-left   { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-right  { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-swap   { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-done   { background: var(--purple-bg); border-color: var(--purple-border); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Reverse String</h1>
+    <p class="subtitle">Two Pointers Swap — The Classic In-Place Reversal</p>
+    <div class="tags">
+      <span class="tag tag-easy">#344 Easy</span>
+      <span class="tag tag-approach">Two Pointers Swap</span>
+      <span class="tag tag-pattern">String Processing</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Space</span>
+    </div>
+  </header>
+
+  <!-- SECTION 1: Understanding the Problem -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">1</span>
+      <span class="section-title">Understanding the Problem</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      Given an array of characters <code style="background: var(--bg2); padding: 2px 6px; border-radius: 4px;">s</code>, reverse it <strong>in-place</strong> with <strong>O(1)</strong> extra memory. This means we can't create a new array — we must modify the existing one.
+    </p>
+
+    <div class="example-diagram">
+      <div style="font-size: 12px; color: var(--text2); text-align: center; margin-bottom: 8px;">Example: ["h", "e", "l", "l", "o"] → ["o", "l", "l", "e", "h"]</div>
+      <div class="diagram-row">
+        <div class="diagram-cell">h</div>
+        <div class="diagram-cell">e</div>
+        <div class="diagram-cell">l</div>
+        <div class="diagram-cell">l</div>
+        <div class="diagram-cell">o</div>
+      </div>
+      <div style="text-align: center; font-size: 20px; color: var(--text3);">↓</div>
+      <div class="diagram-row">
+        <div class="diagram-cell done">o</div>
+        <div class="diagram-cell done">l</div>
+        <div class="diagram-cell done">l</div>
+        <div class="diagram-cell done">e</div>
+        <div class="diagram-cell done">h</div>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight: Meet in the Middle</div>
+      <p>To reverse, we need to swap pairs of elements: first with last, second with second-to-last, and so on. We stop when the two pointers meet in the middle!</p>
+      <ul>
+        <li><strong>Swap s[0] ↔ s[n-1]</strong></li>
+        <li><strong>Swap s[1] ↔ s[n-2]</strong></li>
+        <li>...continue until left ≥ right</li>
+      </ul>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Two Pointers?</div>
+      <p>With one pointer from each end moving toward the center, we naturally visit all swap pairs. This is the most intuitive in-place reversal pattern and requires no extra space beyond the two index variables.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: The Algorithm -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">2</span>
+      <span class="section-title">The Algorithm: Two Pointers Swap</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      The algorithm is beautifully simple: use two pointers converging from opposite ends.
+    </p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="algo-step-num">1</span>
+        <span class="algo-step-text"><strong>Initialize pointers:</strong> Set <code>left = 0</code> (start) and <code>right = n - 1</code> (end).</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">2</span>
+        <span class="algo-step-text"><strong>While left < right:</strong> Swap <code>s[left]</code> and <code>s[right]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">3</span>
+        <span class="algo-step-text"><strong>Move pointers:</strong> Increment <code>left</code>, decrement <code>right</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">4</span>
+        <span class="algo-step-text"><strong>Stop when they meet:</strong> When <code>left >= right</code>, the entire array is reversed.</span>
+      </div>
+    </div>
+
+    <div class="example-diagram">
+      <div style="font-size: 12px; font-weight: 600; color: var(--text2); text-align: center; margin-bottom: 8px;">Visual: Pointers Converging</div>
+      <div class="diagram-row">
+        <div class="diagram-cell left">h</div>
+        <div class="diagram-cell">e</div>
+        <div class="diagram-cell">l</div>
+        <div class="diagram-cell">l</div>
+        <div class="diagram-cell right">o</div>
+      </div>
+      <div style="text-align: center; font-size: 11px; color: var(--text3);">left=0, right=4 → swap h↔o</div>
+      <div style="text-align: center; font-size: 16px; color: var(--text3);">↓</div>
+      <div class="diagram-row">
+        <div class="diagram-cell done">o</div>
+        <div class="diagram-cell left">e</div>
+        <div class="diagram-cell">l</div>
+        <div class="diagram-cell right">l</div>
+        <div class="diagram-cell done">h</div>
+      </div>
+      <div style="text-align: center; font-size: 11px; color: var(--text3);">left=1, right=3 → swap e↔l</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why left < right, not left <= right?</div>
+      <p>If we used <code><=</code>, when there's an odd number of elements, we'd try to swap the middle element with itself — harmless but wasteful. <code><</code> correctly stops when pointers meet or cross.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Why It Works -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">3</span>
+      <span class="section-title">Why It Works: The Invariant</span>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After each iteration:</p>
+      <ul>
+        <li>Elements at indices <strong>[0, left)</strong> and <strong>(right, n-1]</strong> are in their final reversed positions.</li>
+        <li>Elements at indices <strong>[left, right]</strong> are yet to be processed.</li>
+      </ul>
+      <p style="margin-top: 8px;">When left >= right, all elements have been swapped — reversal complete!</p>
+    </div>
+
+    <div class="concept-box">
+      <div class="concept-box-title">📝 Proof Sketch</div>
+      <ul>
+        <li><strong>Base case:</strong> Initially, no elements processed. Invariant holds trivially.</li>
+        <li><strong>Induction:</strong> Each swap places two more elements in final position. Pointers move inward.</li>
+        <li><strong>Termination:</strong> Each iteration decreases (right - left) by 2. We stop when difference ≤ 0.</li>
+        <li><strong>Correctness:</strong> Every index pair (i, n-1-i) gets swapped exactly once.</li>
+      </ul>
+    </div>
+
+    <div class="concept-box">
+      <div class="concept-box-title">🧮 Number of Swaps</div>
+      <p>For array of length n, we perform <strong>⌊n/2⌋</strong> swaps:</p>
+      <ul>
+        <li>Even n: exactly n/2 swaps</li>
+        <li>Odd n: (n-1)/2 swaps (middle element stays in place)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 4: The Code -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">4</span>
+      <span class="section-title">The Code (Annotated)</span>
+    </div>
+
+    <div class="code-panel" style="margin-top: 0;">
+      <div class="code-line">def reverseString(s):</div>
+      <div class="code-line">    left, right = 0, len(s) - 1  <span class="code-comment"># Two pointers at ends</span></div>
+      <div class="code-line">    </div>
+      <div class="code-line">    while left < right:           <span class="code-comment"># Until they meet</span></div>
+      <div class="code-line">        s[left], s[right] = s[right], s[left]  <span class="code-comment"># Swap</span></div>
+      <div class="code-line">        left += 1                  <span class="code-comment"># Move left inward</span></div>
+      <div class="code-line">        right -= 1                 <span class="code-comment"># Move right inward</span></div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 1rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 150px; background: var(--purple-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--purple-mid); text-transform: uppercase; font-weight: 600;">Time</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(n)</div>
+        <div style="font-size: 11px; color: var(--text3);">n/2 swaps, each O(1)</div>
+      </div>
+      <div style="flex: 1; min-width: 150px; background: var(--blue-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--blue-mid); text-transform: uppercase; font-weight: 600;">Space</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(1)</div>
+        <div style="font-size: 11px; color: var(--text3);">Only two index variables</div>
+      </div>
+    </div>
+
+    <div class="concept-box insight" style="margin-top: 1rem;">
+      <div class="concept-box-title">✨ Python One-Liner (Alternative)</div>
+      <p><code>s[:] = s[::-1]</code> — This also works in-place because of slice assignment, but the two-pointer approach is more explicit and educational.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Interview Strategy -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">5</span>
+      <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    </div>
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Understand the Constraint</div>
+        <p>"In-place with O(1) space means I can't create a new array. I need to modify the existing array by swapping elements."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify Swap Pairs</div>
+        <p>"To reverse, s[0] becomes s[n-1], s[1] becomes s[n-2], etc. So I need to swap pairs (0, n-1), (1, n-2), ..."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Recognize Two Pointers</div>
+        <p>"Two pointers from opposite ends naturally generate these pairs! They converge toward the center."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Termination</div>
+        <p>"Stop when left >= right — at that point all pairs have been swapped."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <div class="script-title">🗣️ What to Say to the Interviewer</div>
+      <div class="script-content">
+"To reverse in-place with O(1) space, I'll use two pointers — one starting at the beginning and one at the end.
+
+At each step, I swap the characters at these positions, then move both pointers toward the center.
+
+I continue until the pointers meet or cross. This gives O(n) time since I visit each element once, and O(1) space since I only use two index variables."
+      </div>
+    </div>
+
+    <div class="concept-box" style="margin-top: 1rem;">
+      <div class="concept-box-title">🔄 Follow-up Questions</div>
+      <ul>
+        <li><strong>"What if it's a string (immutable in Python)?"</strong> — Convert to list, reverse, convert back. Or use slicing s[::-1].</li>
+        <li><strong>"Reverse words in a sentence?"</strong> — Reverse entire string, then reverse each word individually.</li>
+        <li><strong>"Reverse only vowels?"</strong> — Two pointers, but skip non-vowels.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Interactive Walkthrough -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">6</span>
+      <span class="section-title">🎯 Interactive Step-by-Step Walkthrough</span>
+    </div>
+
+    <div class="array-section">
+      <div class="section-label">Array State</div>
+      <div class="ptr-labels" id="ptrLabels"></div>
+      <div class="array-row" id="arrayRow"></div>
+      <div class="idx-labels" id="idxLabels"></div>
+    </div>
+
+    <div class="var-tracker" id="varTracker"></div>
+
+    <div class="code-panel" id="codePanel">
+      <div class="code-line">def reverseString(s):</div>
+      <div class="code-line">    left, right = 0, len(s) - 1</div>
+      <div class="code-line">    while left < right:</div>
+      <div class="code-line">        s[left], s[right] = s[right], s[left]</div>
+      <div class="code-line">        left += 1</div>
+      <div class="code-line">        right -= 1</div>
+    </div>
+
+    <div class="info-box" id="infoBox">
+      <div class="phase-row">
+        <span class="phase-badge phase-init">Init</span>
+        <span class="step-num">Step 0 / 0</span>
+      </div>
+      <div class="info-title"></div>
+      <div class="info-body"></div>
+    </div>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="go(-1)">← Prev</button>
+      <button class="btn primary" id="nextBtn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch ls-left"></div>Left Pointer</div>
+      <div class="legend-item"><div class="legend-swatch ls-right"></div>Right Pointer</div>
+      <div class="legend-item"><div class="legend-swatch ls-swap"></div>Swapping</div>
+      <div class="legend-item"><div class="legend-swatch ls-done"></div>Reversed</div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Summary -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">7</span>
+      <span class="section-title">Summary & Key Takeaways</span>
+    </div>
+
+    <div class="takeaways">
+      <div class="takeaway">✓ Two pointers from opposite ends naturally generate swap pairs</div>
+      <div class="takeaway">✓ Stop when left >= right (pointers meet or cross)</div>
+      <div class="takeaway">✓ Each swap places TWO elements in final position</div>
+      <div class="takeaway">✓ ⌊n/2⌋ swaps total — O(n) time, O(1) space</div>
+      <div class="takeaway">✓ The invariant: outside pointers = done, inside = pending</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use Two Pointers (Opposite Direction)</div>
+      <ul>
+        <li>Reverse array/string in-place</li>
+        <li>Palindrome checking</li>
+        <li>Two Sum in sorted array</li>
+        <li>Container with most water</li>
+        <li>Any problem requiring pairs from opposite ends</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Valid Palindrome</strong> (Easy) — Two pointers + skip non-alphanumeric</li>
+        <li><strong>Reverse Words in a String</strong> (Medium) — Reverse all, then reverse each word</li>
+        <li><strong>Reverse Vowels of a String</strong> (Easy) — Two pointers, only swap vowels</li>
+        <li><strong>Two Sum II - Sorted Array</strong> (Medium) — Two pointers convergence</li>
+        <li><strong>Container With Most Water</strong> (Medium) — Greedy two pointers</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// Example: ["h", "e", "l", "l", "o"]
+const initialArr = ['h', 'e', 'l', 'l', 'o'];
+const n = initialArr.length;
+
+const steps = [
+  // Step 0: Initial
+  {
+    phase: 'init', phaseClass: 'phase-init', activeLine: 1,
+    title: 'Initialize Pointers',
+    text: 'Array ["h", "e", "l", "l", "o"]. Set left=0 and right=4. These pointers will converge toward the center.',
+    arr: ['h', 'e', 'l', 'l', 'o'],
+    cells: ['left', 'normal', 'normal', 'normal', 'right'],
+    pointers: { 0: 'left', 4: 'right' },
+    vars: { left: 0, right: 4 },
+    changed: ['left', 'right']
+  },
+  // Step 1: Check condition, prepare swap
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 2,
+    title: 'Check: left (0) < right (4)? YES',
+    text: 'Condition satisfied! We can swap. s[0]="h" will swap with s[4]="o".',
+    arr: ['h', 'e', 'l', 'l', 'o'],
+    cells: ['swap', 'normal', 'normal', 'normal', 'swap'],
+    pointers: { 0: 'left', 4: 'right' },
+    vars: { left: 0, right: 4 },
+    changed: []
+  },
+  // Step 2: After swap h↔o
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 3,
+    title: 'Swap: s[0] ↔ s[4]',
+    text: 'Swapped "h" and "o". Array is now ["o", "e", "l", "l", "h"]. First and last characters are in final position!',
+    arr: ['o', 'e', 'l', 'l', 'h'],
+    cells: ['done', 'normal', 'normal', 'normal', 'done'],
+    pointers: { 0: 'left', 4: 'right' },
+    vars: { left: 0, right: 4 },
+    changed: []
+  },
+  // Step 3: Move pointers
+  {
+    phase: 'move', phaseClass: 'phase-move', activeLine: 4,
+    title: 'Move Pointers: left++, right--',
+    text: 'Increment left to 1, decrement right to 3. Now pointing at "e" and "l".',
+    arr: ['o', 'e', 'l', 'l', 'h'],
+    cells: ['done', 'left', 'normal', 'right', 'done'],
+    pointers: { 1: 'left', 3: 'right' },
+    vars: { left: 1, right: 3 },
+    changed: ['left', 'right']
+  },
+  // Step 4: Check condition again
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 2,
+    title: 'Check: left (1) < right (3)? YES',
+    text: 'Condition satisfied! Swap s[1]="e" with s[3]="l".',
+    arr: ['o', 'e', 'l', 'l', 'h'],
+    cells: ['done', 'swap', 'normal', 'swap', 'done'],
+    pointers: { 1: 'left', 3: 'right' },
+    vars: { left: 1, right: 3 },
+    changed: []
+  },
+  // Step 5: After swap e↔l
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 3,
+    title: 'Swap: s[1] ↔ s[3]',
+    text: 'Swapped "e" and "l". Array is now ["o", "l", "l", "e", "h"]. Four characters are now in final position!',
+    arr: ['o', 'l', 'l', 'e', 'h'],
+    cells: ['done', 'done', 'normal', 'done', 'done'],
+    pointers: { 1: 'left', 3: 'right' },
+    vars: { left: 1, right: 3 },
+    changed: []
+  },
+  // Step 6: Move pointers again
+  {
+    phase: 'move', phaseClass: 'phase-move', activeLine: 4,
+    title: 'Move Pointers: left++, right--',
+    text: 'Increment left to 2, decrement right to 2. Both pointers now at the middle element "l"!',
+    arr: ['o', 'l', 'l', 'e', 'h'],
+    cells: ['done', 'done', 'left', 'done', 'done'],
+    pointers: { 2: 'L=R' },
+    vars: { left: 2, right: 2 },
+    changed: ['left', 'right']
+  },
+  // Step 7: Check condition - FAIL
+  {
+    phase: 'done', phaseClass: 'phase-done', activeLine: 2,
+    title: 'Check: left (2) < right (2)? NO',
+    text: 'Condition NOT satisfied (2 is not less than 2). The middle element stays in place. Loop exits!',
+    arr: ['o', 'l', 'l', 'e', 'h'],
+    cells: ['done', 'done', 'done', 'done', 'done'],
+    pointers: {},
+    vars: { left: 2, right: 2 },
+    changed: []
+  },
+  // Step 8: Done!
+  {
+    phase: 'done', phaseClass: 'phase-done', activeLine: 6,
+    title: '✅ Reversal Complete!',
+    text: 'Array is now ["o", "l", "l", "e", "h"] — the reverse of "hello"! We performed 2 swaps (⌊5/2⌋ = 2).',
+    arr: ['o', 'l', 'l', 'e', 'h'],
+    cells: ['done', 'done', 'done', 'done', 'done'],
+    pointers: {},
+    vars: { swaps: 2, result: 'olleh' },
+    changed: []
+  }
+];
+
+let step = 0;
+
+function render() {
+  const s = steps[step];
+  const currentArr = s.arr;
+  
+  // Array cells  
+  document.getElementById('arrayRow').innerHTML = currentArr.map((v, i) => 
+    `<div class="cell ${s.cells[i]}">${v}</div>`
+  ).join('');
+  
+  // Index labels
+  document.getElementById('idxLabels').innerHTML = currentArr.map((_, i) => 
+    `<div class="idx-label">${i}</div>`
+  ).join('');
+  
+  // Pointer labels
+  document.getElementById('ptrLabels').innerHTML = currentArr.map((_, i) => {
+    const ptr = s.pointers[i];
+    if (ptr === 'left') return `<div class="ptr-label ptr-left">left</div>`;
+    if (ptr === 'right') return `<div class="ptr-label ptr-right">right</div>`;
+    if (ptr === 'L=R') return `<div class="ptr-label" style="background:var(--purple-bg);color:var(--purple-mid);">L=R</div>`;
+    return `<div class="ptr-label hidden">-</div>`;
+  }).join('');
+  
+  // Variable tracker
+  document.getElementById('varTracker').innerHTML = Object.entries(s.vars).map(([name, val]) => {
+    const changed = s.changed.includes(name) ? 'changed' : '';
+    return `<div class="var-box ${changed}">
+      <span class="var-name">${name}</span>
+      <span class="var-val">${val}</span>
+    </div>`;
+  }).join('');
+  
+  // Code highlighting
+  document.querySelectorAll('#codePanel .code-line').forEach((line, i) => {
+    line.classList.toggle('active', i === s.activeLine);
+  });
+  
+  // Info box
+  document.getElementById('infoBox').innerHTML = `
+    <div class="phase-row">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-num">Step ${step} / ${steps.length - 1}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-body">${s.text}</div>
+  `;
+  
+  // Progress dots
+  document.getElementById('progress').innerHTML = steps.map((_, i) => 
+    `<div class="dot ${i === step ? 'active' : ''}" onclick="goTo(${i})"></div>`
+  ).join('');
+  
+  // Button states
+  document.getElementById('prevBtn').disabled = step === 0;
+  document.getElementById('nextBtn').disabled = step === steps.length - 1;
+}
+
+function go(delta) {
+  step = Math.max(0, Math.min(steps.length - 1, step + delta));
+  render();
+}
+
+function goTo(i) {
+  step = i;
+  render();
+}
+
+function reset() {
+  step = 0;
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
