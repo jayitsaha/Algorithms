@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Missing Positive — Deep Dive Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f8f5;        --bg2: #f0efe9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+    --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+    --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+    --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+    --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+    --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+    --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+    --radius: 10px;      --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+      --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+      --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+      --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+      --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+      --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+    }
+  }
+
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 2rem; }
+  header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  header .subtitle { color: var(--text2); font-size: 0.95rem; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+  .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+  .tag-hard { background: var(--red-bg); color: var(--red-mid); }
+  .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+  .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+  .tag-approach { background: var(--cyan-bg); color: var(--cyan-mid); }
+
+  /* Card sections */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--purple-bg); color: var(--purple-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.1rem; font-weight: 600; }
+
+  /* Concept boxes */
+  .concept-box {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin: 1rem 0;
+    border-left: 4px solid var(--purple-border);
+  }
+  .concept-box.insight { border-left-color: var(--amber-border); background: var(--amber-bg); }
+  .concept-box.warning { border-left-color: var(--red-border); background: var(--red-bg); }
+  .concept-box.key-concept { border-left-color: var(--blue-border); background: var(--blue-bg); }
+  .concept-box-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+  .concept-box p, .concept-box ul { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+  .concept-box ul { margin: 0.5rem 0 0 1.5rem; }
+
+  /* Algorithm steps */
+  .algorithm-steps { display: flex; flex-direction: column; gap: 12px; margin: 1rem 0; }
+  .algo-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .algo-step-num {
+    width: 26px; height: 26px; background: var(--blue-bg); color: var(--blue-mid);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; flex-shrink: 0;
+  }
+  .algo-step-text { color: var(--text); line-height: 1.5; }
+
+  /* Strategy steps */
+  .strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+  .strategy-step {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+    border-radius: var(--radius); border: 1px solid var(--purple-border);
+  }
+  .step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+  .strategy-step p { font-size: 0.9rem; color: var(--text2); line-height: 1.5; }
+
+  .interview-script {
+    margin-top: 1.5rem; padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .script-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+  .script-content {
+    font-family: var(--mono); font-size: 12px; line-height: 1.9;
+    color: var(--text2); padding: 12px; background: var(--surface);
+    border-radius: var(--radius); border-left: 3px solid var(--green-mid);
+  }
+
+  /* Takeaways */
+  .takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+  .takeaway {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--green-bg); border-radius: var(--radius);
+    font-size: 13px; color: var(--green-text);
+  }
+
+  /* Related Problems */
+  .related-problems { margin-top: 1rem; }
+  .related-problems h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .related-problems ul { margin: 0 0 0 1.5rem; font-size: 13px; color: var(--text2); line-height: 1.8; }
+
+  /* Key insight diagram */
+  .insight-diagram {
+    display: flex; flex-direction: column; gap: 12px; margin: 1rem 0;
+    padding: 16px; background: var(--bg2); border-radius: var(--radius);
+  }
+  .diagram-row {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+  }
+  .diagram-cell {
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    border-radius: 6px; background: var(--surface); border: 1px solid var(--border);
+  }
+  .diagram-cell.correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .diagram-cell.wrong { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
+  .diagram-cell.target { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+  .diagram-label { font-size: 11px; color: var(--text3); width: 80px; text-align: right; }
+  .diagram-arrow { font-size: 20px; color: var(--text3); }
+
+  /* Visualization Section Styles */
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text3); margin-bottom: 6px; text-align: center;
+  }
+
+  .array-section { margin-bottom: 1rem; }
+
+  .ptr-labels { display: flex; gap: 6px; justify-content: center; margin-bottom: 5px; height: 22px; }
+  .ptr-label {
+    width: 52px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    border-radius: 4px; transition: opacity 0.25s;
+  }
+  .ptr-label.ptr-i     { background: var(--blue-bg); color: var(--blue-mid); }
+  .ptr-label.ptr-target { background: var(--amber-bg); color: var(--amber-mid); }
+  .ptr-label.ptr-swap  { background: var(--purple-bg); color: var(--purple-mid); }
+  .ptr-label.hidden    { opacity: 0; }
+
+  .array-row { display: flex; gap: 6px; justify-content: center; }
+  .cell {
+    width: 52px; height: 48px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; font-family: var(--mono);
+    border: 0.5px solid var(--border);
+    background: var(--surface); color: var(--text);
+    transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.2s;
+  }
+  .cell.scan     { border: 2px solid var(--blue-border); background: var(--blue-bg); color: var(--blue-text); transform: scale(1.05); }
+  .cell.target   { border: 2px solid var(--amber-border); background: var(--amber-bg); color: var(--amber-text); transform: scale(1.05); }
+  .cell.swap     { border: 2px solid var(--purple-border); background: var(--purple-bg); color: var(--purple-text); transform: scale(1.1); }
+  .cell.correct  { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.wrong    { border: 2px solid var(--red-border); background: var(--red-bg); color: var(--red-text); }
+  .cell.ignore   { background: var(--bg2); color: var(--text3); border-style: dashed; }
+  .cell.found    { border: 2px solid var(--red-border); background: var(--red-bg); color: var(--red-text); transform: scale(1.1); }
+  .cell.done     { border: 2px solid var(--green-border); background: var(--green-bg); color: var(--green-text); }
+  .cell.normal   { }
+
+  .idx-labels { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .idx-label { width: 52px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+  .expected-labels { display: flex; gap: 6px; justify-content: center; margin-top: 2px; }
+  .expected-label { width: 52px; text-align: center; font-size: 9px; color: var(--text3); font-family: var(--mono); }
+
+  /* Variable tracker */
+  .var-tracker { display: flex; gap: 12px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .var-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 14px; border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+  .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+  .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+
+  /* Code panel */
+  .code-panel {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .code-line {
+    padding: 1px 6px;
+    border-radius: 4px;
+    transition: background 0.25s;
+    white-space: pre;
+    color: var(--text2);
+  }
+  .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+  .code-comment { color: var(--text3); }
+
+  /* Info box */
+  .info-box {
+    margin-top: 1rem;
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    min-height: 72px;
+  }
+  .phase-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .phase-badge {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .phase-init    { background: var(--amber-bg);  color: var(--amber-mid); }
+  .phase-place   { background: var(--blue-bg);   color: var(--blue-mid); }
+  .phase-swap    { background: var(--purple-bg); color: var(--purple-mid); }
+  .phase-scan    { background: var(--cyan-bg);   color: var(--cyan-mid); }
+  .phase-found   { background: var(--red-bg);    color: var(--red-mid); }
+  .phase-done    { background: var(--green-bg);  color: var(--green-mid); }
+  .step-num { font-size: 11px; color: var(--text3); }
+  .info-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .info-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .code-inline {
+    font-family: var(--mono); font-size: 11px; padding: 1px 5px;
+    border-radius: 4px; background: var(--surface);
+    border: 0.5px solid var(--border2); color: var(--text);
+  }
+
+  /* Progress dots */
+  .progress { display: flex; gap: 5px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border2); transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .dot:hover { transform: scale(1.2); }
+  .dot.active { background: var(--purple-mid); transform: scale(1.3); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; }
+  .btn {
+    padding: 10px 22px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    font-family: var(--sans); border: 1px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--bg2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-mid); }
+  .btn.primary:hover:not(:disabled) { background: var(--purple-border); color: white; }
+  .kbd-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 1.25rem; padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .legend-swatch {
+    width: 14px; height: 14px; border-radius: 4px;
+    border: 2px solid transparent;
+  }
+  .ls-scan     { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .ls-target   { background: var(--amber-bg);  border-color: var(--amber-border); }
+  .ls-swap     { background: var(--purple-bg); border-color: var(--purple-border); }
+  .ls-correct  { background: var(--green-bg);  border-color: var(--green-border); }
+  .ls-wrong    { background: var(--red-bg);    border-color: var(--red-border); }
+  .ls-ignore   { background: var(--bg2);       border: 2px dashed var(--border2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>First Missing Positive</h1>
+    <p class="subtitle">Cyclic Sort / Index Mapping — Use Array as Hash Table</p>
+    <div class="tags">
+      <span class="tag tag-hard">#41 Hard</span>
+      <span class="tag tag-approach">Cyclic Sort / Index Mapping</span>
+      <span class="tag tag-pattern">Array Manipulation</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Space</span>
+    </div>
+  </header>
+
+  <!-- SECTION 1: Understanding the Problem -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">1</span>
+      <span class="section-title">Understanding the Problem</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      Given an unsorted integer array <code style="background: var(--bg2); padding: 2px 6px; border-radius: 4px;">nums</code>, find the <strong>smallest positive integer</strong> that is NOT in the array. Must run in <strong>O(n) time</strong> with <strong>O(1) auxiliary space</strong>.
+    </p>
+
+    <div class="insight-diagram">
+      <div style="font-size: 12px; color: var(--text2); text-align: center; margin-bottom: 8px;">Example: [3, 4, -1, 1] → Answer: <strong>2</strong></div>
+      <div class="diagram-row">
+        <span class="diagram-label">Array:</span>
+        <div class="diagram-cell">3</div>
+        <div class="diagram-cell">4</div>
+        <div class="diagram-cell">-1</div>
+        <div class="diagram-cell">1</div>
+      </div>
+      <div class="diagram-row">
+        <span class="diagram-label">Has 1? ✓</span>
+        <span class="diagram-label">Has 2? ✗</span>
+        <span class="diagram-label">Has 3? ✓</span>
+        <span class="diagram-label">Has 4? ✓</span>
+      </div>
+      <div style="font-size: 12px; color: var(--amber-mid); text-align: center; margin-top: 8px;">Missing: <strong>2</strong> (smallest positive not present)</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight: The Answer is Bounded!</div>
+      <p>For an array of length <strong>n</strong>, the answer must be in the range <strong>[1, n+1]</strong>.</p>
+      <ul>
+        <li><strong>Best case:</strong> Array contains all of 1, 2, ..., n → answer is n+1</li>
+        <li><strong>Worst case:</strong> Array has no positive integers → answer is 1</li>
+        <li><strong>Why?</strong> If any number in [1, n] is missing, that's our answer. Otherwise, it's n+1.</li>
+      </ul>
+      <p style="margin-top: 8px;">This means we only care about values in [1, n]. Everything else (negatives, zeros, values > n) is irrelevant!</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Brilliant Trick: Use Array as Hash Table</div>
+      <p>We can't use extra space for a hash set. But wait — the array itself has n slots!</p>
+      <ul>
+        <li>Place value <strong>x</strong> at index <strong>x-1</strong> (if 1 ≤ x ≤ n)</li>
+        <li>After placing, <code>nums[i]</code> should equal <code>i+1</code> if that number exists</li>
+        <li>Scan for first index where <code>nums[i] ≠ i+1</code> → that's <code>i+1</code>, the missing number!</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: The Algorithm -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">2</span>
+      <span class="section-title">The Algorithm: Cyclic Sort / Index Mapping</span>
+    </div>
+
+    <p style="color: var(--text2); line-height: 1.6; margin-bottom: 1rem;">
+      The algorithm has two phases: <strong>Placement Phase</strong> (put each number in its "home" index) and <strong>Scan Phase</strong> (find the first violation).
+    </p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="algo-step-num">1</span>
+        <span class="algo-step-text"><strong>Placement Phase:</strong> For each position i, while nums[i] is in range [1, n] AND not in its correct spot AND won't create infinite loop — swap nums[i] to its correct index.</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">2</span>
+        <span class="algo-step-text"><strong>The "Correct Spot" Rule:</strong> Value x should be at index x-1. So nums[i] should go to index nums[i]-1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">3</span>
+        <span class="algo-step-text"><strong>Why "while" not "if"?</strong> After swapping, a new value arrives at position i. We must keep swapping until position i has nothing useful to place.</span>
+      </div>
+      <div class="algo-step">
+        <span class="algo-step-num">4</span>
+        <span class="algo-step-text"><strong>Scan Phase:</strong> After all placements, find first i where nums[i] ≠ i+1. Return i+1. If all match, return n+1.</span>
+      </div>
+    </div>
+
+    <div class="insight-diagram">
+      <div style="font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; text-align: center;">Example: [3, 4, -1, 1] → After Placement → [1, -1, 3, 4]</div>
+      <div class="diagram-row">
+        <span class="diagram-label">Index:</span>
+        <div class="diagram-cell" style="background: var(--bg2); font-size: 12px;">0</div>
+        <div class="diagram-cell" style="background: var(--bg2); font-size: 12px;">1</div>
+        <div class="diagram-cell" style="background: var(--bg2); font-size: 12px;">2</div>
+        <div class="diagram-cell" style="background: var(--bg2); font-size: 12px;">3</div>
+      </div>
+      <div class="diagram-row">
+        <span class="diagram-label">Expected:</span>
+        <div class="diagram-cell" style="font-size: 12px; border-style: dashed;">1</div>
+        <div class="diagram-cell" style="font-size: 12px; border-style: dashed;">2</div>
+        <div class="diagram-cell" style="font-size: 12px; border-style: dashed;">3</div>
+        <div class="diagram-cell" style="font-size: 12px; border-style: dashed;">4</div>
+      </div>
+      <div class="diagram-row">
+        <span class="diagram-label">After sort:</span>
+        <div class="diagram-cell correct">1</div>
+        <div class="diagram-cell wrong">-1</div>
+        <div class="diagram-cell correct">3</div>
+        <div class="diagram-cell correct">4</div>
+      </div>
+      <div style="font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px;">Index 1 has -1 instead of 2 → Missing = 2</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Critical: Avoiding Infinite Loops</div>
+      <p>The swap condition must check <code>nums[i] != nums[target]</code> (not just positions). Why?</p>
+      <p style="margin-top: 8px;">If the array has duplicates like <code>[1, 1]</code>, swapping positions 0 and 0 forever would loop infinitely. Checking values ensures we stop when the destination already has the correct value.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Why It Works -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">3</span>
+      <span class="section-title">Why It Works: The Invariants</span>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Invariant 1: Each Swap Fixes One Position</div>
+      <p>Every swap places at least one element in its correct "home" position. An element is never moved away from its correct position once placed there.</p>
+      <p style="margin-top: 8px;"><strong>Why O(n) swaps total?</strong> Each of the n positions can be "fixed" at most once. So we do at most n swaps across the entire algorithm.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Invariant 2: After Placement, What's Missing is Revealed</div>
+      <p>After the placement phase:</p>
+      <ul>
+        <li>If value x ∈ [1, n] exists in the array, it's now at index x-1</li>
+        <li>If nums[i] ≠ i+1, then value i+1 was NEVER in the array (or was a duplicate)</li>
+        <li>The first such violation gives us the smallest missing positive</li>
+      </ul>
+    </div>
+
+    <div class="concept-box">
+      <div class="concept-box-title">📝 Edge Cases Handled</div>
+      <ul>
+        <li><strong>Negatives / Zeros:</strong> Ignored (not in [1, n])</li>
+        <li><strong>Values > n:</strong> Ignored (can't be placed, answer must be ≤ n+1)</li>
+        <li><strong>Duplicates:</strong> One goes to correct spot, others stay (checked via value comparison)</li>
+        <li><strong>All elements present:</strong> Every nums[i] = i+1, return n+1</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 4: The Code -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">4</span>
+      <span class="section-title">The Code (Annotated)</span>
+    </div>
+
+    <div class="code-panel" style="margin-top: 0;">
+      <div class="code-line">def firstMissingPositive(nums):</div>
+      <div class="code-line">    n = len(nums)</div>
+      <div class="code-line">    </div>
+      <div class="code-line">    <span class="code-comment"># Phase 1: Place each value x at index x-1 (if valid)</span></div>
+      <div class="code-line">    for i in range(n):</div>
+      <div class="code-line">        <span class="code-comment"># Keep swapping while nums[i] can be placed correctly</span></div>
+      <div class="code-line">        while 1 <= nums[i] <= n and nums[nums[i] - 1] != nums[i]:</div>
+      <div class="code-line">            <span class="code-comment"># Swap nums[i] to its "home" index</span></div>
+      <div class="code-line">            target = nums[i] - 1</div>
+      <div class="code-line">            nums[i], nums[target] = nums[target], nums[i]</div>
+      <div class="code-line">    </div>
+      <div class="code-line">    <span class="code-comment"># Phase 2: Find first index where nums[i] != i+1</span></div>
+      <div class="code-line">    for i in range(n):</div>
+      <div class="code-line">        if nums[i] != i + 1:</div>
+      <div class="code-line">            return i + 1  <span class="code-comment"># This positive integer is missing</span></div>
+      <div class="code-line">    </div>
+      <div class="code-line">    <span class="code-comment"># All 1..n present, missing is n+1</span></div>
+      <div class="code-line">    return n + 1</div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 1rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 150px; background: var(--purple-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--purple-mid); text-transform: uppercase; font-weight: 600;">Time</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(n)</div>
+        <div style="font-size: 11px; color: var(--text3);">Each element moved at most once</div>
+      </div>
+      <div style="flex: 1; min-width: 150px; background: var(--blue-bg); padding: 10px 14px; border-radius: var(--radius); text-align: center;">
+        <div style="font-size: 11px; color: var(--blue-mid); text-transform: uppercase; font-weight: 600;">Space</div>
+        <div style="font-family: var(--mono); font-size: 16px; font-weight: 700; margin-top: 4px;">O(1)</div>
+        <div style="font-size: 11px; color: var(--text3);">In-place modification only</div>
+      </div>
+    </div>
+
+    <div class="concept-box warning" style="margin-top: 1rem;">
+      <div class="concept-box-title">⚠️ Why compare VALUES not indices?</div>
+      <p>The condition <code>nums[nums[i] - 1] != nums[i]</code> checks if the target position already has the correct value. This handles:</p>
+      <ul>
+        <li><strong>Duplicates:</strong> Don't swap if destination already correct</li>
+        <li><strong>Self-referential:</strong> If nums[i] = i+1 already, no swap needed</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Interview Strategy -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">5</span>
+      <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    </div>
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Constraints</div>
+        <p>"O(n) time and O(1) space with an unsorted array... I can't sort (O(n log n)) or use a hash set (O(n) space). What can I use? The array itself as storage!"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Bound the Answer</div>
+        <p>"What's the range of possible answers? For n elements, answer is in [1, n+1]. So I only care about values in [1, n]."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Index as Hash</div>
+        <p>"If I put value x at index x-1, after placement I can scan for the first mismatch. That's Cyclic Sort!"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Edge Cases</div>
+        <p>"Negatives, zeros, values > n → ignore. Duplicates → check value at destination before swapping."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <div class="script-title">🗣️ What to Say to the Interviewer</div>
+      <div class="script-content">
+"The key insight is that for an array of size n, the answer must be between 1 and n+1.
+
+This means I can use the array itself as a hash table — place each value x at index x-1.
+
+After placing all valid values, I scan for the first index i where nums[i] ≠ i+1.
+That tells me i+1 is missing.
+
+This gives O(n) time because each element is swapped at most once, and O(1) auxiliary space since I modify in-place."
+      </div>
+    </div>
+
+    <div class="concept-box" style="margin-top: 1rem;">
+      <div class="concept-box-title">🔄 Follow-up Questions</div>
+      <ul>
+        <li><strong>"What if we can't modify the array?"</strong> — Need O(n) space (hash set or boolean array)</li>
+        <li><strong>"What about negative marking instead?"</strong> — Alternative: mark presence by negating nums[x-1]</li>
+        <li><strong>"Find ALL missing positives?"</strong> — Same approach, collect all violations</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Interactive Walkthrough -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">6</span>
+      <span class="section-title">🎯 Interactive Step-by-Step Walkthrough</span>
+    </div>
+
+    <div class="array-section">
+      <div class="section-label">Array State</div>
+      <div class="ptr-labels" id="ptrLabels"></div>
+      <div class="array-row" id="arrayRow"></div>
+      <div class="idx-labels" id="idxLabels"></div>
+      <div class="expected-labels" id="expectedLabels"></div>
+    </div>
+
+    <div class="var-tracker" id="varTracker"></div>
+
+    <div class="code-panel" id="codePanel">
+      <div class="code-line">def firstMissingPositive(nums):</div>
+      <div class="code-line">    n = len(nums)</div>
+      <div class="code-line">    for i in range(n):</div>
+      <div class="code-line">        while 1 <= nums[i] <= n and nums[nums[i]-1] != nums[i]:</div>
+      <div class="code-line">            target = nums[i] - 1</div>
+      <div class="code-line">            nums[i], nums[target] = nums[target], nums[i]</div>
+      <div class="code-line">    for i in range(n):</div>
+      <div class="code-line">        if nums[i] != i + 1:</div>
+      <div class="code-line">            return i + 1</div>
+      <div class="code-line">    return n + 1</div>
+    </div>
+
+    <div class="info-box" id="infoBox">
+      <div class="phase-row">
+        <span class="phase-badge phase-init">Init</span>
+        <span class="step-num">Step 0 / 0</span>
+      </div>
+      <div class="info-title"></div>
+      <div class="info-body"></div>
+    </div>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="go(-1)">← Prev</button>
+      <button class="btn primary" id="nextBtn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch ls-scan"></div>Current (i)</div>
+      <div class="legend-item"><div class="legend-swatch ls-target"></div>Target</div>
+      <div class="legend-item"><div class="legend-swatch ls-swap"></div>Swapping</div>
+      <div class="legend-item"><div class="legend-swatch ls-correct"></div>Correct</div>
+      <div class="legend-item"><div class="legend-swatch ls-wrong"></div>Wrong</div>
+      <div class="legend-item"><div class="legend-swatch ls-ignore"></div>Ignored</div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Summary -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-number">7</span>
+      <span class="section-title">Summary & Key Takeaways</span>
+    </div>
+
+    <div class="takeaways">
+      <div class="takeaway">✓ Answer is always in [1, n+1] — so only care about values in that range</div>
+      <div class="takeaway">✓ Use array as hash table: place value x at index x-1</div>
+      <div class="takeaway">✓ While loop for swapping handles chain reactions</div>
+      <div class="takeaway">✓ Compare VALUES not indices to avoid infinite loops with duplicates</div>
+      <div class="takeaway">✓ Scan phase finds first violation — that index+1 is the answer</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use Cyclic Sort / Index Mapping</div>
+      <ul>
+        <li>Find missing/duplicate in range [1, n] or [0, n-1]</li>
+        <li>O(1) space constraint</li>
+        <li>Values naturally map to indices (pigeonhole principle)</li>
+        <li>"First missing positive" type problems</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Find the Duplicate Number</strong> (Medium) — Cyclic sort variant</li>
+        <li><strong>Find All Numbers Disappeared in an Array</strong> (Easy) — Same index mapping</li>
+        <li><strong>Find All Duplicates in an Array</strong> (Medium) — Mark with negatives or swap</li>
+        <li><strong>Missing Number</strong> (Easy) — XOR or sum-based simpler variant</li>
+        <li><strong>Set Mismatch</strong> (Easy) — Find both missing and duplicate</li>
+        <li><strong>Couples Holding Hands</strong> (Hard) — Cyclic sort on pairs</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// Example: [3, 4, -1, 1] → Answer: 2
+const initialArr = [3, 4, -1, 1];
+let arr = [...initialArr];
+const n = arr.length;
+
+const steps = [
+  // Step 0: Initial
+  {
+    phase: 'init', phaseClass: 'phase-init', activeLine: 0,
+    title: 'Initial Array',
+    text: 'Array [3, 4, -1, 1] with n=4. The answer must be in [1, 5]. Let\'s place each value x at index x-1.',
+    arr: [3, 4, -1, 1],
+    cells: ['normal', 'normal', 'normal', 'normal'],
+    pointers: {},
+    vars: { i: '-', n: 4, answer: '?' },
+    changed: []
+  },
+  // Step 1: i=0, check nums[0]=3
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=0: Check nums[0]=3',
+    text: 'Is 3 in range [1,4]? YES. Is nums[3-1]=nums[2]=-1 ≠ 3? YES. We need to swap 3 to index 2.',
+    arr: [3, 4, -1, 1],
+    cells: ['scan', 'normal', 'target', 'normal'],
+    pointers: { 0: 'i', 2: 'target' },
+    vars: { i: 0, n: 4, 'nums[i]': 3 },
+    changed: ['i', 'nums[i]']
+  },
+  // Step 2: Swap 3 and -1
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 5,
+    title: 'Swap: nums[0] ↔ nums[2]',
+    text: 'Swapping 3 to its home index 2. Array becomes [-1, 4, 3, 1]. Now nums[0]=-1.',
+    arr: [-1, 4, 3, 1],
+    cells: ['swap', 'normal', 'swap', 'normal'],
+    pointers: { 0: 'i', 2: 'home' },
+    vars: { i: 0, n: 4, 'nums[i]': -1 },
+    changed: ['nums[i]']
+  },
+  // Step 3: i=0, check nums[0]=-1
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=0: Check nums[0]=-1',
+    text: 'Is -1 in range [1,4]? NO (negative). Stop swapping at i=0. Move to i=1.',
+    arr: [-1, 4, 3, 1],
+    cells: ['ignore', 'normal', 'correct', 'normal'],
+    pointers: { 0: 'i' },
+    vars: { i: 0, n: 4, 'nums[i]': -1 },
+    changed: []
+  },
+  // Step 4: i=1, check nums[1]=4
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=1: Check nums[1]=4',
+    text: 'Is 4 in range [1,4]? YES. Is nums[4-1]=nums[3]=1 ≠ 4? YES. Swap 4 to index 3.',
+    arr: [-1, 4, 3, 1],
+    cells: ['ignore', 'scan', 'correct', 'target'],
+    pointers: { 1: 'i', 3: 'target' },
+    vars: { i: 1, n: 4, 'nums[i]': 4 },
+    changed: ['i', 'nums[i]']
+  },
+  // Step 5: Swap 4 and 1
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 5,
+    title: 'Swap: nums[1] ↔ nums[3]',
+    text: 'Swapping 4 to its home index 3. Array becomes [-1, 1, 3, 4]. Now nums[1]=1.',
+    arr: [-1, 1, 3, 4],
+    cells: ['ignore', 'swap', 'correct', 'swap'],
+    pointers: { 1: 'i', 3: 'home' },
+    vars: { i: 1, n: 4, 'nums[i]': 1 },
+    changed: ['nums[i]']
+  },
+  // Step 6: i=1, check nums[1]=1
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=1: Check nums[1]=1',
+    text: 'Is 1 in range [1,4]? YES. Is nums[1-1]=nums[0]=-1 ≠ 1? YES. Swap 1 to index 0.',
+    arr: [-1, 1, 3, 4],
+    cells: ['target', 'scan', 'correct', 'correct'],
+    pointers: { 0: 'target', 1: 'i' },
+    vars: { i: 1, n: 4, 'nums[i]': 1 },
+    changed: []
+  },
+  // Step 7: Swap 1 and -1
+  {
+    phase: 'swap', phaseClass: 'phase-swap', activeLine: 5,
+    title: 'Swap: nums[1] ↔ nums[0]',
+    text: 'Swapping 1 to its home index 0. Array becomes [1, -1, 3, 4]. Now nums[1]=-1.',
+    arr: [1, -1, 3, 4],
+    cells: ['swap', 'swap', 'correct', 'correct'],
+    pointers: { 0: 'home', 1: 'i' },
+    vars: { i: 1, n: 4, 'nums[i]': -1 },
+    changed: ['nums[i]']
+  },
+  // Step 8: i=1, check nums[1]=-1
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=1: Check nums[1]=-1',
+    text: 'Is -1 in range [1,4]? NO. Stop swapping at i=1. Move to i=2.',
+    arr: [1, -1, 3, 4],
+    cells: ['correct', 'ignore', 'correct', 'correct'],
+    pointers: { 1: 'i' },
+    vars: { i: 1, n: 4, 'nums[i]': -1 },
+    changed: []
+  },
+  // Step 9: i=2, check nums[2]=3
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=2: Check nums[2]=3',
+    text: 'Is 3 in range [1,4]? YES. Is nums[3-1]=nums[2]=3 ≠ 3? NO! Already correct. Move to i=3.',
+    arr: [1, -1, 3, 4],
+    cells: ['correct', 'ignore', 'scan', 'correct'],
+    pointers: { 2: 'i' },
+    vars: { i: 2, n: 4, 'nums[i]': 3 },
+    changed: ['i', 'nums[i]']
+  },
+  // Step 10: i=3, check nums[3]=4
+  {
+    phase: 'place', phaseClass: 'phase-place', activeLine: 3,
+    title: 'i=3: Check nums[3]=4',
+    text: 'Is 4 in range [1,4]? YES. Is nums[4-1]=nums[3]=4 ≠ 4? NO! Already correct. Placement phase complete!',
+    arr: [1, -1, 3, 4],
+    cells: ['correct', 'ignore', 'correct', 'scan'],
+    pointers: { 3: 'i' },
+    vars: { i: 3, n: 4, 'nums[i]': 4 },
+    changed: ['i', 'nums[i]']
+  },
+  // Step 11: Scan phase - check i=0
+  {
+    phase: 'scan', phaseClass: 'phase-scan', activeLine: 7,
+    title: 'Scan Phase: Check i=0',
+    text: 'Is nums[0]=1 equal to 0+1=1? YES ✓. Position 0 is correct.',
+    arr: [1, -1, 3, 4],
+    cells: ['correct', 'normal', 'normal', 'normal'],
+    pointers: { 0: 'i' },
+    vars: { i: 0, 'nums[i]': 1, 'i+1': 1 },
+    changed: ['i', 'nums[i]', 'i+1']
+  },
+  // Step 12: Scan - check i=1
+  {
+    phase: 'found', phaseClass: 'phase-found', activeLine: 8,
+    title: 'Scan Phase: Check i=1 — FOUND!',
+    text: 'Is nums[1]=-1 equal to 1+1=2? NO ✗. The value 2 is MISSING! Return i+1 = 2.',
+    arr: [1, -1, 3, 4],
+    cells: ['correct', 'wrong', 'normal', 'normal'],
+    pointers: { 1: 'MISS' },
+    vars: { i: 1, 'nums[i]': -1, 'i+1': 2, answer: 2 },
+    changed: ['answer']
+  },
+  // Step 13: Done
+  {
+    phase: 'done', phaseClass: 'phase-done', activeLine: 8,
+    title: '✅ Answer: 2',
+    text: 'The smallest missing positive integer is 2. Array has 1, 3, 4 but NOT 2.',
+    arr: [1, -1, 3, 4],
+    cells: ['done', 'wrong', 'done', 'done'],
+    pointers: {},
+    vars: { answer: 2 },
+    changed: []
+  }
+];
+
+let step = 0;
+
+function render() {
+  const s = steps[step];
+  const currentArr = s.arr;
+  
+  // Array cells
+  document.getElementById('arrayRow').innerHTML = currentArr.map((v, i) => 
+    `<div class="cell ${s.cells[i]}">${v}</div>`
+  ).join('');
+  
+  // Index labels
+  document.getElementById('idxLabels').innerHTML = currentArr.map((_, i) => 
+    `<div class="idx-label">${i}</div>`
+  ).join('');
+  
+  // Expected labels
+  document.getElementById('expectedLabels').innerHTML = currentArr.map((_, i) => 
+    `<div class="expected-label">exp: ${i+1}</div>`
+  ).join('');
+  
+  // Pointer labels
+  document.getElementById('ptrLabels').innerHTML = currentArr.map((_, i) => {
+    const ptr = s.pointers[i];
+    if (ptr === 'i') return `<div class="ptr-label ptr-i">i</div>`;
+    if (ptr === 'target') return `<div class="ptr-label ptr-target">target</div>`;
+    if (ptr === 'home') return `<div class="ptr-label" style="background:var(--green-bg);color:var(--green-mid);">home</div>`;
+    if (ptr === 'MISS') return `<div class="ptr-label" style="background:var(--red-bg);color:var(--red-mid);">MISS</div>`;
+    return `<div class="ptr-label hidden">-</div>`;
+  }).join('');
+  
+  // Variable tracker
+  document.getElementById('varTracker').innerHTML = Object.entries(s.vars).map(([name, val]) => {
+    const changed = s.changed.includes(name) ? 'changed' : '';
+    return `<div class="var-box ${changed}">
+      <span class="var-name">${name}</span>
+      <span class="var-val">${val}</span>
+    </div>`;
+  }).join('');
+  
+  // Code highlighting
+  document.querySelectorAll('#codePanel .code-line').forEach((line, i) => {
+    line.classList.toggle('active', i === s.activeLine);
+  });
+  
+  // Info box
+  document.getElementById('infoBox').innerHTML = `
+    <div class="phase-row">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-num">Step ${step} / ${steps.length - 1}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-body">${s.text}</div>
+  `;
+  
+  // Progress dots
+  document.getElementById('progress').innerHTML = steps.map((_, i) => 
+    `<div class="dot ${i === step ? 'active' : ''}" onclick="goTo(${i})"></div>`
+  ).join('');
+  
+  // Button states
+  document.getElementById('prevBtn').disabled = step === 0;
+  document.getElementById('nextBtn').disabled = step === steps.length - 1;
+}
+
+function go(delta) {
+  step = Math.max(0, Math.min(steps.length - 1, step + delta));
+  render();
+}
+
+function goTo(i) {
+  step = i;
+  render();
+}
+
+function reset() {
+  step = 0;
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
