@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#125 · Valid Palindrome</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.code-comment{color:var(--text3)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Pointer row */
+.ptr-row{display:flex;gap:4px;min-height:24px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:46px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;line-height:1.4}
+.ptr-left{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-right{background:var(--green-bg);color:var(--green-mid)}
+
+/* Cells */
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:46px;height:46px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:17px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.left{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.right{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.both-match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.cell.skip{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.done{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:3px}
+.idx-slot{width:46px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* cleaned string row */
+.cleaned-section{margin-top:1.25rem}
+.cleaned-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+
+/* ── Comparison panel (before/after) ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:520px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-str{font-family:var(--mono);font-size:13px;color:var(--text);word-break:break-all;line-height:1.8}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 16px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);min-width:24px;text-align:center}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-skip{background:var(--bg2);color:var(--text3);border:1px solid var(--border2)}
+.phase-compare{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-mismatch{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:8px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-left{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-right{background:var(--green-bg);border-color:var(--green-border)}
+.sw-match{background:var(--green-bg);border-color:var(--green-border)}
+.sw-mismatch{background:var(--red-bg);border-color:var(--red-border)}
+.sw-skip{background:var(--bg2);border-color:var(--border)}
+.sw-done{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* ── Complexity Table ── */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13.5px}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
+.good{color:var(--green-mid);font-weight:600}
+.bad{color:var(--red-mid);font-weight:600}
+.cmp-table tr.highlight-row td{background:var(--green-bg)}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.takeaway::before{content:'✓';font-weight:700;flex-shrink:0}
+.related-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0.75rem 0}
+.related-list li{padding:9px 13px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;color:var(--text2)}
+.related-list li strong{color:var(--text)}
+
+/* ── Misc ── */
+hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+p{margin:0.5rem 0;color:var(--text2);font-size:14.5px}
+strong{color:var(--text)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 5px;border-radius:4px;color:var(--text)}
+h3{font-size:15px;font-weight:700;color:var(--text);margin:1.25rem 0 0.5rem}
+h4{font-size:13.5px;font-weight:700;color:var(--text);margin:0.75rem 0 0.25rem}
+ul{padding-left:1.25rem;color:var(--text2);font-size:14px}
+ul li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header>
+  <div class="problem-number">#125 · LeetCode Easy</div>
+  <h1>Valid Palindrome</h1>
+  <p class="subtitle">Skip non-alphanumeric characters, then check if cleaned string reads the same forwards and backwards</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Two Pointers + Skip Non-Alnum</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — UNDERSTANDING THE PROBLEM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s1','i1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon" id="i1">▲</span>
+  </div>
+  <div class="section-content" id="s1">
+
+    <p>Given a string <code>s</code>, determine if it is a palindrome <em>after</em>:</p>
+    <ol style="padding-left:1.5rem;color:var(--text2);font-size:14px;margin:0.5rem 0">
+      <li style="margin:4px 0">Converting all uppercase letters to lowercase</li>
+      <li style="margin:4px 0">Removing all non-alphanumeric characters (spaces, punctuation, etc.)</li>
+    </ol>
+    <p>A palindrome reads the same forwards and backwards. Examples of valid palindromes: <code>"racecar"</code>, <code>"abcba"</code>, <code>"a"</code>, <code>""</code> (empty string is trivially a palindrome).</p>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Raw Input</div>
+        <div class="panel-str">"A man, a plan, a canal: Panama"</div>
+        <p style="font-size:12px;margin-top:6px;color:var(--red-mid)">Has spaces, commas, colons, uppercase</p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ After Cleaning</div>
+        <div class="panel-str">"amanaplanacanalpanama"</div>
+        <p style="font-size:12px;margin-top:6px;color:var(--green-mid)">Only lowercase alphanumeric → palindrome ✓</p>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We don't need to actually build the cleaned string. We can use <strong>two pointers</strong> starting from each end, skipping non-alphanumeric characters on the fly, and comparing the letters/digits they land on. If all pairs match, it's a palindrome.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Edge Cases to Remember</div>
+      <ul>
+        <li>Empty string or all non-alphanumeric characters → cleaned string is <code>""</code> → <code>True</code> (empty is a palindrome)</li>
+        <li>Single alphanumeric character → always <code>True</code></li>
+        <li>Case insensitive: <code>'A'</code> == <code>'a'</code></li>
+        <li>Digits count: <code>"0P"</code> → cleaned: <code>"0p"</code> → not a palindrome</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s2','i2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two Pointers + Skip Non-Alnum</span>
+    <span class="collapse-icon" id="i2">▲</span>
+  </div>
+  <div class="section-content" id="s2">
+
+    <p>Two pointers <code>left</code> and <code>right</code> start at opposite ends of the string. They converge toward the centre, skipping non-alphanumeric characters and comparing what they land on.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Initialize <code>left = 0</code>, <code>right = len(s) - 1</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">While <code>left &lt; right</code>: advance <code>left</code> right past any non-alphanumeric chars.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text">While <code>left &lt; right</code>: advance <code>right</code> left past any non-alphanumeric chars.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text">Compare <code>s[left].lower()</code> with <code>s[right].lower()</code>. If they differ → return <code>False</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text">Move pointers inward: <code>left += 1</code>, <code>right -= 1</code>. Repeat from step 2.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text">If pointers cross without mismatch → return <code>True</code>.</span>
+      </div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Idea</th><th>Time</th><th>Space</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Clean then Reverse</td>
+          <td>Filter → new string → compare to reverse</td>
+          <td class="good">O(n)</td>
+          <td class="bad">O(n)</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>Two Pointer In-Place ✓</strong></td>
+          <td>Skip non-alnum on the fly, compare at pointers</td>
+          <td class="good">O(n)</td>
+          <td class="good">O(1)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Opposite-Direction Two Pointers?</div>
+      <p>A palindrome by definition mirrors around its centre: <code>s[0] == s[n-1]</code>, <code>s[1] == s[n-2]</code>, etc. Checking these pairs from the outside in naturally matches the problem structure. Each comparison either confirms a mirror pair or immediately reveals a mismatch — no need to look at the whole string if we find a mismatch early.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY IT WORKS
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s3','i3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon" id="i3">▲</span>
+  </div>
+  <div class="section-content" id="s3">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Loop Invariant</div>
+      <p>At the start of each iteration (when <code>left &lt; right</code> and both point at alphanumeric chars), all mirror pairs <em>outside</em> the current window <code>[left, right]</code> have already been verified as equal. If the current pair matches, we shrink the window inward; if not, the string is not a palindrome.</p>
+    </div>
+
+    <h3>Why Skipping Non-Alphanumeric is Correct</h3>
+    <p>The problem explicitly says to <em>remove</em> non-alphanumeric characters before checking. Our pointer skipping is logically equivalent: we're looking at only the alphanumeric characters in their original relative order, checking them as mirror pairs. Non-alphanumeric characters simply have no role in the palindrome test.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Empty after cleaning (<code>s = " "</code>):</strong> Pointers never satisfy <code>left &lt; right</code> with both on valid chars → return <code>True</code>.</span></div>
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Single alnum char (<code>s = "a!"</code>):</strong> <code>left</code> lands on 'a', <code>right</code> skips '!' back to 'a', then <code>left</code> ≥ <code>right</code> → loop ends → return <code>True</code>.</span></div>
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Early exit:</strong> First mismatch returns <code>False</code> immediately — no need to scan the rest of the string.</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — CODE (ANNOTATED)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s4','i4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon" id="i4">▲</span>
+  </div>
+  <div class="section-content" id="s4">
+
+    <h3>Optimal: Two Pointers + Skip Non-Alnum &nbsp;<span style="font-size:12px;color:var(--green-mid);font-weight:600">← Interview Pick</span></h3>
+    <div class="code-panel">
+<div class="code-line">def isPalindrome(s: str) -> bool:</div>
+<div class="code-line">    left, right = 0, len(s) - 1  <span class="code-comment"># start from both ends</span></div>
+<div class="code-line">    while left &lt; right:</div>
+<div class="code-line">        <span class="code-comment"># skip non-alphanumeric from the left</span></div>
+<div class="code-line">        while left &lt; right and not s[left].isalnum():</div>
+<div class="code-line">            left += 1</div>
+<div class="code-line">        <span class="code-comment"># skip non-alphanumeric from the right</span></div>
+<div class="code-line">        while left &lt; right and not s[right].isalnum():</div>
+<div class="code-line">            right -= 1</div>
+<div class="code-line">        <span class="code-comment"># compare (case-insensitive)</span></div>
+<div class="code-line">        if s[left].lower() != s[right].lower():</div>
+<div class="code-line">            return False</div>
+<div class="code-line">        left += 1   <span class="code-comment"># matched — move both inward</span></div>
+<div class="code-line">        right -= 1</div>
+<div class="code-line">    return True  <span class="code-comment"># all mirror pairs matched</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why <code>left &lt; right</code> guard inside inner while loops?</div>
+      <p>If all remaining characters to the right (or left) are non-alphanumeric, the inner loop would run past the opposite pointer without the guard. The guard ensures we don't advance <code>left</code> past <code>right</code> while skipping, which would make the outer comparison meaningless.</p>
+    </div>
+
+    <hr>
+    <h3>Alternative: Clean-then-Compare (Simpler to Read, O(n) Space)</h3>
+    <div class="code-panel">
+<div class="code-line">def isPalindrome_clean(s: str) -> bool:</div>
+<div class="code-line">    cleaned = [c.lower() for c in s if c.isalnum()]</div>
+<div class="code-line">    return cleaned == cleaned[::-1]</div>
+    </div>
+    <p style="margin-top:0.5rem">Clean and readable — but allocates O(n) extra space. Use the two-pointer approach in interviews when O(1) space is expected.</p>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s5','i5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon" id="i5">▲</span>
+  </div>
+  <div class="section-content" id="s5">
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Clarify the Cleaning Rules</div>
+        <p>State explicitly: "After converting to lowercase and removing non-alphanumeric characters, does it read the same both ways?" Confirm digits count as valid characters. Often interviewers add this wrinkle specifically to test whether you read the problem carefully.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — Lead with the Clean Approach, Then Optimise</div>
+        <p>It's perfectly valid to say "My first thought is to build a cleaned string and compare to its reverse — O(n) time, O(n) space." Then immediately say "I can do O(1) space with two pointers, skipping non-alnum characters in-place." This shows progression of thought.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — Explain the Skip Guard</div>
+        <p>Mention why both inner while loops also check <code>left &lt; right</code>: "If all remaining characters are punctuation, a pointer could overshoot, so I guard both inner loops." This shows attention to detail.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Walk Through Edge Cases</div>
+        <p>Mention: empty string (True), all non-alnum (True), single character (True), digits matter (<code>"race a car"</code> → False), case insensitive (<code>"A"</code> == <code>"a"</code>).</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key insight is: a palindrome mirrors around the centre..."<br>
+"So I'll use two pointers, starting from both ends converging inward."<br>
+"I skip any non-alphanumeric character before comparing the pair."<br>
+"Time O(n) — each character visited at most once. Space O(1) — just two pointers."<br>
+"Edge case: empty string or all-punctuation returns True — empty is trivially a palindrome."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-Up Questions to Expect</div>
+      <ul>
+        <li><strong>Valid Palindrome II</strong> — What if you can delete at most ONE character? → Two pointers, on mismatch try skipping left or right</li>
+        <li><strong>Longest Palindromic Substring</strong> — Find the longest palindrome in a string → Expand around center</li>
+        <li><strong>Palindrome Linked List</strong> — Check palindrome in a LL → Fast-slow pointer to find midpoint, reverse second half</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s6','i6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon" id="i6">▲</span>
+  </div>
+  <div class="section-content" id="s6">
+
+    <p style="font-size:13px;color:var(--text3);margin-bottom:4px">Tracing: <code>s = "race, a car"</code> → Expected: <code>False</code></p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Shows pointer skip over <code>','</code> and <code>' '</code>; ends on a mismatch <code>'e' ≠ 'a'</code></p>
+
+    <div class="viz-area">
+      <!-- Pointer row -->
+      <div class="ptr-row" id="ptr-row"></div>
+      <!-- Cells -->
+      <div class="cells-row" id="cells-row"></div>
+      <!-- Index row -->
+      <div class="idx-row" id="idx-row"></div>
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker" id="var-tracker"></div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="viz-code">
+      <div class="code-line" id="cl0">def isPalindrome(s: str) -> bool:</div>
+      <div class="code-line" id="cl1">    left, right = 0, len(s) - 1</div>
+      <div class="code-line" id="cl2">    while left &lt; right:</div>
+      <div class="code-line" id="cl3">        while left &lt; right and not s[left].isalnum():</div>
+      <div class="code-line" id="cl4">            left += 1</div>
+      <div class="code-line" id="cl5">        while left &lt; right and not s[right].isalnum():</div>
+      <div class="code-line" id="cl6">            right -= 1</div>
+      <div class="code-line" id="cl7">        if s[left].lower() != s[right].lower():</div>
+      <div class="code-line" id="cl8">            return False</div>
+      <div class="code-line" id="cl9">        left += 1; right -= 1</div>
+      <div class="code-line" id="cl10">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="step-counter" id="step-ctr">Step 1 of 13</div>
+      <div id="phase-badge" class="phase-badge phase-init">INITIALIZE</div>
+      <div class="step-title" id="step-title"></div>
+      <div class="step-body"  id="step-body"></div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys · R to reset</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-left"></div>left pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-right"></div>right pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div>Compared, match ✓</div>
+      <div class="legend-item"><div class="legend-swatch sw-mismatch"></div>Compared, mismatch ✗</div>
+      <div class="legend-item"><div class="legend-swatch sw-skip"></div>Skipped (non-alnum)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div>Confirmed mirror pair</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s7','i7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon" id="i7">▲</span>
+  </div>
+  <div class="section-content" id="s7">
+
+    <div class="takeaways">
+      <div class="takeaway">Two pointers converging from both ends — the natural structure for palindrome checking</div>
+      <div class="takeaway">Skip non-alphanumeric on the fly with inner while loops (no extra space needed)</div>
+      <div class="takeaway">Always guard inner skip loops with <code>left &lt; right</code> to prevent overshoot</div>
+      <div class="takeaway">Compare with <code>.lower()</code> for case-insensitive matching</div>
+      <div class="takeaway">Empty string (after cleaning) → <code>True</code> — loop never runs</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognise This Pattern</div>
+      <ul>
+        <li>"Check if reads the same forward and backward"</li>
+        <li>"Ignore non-alphanumeric / whitespace / special characters"</li>
+        <li>"Case-insensitive comparison"</li>
+        <li>Any problem verifying symmetry around a centre point</li>
+      </ul>
+    </div>
+
+    <h3>Related Problems</h3>
+    <ul class="related-list">
+      <li><strong>Valid Palindrome II</strong> (Easy) — At most one deletion allowed; on mismatch, try skipping left OR right pointer and recurse</li>
+      <li><strong>Longest Palindromic Substring</strong> (Medium) — Find longest palindromic substring; expand-around-center technique</li>
+      <li><strong>Palindrome Linked List</strong> (Easy) — Check palindrome in LL; fast-slow to find midpoint, reverse second half, compare</li>
+      <li><strong>Palindrome Number</strong> (Easy) — Check if integer is a palindrome without converting to string; reverse half the digits</li>
+      <li><strong>Valid Palindrome III</strong> (Hard) — At most k deletions; DP (LCS with reversed string)</li>
+      <li><strong>Reverse String</strong> (Easy) — Same two-pointer skeleton — swap from both ends</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p><strong>Main Pattern:</strong> String Processing &nbsp;·&nbsp; <strong>Sub-Pattern:</strong> Two Pointers + Skip Non-Alnum<br>
+      Source: DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 (Basic String Operations)</p>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// Demo: s = "race, a car"
+// r(0) a(1) c(2) e(3) ,(4) ' '(5) a(6) ' '(7) c(8) a(9) r(10)
+// alnum chars: r,a,c,e,a,c,a,r  →  mismatch at e vs a  →  False
+
+const DEMO = "race, a car";
+const DN   = DEMO.length; // 11
+
+// cell states: normal | left | right | both-match | mismatch | skip | done
+const STEPS_DATA = [
+  // Step 0: Initialize
+  {
+    cells: ['left','normal','normal','normal','normal','normal','normal','normal','normal','normal','right'],
+    lp:0, rp:10,
+    vars:{left:0, right:10, "s[L] vs s[R]":'—'},
+    changed:[],
+    activeLine:1, phaseClass:'phase-init', phaseLabel:'INITIALIZE',
+    title:"Initialize: left=0 ('r'), right=10 ('r')",
+    text:"Set left=0 and right=10 (last index). Both are alphanumeric — no skipping needed this round. Outer while: 0 < 10 ✓."
+  },
+  // Step 1: Compare r(0) vs r(10)
+  {
+    cells: ['both-match','normal','normal','normal','normal','normal','normal','normal','normal','normal','both-match'],
+    lp:0, rp:10,
+    vars:{left:0, right:10, "s[L] vs s[R]":"'r'=='r'"},
+    changed:["s[L] vs s[R]"],
+    activeLine:7, phaseClass:'phase-match', phaseLabel:"MATCH ✓",
+    title:"s[0]='r' vs s[10]='r' → match ✓",
+    text:"'r'.lower() == 'r'.lower(). Match! Advance: left→1, right→9."
+  },
+  // Step 2: Compare a(1) vs a(9)
+  {
+    cells: ['done','left','normal','normal','normal','normal','normal','normal','normal','right','done'],
+    lp:1, rp:9,
+    vars:{left:1, right:9, "s[L] vs s[R]":"'a'=='a'"},
+    changed:['left','right',"s[L] vs s[R]"],
+    activeLine:7, phaseClass:'phase-match', phaseLabel:"MATCH ✓",
+    title:"s[1]='a' vs s[9]='a' → match ✓",
+    text:"Both land on alphanumeric chars directly. 'a' == 'a'. Match! Advance: left→2, right→8."
+  },
+  // Step 3: Compare c(2) vs c(8)
+  {
+    cells: ['done','done','left','normal','normal','normal','normal','normal','right','done','done'],
+    lp:2, rp:8,
+    vars:{left:2, right:8, "s[L] vs s[R]":"'c'=='c'"},
+    changed:['left','right',"s[L] vs s[R]"],
+    activeLine:7, phaseClass:'phase-match', phaseLabel:"MATCH ✓",
+    title:"s[2]='c' vs s[8]='c' → match ✓",
+    text:"'c' == 'c'. Match! Advance: left→3, right→7. Next iteration: left on 'e', right on ' ' (space — must skip)."
+  },
+  // Step 4: Skip — right=7 is ' ' (non-alnum), advance right left to 6 ('a')
+  {
+    cells: ['done','done','done','left','normal','normal','right','skip','done','done','done'],
+    lp:3, rp:6,
+    vars:{left:3, right:6, "s[L] vs s[R]":'—'},
+    changed:['left','right',"s[L] vs s[R]"],
+    activeLine:5, phaseClass:'phase-skip', phaseLabel:"SKIP",
+    title:"right skips ' ' at idx 7 → lands on 'a' at idx 6",
+    text:"s[7]=' ' is not alphanumeric. Inner while: right-- → right=6. s[6]='a' is alphanumeric — stop. left=3 ('e') was already on an alphanumeric char — no left skip needed."
+  },
+  // Step 5: Compare e(3) vs a(6) — MISMATCH
+  {
+    cells: ['done','done','done','mismatch','skip','skip','mismatch','skip','done','done','done'],
+    lp:3, rp:6,
+    vars:{left:3, right:6, "s[L] vs s[R]":"'e' ≠ 'a' ✗"},
+    changed:["s[L] vs s[R]"],
+    activeLine:8, phaseClass:'phase-mismatch', phaseLabel:"MISMATCH ✗",
+    title:"s[3]='e' vs s[6]='a' → MISMATCH → return False",
+    text:"'e'.lower() ≠ 'a'.lower(). Mismatch found! Return False immediately. \"race, a car\" is NOT a palindrome. Cleaned string is \"raceacar\" — 'e' at position 3 ≠ 'a' at position 4 in the cleaned sequence."
+  }
+];
+
+window.STEPS   = STEPS_DATA;
+window.VIZ_STR = DEMO;
+window.VIZ_N   = DN;
+</script>
+
+<script>
+// Render engine uses window.STEPS, window.VIZ_STR, window.VIZ_N
+let cur = 0;
+
+function render() {
+  const step = STEPS[cur];
+  const str  = VIZ_STR;
+  const n    = VIZ_N;
+
+  // ─── Pointer row ───
+  const ptrRow = document.getElementById('ptr-row');
+  ptrRow.innerHTML = '';
+  for (let k = 0; k < n; k++) {
+    const slot = document.createElement('div');
+    slot.className = 'ptr-slot';
+    if (k === step.lp && k === step.rp) {
+      slot.innerHTML = '<span class="ptr-lbl ptr-left" style="font-size:9px">L·R</span>';
+    } else if (k === step.lp) {
+      slot.innerHTML = '<span class="ptr-lbl ptr-left">L</span>';
+    } else if (k === step.rp) {
+      slot.innerHTML = '<span class="ptr-lbl ptr-right">R</span>';
+    }
+    ptrRow.appendChild(slot);
+  }
+
+  // ─── Cells row ───
+  const cellsRow = document.getElementById('cells-row');
+  cellsRow.innerHTML = '';
+  for (let k = 0; k < n; k++) {
+    const c = document.createElement('div');
+    c.className = 'cell ' + step.cells[k];
+    c.textContent = str[k] === ' ' ? '·' : str[k];
+    cellsRow.appendChild(c);
+  }
+
+  // ─── Index row ───
+  const idxRow = document.getElementById('idx-row');
+  idxRow.innerHTML = '';
+  for (let k = 0; k < n; k++) {
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    idxRow.appendChild(ix);
+  }
+
+  // ─── Variable tracker ───
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  Object.entries(step.vars).forEach(([name, val]) => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + ((step.changed||[]).includes(name) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+    vt.appendChild(box);
+  });
+
+  // ─── Code highlights ───
+  for (let l = 0; l <= 10; l++) {
+    const el = document.getElementById('cl' + l);
+    if (el) el.classList.toggle('active', l === step.activeLine);
+  }
+
+  // ─── Info card ───
+  document.getElementById('step-ctr').textContent = `Step ${cur+1} of ${STEPS.length}`;
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent  = step.text;
+
+  // ─── Progress dots ───
+  const dotsEl = document.getElementById('dots');
+  dotsEl.innerHTML = '';
+  STEPS.forEach((_,idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (idx===cur ? ' active' : idx<cur ? ' visited' : '');
+    d.onclick = () => { cur=idx; render(); };
+    dotsEl.appendChild(d);
+  });
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(STEPS.length-1, cur+dir));
+  render();
+}
+function reset() { cur=0; render(); }
+
+function toggle(contentId, iconId) {
+  const el   = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  const col  = el.classList.toggle('collapsed');
+  icon.textContent = col ? '▼' : '▲';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') go(1);
+  if (e.key==='ArrowLeft')  go(-1);
+  if (e.key==='r'||e.key==='R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
