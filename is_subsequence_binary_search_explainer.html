@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#392 · Is Subsequence — Solution 2: Binary Search (Multi-Query)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.solution-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--purple-bg);color:var(--purple-mid);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+h1{font-size:28px;font-weight:700;margin:4px 0 8px;line-height:1.3}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.tag-followup{background:var(--amber-bg);color:var(--amber-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Standard Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.code-comment{color:var(--text3)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* String rows (t and s) */
+.string-section{margin-bottom:1.25rem}
+.string-label-row{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:48px;height:48px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:19px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.found{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.skip{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.idx-row{display:flex;gap:4px;margin-top:3px}
+.idx-slot{width:48px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Positions Map Panel ── */
+.pos-map-panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem;margin:1rem 0}
+.pos-map-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px}
+.pos-map-rows{display:flex;flex-direction:column;gap:5px}
+.pos-map-row{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;border-radius:8px;
+  transition:background 0.3s,border-color 0.3s;
+  border:1.5px solid transparent;
+}
+.pos-map-row.querying{background:var(--blue-bg);border-color:var(--blue-border)}
+.pos-map-char{font-family:var(--mono);font-size:15px;font-weight:700;width:16px;color:var(--text);flex-shrink:0}
+.pos-map-colon{color:var(--text3);font-size:13px;margin-right:2px;flex-shrink:0}
+.pos-map-cells{display:flex;gap:5px;flex-wrap:wrap}
+.pos-map-cell{
+  width:32px;height:32px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  border:1.5px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:all 0.3s;
+}
+.pos-map-cell.before{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.pos-map-cell.selected{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.pos-map-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3);opacity:0.55}
+
+/* ── Bisect Detail Panel ── */
+.bisect-panel{background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);padding:1rem;margin:1rem 0}
+.bisect-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:8px}
+.bisect-formula{font-family:var(--mono);font-size:13px;color:var(--cyan-text);margin-bottom:12px;line-height:1.5}
+.bisect-cells-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bisect-cell-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.bisect-cell{
+  width:44px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:600;
+  border:2px solid;
+  transition:all 0.3s;
+}
+.bisect-cell.before-curr{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.bisect-cell.selected-match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.bisect-cell.normal-cell{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.bisect-cell-lbl{font-size:10px;font-weight:700;text-align:center;line-height:1.2}
+.lbl-before{color:var(--red-mid)}
+.lbl-selected{color:var(--green-mid)}
+.bisect-result{font-size:13px;color:var(--cyan-text);margin-top:4px;line-height:1.5}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 16px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:24px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.viz-code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:10px 14px;font-family:var(--mono);font-size:12px;line-height:1.85;overflow-x:auto}
+.viz-code-panel .code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.viz-code-panel .code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.viz-code-panel .code-comment{color:var(--text3)}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-query{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--blue-bg);color:var(--blue-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:8px;margin:1.25rem 0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-skip{background:var(--bg2);border-color:var(--border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+.sw-before{background:var(--red-bg);border-color:var(--red-border)}
+
+/* ── Complexity Table ── */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13.5px}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
+.good{color:var(--green-mid);font-weight:600}
+.cmp-table tr.highlight-row td{background:var(--green-bg)}
+
+/* ── Cost Comparison ── */
+.cost-compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:500px){.cost-compare{grid-template-columns:1fr}}
+.cost-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.cost-box h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.cost-box.sol1{background:var(--bg2);border-color:var(--border2)}
+.cost-box.sol1 h4{color:var(--text2)}
+.cost-box.sol2{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.cost-box.sol2 h4{color:var(--cyan-mid)}
+.cost-formula{font-family:var(--mono);font-size:13px;color:var(--text);margin:4px 0}
+.cost-when{font-size:12px;color:var(--text2);margin-top:6px}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.takeaway::before{content:'✓';font-weight:700;flex-shrink:0}
+.related-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0.75rem 0}
+.related-list li{padding:9px 13px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;color:var(--text2)}
+.related-list li strong{color:var(--text)}
+
+/* ── Misc ── */
+hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+p{margin:0.5rem 0;color:var(--text2);font-size:14.5px}
+strong{color:var(--text)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 5px;border-radius:4px;color:var(--text)}
+h3{font-size:15px;font-weight:700;color:var(--text);margin:1.25rem 0 0.5rem}
+h4{font-size:13.5px;font-weight:700;color:var(--text);margin:0.75rem 0 0.25rem}
+ul{padding-left:1.25rem;color:var(--text2);font-size:14px}
+ul li{margin:5px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:520px){.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header>
+  <div class="problem-number">#392 · LeetCode Easy</div>
+  <div class="solution-badge">Solution 2 — Follow-Up Variant</div>
+  <h1>Is Subsequence<br><span style="font-size:20px;font-weight:500;color:var(--text2)">Binary Search for Multiple Queries</span></h1>
+  <p class="subtitle">Precompute once, answer k queries in O(|s|·log|t|) each — the interviewer's favourite follow-up</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy / Follow-Up</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Binary Search</span>
+    <span class="tag tag-followup">Multi-Query Optimisation</span>
+    <span class="tag tag-complexity">Preprocess: O(|t|)</span>
+    <span class="tag tag-complexity">Per Query: O(|s|·log|t|)</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — WHY A DIFFERENT APPROACH?
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s1','i1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Why Do We Need a Different Approach?</span>
+    <span class="collapse-icon" id="i1">▲</span>
+  </div>
+  <div class="section-content" id="s1">
+
+    <p>The greedy two-pointer from Solution 1 is O(|t|) per query — optimal for a <em>single</em> check. But the interviewer almost always follows up with:</p>
+
+    <div class="concept-box danger">
+      <div class="concept-box-title">🎤 The Follow-Up Question</div>
+      <p><em>"What if there are <strong>k = 10,000</strong> different patterns <code>s₁, s₂, …, sₖ</code> and we want to check each one against the same string <code>t</code>?"</em></p>
+    </div>
+
+    <p>With the greedy approach, each query rescans all of <code>t</code>. For k queries:</p>
+
+    <div class="cost-compare">
+      <div class="cost-box sol1">
+        <h4>Greedy × k Queries</h4>
+        <div class="cost-formula">Total: O(k · |t|)</div>
+        <div class="cost-when">If k=10,000 and |t|=100,000 → 10⁹ operations ✗</div>
+      </div>
+      <div class="cost-box sol2">
+        <h4>Precompute + Binary Search</h4>
+        <div class="cost-formula">Setup: O(|t|) once</div>
+        <div class="cost-formula">Each query: O(|s| · log|t|)</div>
+        <div class="cost-formula">Total: O(|t| + k · |s| · log|t|)</div>
+        <div class="cost-when">If |s|=10, k=10,000, |t|=100,000 → ~1.7M ops ✓</div>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Core Idea</div>
+      <p>Pay O(|t|) once upfront to build a lookup structure for <code>t</code>. For each query, instead of scanning all of <code>t</code> linearly, <strong>binary search</strong> for the next valid occurrence of each character of <code>s</code>.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s2','i2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Preprocess + Binary Search</span>
+    <span class="collapse-icon" id="i2">▲</span>
+  </div>
+  <div class="section-content" id="s2">
+
+    <h3>Phase 1 — Preprocess <code>t</code> (done once)</h3>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Scan <code>t</code> left-to-right, recording every index where each character appears.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">Store in a dict: <code>char → [sorted list of positions]</code>. Because we insert in index order, the lists are already sorted.</span>
+      </div>
+    </div>
+
+    <p>Example: <code>t = "caebcde"</code></p>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:12px 14px;font-family:var(--mono);font-size:13px;margin:8px 0;line-height:2">
+      positions = {'a': [1], 'b': [3], 'c': [0, 4], 'd': [5], 'e': [2, 6]}
+    </div>
+
+    <h3>Phase 2 — Answer Query for Pattern <code>s</code></h3>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Start with <code>curr = -1</code> (the "cursor" — next match must come strictly after this position).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">For each character <code>c</code> in <code>s</code>, look up <code>positions[c]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text">Use <code>bisect_right(positions[c], curr)</code> to find the index of the <em>first position strictly greater than</em> <code>curr</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text">If that index is past the end of the list → no valid occurrence → return <code>False</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text">Otherwise: <code>curr = positions[c][idx]</code>. Advance the cursor and continue.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text">If all characters of <code>s</code> matched successfully → return <code>True</code>.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why <code>bisect_right</code> and not <code>bisect_left</code>?</div>
+      <p><code>bisect_right(arr, x)</code> returns the index of the first element <em>strictly greater than</em> <code>x</code>. This is exactly what we need: the next occurrence of character <code>c</code> that comes <em>after</em> <code>curr</code>. Using <code>bisect_left</code> would return the first element <em>≥ curr</em>, which could match the same position twice if <code>curr</code> itself is in the list.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY IT WORKS (INVARIANT)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s3','i3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Ordering Invariant</span>
+    <span class="collapse-icon" id="i3">▲</span>
+  </div>
+  <div class="section-content" id="s3">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing character <code>s[k]</code>, the variable <code>curr</code> holds the index in <code>t</code> where <code>s[k]</code> was matched. Any subsequent match for <code>s[k+1]</code> must be at an index <strong>strictly greater than <code>curr</code></strong>. This enforces the "relative order preserved" requirement directly.</p>
+    </div>
+
+    <h3>Why <code>bisect_right</code> finds the correct match</h3>
+    <p>The positions list for any character is a <strong>sorted array</strong> of indices. <code>bisect_right(arr, curr)</code> returns the number of elements ≤ curr — which is exactly the index of the first element > curr. In O(log n) time, we skip all positions that are too early and land on the earliest valid one.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong>Empty <code>s</code>:</strong> The for-loop doesn't execute → return <code>True</code>. Empty string is a subsequence of anything.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong>Character not in <code>positions</code>:</strong> char never appears in <code>t</code> → return <code>False</code> immediately.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong>No position left after <code>curr</code>:</strong> <code>bisect_right</code> returns <code>len(positions[c])</code> (past end) → return <code>False</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">•</span>
+        <span class="step-text"><strong>Greedy correctness still holds:</strong> Taking the earliest valid position each time is still optimal — no reason to delay a match when an earlier one preserves order.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — THE CODE (ANNOTATED)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s4','i4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon" id="i4">▲</span>
+  </div>
+  <div class="section-content" id="s4">
+
+    <div class="code-panel">
+<div class="code-line">from collections import defaultdict</div>
+<div class="code-line">import bisect</div>
+<div class="code-line"></div>
+<div class="code-line"><span class="code-comment"># Call once with the large source string t</span></div>
+<div class="code-line">def preprocess(t: str) -> dict:</div>
+<div class="code-line">    positions = defaultdict(list)  <span class="code-comment"># char → sorted list of indices</span></div>
+<div class="code-line">    for i, c in enumerate(t):       <span class="code-comment"># scan t exactly once — O(|t|)</span></div>
+<div class="code-line">        positions[c].append(i)       <span class="code-comment"># lists are sorted automatically</span></div>
+<div class="code-line">    return positions</div>
+<div class="code-line"></div>
+<div class="code-line"><span class="code-comment"># Call for EACH of the k queries — O(|s| log |t|) per call</span></div>
+<div class="code-line">def isSubsequence_multi(s: str, positions: dict) -> bool:</div>
+<div class="code-line">    curr = -1  <span class="code-comment"># must find each char AFTER this position</span></div>
+<div class="code-line">    for c in s:</div>
+<div class="code-line">        if c not in positions: return False  <span class="code-comment"># never in t at all</span></div>
+<div class="code-line">        <span class="code-comment"># first index in positions[c] that is strictly > curr</span></div>
+<div class="code-line">        idx = bisect.bisect_right(positions[c], curr)</div>
+<div class="code-line">        if idx == len(positions[c]): return False  <span class="code-comment"># exhausted; no match</span></div>
+<div class="code-line">        curr = positions[c][idx]   <span class="code-comment"># commit to this match; advance cursor</span></div>
+<div class="code-line">    return True</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: using <code>bisect_left</code></div>
+      <p>If <code>curr = 4</code> and positions contains <code>4</code>, <code>bisect_left</code> would return the index OF 4 — the same position we just matched. Using it would allow matching the same position twice, breaking the ordering constraint. Always use <code>bisect_right</code> for "strictly after".</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Single-query usage</div>
+      <p>If you only have <em>one</em> query, don't use this. The O(|t|) preprocessing cost makes it break even only when you have multiple queries. For a single check, Solution 1's greedy with O(1) space is strictly better.</p>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Preprocessing</th><th>Per Query</th><th>Space</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>Greedy Two-Pointer</td><td class="good">—</td><td class="good">O(|t|)</td><td class="good">O(1)</td><td>1 query</td></tr>
+        <tr class="highlight-row"><td><strong>Binary Search ✓</strong></td><td>O(|t|)</td><td class="good">O(|s|·log|t|)</td><td>O(|t|)</td><td>k queries, same t</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s5','i5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: When to Mention This</span>
+    <span class="collapse-icon" id="i5">▲</span>
+  </div>
+  <div class="section-content" id="s5">
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Lead with Solution 1</div>
+        <p>Always start with the greedy two-pointer. It's simpler, O(1) space, and directly optimal for the base problem. Do NOT open with binary search — it over-complicates a straightforward problem.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — Proactively Mention the Follow-Up</div>
+        <p>After presenting Solution 1, volunteer: <em>"For the case of many queries against the same t, we can precompute a positions map and binary search…"</em> This signals strong problem-solving instinct.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — Derive the Trade-Off Clearly</div>
+        <p>Total cost analysis: O(|t| + k·|s|·log|t|) vs O(k·|t|). Binary search wins when k is large AND |s| ≪ |t|. Be able to state when each solution is better — this is where most candidates fall short.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Explain <code>bisect_right</code> Carefully</div>
+        <p>State explicitly: "I need <em>strictly greater than</em> curr, so I use <code>bisect_right</code> — if I used <code>bisect_left</code> with curr in the list, it would return the same index and break the ordering." Mentioning this subtlety shows depth.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say When the Follow-Up Arrives</h4>
+      <div class="script-content">
+"With k queries against the same t, re-running O(|t|) gets expensive..."<br>
+"I'll preprocess t once: map each char to its sorted list of positions. O(|t|)."<br>
+"For each query, I binary search each char's list for the first position > curr."<br>
+"bisect_right handles this: finds leftmost position strictly after curr."<br>
+"Per query: O(|s| log |t|). Total: O(|t| + k·|s|·log|t|)."<br>
+"This beats O(k·|t|) when |s| is small relative to |t|."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Deeper Extensions to Know</div>
+      <ul>
+        <li><strong>Space concern:</strong> Positions map is O(|t|) — acceptable since t is fixed</li>
+        <li><strong>What if t changes too?</strong> Each update to t requires re-building the map — amortized analysis depends on update frequency</li>
+        <li><strong>What if s has repeated chars?</strong> Works fine — each repeated char in s triggers its own bisect_right on the same positions list, advancing curr each time</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s6','i6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon" id="i6">▲</span>
+  </div>
+  <div class="section-content" id="s6">
+
+    <p style="font-size:13px;color:var(--text3);margin-bottom:4px">Tracing: <code>s = "ace"</code>, <code>t = "caebcde"</code> — Note 2 c's and 2 e's in t (demonstrates binary search skipping out-of-order positions) → Expected: <code>True</code></p>
+
+    <!-- ── Visualization ── -->
+    <div class="viz-area">
+
+      <!-- t row -->
+      <div class="string-section">
+        <div class="string-label-row">Source string → t  (scanned during preprocessing; NOT re-scanned per query)</div>
+        <div class="cells-row" id="t-cells"></div>
+        <div class="idx-row"  id="t-idxs"></div>
+      </div>
+
+      <!-- s row -->
+      <div class="string-section">
+        <div class="string-label-row">Pattern → s  (current char being queried highlighted in blue)</div>
+        <div class="cells-row" id="s-cells"></div>
+        <div class="idx-row"  id="s-idxs"></div>
+      </div>
+
+      <!-- Positions Map Panel -->
+      <div class="pos-map-panel">
+        <div class="pos-map-header">Positions Map (built once from t)</div>
+        <div class="pos-map-rows" id="pos-map"></div>
+      </div>
+
+      <!-- Bisect Detail Panel -->
+      <div class="bisect-panel" id="bisect-panel">
+        <div class="bisect-header">Binary Search Detail</div>
+        <div class="bisect-formula" id="bisect-formula">—</div>
+        <div class="bisect-cells-row" id="bisect-cells"></div>
+        <div class="bisect-result" id="bisect-result"></div>
+      </div>
+
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker" id="var-tracker"></div>
+
+    <!-- Interactive Code Panel -->
+    <div class="viz-code-panel">
+      <div class="code-line" id="icl0">def preprocess(t):</div>
+      <div class="code-line" id="icl1">    positions = defaultdict(list)</div>
+      <div class="code-line" id="icl2">    for i, c in enumerate(t):</div>
+      <div class="code-line" id="icl3">        positions[c].append(i)</div>
+      <div class="code-line" id="icl4">    return positions</div>
+      <div class="code-line" id="icl5"> </div>
+      <div class="code-line" id="icl6">def isSubsequence_multi(s, positions):</div>
+      <div class="code-line" id="icl7">    curr = -1</div>
+      <div class="code-line" id="icl8">    for c in s:</div>
+      <div class="code-line" id="icl9">        if c not in positions: return False</div>
+      <div class="code-line" id="icl10">        idx = bisect.bisect_right(positions[c], curr)</div>
+      <div class="code-line" id="icl11">        if idx == len(positions[c]): return False</div>
+      <div class="code-line" id="icl12">        curr = positions[c][idx]</div>
+      <div class="code-line" id="icl13">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="step-counter" id="step-ctr">Step 1 of 8</div>
+      <div id="phase-badge" class="phase-badge phase-init">INITIALIZE</div>
+      <div class="step-title" id="step-title"></div>
+      <div class="step-body" id="step-body"></div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys · R to reset</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div>Current query char (s[i])</div>
+      <div class="legend-item"><div class="legend-swatch sw-found"></div>Matched ✓</div>
+      <div class="legend-item"><div class="legend-swatch sw-skip"></div>Rejected (position ≤ curr)</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div>Not involved</div>
+      <div class="legend-item"><div class="legend-swatch sw-before"></div>Position list: ≤ curr (skipped)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s7','i7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon" id="i7">▲</span>
+  </div>
+  <div class="section-content" id="s7">
+
+    <div class="takeaways">
+      <div class="takeaway">Precompute <code>positions</code> map once in O(|t|), amortise across all k queries</div>
+      <div class="takeaway"><code>bisect_right(positions[c], curr)</code> finds the first index > curr in O(log|t|)</div>
+      <div class="takeaway">Always use <code>bisect_right</code> (not <code>bisect_left</code>) to enforce strictly-after semantics</div>
+      <div class="takeaway">Use this solution only when k is large; for single queries, greedy is better</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Reach for This Pattern</div>
+      <ul>
+        <li>Multiple subsequence checks against the same fixed text</li>
+        <li>Any "find ordered occurrences in sorted indexed structure" problem</li>
+        <li>The text is static but queries are numerous</li>
+        <li>Interviewer asks: "Can you do better if you run this 10,000 times?"</li>
+      </ul>
+    </div>
+
+    <h3>Related Problems</h3>
+    <ul class="related-list">
+      <li><strong>Number of Matching Subsequences</strong> (Medium) — This exact algorithm applied to multiple patterns simultaneously; process by first char to batch queries</li>
+      <li><strong>Shortest Way to Form String</strong> (Medium) — Binary search on the same positions structure to count minimum copies of source needed</li>
+      <li><strong>Longest Common Subsequence</strong> (Medium) — Related in concept: ordered character matching, but via DP rather than greedy binary search</li>
+      <li><strong>Search Insert Position</strong> (Easy) — Pure binary search using <code>bisect_left</code>; establishes the <code>bisect</code> API fundamentals</li>
+      <li><strong>Find First and Last Position of Element in Sorted Array</strong> (Medium) — Same <code>bisect_left</code>/<code>bisect_right</code> duality</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p><strong>Main Pattern:</strong> String Processing &nbsp;·&nbsp; <strong>Sub-Pattern:</strong> Two Pointers (Greedy Match) + Binary Search on Precomputed Index<br>
+      See also: DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 &amp; Section 9 (Binary Search)</p>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+const S_STR = "ace";
+const T_STR = "caebcde";
+// t indices: c=0, a=1, e=2, b=3, c=4, d=5, e=6
+// positions: a:[1], b:[3], c:[0,4], d:[5], e:[2,6]
+
+const CHARS_ORDER = ['a','b','c','d','e'];
+
+const STEPS = [
+  // ─── Step 0: Preprocessing ───
+  {
+    phaseLabel: 'PREPROCESS',
+    phaseClass: 'phase-init',
+    sPtr: 0,
+    curr: -1,
+    queriedChar: null,
+    tCells: ['normal','normal','normal','normal','normal','normal','normal'],
+    posMap: {
+      a: [{v:1,  s:'normal'}],
+      b: [{v:3,  s:'normal'}],
+      c: [{v:0,  s:'normal'}, {v:4, s:'normal'}],
+      d: [{v:5,  s:'normal'}],
+      e: [{v:2,  s:'normal'}, {v:6, s:'normal'}]
+    },
+    bisect: null,
+    vars: {curr:-1, 'query i':0},
+    changed: [],
+    activeLine: 1,
+    title: 'Build positions map in O(|t|) — done once',
+    text: 'Scan t="caebcde" left-to-right, appending each index to that character\'s list. Result: {\'a\':[1], \'b\':[3], \'c\':[0,4], \'d\':[5], \'e\':[2,6]}. Since we insert in index order, lists are already sorted. This O(|t|) work is shared across all k queries. curr=-1 means "no match placed yet; first match can be anywhere."'
+  },
+  // ─── Step 1: Query 'a' ───
+  {
+    phaseLabel: "QUERY s[0]='a'",
+    phaseClass: 'phase-query',
+    sPtr: 0,
+    curr: -1,
+    queriedChar: 'a',
+    tCells: ['normal','active','normal','normal','normal','normal','normal'],
+    posMap: {
+      a: [{v:1, s:'selected'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'normal'}, {v:4, s:'normal'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'normal'}, {v:6, s:'normal'}]
+    },
+    bisect: {
+      formula: "bisect_right(positions['a'], curr=-1)  =  bisect_right([1], -1)  =  0",
+      cells: [{v:1, s:'selected-match', lbl:'→ match'}],
+      result: 'idx=0 &lt; len([1])=1 ✓ &nbsp;→&nbsp; <strong>curr = positions[\'a\'][0] = 1</strong>'
+    },
+    vars: {curr:-1, 'query i':0},
+    changed: [],
+    activeLine: 10,
+    title: "bisect_right([1], -1) = 0 → match at t[1]='a'",
+    text: "Look up positions['a']=[1]. Call bisect_right([1], -1): find first position > -1. All positions pass (1 > -1), so result is index 0, value 1. t[1]='a' is the match. Since there's only one 'a' in t and it's valid, binary search trivially returns it."
+  },
+  // ─── Step 1b: Advance after 'a' ───
+  {
+    phaseLabel: "MATCH ✓  curr → 1",
+    phaseClass: 'phase-match',
+    sPtr: 1,
+    curr: 1,
+    queriedChar: 'a',
+    tCells: ['normal','found','normal','normal','normal','normal','normal'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'normal'}, {v:4, s:'normal'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'normal'}, {v:6, s:'normal'}]
+    },
+    bisect: {
+      formula: "curr = positions['a'][0] = 1",
+      cells: [{v:1, s:'selected-match', lbl:'committed'}],
+      result: '<strong>curr = 1.</strong> Next char to find: s[1]=\'c\', must appear at position &gt; 1 in t'
+    },
+    vars: {curr:1, 'query i':1},
+    changed: ['curr','query i'],
+    activeLine: 12,
+    title: "curr = 1. Next: find s[1]='c' strictly after position 1",
+    text: "curr advances to 1 (the index where 'a' was matched). The ordering constraint: every subsequent match must have an index > 1. The 'c' at t[0]=0 cannot be used — it's before our placed 'a'."
+  },
+  // ─── Step 2: Query 'c' — KEY STEP ───
+  {
+    phaseLabel: "QUERY s[1]='c'",
+    phaseClass: 'phase-query',
+    sPtr: 1,
+    curr: 1,
+    queriedChar: 'c',
+    tCells: ['skip','found','normal','normal','active','normal','normal'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'before'}, {v:4, s:'selected'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'normal'}, {v:6, s:'normal'}]
+    },
+    bisect: {
+      formula: "bisect_right(positions['c'], curr=1)  =  bisect_right([0, 4], 1)  =  1",
+      cells: [
+        {v:0, s:'before-curr', lbl:'≤ curr'},
+        {v:4, s:'selected-match', lbl:'→ match'}
+      ],
+      result: 'positions[\'c\'][0]=0 &le; 1 → <span style="color:var(--red-mid)">rejected</span>. idx=1 → <strong>curr = positions[\'c\'][1] = 4</strong>'
+    },
+    vars: {curr:1, 'query i':1},
+    changed: [],
+    activeLine: 10,
+    title: "bisect_right([0,4], 1): t[0] REJECTED (≤ curr), match at t[4]='c'",
+    text: "positions['c']=[0,4]. bisect_right([0,4], 1) = 1: the first element > 1 is at index 1, value 4. Position 0 is ≤ curr=1 — using it would place 'c' before our matched 'a', violating order. The binary search instantly skips it with no linear scan. Match at t[4]='c'."
+  },
+  // ─── Step 2b: Advance after 'c' ───
+  {
+    phaseLabel: "MATCH ✓  curr → 4",
+    phaseClass: 'phase-match',
+    sPtr: 2,
+    curr: 4,
+    queriedChar: 'c',
+    tCells: ['skip','found','normal','normal','found','normal','normal'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'done'}, {v:4, s:'done'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'normal'}, {v:6, s:'normal'}]
+    },
+    bisect: {
+      formula: "curr = positions['c'][1] = 4",
+      cells: [
+        {v:0, s:'before-curr', lbl:'skipped'},
+        {v:4, s:'selected-match', lbl:'committed'}
+      ],
+      result: '<strong>curr = 4.</strong> t[0]=\'c\' was permanently skipped. Next: find \'e\' strictly after position 4'
+    },
+    vars: {curr:4, 'query i':2},
+    changed: ['curr','query i'],
+    activeLine: 12,
+    title: "curr = 4. 'c' at t[0] skipped — order preserved. Next: 'e' after 4",
+    text: "Key insight: we jumped over the 'c' at t[0] in O(log n) — no linear traversal needed. curr=4. Any 'e' we match must be at index > 4. The 'e' at t[2]=2 is less than 4, so it will also be rejected."
+  },
+  // ─── Step 3: Query 'e' ───
+  {
+    phaseLabel: "QUERY s[2]='e'",
+    phaseClass: 'phase-query',
+    sPtr: 2,
+    curr: 4,
+    queriedChar: 'e',
+    tCells: ['skip','found','skip','normal','found','normal','active'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'done'}, {v:4, s:'done'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'before'}, {v:6, s:'selected'}]
+    },
+    bisect: {
+      formula: "bisect_right(positions['e'], curr=4)  =  bisect_right([2, 6], 4)  =  1",
+      cells: [
+        {v:2, s:'before-curr', lbl:'≤ curr'},
+        {v:6, s:'selected-match', lbl:'→ match'}
+      ],
+      result: 'positions[\'e\'][0]=2 &le; 4 → <span style="color:var(--red-mid)">rejected</span>. idx=1 → <strong>curr = positions[\'e\'][1] = 6</strong>'
+    },
+    vars: {curr:4, 'query i':2},
+    changed: [],
+    activeLine: 10,
+    title: "bisect_right([2,6], 4): t[2] REJECTED (≤ curr), match at t[6]='e'",
+    text: "positions['e']=[2,6]. bisect_right([2,6], 4)=1: first element > 4 is at index 1, value 6. Position 2 is ≤ curr=4 — the 'e' at t[2] comes before our matched 'c' at t[4]. Rejected. Binary search directly gives us the 'e' at t[6]."
+  },
+  // ─── Step 3b: Advance, all matched ───
+  {
+    phaseLabel: "ALL MATCHED ✅",
+    phaseClass: 'phase-match',
+    sPtr: 3,
+    curr: 6,
+    queriedChar: 'e',
+    tCells: ['skip','found','skip','normal','found','normal','found'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'done'}, {v:4, s:'done'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'done'}, {v:6, s:'done'}]
+    },
+    bisect: {
+      formula: "curr = positions['e'][1] = 6",
+      cells: [
+        {v:2, s:'before-curr', lbl:'skipped'},
+        {v:6, s:'selected-match', lbl:'committed'}
+      ],
+      result: '<strong>curr = 6. Loop ends — s fully consumed.</strong>'
+    },
+    vars: {curr:6, 'query i':'done'},
+    changed: ['curr','query i'],
+    activeLine: 12,
+    title: "curr = 6. 'ace' matched: a→t[1], c→t[4], e→t[6]",
+    text: "All 3 characters matched. Matched positions: 1 < 4 < 6 (strictly increasing — order preserved). Note: t[0]='c', t[2]='e', t[3]='b', t[5]='d' were never touched during queries. Binary search avoids scanning irrelevant characters entirely."
+  },
+  // ─── Step 4: Result ───
+  {
+    phaseLabel: 'RESULT ✅ TRUE',
+    phaseClass: 'phase-result',
+    sPtr: 3,
+    curr: 6,
+    queriedChar: null,
+    tCells: ['skip','found','skip','normal','found','normal','found'],
+    posMap: {
+      a: [{v:1, s:'done'}],
+      b: [{v:3, s:'normal'}],
+      c: [{v:0, s:'done'}, {v:4, s:'done'}],
+      d: [{v:5, s:'normal'}],
+      e: [{v:2, s:'done'}, {v:6, s:'done'}]
+    },
+    bisect: null,
+    vars: {curr:6, 'query i':'done'},
+    changed: [],
+    activeLine: 13,
+    title: 'return True — O(|s|·log|t|) = O(3·log7) ≈ 8 operations for this query',
+    text: "For this query: 3 bisect calls × O(log 7) each = ~8 comparisons. Compare with greedy: O(|t|)=O(7). For a single query binary search is comparable. For k=10,000 queries: binary search uses 10,000×8=80,000 ops vs greedy 10,000×7=70,000 — barely wins here since |t| is tiny. At real scale |s|=10, |t|=100,000: binary search 10,000×170=1.7M vs greedy 10,000×100,000=1B ops."
+  }
+];
+
+let cur = 0;
+const MAX_LINE = 13;
+
+function render() {
+  const step = STEPS[cur];
+
+  // ─── t cells ───
+  const tCellsEl = document.getElementById('t-cells');
+  const tIdxsEl  = document.getElementById('t-idxs');
+  tCellsEl.innerHTML = tIdxsEl.innerHTML = '';
+  for (let k = 0; k < T_STR.length; k++) {
+    const c = document.createElement('div');
+    c.className = 'cell ' + step.tCells[k];
+    c.textContent = T_STR[k];
+    tCellsEl.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    tIdxsEl.appendChild(ix);
+  }
+
+  // ─── s cells ───
+  const sCellsEl = document.getElementById('s-cells');
+  const sIdxsEl  = document.getElementById('s-idxs');
+  sCellsEl.innerHTML = sIdxsEl.innerHTML = '';
+  for (let k = 0; k < S_STR.length; k++) {
+    let state = 'normal';
+    if (step.sPtr !== null) {
+      if (k < step.sPtr) state = 'found';
+      else if (k === step.sPtr) state = 'active';
+    }
+    if (step.sPtr >= S_STR.length) state = 'found';
+    const c = document.createElement('div');
+    c.className = 'cell ' + state;
+    c.textContent = S_STR[k];
+    sCellsEl.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    sIdxsEl.appendChild(ix);
+  }
+
+  // ─── Positions map ───
+  const posMapEl = document.getElementById('pos-map');
+  posMapEl.innerHTML = '';
+  for (const ch of CHARS_ORDER) {
+    const row = document.createElement('div');
+    row.className = 'pos-map-row' + (ch === step.queriedChar ? ' querying' : '');
+
+    const charEl = document.createElement('span');
+    charEl.className = 'pos-map-char';
+    charEl.textContent = ch;
+    row.appendChild(charEl);
+
+    const colon = document.createElement('span');
+    colon.className = 'pos-map-colon';
+    colon.textContent = ':';
+    row.appendChild(colon);
+
+    const cellsWrap = document.createElement('div');
+    cellsWrap.className = 'pos-map-cells';
+    for (const cell of step.posMap[ch]) {
+      const el = document.createElement('div');
+      el.className = 'pos-map-cell ' + cell.s;
+      el.textContent = cell.v;
+      cellsWrap.appendChild(el);
+    }
+    row.appendChild(cellsWrap);
+    posMapEl.appendChild(row);
+  }
+
+  // ─── Bisect panel ───
+  const bPanel = document.getElementById('bisect-panel');
+  if (step.bisect) {
+    bPanel.style.display = '';
+    document.getElementById('bisect-formula').textContent = step.bisect.formula;
+
+    const bCells = document.getElementById('bisect-cells');
+    bCells.innerHTML = '';
+    for (const cell of step.bisect.cells) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bisect-cell-wrap';
+
+      const el = document.createElement('div');
+      el.className = 'bisect-cell ' + cell.s;
+      el.textContent = cell.v;
+      wrap.appendChild(el);
+
+      if (cell.lbl) {
+        const lbl = document.createElement('div');
+        lbl.className = 'bisect-cell-lbl ' +
+          (cell.s === 'before-curr' ? 'lbl-before' :
+           cell.s === 'selected-match' ? 'lbl-selected' : '');
+        lbl.textContent = cell.lbl;
+        wrap.appendChild(lbl);
+      }
+      bCells.appendChild(wrap);
+    }
+
+    document.getElementById('bisect-result').innerHTML = step.bisect.result;
+  } else {
+    bPanel.style.display = 'none';
+  }
+
+  // ─── Variable tracker ───
+  const vtEl = document.getElementById('var-tracker');
+  vtEl.innerHTML = '';
+  Object.entries(step.vars).forEach(([name, val]) => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + ((step.changed || []).includes(name) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+    vtEl.appendChild(box);
+  });
+
+  // ─── Code highlights ───
+  for (let l = 0; l <= MAX_LINE; l++) {
+    const el = document.getElementById('icl' + l);
+    if (el) el.classList.toggle('active', l === step.activeLine);
+  }
+
+  // ─── Info card ───
+  document.getElementById('step-ctr').textContent = `Step ${cur + 1} of ${STEPS.length}`;
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent  = step.text;
+
+  // ─── Progress dots ───
+  const dotsEl = document.getElementById('dots');
+  dotsEl.innerHTML = '';
+  STEPS.forEach((_, idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (idx === cur ? ' active' : idx < cur ? ' visited' : '');
+    d.onclick = () => { cur = idx; render(); };
+    dotsEl.appendChild(d);
+  });
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, cur + dir));
+  render();
+}
+
+function reset() { cur = 0; render(); }
+
+// Collapsible sections
+function toggle(contentId, iconId) {
+  const el   = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  const collapsed = el.classList.toggle('collapsed');
+  icon.textContent = collapsed ? '▼' : '▲';
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Boot
+render();
+</script>
+</body>
+</html>
