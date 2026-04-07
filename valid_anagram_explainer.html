@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#242 · Valid Anagram</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.str-section{display:flex;align-items:flex-start;gap:12px}
+.str-label-box{width:18px;height:42px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text3);flex-shrink:0;margin-top:22px}
+.str-col{display:flex;flex-direction:column}
+
+.ptr-row{display:flex;gap:4px;min-height:24px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:44px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;line-height:1.4;white-space:nowrap}
+.ptr-s{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-t{background:var(--green-bg);color:var(--green-mid)}
+
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:44px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:17px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active-s{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.active-t{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.result{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:4px}
+.idx-slot{width:44px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Freq Map ── */
+.freq-section{display:flex;flex-direction:column;align-items:center;margin-top:2rem}
+.freq-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:14px}
+.freq-map{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.freq-cell{
+  display:flex;flex-direction:column;align-items:center;
+  width:60px;padding:10px 6px;
+  border-radius:var(--radius);border:2px solid var(--border2);
+  background:var(--surface);
+  transition:background 0.3s,border-color 0.3s;
+  flex-shrink:0;
+}
+.freq-char{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text3);margin-bottom:6px}
+.freq-count{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text3);line-height:1;min-height:28px;display:flex;align-items:center}
+.freq-cell.unseen{opacity:0.3}
+.freq-cell.positive{background:var(--blue-bg);border-color:var(--blue-border)}
+.freq-cell.positive .freq-char{color:var(--blue-mid)}
+.freq-cell.positive .freq-count{color:var(--blue-text)}
+.freq-cell.zero{background:var(--green-bg);border-color:var(--green-border)}
+.freq-cell.zero .freq-char{color:var(--green-mid)}
+.freq-cell.zero .freq-count{color:var(--green-mid)}
+.freq-cell.negative{background:var(--red-bg);border-color:var(--red-border)}
+.freq-cell.negative .freq-char{color:var(--red-mid)}
+.freq-cell.negative .freq-count{color:var(--red-mid)}
+.freq-cell.changed{background:var(--amber-bg);border-color:var(--amber-border)}
+.freq-cell.changed .freq-char{color:var(--amber-mid)}
+.freq-cell.changed .freq-count{color:var(--amber-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-check{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-s{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-t{background:var(--green-bg);border-color:var(--green-border)}
+.sw-pos{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-zero{background:var(--green-bg);border-color:var(--green-border)}
+.sw-chg{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #242</div>
+  <h1>Valid Anagram</h1>
+  <p class="subtitle">Given two strings s and t, return true if t is an anagram of s, and false otherwise.</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Frequency Count</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(k)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>An <strong>anagram</strong> is a word formed by rearranging all the letters of another word. "listen" → "silent" is an anagram. "rat" → "car" is not — 'r', 'a', 't' ≠ 'c', 'a', 'r' (one has 't', the other has 'c').</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Two strings are anagrams if and only if <strong>every character appears the same number of times in both strings</strong>. Position is irrelevant — only character frequency matters.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Anagram: s="anagram", t="nagaram"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          s: a×3, n×1, g×1, r×1, m×1<br>
+          t: a×3, n×1, g×1, r×1, m×1<br>
+          Same frequencies → <strong>True</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Not Anagram: s="rat", t="car"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          s: r×1, a×1, t×1<br>
+          t: c×1, a×1, r×1<br>
+          s has 't', t has 'c' → <strong>False</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases to consider:</strong> strings of different lengths (always False), empty strings (both empty → True), strings of all-same characters like "aaa"/"aaa", and inputs containing only one character.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Pass Frequency Count</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain a single <strong>frequency map</strong> (hash map) as a tally sheet. <em>Increment</em> for each letter in <code>s</code>, then <em>decrement</em> for each letter in <code>t</code>. If all tallies return to zero — they're anagrams.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Quick-fail on length:</strong> If <code>len(s) != len(t)</code>, return False immediately. An anagram must use <em>all</em> original letters exactly once, so lengths must match.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Count s (increment pass):</strong> Iterate through <code>s</code>. For each character <code>c</code>, do <code>freq[c] += 1</code>. After this pass, <code>freq</code> maps each character to how many times it appears in s.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Verify t (decrement pass):</strong> Iterate through <code>t</code>. For each <code>c</code>, do <code>freq[c] -= 1</code>. If <code>freq[c]</code> drops <strong>below 0</strong>, t has used that character more times than s had it — return False immediately (fail fast).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return True:</strong> If we reach the end without any count going negative (and lengths matched), every character was used exactly the right number of times — t is a valid anagram of s.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Sorting Alternative (mention first in interviews)</div>
+      <p><code>return sorted(s) == sorted(t)</code> — if both strings sort to the same sequence, they're anagrams. Simple and correct, but <strong>O(n log n)</strong> time and O(n) space for the sorted copies. Propose this first, then offer to optimize to O(n).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At any point during the <code>t</code> scan, <code>freq[c]</code> equals <strong>(occurrences of c in s) − (occurrences of c in t processed so far)</strong>. It represents "how many more times c must still appear in the remaining t." If this goes negative, t has over-consumed c.</p>
+    </div>
+
+    <p><strong>Why negative means failure:</strong> After counting s, <code>freq[c]</code> = times c appears in s. As we scan t, each use decrements the remaining budget. A negative means t demanded c more times than s provided — that's impossible for a rearrangement.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why no final "all-zeros" check is needed:</strong> Since we already verified <code>len(s) == len(t)</code>, and no count went negative during the t pass, the total number of decrements equals the total increments. With equal totals and no overage, all counts must be exactly 0 at the end.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Trap: Checking Zeros at the End</div>
+      <p>Many beginners write <code>return all(v == 0 for v in freq.values())</code> after the loops. This is <em>correct</em> but <em>unnecessary</em> — the length equality check combined with "no negatives" already guarantees all zeros. The negative check during the loop also gives us early exit on bad input, which is more efficient.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Counter-example for intuition (s="rat", t="car"):</strong> After counting s: freq = {r:1, a:1, t:1}. Scanning t: 'c' → freq.get('c',0)−1 = −1 &lt; 0 → return False immediately. Clean and correct.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Frequency Count (Optimal, O(n) time)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isAnagram(s: str, t: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    if len(s) != len(t):         </span><span class="aann">← Quick fail: different lengths can't be anagrams</span></div>
+<div class="ann-line"><span class="acode">        return False</span></div>
+<div class="ann-line"><span class="acode">    freq = {}                    </span><span class="aann">← Tally sheet: char → (count in s) − (count in t so far)</span></div>
+<div class="ann-line"><span class="acode">    for c in s:                  </span><span class="aann">← Pass 1: count each character in s</span></div>
+<div class="ann-line"><span class="acode">        freq[c] = freq.get(c, 0) + 1  </span><span class="aann">← get(c, 0) handles unseen chars gracefully</span></div>
+<div class="ann-line"><span class="acode">    for c in t:                  </span><span class="aann">← Pass 2: subtract each character in t</span></div>
+<div class="ann-line"><span class="acode">        freq[c] = freq.get(c, 0) - 1  </span><span class="aann">← If c not in s, get returns 0, becomes -1</span></div>
+<div class="ann-line"><span class="acode">        if freq[c] &lt; 0:          </span><span class="aann">← t used this char more than s had it → fail fast</span></div>
+<div class="ann-line"><span class="acode">            return False</span></div>
+<div class="ann-line"><span class="acode">    return True                  </span><span class="aann">← All counts balanced → valid anagram</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why freq.get(c, 0) in the t loop instead of freq[c]?</div>
+      <p>If t contains a character that was never in s, <code>freq[c]</code> raises a <code>KeyError</code>. Using <code>freq.get(c, 0)</code> defaults to 0. Subtracting 1 gives −1, triggering the <code>&lt; 0</code> check. This handles the "character not in s" case cleanly without any if-guards.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Sort and Compare (O(n log n), simpler)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isAnagram(s: str, t: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    return sorted(s) == sorted(t)  </span><span class="aann">← Rearrange both alphabetically, then compare</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Pythonic one-liner (interview bonus)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import Counter</span></div>
+<div class="ann-line"><span class="acode">def isAnagram(s: str, t: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    return Counter(s) == Counter(t)  </span><span class="aann">← Same O(n) logic, but no early exit on negatives</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Frequency Count:</strong> Time O(n), Space O(k) where k = distinct chars (≤ 26 for a–z → O(1))<br>
+        <strong>Sort &amp; Compare:</strong> Time O(n log n), Space O(n) for sorted copies<br>
+        <strong>Fixed Array (a–z only):</strong> <code>count = [0]*26</code>, index by <code>ord(c) - ord('a')</code> — same O(n)/O(1) with better cache locality
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Clarify Constraints</div>
+        <p style="font-size:14px;color:var(--text)">Ask: "Can the strings contain Unicode characters or only lowercase a–z?" If only lowercase, a fixed 26-element integer array works. If Unicode, use a hash map (handles any character). This shows you think about generality.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force First</div>
+        <p style="font-size:14px;color:var(--text)">"The intuitive approach: sort both strings and compare — <code>sorted(s) == sorted(t)</code>. O(n log n) time, O(n) space. Correct, but we can do better."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize with Frequency Count</div>
+        <p style="font-size:14px;color:var(--text)">"Instead of sorting, I can count character frequencies in one pass over s, then verify in one pass over t. If any count goes negative, t is using a character more than s had — return False. O(n) time, O(k) space."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Mention the Fixed Array Optimization</div>
+        <p style="font-size:14px;color:var(--text)">"If we're limited to lowercase English, I'd use <code>count = [0]*26</code> with index <code>ord(c) - ord('a')</code> instead of a dict — same complexity but better cache performance and no hashing overhead."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"First, I'll check if lengths differ — if so, immediate False, since anagrams use all letters exactly once.<br>
+Then I need to verify both strings have the same character counts. I'll use a frequency map.<br>
+Pass 1: count up each char in s. Pass 2: count down each char in t.<br>
+If any count goes below zero during Pass 2, t has over-used that character — return False.<br>
+Otherwise return True. Time O(n), Space O(1) for lowercase English (26 possible keys)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if the input is Unicode?"</strong> → Use a hash map (dict). Already handles it!</li>
+        <li><strong>"Find all anagram substrings of p in s?"</strong> → Sliding window + Counter (#438)</li>
+        <li><strong>"Group words that are anagrams of each other?"</strong> → Sort each word as a key (#49)</li>
+        <li><strong>"Minimum swaps to make two strings anagrams?"</strong> → Frequency delta (#1347)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: s="anagram", t="nagaram"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- String s -->
+      <div class="str-section">
+        <div class="str-label-box">s</div>
+        <div class="str-col">
+          <div class="ptr-row" id="s-ptrs"></div>
+          <div class="cells-row" id="s-cells"></div>
+          <div class="idx-row" id="s-idx"></div>
+        </div>
+      </div>
+      <!-- String t -->
+      <div class="str-section" style="margin-top:1.25rem">
+        <div class="str-label-box">t</div>
+        <div class="str-col">
+          <div class="ptr-row" id="t-ptrs"></div>
+          <div class="cells-row" id="t-cells"></div>
+          <div class="idx-row" id="t-idx"></div>
+        </div>
+      </div>
+      <!-- Frequency Map -->
+      <div class="freq-section">
+        <div class="freq-section-title">freq map · char → (count in s) − (count in t so far)</div>
+        <div class="freq-map" id="freq-map"></div>
+      </div>
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-phase">
+          <span class="var-name">phase</span>
+          <span class="var-val" id="vv-phase">—</span>
+        </div>
+        <div class="var-box" id="vb-char">
+          <span class="var-name">c</span>
+          <span class="var-val" id="vv-char">—</span>
+        </div>
+        <div class="var-box" id="vb-val">
+          <span class="var-name">freq[c]</span>
+          <span class="var-val" id="vv-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def isAnagram(s: str, t: str) -> bool:</div>
+      <div class="code-line" id="cl-1">    if len(s) != len(t):</div>
+      <div class="code-line" id="cl-2">        return False</div>
+      <div class="code-line" id="cl-3">    freq = {}</div>
+      <div class="code-line" id="cl-4">    for c in s:</div>
+      <div class="code-line" id="cl-5">        freq[c] = freq.get(c, 0) + 1</div>
+      <div class="code-line" id="cl-6">    for c in t:</div>
+      <div class="code-line" id="cl-7">        freq[c] = freq.get(c, 0) - 1</div>
+      <div class="code-line" id="cl-8">        if freq[c] &lt; 0:</div>
+      <div class="code-line" id="cl-9">            return False</div>
+      <div class="code-line" id="cl-10">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 16</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-s"></div> Current char (s)</div>
+      <div class="legend-item"><div class="legend-swatch sw-t"></div> Current char (t)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed</div>
+      <div class="legend-item"><div class="legend-swatch sw-pos"></div> freq &gt; 0 (still needed)</div>
+      <div class="legend-item"><div class="legend-swatch sw-zero"></div> freq = 0 (balanced)</div>
+      <div class="legend-item"><div class="legend-swatch sw-chg"></div> Just updated</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Anagram = same character frequencies (position is irrelevant)</div>
+      <div class="takeaway">Length check first — O(1) early exit before any counting</div>
+      <div class="takeaway">Fail fast during t scan if any freq[c] goes negative</div>
+      <div class="takeaway">For lowercase a–z, space is O(26) = O(1) — effectively constant</div>
+      <div class="takeaway">Counter(s) == Counter(t) is the Pythonic one-liner; manual approach teaches the invariant</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sort &amp; Compare</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Simplest; good starting point</td>
+        </tr>
+        <tr>
+          <td><strong>Frequency Count ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td>O(k)</td>
+          <td>Optimal; handles Unicode</td>
+        </tr>
+        <tr>
+          <td>Fixed Array [0]*26</td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Best constants; a–z only</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Frequency Count Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Same characters, different order?" → Frequency count</li>
+        <li>"Does A contain all characters in B?" → Frequency count</li>
+        <li>Sliding window with character matching → Frequency count + window shrink</li>
+        <li>Grouping words by character composition → Sort key from frequency</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Frequency Count)</div>
+      <div class="related-item"><strong>Group Anagrams</strong><span class="related-diff diff-med">Medium</span> — Sort each word as a key to bucket anagrams together (#49)</div>
+      <div class="related-item"><strong>Find All Anagrams in a String</strong><span class="related-diff diff-med">Medium</span> — Sliding window with frequency count over fixed-size window (#438)</div>
+      <div class="related-item"><strong>Ransom Note</strong><span class="related-diff diff-easy">Easy</span> — Can magazine characters cover the ransom note? One-sided frequency check (#383)</div>
+      <div class="related-item"><strong>Determine if Two Strings Are Close</strong><span class="related-diff diff-med">Medium</span> — Frequency bags must match (not values, just distribution) (#1657)</div>
+      <div class="related-item"><strong>Minimum Steps to Make Two Strings Anagram</strong><span class="related-diff diff-med">Medium</span> — Count the delta between two frequency maps (#1347)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 (String Processing → Basic String Operations)<br>
+      Sub-Pattern: <strong>Frequency Count</strong> · Source: Guide Section 2.1</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+const STR_S = "anagram";
+const STR_T = "nagaram";
+const FREQ_ORDER = ['a','n','g','r','m'];
+
+const steps = [
+  {
+    id:0,phase:'init',phaseLabel:'INIT',phaseClass:'phase-init',
+    sIdx:-1,tIdx:-1,freq:{},activeLine:3,
+    title:'Initialize',
+    text:'s = "anagram" and t = "nagaram" — both length 7. Lengths match, so we proceed. Initialize an empty frequency map that will tally character counts.',
+    changed:[]
+  },
+  {
+    id:1,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:0,tIdx:-1,freq:{a:1},activeLine:5,
+    title:"s[0] = 'a'  →  freq['a'] = 1",
+    text:"Scanning s. At index 0: character 'a'. freq.get('a', 0) + 1 = 0 + 1 = 1. First character seen — freq = {a: 1}.",
+    changed:['a']
+  },
+  {
+    id:2,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:1,tIdx:-1,freq:{a:1,n:1},activeLine:5,
+    title:"s[1] = 'n'  →  freq['n'] = 1",
+    text:"Index 1: 'n'. New character — not yet in freq. freq.get('n', 0) + 1 = 1. freq = {a:1, n:1}.",
+    changed:['n']
+  },
+  {
+    id:3,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:2,tIdx:-1,freq:{a:2,n:1},activeLine:5,
+    title:"s[2] = 'a'  →  freq['a'] = 2",
+    text:"Index 2: 'a' again. freq.get('a', 0) + 1 = 1 + 1 = 2. freq = {a:2, n:1}.",
+    changed:['a']
+  },
+  {
+    id:4,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:3,tIdx:-1,freq:{a:2,n:1,g:1},activeLine:5,
+    title:"s[3] = 'g'  →  freq['g'] = 1",
+    text:"Index 3: 'g'. New character. freq = {a:2, n:1, g:1}.",
+    changed:['g']
+  },
+  {
+    id:5,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:4,tIdx:-1,freq:{a:2,n:1,g:1,r:1},activeLine:5,
+    title:"s[4] = 'r'  →  freq['r'] = 1",
+    text:"Index 4: 'r'. New character. freq = {a:2, n:1, g:1, r:1}.",
+    changed:['r']
+  },
+  {
+    id:6,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:5,tIdx:-1,freq:{a:3,n:1,g:1,r:1},activeLine:5,
+    title:"s[5] = 'a'  →  freq['a'] = 3",
+    text:"Index 5: 'a' for the third time. freq['a']: 2 → 3. freq = {a:3, n:1, g:1, r:1}.",
+    changed:['a']
+  },
+  {
+    id:7,phase:'build',phaseLabel:'BUILD s',phaseClass:'phase-build',
+    sIdx:6,tIdx:-1,freq:{a:3,n:1,g:1,r:1,m:1},activeLine:5,
+    title:"s[6] = 'm'  →  freq['m'] = 1",
+    text:"Index 6: 'm'. Last character of s. freq = {a:3, n:1, g:1, r:1, m:1}. Phase 1 complete — s has 3×a, 1×n, 1×g, 1×r, 1×m. Now we verify t matches.",
+    changed:['m']
+  },
+  {
+    id:8,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:0,freq:{a:3,n:0,g:1,r:1,m:1},activeLine:7,
+    title:"t[0] = 'n'  →  freq['n'] = 0",
+    text:"Now scanning t. Index 0: 'n'. freq.get('n', 0) - 1 = 1 - 1 = 0. Not negative → OK. t has consumed one of the n's that s had.",
+    changed:['n']
+  },
+  {
+    id:9,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:1,freq:{a:2,n:0,g:1,r:1,m:1},activeLine:7,
+    title:"t[1] = 'a'  →  freq['a'] = 2",
+    text:"Index 1: 'a'. freq['a']: 3 → 2. Not negative → OK. Two more a's still expected from the remaining t.",
+    changed:['a']
+  },
+  {
+    id:10,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:2,freq:{a:2,n:0,g:0,r:1,m:1},activeLine:7,
+    title:"t[2] = 'g'  →  freq['g'] = 0",
+    text:"Index 2: 'g'. freq['g']: 1 → 0. Perfectly consumed — t's 'g' accounts for s's 'g' exactly.",
+    changed:['g']
+  },
+  {
+    id:11,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:3,freq:{a:1,n:0,g:0,r:1,m:1},activeLine:7,
+    title:"t[3] = 'a'  →  freq['a'] = 1",
+    text:"Index 3: 'a' again. freq['a']: 2 → 1. One 'a' still expected from the remaining t.",
+    changed:['a']
+  },
+  {
+    id:12,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:4,freq:{a:1,n:0,g:0,r:0,m:1},activeLine:7,
+    title:"t[4] = 'r'  →  freq['r'] = 0",
+    text:"Index 4: 'r'. freq['r']: 1 → 0. Perfectly consumed!",
+    changed:['r']
+  },
+  {
+    id:13,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:5,freq:{a:0,n:0,g:0,r:0,m:1},activeLine:7,
+    title:"t[5] = 'a'  →  freq['a'] = 0",
+    text:"Index 5: the third 'a'. freq['a']: 1 → 0. All three a's from s are now accounted for!",
+    changed:['a']
+  },
+  {
+    id:14,phase:'check',phaseLabel:'CHECK t',phaseClass:'phase-check',
+    sIdx:-1,tIdx:6,freq:{a:0,n:0,g:0,r:0,m:0},activeLine:7,
+    title:"t[6] = 'm'  →  freq['m'] = 0",
+    text:"Index 6: 'm'. Last character of t. freq['m']: 1 → 0. ALL frequency counts are now 0! Every character from s was consumed exactly once by t.",
+    changed:['m']
+  },
+  {
+    id:15,phase:'result',phaseLabel:'RETURN TRUE',phaseClass:'phase-result',
+    sIdx:-1,tIdx:-1,freq:{a:0,n:0,g:0,r:0,m:0},activeLine:10,
+    title:'Return True ✓',
+    text:'No frequency count went negative during the t scan, and both strings had equal length. Every character in s was used exactly once by t. "nagaram" is a valid anagram of "anagram".',
+    changed:[]
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build s string cells
+  const sPtrs = document.getElementById('s-ptrs');
+  const sCells = document.getElementById('s-cells');
+  const sIdxRow = document.getElementById('s-idx');
+  STR_S.split('').forEach((ch, i) => {
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot'; ps.id = 'sp-' + i;
+    sPtrs.appendChild(ps);
+    const c = document.createElement('div');
+    c.className = 'cell normal'; c.id = 'sc-' + i;
+    c.textContent = ch;
+    sCells.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot'; ix.textContent = i;
+    sIdxRow.appendChild(ix);
+  });
+
+  // Build t string cells
+  const tPtrs = document.getElementById('t-ptrs');
+  const tCells = document.getElementById('t-cells');
+  const tIdxRow = document.getElementById('t-idx');
+  STR_T.split('').forEach((ch, i) => {
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot'; ps.id = 'tp-' + i;
+    tPtrs.appendChild(ps);
+    const c = document.createElement('div');
+    c.className = 'cell normal'; c.id = 'tc-' + i;
+    c.textContent = ch;
+    tCells.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot'; ix.textContent = i;
+    tIdxRow.appendChild(ix);
+  });
+
+  // Build freq map cells
+  const fm = document.getElementById('freq-map');
+  FREQ_ORDER.forEach(key => {
+    const fc = document.createElement('div');
+    fc.className = 'freq-cell unseen'; fc.id = 'fc-' + key;
+    fc.innerHTML = '<div class="freq-char">' + key + '</div><div class="freq-count" id="fv-' + key + '">—</div>';
+    fm.appendChild(fc);
+  });
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // ── s cells ──
+  STR_S.split('').forEach((ch, i) => {
+    const cell = document.getElementById('sc-' + i);
+    const ptr  = document.getElementById('sp-' + i);
+    cell.className = 'cell';
+    ptr.innerHTML = '';
+    if (step.phase === 'result') {
+      cell.classList.add('result');
+    } else if (step.phase === 'check') {
+      cell.classList.add('done');
+    } else if (i === step.sIdx) {
+      cell.classList.add('active-s');
+      const lbl = document.createElement('span');
+      lbl.className = 'ptr-lbl ptr-s'; lbl.textContent = 'c';
+      ptr.appendChild(lbl);
+    } else if (i < step.sIdx) {
+      cell.classList.add('done');
+    } else {
+      cell.classList.add('normal');
+    }
+  });
+
+  // ── t cells ──
+  STR_T.split('').forEach((ch, i) => {
+    const cell = document.getElementById('tc-' + i);
+    const ptr  = document.getElementById('tp-' + i);
+    cell.className = 'cell';
+    ptr.innerHTML = '';
+    if (step.phase === 'result') {
+      cell.classList.add('result');
+    } else if (i === step.tIdx) {
+      cell.classList.add('active-t');
+      const lbl = document.createElement('span');
+      lbl.className = 'ptr-lbl ptr-t'; lbl.textContent = 'c';
+      ptr.appendChild(lbl);
+    } else if (step.tIdx >= 0 && i < step.tIdx) {
+      cell.classList.add('done');
+    } else {
+      cell.classList.add('normal');
+    }
+  });
+
+  // ── freq map ──
+  FREQ_ORDER.forEach(key => {
+    const fcEl = document.getElementById('fc-' + key);
+    const fvEl = document.getElementById('fv-' + key);
+    const count = step.freq[key];
+    const isChanged = step.changed.includes(key);
+
+    if (count === undefined) {
+      fcEl.className = 'freq-cell unseen';
+      fvEl.textContent = '—';
+    } else if (isChanged) {
+      fcEl.className = 'freq-cell changed';
+      fvEl.textContent = count;
+    } else if (count > 0) {
+      fcEl.className = 'freq-cell positive';
+      fvEl.textContent = count;
+    } else if (count === 0) {
+      fcEl.className = 'freq-cell zero';
+      fvEl.textContent = count;
+    } else {
+      fcEl.className = 'freq-cell negative';
+      fvEl.textContent = count;
+    }
+  });
+
+  // ── Code panel ──
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  const curChar = step.sIdx >= 0 ? STR_S[step.sIdx] : (step.tIdx >= 0 ? STR_T[step.tIdx] : '—');
+  const phaseShort = {init:'init',build:'build s',check:'check t',result:'done'}[step.phase] || step.phase;
+  const changedKey = step.changed[0];
+  const freqVal = changedKey !== undefined && step.freq[changedKey] !== undefined
+    ? String(step.freq[changedKey]) : '—';
+
+  document.getElementById('vv-phase').textContent = phaseShort;
+  document.getElementById('vv-char').textContent = curChar;
+  document.getElementById('vv-val').textContent = freqVal;
+
+  document.getElementById('vb-char').classList.toggle('changed', step.sIdx >= 0 || step.tIdx >= 0);
+  document.getElementById('vb-val').classList.toggle('changed', step.changed.length > 0);
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>
