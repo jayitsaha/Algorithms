@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#680 · Valid Palindrome II</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column Layout ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-str{font-family:var(--mono);font-size:14px;color:var(--text);word-break:break-all;line-height:2}
+
+/* Decision Panel — shows two choices at mismatch */
+.decision-panel{background:var(--bg2);border-radius:var(--radius-lg);padding:1rem;margin:1rem 0;border:1px solid var(--border2)}
+.decision-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:0.75rem}
+.decision-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.decision-options{grid-template-columns:1fr}}
+.decision-option{padding:12px;border-radius:var(--radius);border:2px solid var(--border)}
+.decision-option.try-left{background:var(--blue-bg);border-color:var(--blue-border)}
+.decision-option.try-right{background:var(--green-bg);border-color:var(--green-border)}
+.decision-option.winner{border-width:2px}
+.decision-option.loser{opacity:0.45}
+.decision-option.neutral{background:var(--bg2)}
+.option-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.try-left .option-label{color:var(--blue-mid)}
+.try-right .option-label{color:var(--green-mid)}
+.option-action{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.option-result{font-family:var(--mono);font-size:12px;color:var(--text2)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.code-comment{color:var(--text3)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Pointer rows */
+.ptr-row{display:flex;gap:4px;min-height:24px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:42px;display:flex;justify-content:center;align-items:flex-end;flex-direction:column;gap:2px}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;line-height:1.4;white-space:nowrap}
+.ptr-left{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-right{background:var(--green-bg);color:var(--green-mid)}
+.ptr-skip{background:var(--amber-bg);color:var(--amber-mid)}
+
+/* Cells */
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:42px;height:42px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal  {background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.left    {background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.right   {background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.match   {background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.cell.skip-l  {background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text);opacity:0.5}
+.cell.skip-r  {background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);opacity:0.5}
+.cell.done    {background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:3px}
+.idx-slot{width:42px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* Sub-check label */
+.subcheck-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:10px;border:1px solid}
+.subcheck-badge.left-skip{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.subcheck-badge.right-skip{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.subcheck-badge.outer{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 16px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);min-width:30px;text-align:center}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init    {background:var(--purple-bg);color:var(--purple-mid)}
+.phase-match   {background:var(--green-bg);color:var(--green-mid)}
+.phase-mismatch{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border)}
+.phase-skip-l  {background:var(--amber-bg);color:var(--amber-mid)}
+.phase-skip-r  {background:var(--purple-bg);color:var(--purple-mid)}
+.phase-result  {background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:8px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-left{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-right{background:var(--green-bg);border-color:var(--green-border)}
+.sw-match{background:var(--green-bg);border-color:var(--green-border)}
+.sw-mismatch{background:var(--red-bg);border-color:var(--red-border)}
+.sw-skip-l{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-skip-r{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-done{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* ── Complexity Table ── */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13.5px}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
+.good{color:var(--green-mid);font-weight:600}
+.bad{color:var(--red-mid);font-weight:600}
+.cmp-table tr.highlight-row td{background:var(--green-bg)}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.takeaway::before{content:'✓';font-weight:700;flex-shrink:0}
+.related-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0.75rem 0}
+.related-list li{padding:9px 13px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;color:var(--text2)}
+.related-list li strong{color:var(--text)}
+
+/* ── Misc ── */
+hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+p{margin:0.5rem 0;color:var(--text2);font-size:14.5px}
+strong{color:var(--text)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:2px 5px;border-radius:4px;color:var(--text)}
+h3{font-size:15px;font-weight:700;color:var(--text);margin:1.25rem 0 0.5rem}
+h4{font-size:13.5px;font-weight:700;color:var(--text);margin:0.75rem 0 0.25rem}
+ul{padding-left:1.25rem;color:var(--text2);font-size:14px}
+ul li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+<header>
+  <div class="problem-number">#680 · LeetCode Easy</div>
+  <h1>Valid Palindrome II</h1>
+  <p class="subtitle">Two converging pointers — on first mismatch, try skipping the left character OR the right character, check if either produces a palindrome</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Two Pointers + One Skip Allowed</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     SECTION 1 — UNDERSTANDING
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s1','i1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon" id="i1">▲</span>
+  </div>
+  <div class="section-content" id="s1">
+
+    <p>Given a string <code>s</code>, return <code>true</code> if it can become a palindrome by <strong>deleting at most one character</strong>. The string only contains printable ASCII characters (no need to clean non-alnum like in Valid Palindrome I).</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Not a palindrome as-is</div>
+        <div class="panel-str">"abca"</div>
+        <p style="font-size:12px;margin-top:6px;color:var(--red-mid)">a≠a✓, b≠c → mismatch</p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Delete one → palindrome</div>
+        <div class="panel-str">"abc" (delete 'a') or "aca" (delete 'b') → both palindromes… wait:<br>delete 'b' → "aca" ✓</div>
+        <p style="font-size:12px;margin-top:6px;color:var(--green-mid)">True — at most one deletion needed</p>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is a direct extension of Valid Palindrome I. We run the same two-pointer check, but when we hit the <strong>first mismatch</strong> we get <strong>one free deletion</strong>. We try both options — skip the left character (move left inward) or skip the right character (move right inward) — and check if either remaining window is a palindrome. If yes → <code>True</code>.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why the First Mismatch is the Only Branch Point</div>
+      <p>Before the first mismatch, all pairs matched perfectly so no deletion was needed for those characters. At the mismatch, we <em>must</em> delete one of the two mismatching characters to continue — and we've used up our one deletion. So both sub-checks (<code>s[left+1..right]</code> and <code>s[left..right-1]</code>) get no further deletions allowed: they must be perfect palindromes.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s2','i2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two Pointers + One Skip</span>
+    <span class="collapse-icon" id="i2">▲</span>
+  </div>
+  <div class="section-content" id="s2">
+
+    <p>We need a helper function <code>is_palindrome(s, l, r)</code> that checks a window <code>s[l..r]</code> with <strong>no deletions allowed</strong>. The main function uses it after spending the skip.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Set <code>left=0</code>, <code>right=len(s)-1</code>. Run the standard two-pointer palindrome check.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">While <code>left &lt; right</code>: if <code>s[left] == s[right]</code>, move both pointers inward — no deletion needed here.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text">First mismatch found at positions <code>(left, right)</code>. We have one deletion left. Try two options:</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Option A:</strong> Delete <code>s[left]</code> → check if <code>s[left+1 .. right]</code> is a palindrome (no more deletions).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Option B:</strong> Delete <code>s[right]</code> → check if <code>s[left .. right-1]</code> is a palindrome (no more deletions).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text">Return <code>True</code> if either option passes. If neither passes, the string cannot be made palindrome with one deletion.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">7</span>
+        <span class="step-text">If the outer loop completes without any mismatch, the string is already a palindrome → return <code>True</code>.</span>
+      </div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Idea</th><th>Time</th><th>Space</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Brute Force</td>
+          <td>Try deleting every character, check each for palindrome</td>
+          <td class="bad">O(n²)</td>
+          <td class="bad">O(n)</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>Two Pointers + One Skip ✓</strong></td>
+          <td>Two pointers; on first mismatch branch into 2 sub-checks</td>
+          <td class="good">O(n)</td>
+          <td class="good">O(1)</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 3 — WHY IT WORKS
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s3','i3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon" id="i3">▲</span>
+  </div>
+  <div class="section-content" id="s3">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Two Invariants</div>
+      <p><strong>Outer loop invariant:</strong> At the start of each iteration, all characters outside the current window <code>[left, right]</code> have already been confirmed as matching mirror pairs — no deletion was needed for them.</p>
+      <p style="margin-top:0.5rem"><strong>Sub-check invariant:</strong> After spending the deletion at the first mismatch, the remaining sub-window must be a <em>perfect</em> palindrome. Since no further deletion is allowed, the standard two-pointer check is applied.</p>
+    </div>
+
+    <h3>Why Try BOTH Directions at the Mismatch?</h3>
+    <p>When <code>s[left] ≠ s[right]</code>, we don't know which character is the "rogue" one that should be deleted. Consider:</p>
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">Case: delete left char</div>
+        <div class="panel-str">s = "abca"<br>left='a', right='a' ✓<br>left='b', right='c' ✗<br>Skip 'b' → "ca" → c≠a ✗<br>Skip 'c' → "bc"[b..b] = "b" ✓ wait…<br>"abca" skip right char 'c'→ "aba" wait no:<br>left=1 'b', right=2 'c' mismatch.<br>Skip left → s[2..2]="c" ✓(single)<br>Skip right → s[1..1]="b" ✓(single)<br>Either works → True</div>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Case: only one direction works</div>
+        <div class="panel-str">s = "aguokepatgbnvfqmgmlcupuufxoohdfpgjdxrvpxgpqtqs..."<br>One option leads to a palindrome,<br>the other does not.<br>Must try BOTH to be safe.</div>
+      </div>
+    </div>
+
+    <h3>Edge Cases</h3>
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Already a palindrome (zero deletions needed):</strong> Outer loop completes without mismatch → <code>True</code>.</span></div>
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Single character:</strong> <code>left=right</code> immediately → loop doesn't run → <code>True</code>.</span></div>
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Two characters, different:</strong> <code>left=0, right=1</code>, mismatch → try <code>s[1..1]</code> (palindrome) and <code>s[0..0]</code> (palindrome) → both <code>True</code> → <code>True</code>.</span></div>
+      <div class="algo-step"><span class="step-num">•</span><span class="step-text"><strong>Mismatch at very first pair:</strong> Still only one deletion, same logic — try skipping either end character.</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 4 — CODE
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s4','i4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon" id="i4">▲</span>
+  </div>
+  <div class="section-content" id="s4">
+
+    <h3>Optimal: Two Pointers + One Skip &nbsp;<span style="font-size:12px;color:var(--green-mid);font-weight:600">← Interview Pick</span></h3>
+    <div class="code-panel">
+<div class="code-line">def validPalindrome(s: str) -> bool:</div>
+<div class="code-line">    def is_pal(l, r):            <span class="code-comment"># helper: strict palindrome check on window s[l..r]</span></div>
+<div class="code-line">        while l &lt; r:</div>
+<div class="code-line">            if s[l] != s[r]:     <span class="code-comment"># no deletions allowed in sub-check</span></div>
+<div class="code-line">                return False</div>
+<div class="code-line">            l += 1; r -= 1</div>
+<div class="code-line">        return True</div>
+<div class="code-line"> </div>
+<div class="code-line">    left, right = 0, len(s) - 1</div>
+<div class="code-line">    while left &lt; right:</div>
+<div class="code-line">        if s[left] != s[right]:  <span class="code-comment"># first mismatch — spend our one deletion</span></div>
+<div class="code-line">            return is_pal(left + 1, right) or is_pal(left, right - 1)</div>
+<div class="code-line">        left += 1                <span class="code-comment"># matched — advance both inward</span></div>
+<div class="code-line">        right -= 1</div>
+<div class="code-line">    return True                  <span class="code-comment"># no mismatch → already a palindrome</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Not Using a Helper</div>
+      <p>A common error is to try to add a <code>used_delete</code> flag inside a single loop. This breaks because after spending the deletion you need a <em>clean</em> palindrome check from scratch on a sub-window. A recursive call or a helper function is the cleanest way to express "check this window with no deletions allowed."</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Return Early at First Mismatch?</div>
+      <p>We know all characters outside <code>[left, right]</code> already match in pairs. The only "bad" character must be at <code>left</code> or <code>right</code> — there's no other candidate. If neither removing <code>s[left]</code> nor <code>s[right]</code> fixes it, no single deletion can help.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s5','i5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon" id="i5">▲</span>
+  </div>
+  <div class="section-content" id="s5">
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Recognise it as "Palindrome I + one twist"</div>
+        <p>Any time you see "palindrome with at most k deletions/changes", your starting point is the two-pointer palindrome check. Here k=1, which makes it especially clean.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — Say "I'll run two pointers; at first mismatch I branch"</div>
+        <p>This immediately signals you understand the problem structure. Mention that the branch creates two sub-windows, each checked with a helper that has no remaining deletions.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — Justify why it's O(n)</div>
+        <p>The outer pointer scan is O(n). The two sub-checks are each O(n) in the worst case but they never both run their full length — and crucially they only fire once. Total: O(n).</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Walk through edge cases proactively</div>
+        <p>Mention: already a palindrome (zero deletions), two-character string with different chars, mismatch at position 0.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">
+"This is Valid Palindrome I, but with one free deletion."<br>
+"I'll run two pointers from both ends — same as before."<br>
+"The moment I find a mismatch, I branch: try skipping left OR skip right."<br>
+"Each branch is just a strict palindrome check — no more deletions."<br>
+"Return true if either branch succeeds."<br>
+"Time O(n) — each character touched at most twice. Space O(1)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-Up: What if k=2 deletions?</div>
+      <p>For k=2, you'd recurse/branch again at the second mismatch inside each sub-check. This generalises to recursion with a <code>deletions_left</code> counter — but it becomes O(n·k) time and O(k) stack space. For large k, a DP solution (check if <code>len(s) - LPS(s) &lt;= k</code>) is preferred.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s6','i6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon" id="i6">▲</span>
+  </div>
+  <div class="section-content" id="s6">
+
+    <p style="font-size:13px;color:var(--text3);margin-bottom:4px">Tracing: <code>s = "abcba"</code> — wait, that's already a palindrome. Let's trace <code>s = "abcca"</code> → Expected: <code>True</code> (delete one 'c')</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Outer pointers hit mismatch at 'b' vs 'c'. Try skip-left → <code>"bcca"[1..4]</code> → fail. Try skip-right → <code>"abcc"[0..3]</code> → fail. Hmm — let me use a cleaner example: <code>s = "abca"</code> → True (delete 'b' or 'c')</p>
+
+    <!-- Pointer row (outer) -->
+    <div id="subcheck-label" style="min-height:28px;margin-bottom:4px"></div>
+    <div class="ptr-row" id="ptr-row"></div>
+    <!-- Cells -->
+    <div class="cells-row" id="cells-row"></div>
+    <!-- Index row -->
+    <div class="idx-row" id="idx-row"></div>
+
+    <!-- Decision Panel (shown during mismatch step) -->
+    <div class="decision-panel" id="decision-panel" style="display:none">
+      <div class="decision-title">🔀 First Mismatch — Choose a deletion:</div>
+      <div class="decision-options">
+        <div class="decision-option try-left" id="opt-a">
+          <div class="option-label">Option A</div>
+          <div class="option-action">Delete s[left] → skip left pointer</div>
+          <div class="option-result" id="opt-a-res"></div>
+        </div>
+        <div class="decision-option try-right" id="opt-b">
+          <div class="option-label">Option B</div>
+          <div class="option-action">Delete s[right] → skip right pointer</div>
+          <div class="option-result" id="opt-b-res"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker" id="var-tracker"></div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="viz-code">
+      <div class="code-line" id="cl0">def validPalindrome(s: str) -> bool:</div>
+      <div class="code-line" id="cl1">    def is_pal(l, r):</div>
+      <div class="code-line" id="cl2">        while l &lt; r:</div>
+      <div class="code-line" id="cl3">            if s[l] != s[r]: return False</div>
+      <div class="code-line" id="cl4">            l += 1; r -= 1</div>
+      <div class="code-line" id="cl5">        return True</div>
+      <div class="code-line" id="cl6"> </div>
+      <div class="code-line" id="cl7">    left, right = 0, len(s) - 1</div>
+      <div class="code-line" id="cl8">    while left &lt; right:</div>
+      <div class="code-line" id="cl9">        if s[left] != s[right]:    # first mismatch</div>
+      <div class="code-line" id="cl10">           return is_pal(left+1, right) or is_pal(left, right-1)</div>
+      <div class="code-line" id="cl11">        left += 1; right -= 1</div>
+      <div class="code-line" id="cl12">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="step-counter" id="step-ctr">Step 1 of 9</div>
+      <div id="phase-badge" class="phase-badge phase-init">INITIALIZE</div>
+      <div class="step-title" id="step-title"></div>
+      <div class="step-body"  id="step-body"></div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys · R to reset</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-left"></div>left pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-right"></div>right pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div>Matched pair</div>
+      <div class="legend-item"><div class="legend-swatch sw-mismatch"></div>Mismatch</div>
+      <div class="legend-item"><div class="legend-swatch sw-skip-l"></div>Skip (delete) left</div>
+      <div class="legend-item"><div class="legend-swatch sw-skip-r"></div>Skip (delete) right</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div>Confirmed pair</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle('s7','i7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon" id="i7">▲</span>
+  </div>
+  <div class="section-content" id="s7">
+
+    <div class="takeaways">
+      <div class="takeaway">Run standard two-pointer palindrome check from both ends</div>
+      <div class="takeaway">At the first (and only) mismatch, branch: try skipping left OR skipping right</div>
+      <div class="takeaway">Each sub-check is a strict palindrome verification (no more deletions)</div>
+      <div class="takeaway">Return <code>True</code> if either sub-check passes — you only need one to succeed</div>
+      <div class="takeaway">If loop ends without mismatch, the string is already a palindrome → <code>True</code></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognise This Pattern</div>
+      <ul>
+        <li>"Check palindrome after at most one deletion/change"</li>
+        <li>"At most k edits" with k=1 → always try both sides at first mismatch</li>
+        <li>Any "tolerate one error" problem where you can reconstruct using two-pointer structure</li>
+      </ul>
+    </div>
+
+    <h3>Related Problems</h3>
+    <ul class="related-list">
+      <li><strong>Valid Palindrome I</strong> (Easy) — Same pattern, but also skip non-alphanumeric chars; no deletions allowed</li>
+      <li><strong>Valid Palindrome III</strong> (Hard) — At most k deletions; DP approach: <code>len(s) - LPS(s) &lt;= k</code></li>
+      <li><strong>Longest Palindromic Subsequence</strong> (Medium) — DP; LPS to determine minimum deletions to make palindrome</li>
+      <li><strong>Minimum Insertions to Make Palindrome</strong> (Medium) — Same DP as LPS; <code>n - LPS(s)</code> insertions</li>
+      <li><strong>Palindrome Linked List</strong> (Easy) — Fast-slow pointer to find mid, reverse second half, compare</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p><strong>Main Pattern:</strong> String Processing &nbsp;·&nbsp; <strong>Sub-Pattern:</strong> Two Pointers + One Skip Allowed<br>
+      Source: DSA_Patterns_and_SubPatterns_Guide.md — line 210 (Section 2: String Processing)</p>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// s = "abca"  (4 chars, indices 0-3)
+// a(0) b(1) c(2) a(3)
+// Outer: left=0 'a', right=3 'a' → match → left=1, right=2
+// Outer: left=1 'b', right=2 'c' → MISMATCH
+// Option A: skip left → is_pal(2,2) → "c" single char → True ✓
+// Option B: skip right → is_pal(1,1) → "b" single char → True ✓
+// Return True
+
+const S = "abca";
+const N = S.length;
+
+// Each step: cells array (length N), lp, rp (main pointers), subcheck info
+// decision: null or {show:true, optA, optB}
+// subchecklp, subchecks rp for sub-check steps
+
+const STEPS = [
+  // 0 — init
+  {
+    cells: ['left','normal','normal','right'],
+    lp:0, rp:3,
+    vars:{left:0, right:3, skipped:'none'},
+    changed:[],
+    activeLine:7, phaseClass:'phase-init', phaseLabel:'INITIALIZE',
+    subLabel: null, showDecision: false,
+    title:"Initialize: left=0 ('a'), right=3 ('a')",
+    text:"Set left=0 and right=3. Outer while: 0 < 3 ✓. No skip used yet. s[0]='a', s[3]='a' — check if they match."
+  },
+  // 1 — compare a(0) vs a(3) → match
+  {
+    cells: ['match','normal','normal','match'],
+    lp:0, rp:3,
+    vars:{left:0, right:3, skipped:'none'},
+    changed:['left','right'],
+    activeLine:8, phaseClass:'phase-match', phaseLabel:"MATCH ✓",
+    subLabel: null, showDecision: false,
+    title:"s[0]='a' vs s[3]='a' → match ✓",
+    text:"'a' == 'a'. Outer loop condition: s[left] != s[right]? No. Move both inward: left→1, right→2."
+  },
+  // 2 — advance, now left=1, right=2
+  {
+    cells: ['done','left','right','done'],
+    lp:1, rp:2,
+    vars:{left:1, right:2, skipped:'none'},
+    changed:['left','right'],
+    activeLine:11, phaseClass:'phase-match', phaseLabel:"ADVANCE",
+    subLabel: null, showDecision: false,
+    title:"Advance: left=1 ('b'), right=2 ('c')",
+    text:"left and right moved inward. Now left=1 pointing at 'b', right=2 pointing at 'c'. Outer while: 1 < 2 ✓. Check for mismatch."
+  },
+  // 3 — compare b(1) vs c(2) → MISMATCH
+  {
+    cells: ['done','mismatch','mismatch','done'],
+    lp:1, rp:2,
+    vars:{left:1, right:2, skipped:'none'},
+    changed:[],
+    activeLine:9, phaseClass:'phase-mismatch', phaseLabel:"MISMATCH ✗",
+    subLabel: null, showDecision: true,
+    decisionOptA:"is_pal(2, 2) = check 'c' → single char → True ✓",
+    decisionOptB:"is_pal(1, 1) = check 'b' → single char → True ✓",
+    title:"s[1]='b' vs s[2]='c' → MISMATCH! Spend our one deletion.",
+    text:"First mismatch found. We have exactly one deletion to use. Try both options: (A) skip left → check s[2..2], or (B) skip right → check s[1..1]. If either returns True, we return True."
+  },
+  // 4 — option A: skip left, sub-check s[2..2]
+  {
+    cells: ['done','skip-l','left','done'],
+    lp:2, rp:2,
+    vars:{left:2, right:2, skipped:'left'},
+    changed:['skipped','left'],
+    activeLine:10, phaseClass:'phase-skip-l', phaseLabel:"OPTION A: SKIP LEFT",
+    subLabel: 'left-skip',
+    showDecision: false,
+    title:"Option A: delete s[1]='b' → check s[2..2]='c'",
+    text:"is_pal(l=2, r=2): l < r? 2 < 2 is False — loop doesn't run → return True immediately. A single character is always a palindrome."
+  },
+  // 5 — option A resolved True
+  {
+    cells: ['done','skip-l','match','done'],
+    lp:2, rp:2,
+    vars:{left:2, right:2, skipped:'left'},
+    changed:[],
+    activeLine:5, phaseClass:'phase-match', phaseLabel:"OPTION A → TRUE ✓",
+    subLabel: 'left-skip',
+    showDecision: false,
+    title:"is_pal(2, 2) = True → validPalindrome returns True",
+    text:"The sub-check returned True. By OR logic, is_pal(left+1, right) OR is_pal(left, right-1) — the first branch is True, so the whole expression is True. We don't even need to evaluate Option B. Return True."
+  },
+  // 6 — final result
+  {
+    cells: ['done','skip-l','done','done'],
+    lp:null, rp:null,
+    vars:{left:'—', right:'—', skipped:'left'},
+    changed:[],
+    activeLine:12, phaseClass:'phase-result', phaseLabel:"RESULT: TRUE ✓",
+    subLabel: null,
+    showDecision: false,
+    title:"return True — \"abca\" can become a palindrome with one deletion",
+    text:"Deleting 'b' (index 1) leaves \"aca\" — a palindrome. Alternatively, deleting 'c' (index 2) leaves \"aba\" — also a palindrome. Either way, at most one deletion suffices."
+  }
+];
+
+let cur = 0;
+
+function render() {
+  const step = STEPS[cur];
+
+  // ── Subcheck label ──
+  const sublbl = document.getElementById('subcheck-label');
+  if (step.subLabel) {
+    const cls = step.subLabel === 'left-skip' ? 'left-skip' : 'right-skip';
+    const text = step.subLabel === 'left-skip'
+      ? '📍 Sub-check: is_pal(left+1, right) — after deleting s[left]'
+      : '📍 Sub-check: is_pal(left, right-1) — after deleting s[right]';
+    sublbl.innerHTML = `<span class="subcheck-badge ${cls}">${text}</span>`;
+  } else {
+    sublbl.innerHTML = '<span class="subcheck-badge outer">📍 Outer scan — no deletion used yet</span>';
+  }
+
+  // ── Pointer row ──
+  const ptrRow = document.getElementById('ptr-row');
+  ptrRow.innerHTML = '';
+  for (let k = 0; k < N; k++) {
+    const slot = document.createElement('div');
+    slot.className = 'ptr-slot';
+    const labels = [];
+    if (step.lp === k && step.rp === k) labels.push('<span class="ptr-lbl ptr-left">L·R</span>');
+    else if (step.lp === k) labels.push('<span class="ptr-lbl ptr-left">L</span>');
+    else if (step.rp === k) labels.push('<span class="ptr-lbl ptr-right">R</span>');
+    slot.innerHTML = labels.join('');
+    ptrRow.appendChild(slot);
+  }
+
+  // ── Cells ──
+  const cellsRow = document.getElementById('cells-row');
+  cellsRow.innerHTML = '';
+  for (let k = 0; k < N; k++) {
+    const c = document.createElement('div');
+    c.className = 'cell ' + step.cells[k];
+    c.textContent = S[k];
+    cellsRow.appendChild(c);
+  }
+
+  // ── Index row ──
+  const idxRow = document.getElementById('idx-row');
+  idxRow.innerHTML = '';
+  for (let k = 0; k < N; k++) {
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = k;
+    idxRow.appendChild(ix);
+  }
+
+  // ── Decision Panel ──
+  const dp = document.getElementById('decision-panel');
+  dp.style.display = step.showDecision ? 'block' : 'none';
+  if (step.showDecision) {
+    document.getElementById('opt-a-res').textContent = step.decisionOptA;
+    document.getElementById('opt-b-res').textContent = step.decisionOptB;
+  }
+
+  // ── Variable Tracker ──
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  Object.entries(step.vars).forEach(([name, val]) => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + ((step.changed||[]).includes(name) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+    vt.appendChild(box);
+  });
+
+  // ── Code highlights ──
+  for (let l = 0; l <= 12; l++) {
+    const el = document.getElementById('cl' + l);
+    if (el) el.classList.toggle('active', l === step.activeLine);
+  }
+
+  // ── Info card ──
+  document.getElementById('step-ctr').textContent = `Step ${cur+1} of ${STEPS.length}`;
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent  = step.text;
+
+  // ── Progress dots ──
+  const dotsEl = document.getElementById('dots');
+  dotsEl.innerHTML = '';
+  STEPS.forEach((_,idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (idx===cur?' active':idx<cur?' visited':'');
+    d.onclick = () => { cur=idx; render(); };
+    dotsEl.appendChild(d);
+  });
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(dir) { cur = Math.max(0, Math.min(STEPS.length-1, cur+dir)); render(); }
+function reset() { cur=0; render(); }
+
+function toggle(cid, iid) {
+  const el = document.getElementById(cid);
+  const icon = document.getElementById(iid);
+  const col = el.classList.toggle('collapsed');
+  icon.textContent = col ? '▼' : '▲';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') go(1);
+  if (e.key==='ArrowLeft')  go(-1);
+  if (e.key==='r'||e.key==='R') reset();
+});
+
+render();
+</script>
+</body>
+</html>
