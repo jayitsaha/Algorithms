@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Edit Distance — Interactive DSA Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+/* ─── HEADER ─── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem 2rem;}
+.header-inner{max-width:920px;margin:0 auto;}
+.problem-number{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+h1{font-size:28px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+/* ─── LAYOUT ─── */
+main{max-width:920px;margin:0 auto;padding:2rem;}
+/* ─── CARD ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+p{margin-bottom:.75rem;line-height:1.65;}
+h3{font-size:15px;font-weight:700;margin:.75rem 0 .4rem;}
+h4{font-size:13px;font-weight:700;color:var(--text2);margin:.5rem 0 .25rem;}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px;color:var(--text);}
+/* ─── CONCEPT BOXES ─── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+/* ─── CASE TABLE ─── */
+.case-table{width:100%;border-collapse:collapse;margin:1rem 0;}
+.case-table th,.case-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);font-size:13px;}
+.case-table th{background:var(--bg2);font-weight:600;}
+.case-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.case-replace{background:var(--blue-bg);color:var(--blue-mid);}
+.case-insert{background:var(--green-bg);color:var(--green-mid);}
+.case-delete{background:var(--amber-bg);color:var(--amber-mid);}
+/* ─── ALGO STEPS ─── */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.55;font-size:14px;}
+/* ─── COMPARISON GRID ─── */
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0;}
+.comparison-panel{padding:1rem;border-radius:var(--radius);}
+.comparison-panel.bad{background:var(--red-bg);border:1px solid var(--red-border);}
+.comparison-panel.good{background:var(--green-bg);border:1px solid var(--green-border);}
+.comparison-panel h4{font-size:13px;font-weight:700;margin-bottom:8px;}
+.comparison-panel.bad h4{color:var(--red-mid);}
+.comparison-panel.good h4{color:var(--green-mid);}
+/* ─── CODE BLOCK (static) ─── */
+.code-block{background:var(--bg2);border-radius:var(--radius);padding:1rem;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;color:var(--text2);margin:.75rem 0;}
+/* ─── STRATEGY ─── */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{margin-bottom:.75rem;font-size:14px;}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+/* ─── TAKEAWAYS ─── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);font-size:14px;color:var(--green-text);border:1px solid var(--green-border);}
+.takeaway::before{content:"✓";font-weight:700;flex-shrink:0;}
+/* ─── RELATED PROBLEMS ─── */
+.related-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:.75rem 0;}
+.related-list li{padding:8px 12px;background:var(--bg2);border-radius:var(--radius);font-size:13px;}
+.related-list li strong{color:var(--blue-mid);}
+/* ═══════════════════════════════
+   INTERACTIVE SECTION
+═══════════════════════════════ */
+.viz-container{background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;margin:1.25rem 0;}
+/* length status bar */
+.len-bar{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;padding:10px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);}
+.len-item{text-align:center;}
+.len-label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px;}
+.len-val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text);}
+/* string display */
+.string-rows{display:flex;flex-direction:column;gap:20px;margin:1rem 0;}
+.string-row{display:flex;align-items:center;gap:14px;}
+.string-label{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text3);width:20px;text-align:right;flex-shrink:0;}
+.cells-wrapper{position:relative;display:flex;flex-direction:column;align-items:flex-start;}
+.pointer-row{display:flex;gap:4px;height:22px;margin-bottom:4px;}
+.ptr-cell{width:52px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mono);transition:opacity .25s;}
+.ptr-cell.ptr-i{color:var(--blue-mid);}
+.ptr-cell.ptr-j{color:var(--green-mid);}
+.ptr-cell.hide{opacity:0;}
+.cells-row{display:flex;gap:4px;}
+.cell{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:20px;font-weight:700;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:background .3s,border-color .3s,color .3s,transform .2s;}
+.idx-row{display:flex;gap:4px;margin-top:4px;}
+.idx-cell{width:52px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);}
+/* cell states */
+.cell.comparing{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text);transform:scale(1.06);}
+.cell.matched{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);}
+.cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text);transform:scale(1.1);}
+.cell.tail-check{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);}
+.cell.skip-char{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text);}
+.cell.result-ok{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-text);}
+/* var tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:28px;text-align:center;}
+/* code panel */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+/* info card */
+.info-card{margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;}
+.info-top{display:flex;align-items:center;gap:12px;margin-bottom:.75rem;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:12px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-compare{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-match{background:var(--green-bg);color:var(--green-mid);}
+.phase-mismatch{background:var(--red-bg);color:var(--red-mid);}
+.phase-tail{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-result{background:var(--green-bg);color:var(--green-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
+/* progress dots */
+.progress-dots{display:flex;gap:8px;justify-content:center;margin-top:1.25rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .3s,transform .2s;cursor:pointer;}
+.dot.active{background:var(--blue-mid);transform:scale(1.4);}
+.dot.visited{background:var(--text3);}
+/* controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1.25rem;}
+.btn{padding:10px 24px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .2s,transform .1s;}
+.btn:hover{background:var(--bg2);}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid);}
+.btn-primary:hover{background:var(--blue-text);}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+/* legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="problem-number">LeetCode #161</div>
+    <h1>One Edit Distance</h1>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">String Processing</span>
+      <span class="tag tag-pattern">Check Insert / Delete / Replace</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Space</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ── SECTION 1: Understanding the Problem ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+  </div>
+  <p>Given strings <code>s</code> and <code>t</code>, return <code>True</code> if they are <em>exactly</em> one edit apart — not zero edits, not two or more. Exactly one. There are exactly three atomic edits:</p>
+  <table class="case-table">
+    <thead><tr><th>Edit Type</th><th>Example</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><span class="case-badge case-replace">REPLACE</span></td><td><code>"cat" → "cut"</code> (c→c, <u>a→u</u>, t→t)</td><td>Same length; exactly 1 char differs</td></tr>
+      <tr><td><span class="case-badge case-insert">INSERT</span></td><td><code>"abc" → "abdc"</code> (insert 'd')</td><td><code>len(t) = len(s) + 1</code></td></tr>
+      <tr><td><span class="case-badge case-delete">DELETE</span></td><td><code>"abdc" → "abc"</code> (delete 'd')</td><td><code>len(t) = len(s) - 1</code></td></tr>
+    </tbody>
+  </table>
+  <div class="concept-box insight">
+    <div class="concept-box-title">💡 Key Insight: Collapse Three Cases into Two</div>
+    <p><strong>INSERT and DELETE are the same operation viewed from opposite directions.</strong> If we normalize by always treating the shorter string as <code>s</code>, we only need to handle two cases: <em>same-length → replace</em> and <em>length-diff-of-1 → insert</em>. Everything simplifies from there.</p>
+  </div>
+  <div class="concept-box danger">
+    <div class="concept-box-title">⚠️ The "Exactly One" Trap</div>
+    <p>If <code>s == t</code>, that's <strong>zero edits</strong> — return <code>False</code>. Many candidates forget this and pass "at most one" tests but fail "exactly one" tests. Identical strings are valid <em>is-substring</em> but <em>not</em> one-edit-apart.</p>
+  </div>
+  <p>Edge cases to keep in mind: empty strings (<code>""</code> and <code>"a"</code> are one edit apart), single character strings, and the prefix case (<code>"abc"</code> vs <code>"abcd"</code>) where no character ever differs but there's still a valid insertion at the end.</p>
+</div>
+
+<!-- ── SECTION 2: The Algorithm ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Length-Based Case Split</span>
+  </div>
+  <p>The algorithm hinges on one critical observation: <strong>once you find the first character difference, you know exactly where the edit happened and you can verify the rest in O(1) comparisons</strong> (a single tail equality check).</p>
+  <div class="algorithm-steps">
+    <div class="algo-step">
+      <span class="step-num">1</span>
+      <span class="step-text"><strong>Boundary check:</strong> If <code>|len(s) - len(t)| &gt; 1</code>, return <code>False</code> immediately. A single edit can change length by at most 1.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">2</span>
+      <span class="step-text"><strong>Normalize:</strong> Swap <code>s</code> and <code>t</code> if <code>len(s) &gt; len(t)</code>, ensuring <code>s</code> is always the shorter (or equal-length) string. This unifies INSERT and DELETE into one code path.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">3</span>
+      <span class="step-text"><strong>Scan for first mismatch:</strong> Walk index <code>i</code> through <code>s</code>. Compare <code>s[i]</code> with <code>t[i]</code> at each step. If all match and <code>i</code> reaches <code>len(s)</code>, jump to step 5.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">4</span>
+      <span class="step-text"><strong>Mismatch found at index <code>i</code>:</strong><br>
+        • <strong>Same length (replace):</strong> return <code>s[i+1:] == t[i+1:]</code> — tails after the replaced char must match.<br>
+        • <strong>Different length (insert):</strong> return <code>s[i:] == t[i+1:]</code> — skip the "extra" char at <code>t[i]</code>, then the rest must align.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">5</span>
+      <span class="step-text"><strong>No mismatch (s is a prefix of t):</strong> return <code>len(t) - len(s) == 1</code>. Valid only when <code>t</code> has exactly one extra character appended at the end.</span>
+    </div>
+  </div>
+  <div class="concept-box key-concept">
+    <div class="concept-box-title">🔐 Why "First Mismatch" Is Enough</div>
+    <p>Since we can make only <strong>one</strong> edit, the first mismatch <em>must</em> be where that edit occurs. After applying this one hypothetical edit, the remainder of both strings must be identical. The tail equality check <code>s[i:] == t[i+1:]</code> verifies exactly that — no further scanning needed.</p>
+  </div>
+</div>
+
+<!-- ── SECTION 3: Why It Works ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+  </div>
+  <div class="concept-box key-concept">
+    <div class="concept-box-title">🔐 The Invariant</div>
+    <p>At every step <code>i</code>: <strong>all characters <code>s[0..i-1]</code> and <code>t[0..i-1]</code> are identical</strong>. The edit budget is intact — no edit has been "spent" yet.</p>
+  </div>
+  <p><strong>Replace case:</strong> We've confirmed <code>s[0..i-1] == t[0..i-1]</code>. Replacing <code>s[i]</code> with <code>t[i]</code> costs our one edit. For the strings to be exactly one edit apart, everything after — <code>s[i+1:]</code> and <code>t[i+1:]</code> — must already be the same. One slice comparison confirms or denies this.</p>
+  <p><strong>Insert case:</strong> We've confirmed <code>s[0..i-1] == t[0..i-1]</code>. Inserting <code>t[i]</code> into <code>s</code> at position <code>i</code> costs our one edit. After the insertion, <code>s[i:]</code> must equal <code>t[i+1:]</code> — s's remaining characters align with t after the newly inserted one.</p>
+  <div class="comparison-grid">
+    <div class="comparison-panel bad">
+      <h4>❌ Two Edits Needed</h4>
+      <p style="font-family:var(--mono);font-size:12px;line-height:2">s = "abc"<br>t = "xyd"<br>Mismatch at 0: s="abc", t[1:]="yd"<br>"bc" ≠ "yd" → False</p>
+    </div>
+    <div class="comparison-panel good">
+      <h4>✓ Exactly One Edit</h4>
+      <p style="font-family:var(--mono);font-size:12px;line-height:2">s = "abc"<br>t = "abdc"<br>Mismatch at 2: s[2:]="c", t[3:]="c"<br>"c" == "c" → True</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 4: The Code ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+  </div>
+  <div class="code-block">def isOneEditDistance(s: str, t: str) -&gt; bool:
+    m, n = len(s), len(t)                   # Lengths of both strings
+    if abs(m - n) &gt; 1:                      # Length diff &gt; 1 → impossible
+        return False
+    if m &gt; n:                               # Normalize: ensure s is shorter/equal
+        return isOneEditDistance(t, s)      #   (recursive swap — O(1) extra work)
+
+    for i in range(m):                      # Scan through shorter string
+        if s[i] != t[i]:                    # First mismatch found at index i
+            if m == n:                      # Same length → REPLACE case
+                return s[i+1:] == t[i+1:]  #   Tails after i must match
+            else:                           # Diff length → INSERT case
+                return s[i:] == t[i+1:]    #   t[i] is the inserted char; align s[i:] to t[i+1:]
+
+    return m + 1 == n                       # No mismatch: s is prefix of t (insert at end)</div>
+  <div class="concept-box warning">
+    <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Prefix Case</div>
+    <p>The <code>return m + 1 == n</code> at the end handles <code>s="abc", t="abcd"</code> where s is a strict prefix of t. Without it, you'd return <code>False</code> unconditionally after the loop — which would also (wrongly) make <code>s="abc", t="abc"</code> return <code>False</code>... oh wait, that's actually <em>correct</em>! But <code>s="abc", t="abcd"</code> would also return <code>False</code>, which is wrong. The check <code>m + 1 == n</code> elegantly covers both: identical strings (m==n → False) and true prefixes (m+1==n → True).</p>
+  </div>
+  <div class="concept-box key-concept">
+    <div class="concept-box-title">⏱ Complexity</div>
+    <p><strong>Time:</strong> O(n) — single pass until mismatch, then O(n) slice comparison. Total O(n).<br>
+    <strong>Space:</strong> O(n) due to slicing (<code>s[i:]</code> creates a new string). Use the two-pointer variant below for true O(1) space.</p>
+  </div>
+</div>
+
+<!-- ── SECTION 5: Interview Strategy ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+  </div>
+  <div class="strategy-steps">
+    <div class="strategy-step">
+      <div class="step-label">Step 1: Enumerate the Edit Types</div>
+      <p>Say aloud: <em>"There are exactly three operations: replace, insert, delete."</em> Draw one example each. Immediately notice that INSERT(s,t) == DELETE(t,s) — they're symmetric. This collapse means I only need two code branches.</p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 2: State the Length Constraint</div>
+      <p>Before writing any code: <em>"If the lengths differ by more than 1, it's impossible — one edit can change length by at most 1."</em> This is a free O(1) guard that impresses interviewers. Mention it before touching the loop.</p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 3: The "First Mismatch" Reduction</div>
+      <p>Key insight to state: <em>"I only need to find where strings first diverge. Once found, the edit must happen there. Then I just verify the tails match."</em> This is the crux — no need to track a running count or use DP.</p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 4: Don't Forget Edge Cases</div>
+      <p>Verbalize: <em>"s and t identical → return False (zero edits). s is prefix of t → return True only if len diff is 1. Empty string vs single char → return True."</em></p>
+    </div>
+  </div>
+  <div class="interview-script">
+    <h4>🗣️ What to Say to the Interviewer</h4>
+    <div class="script-content">"Three edit types collapse to two once I normalize to keep <code>s</code> shorter. I check the length constraint first — it's O(1) and prunes impossible cases. Then I scan until the first mismatch: same-length means replace (check both tails from i+1), different-length means insert (check s[i:] vs t[i+1:]). If I exhaust s without a mismatch, I only return True if t is exactly one character longer — that covers the append-at-end case."</div>
+  </div>
+</div>
+
+<!-- ── SECTION 6: Interactive Walkthrough ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+  </div>
+  <p style="color:var(--text2);font-size:13px;">Demo: <code>s = "abc"</code>, <code>t = "abdc"</code> — insert <code>'d'</code> into s at index 2 gives t → <strong style="color:var(--green-mid)">True</strong></p>
+
+  <div class="viz-container">
+    <!-- Length status bar -->
+    <div class="len-bar">
+      <div class="len-item"><div class="len-label">len(s)</div><div class="len-val">3</div></div>
+      <div class="len-item"><div class="len-label">len(t)</div><div class="len-val">4</div></div>
+      <div class="len-item"><div class="len-label">|m−n|</div><div class="len-val">1</div></div>
+      <div class="len-item"><div class="len-label">Case</div><div class="len-val" id="lv-case" style="font-size:15px">—</div></div>
+      <div class="len-item"><div class="len-label">Swap?</div><div class="len-val" id="lv-swap" style="font-size:13px">No</div></div>
+    </div>
+
+    <!-- String rows -->
+    <div class="string-rows">
+      <!-- s row -->
+      <div class="string-row">
+        <div class="string-label">s</div>
+        <div class="cells-wrapper">
+          <div class="pointer-row">
+            <div class="ptr-cell ptr-i hide" id="ps0">i</div>
+            <div class="ptr-cell ptr-i hide" id="ps1">i</div>
+            <div class="ptr-cell ptr-i hide" id="ps2">i</div>
+          </div>
+          <div class="cells-row">
+            <div class="cell" id="s0">a</div>
+            <div class="cell" id="s1">b</div>
+            <div class="cell" id="s2">c</div>
+          </div>
+          <div class="idx-row">
+            <div class="idx-cell">0</div>
+            <div class="idx-cell">1</div>
+            <div class="idx-cell">2</div>
+          </div>
+        </div>
+      </div>
+      <!-- t row -->
+      <div class="string-row">
+        <div class="string-label">t</div>
+        <div class="cells-wrapper">
+          <div class="pointer-row">
+            <div class="ptr-cell ptr-j hide" id="pt0">j</div>
+            <div class="ptr-cell ptr-j hide" id="pt1">j</div>
+            <div class="ptr-cell ptr-j hide" id="pt2">j</div>
+            <div class="ptr-cell ptr-j hide" id="pt3">j</div>
+          </div>
+          <div class="cells-row">
+            <div class="cell" id="t0">a</div>
+            <div class="cell" id="t1">b</div>
+            <div class="cell" id="t2">d</div>
+            <div class="cell" id="t3">c</div>
+          </div>
+          <div class="idx-row">
+            <div class="idx-cell">0</div>
+            <div class="idx-cell">1</div>
+            <div class="idx-cell">2</div>
+            <div class="idx-cell">3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variable tracker -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-i"><span class="var-name">i</span><span class="var-val" id="vv-i">—</span></div>
+      <div class="var-box" id="vb-si"><span class="var-name">s[i]</span><span class="var-val" id="vv-si">—</span></div>
+      <div class="var-box" id="vb-ti"><span class="var-name">t[i]</span><span class="var-val" id="vv-ti">—</span></div>
+      <div class="var-box" id="vb-res"><span class="var-name">result</span><span class="var-val" id="vv-res">?</span></div>
+    </div>
+
+    <!-- Code panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl0">def isOneEditDistance(s, t):</div>
+      <div class="code-line" id="cl1">    m, n = len(s), len(t)</div>
+      <div class="code-line" id="cl2">    if abs(m - n) > 1: return False</div>
+      <div class="code-line" id="cl3">    if m > n: return isOneEditDistance(t, s)</div>
+      <div class="code-line" id="cl4">    for i in range(m):</div>
+      <div class="code-line" id="cl5">        if s[i] != t[i]:</div>
+      <div class="code-line" id="cl6">            if m == n: return s[i+1:] == t[i+1:]</div>
+      <div class="code-line" id="cl7">            else:      return s[i:] == t[i+1:]</div>
+      <div class="code-line" id="cl8">    return m + 1 == n</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-top">
+        <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+        <span class="step-counter" id="step-counter">Step 1 / 8</span>
+      </div>
+      <div class="info-title" id="info-title">Boundary Check</div>
+      <div class="info-text" id="info-text">m=3, n=4. |3−4|=1 ≤ 1 → compatible length difference. No swap needed since m &lt; n already. Entering the comparison loop.</div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-bg);border:1px solid var(--blue-border)"></div>Comparing</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green-bg);border:1px solid var(--green-border)"></div>Matched</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red-bg);border:1px solid var(--red-border)"></div>Mismatch</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-bg);border:1px solid var(--amber-border)"></div>Skipped (inserted char)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple-bg);border:1px solid var(--purple-border)"></div>Tail check</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 7: Summary ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+  </div>
+  <div class="takeaways">
+    <div class="takeaway">INSERT and DELETE are symmetric — normalize to keep the shorter string as <code>s</code></div>
+    <div class="takeaway"><code>|len(s) - len(t)| &gt; 1</code> is an immediate O(1) pruning check — always do it first</div>
+    <div class="takeaway">The edit <em>must</em> happen at the first mismatch — after that, just check tails</div>
+    <div class="takeaway">Replace case: verify <code>s[i+1:] == t[i+1:]</code> — both strings share the same suffix</div>
+    <div class="takeaway">Insert case: verify <code>s[i:] == t[i+1:]</code> — one extra char in t, then the rest aligns</div>
+    <div class="takeaway">No mismatch loop? Check <code>m + 1 == n</code> — covers the append-at-end prefix case</div>
+    <div class="takeaway">Identical strings return <code>False</code> — "exactly one edit" is not the same as "at most one"</div>
+  </div>
+  <div class="concept-box insight">
+    <div class="concept-box-title">🎯 When to Use This Pattern</div>
+    <ul style="margin-left:1.25rem;line-height:2.2;margin-top:.25rem;">
+      <li>Any <em>"is this string reachable in exactly k steps?"</em> question where k is small</li>
+      <li>Spell-checker candidate generation (adjacent keys, transpositions)</li>
+      <li>BFS word ladder where each "step" changes one character</li>
+      <li>Variant recognition signal: <em>"differ by exactly one insert/delete/replace"</em></li>
+    </ul>
+  </div>
+  <h3 style="margin-top:1rem;">Related Problems</h3>
+  <ul class="related-list">
+    <li><strong>Edit Distance (#72)</strong> (Hard) — Full DP for arbitrary number of edits; this problem is the k=1 special case</li>
+    <li><strong>Word Ladder (#127)</strong> (Hard) — BFS where each step is one character replace; recognizing "one edit = one BFS edge" is the key</li>
+    <li><strong>Delete Operation for Two Strings (#583)</strong> (Medium) — Minimum deletions from both strings to make equal; related via LCS</li>
+    <li><strong>Minimum ASCII Delete Sum (#712)</strong> (Medium) — Weighted edit distance variant</li>
+    <li><strong>Longest Common Subsequence (#1143)</strong> (Medium) — LCS is the foundation of edit distance DP</li>
+    <li><strong>Sentence Similarity II (#737)</strong> (Medium) — Edit distance at the word level via Union-Find</li>
+  </ul>
+</div>
+
+</main>
+
+<script>
+const steps = [
+  {
+    phase: 'INIT', phaseClass: 'phase-init', al: 2,
+    title: 'Boundary check: |m−n| = 1 ≤ 1 ✓',
+    text: 'm=3 (len "abc"), n=4 (len "abdc"). |3−4|=1 ≤ 1 → lengths are compatible; a single insert/delete could bridge them. m < n so no swap is needed — s is already the shorter string.',
+    ss: ['','',''], ts: ['','','',''],
+    pi: [], pj: [],
+    vars: { i: '—', si: '—', ti: '—', res: '?' }, ch: [],
+    lcase: '—', lswap: 'No'
+  },
+  {
+    phase: 'COMPARE', phaseClass: 'phase-compare', al: 4,
+    title: 'i=0 → Compare s[0]=\'a\' vs t[0]=\'a\'',
+    text: 'Loop begins at i=0. Checking s[0]=\'a\' against t[0]=\'a\'. They are the same character — no edit needed here. Move forward.',
+    ss: ['comparing','',''], ts: ['comparing','','',''],
+    pi: [0], pj: [0],
+    vars: { i: '0', si: 'a', ti: 'a', res: '?' }, ch: ['i','si','ti'],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'MATCH', phaseClass: 'phase-match', al: 5,
+    title: 'i=0: MATCH — advance',
+    text: '\'a\' == \'a\' ✓  — characters match, no edit used. Mark as matched. Increment i.',
+    ss: ['matched','',''], ts: ['matched','','',''],
+    pi: [0], pj: [0],
+    vars: { i: '0', si: 'a', ti: 'a', res: '?' }, ch: [],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'COMPARE', phaseClass: 'phase-compare', al: 4,
+    title: 'i=1 → Compare s[1]=\'b\' vs t[1]=\'b\'',
+    text: 'i=1. s[1]=\'b\' compared to t[1]=\'b\'. Still matching. The strings are identical through index 1.',
+    ss: ['matched','comparing',''], ts: ['matched','comparing','',''],
+    pi: [1], pj: [1],
+    vars: { i: '1', si: 'b', ti: 'b', res: '?' }, ch: ['i','si','ti'],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'MATCH', phaseClass: 'phase-match', al: 5,
+    title: 'i=1: MATCH — advance',
+    text: '\'b\' == \'b\' ✓ — another match. s[0..1] == t[0..1] confirmed. The invariant holds: no edit spent yet.',
+    ss: ['matched','matched',''], ts: ['matched','matched','',''],
+    pi: [1], pj: [1],
+    vars: { i: '1', si: 'b', ti: 'b', res: '?' }, ch: [],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'MISMATCH', phaseClass: 'phase-mismatch', al: 5,
+    title: 'i=2: MISMATCH! s[2]=\'c\' ≠ t[2]=\'d\'',
+    text: 'i=2. s[2]=\'c\' but t[2]=\'d\' — first divergence found! Since m≠n (3≠4), this is the INSERT path. The extra character \'d\' in t is at position 2. Our edit budget is spent here.',
+    ss: ['matched','matched','mismatch'], ts: ['matched','matched','mismatch',''],
+    pi: [2], pj: [2],
+    vars: { i: '2', si: 'c', ti: 'd', res: '?' }, ch: ['i','si','ti'],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'TAIL CHECK', phaseClass: 'phase-tail', al: 7,
+    title: 'INSERT case → check s[2:] == t[3:]',
+    text: 'm≠n → INSERT branch. t[2]=\'d\' is the inserted character — skip it. Now compare: does the rest of s from index 2 equal the rest of t from index 3? s[2:]="c" vs t[3:]="c".',
+    ss: ['matched','matched','tail-check'], ts: ['matched','matched','skip-char','tail-check'],
+    pi: [2], pj: [3],
+    vars: { i: '2', si: 'c', ti: 'c', res: '?' }, ch: ['ti'],
+    lcase: 'INSERT', lswap: 'No'
+  },
+  {
+    phase: 'RESULT', phaseClass: 'phase-result', al: 7,
+    title: '✓ Return True — exactly one insert apart',
+    text: 's[2:]="c" == t[3:]="c" ✓  The tails match perfectly. Inserting \'d\' at index 2 of "abc" produces "abdc". Exactly one edit. Return True!',
+    ss: ['result-ok','result-ok','result-ok'], ts: ['result-ok','result-ok','result-ok','result-ok'],
+    pi: [], pj: [],
+    vars: { i: '2', si: 'c', ti: 'c', res: 'True' }, ch: ['res'],
+    lcase: 'INSERT ✓', lswap: 'No'
+  }
+];
+
+let cur = 0;
+
+function renderStep(idx) {
+  const s = steps[idx];
+  // phase
+  const pb = document.getElementById('phase-badge');
+  pb.className = 'phase-badge ' + s.phaseClass;
+  pb.textContent = s.phase;
+  document.getElementById('step-counter').textContent = `Step ${idx+1} / ${steps.length}`;
+  // info
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-text').textContent = s.text;
+  // cells s
+  ['s0','s1','s2'].forEach((id, i) => {
+    document.getElementById(id).className = 'cell' + (s.ss[i] ? ' ' + s.ss[i] : '');
+  });
+  // cells t
+  ['t0','t1','t2','t3'].forEach((id, i) => {
+    document.getElementById(id).className = 'cell' + (s.ts[i] ? ' ' + s.ts[i] : '');
+  });
+  // pointers s
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('ps'+i).className = 'ptr-cell ptr-i' + (s.pi.includes(i) ? '' : ' hide');
+  }
+  // pointers t
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pt'+i).className = 'ptr-cell ptr-j' + (s.pj.includes(i) ? '' : ' hide');
+  }
+  // code lines
+  for (let i = 0; i <= 8; i++) {
+    document.getElementById('cl'+i).className = 'code-line' + (i === s.al ? ' active' : '');
+  }
+  // vars
+  const vmap = [['i','vb-i','vv-i'],['si','vb-si','vv-si'],['ti','vb-ti','vv-ti'],['res','vb-res','vv-res']];
+  vmap.forEach(([k, boxId, valId]) => {
+    document.getElementById(valId).textContent = s.vars[k];
+    document.getElementById(boxId).className = 'var-box' + (s.ch.includes(k) ? ' changed' : '');
+  });
+  // status bar
+  document.getElementById('lv-case').textContent = s.lcase;
+  document.getElementById('lv-swap').textContent = s.lswap;
+  // dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === idx ? ' active' : (i < idx ? ' visited' : ''));
+  });
+  // buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === steps.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  renderStep(cur);
+}
+
+function reset() { cur = 0; renderStep(0); }
+
+// build dots
+const dc = document.getElementById('progress-dots');
+steps.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => { cur = i; renderStep(i); };
+  dc.appendChild(d);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+renderStep(0);
+</script>
+</body>
+</html>

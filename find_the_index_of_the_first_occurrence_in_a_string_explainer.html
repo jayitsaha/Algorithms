@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#28 · Find the Index of the First Occurrence in a String</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════
+   DESIGN TOKENS
+═══════════════ */
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;   --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE;  --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;  --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;    --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;   --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+    --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#F09595;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+.container{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+p{margin:.5rem 0;color:var(--text2);}
+ul,ol{padding-left:1.5rem;color:var(--text2);line-height:1.9;}
+strong{color:var(--text);font-weight:700;}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg2);padding:1px 5px;border-radius:4px;}
+h4{font-size:15px;font-weight:700;color:var(--text);margin:1rem 0 .5rem;}
+
+/* HEADER */
+.problem-header{padding:28px 0 20px;}
+.problem-header h1{font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.problem-header .subtitle{color:var(--text2);margin-top:4px;font-size:15px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-easy{background:var(--green-bg);color:var(--green-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.section-chevron{color:var(--text3);transition:transform .25s;font-size:12px;}
+.section-chevron.open{transform:rotate(180deg);}
+.section-body{display:none;}
+.section-body.open{display:block;}
+
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+.concept-box p,.concept-box ul{margin-top:0;}
+.concept-box li{color:inherit;}
+
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/* CODE BLOCKS */
+.code-block{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.85;overflow-x:auto;margin:1rem 0;white-space:pre;}
+.code-block .cm{color:var(--text3);}
+
+/* INTERVIEW */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0;}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:6px;}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;margin-top:0;}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 12px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-size:14px;font-weight:500;border-left:3px solid var(--green-border);}
+
+/* COMPARISON TABLE */
+.comparison-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:14px;}
+.comparison-table th,.comparison-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.comparison-table th{background:var(--bg2);font-weight:700;color:var(--text2);font-size:12px;text-transform:uppercase;}
+.comparison-table td{background:var(--surface);}
+.comparison-table tr:hover td{background:var(--bg2);}
+
+/* ═══════════════════════════════════════════
+   KMP FAILURE FUNCTION TABLE (Section 1 diagram)
+═══════════════════════════════════════════ */
+.lps-table-wrap{overflow-x:auto;margin:1rem 0;}
+.lps-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;}
+.lps-table th,.lps-table td{padding:8px 14px;border:1px solid var(--border);text-align:center;}
+.lps-table th{background:var(--bg2);font-size:11px;text-transform:uppercase;font-weight:700;color:var(--text3);}
+.lps-table .header-row td{background:var(--purple-bg);color:var(--purple-mid);font-weight:700;}
+.lps-table .lps-row td{background:var(--cyan-bg);color:var(--cyan-mid);font-weight:700;}
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — TWO-ROW VISUALIZER
+═══════════════════════════════════════════ */
+.viz-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+.string-row{display:flex;gap:3px;align-items:center;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;}
+.str-cell{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:700;
+  border:2px solid var(--border2);background:var(--surface);color:var(--text);
+  transition:all .25s;flex-shrink:0;position:relative;
+}
+.str-cell.sc-match  {background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);}
+.str-cell.sc-cmp    {background:var(--purple-bg);border-color:var(--purple-mid);color:var(--purple-mid);}
+.str-cell.sc-mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid);}
+.str-cell.sc-found  {background:var(--green-bg);border-color:var(--green-mid);color:var(--green-mid);box-shadow:0 0 0 3px var(--green-border);}
+.str-cell.sc-skip   {background:var(--bg2);border-color:transparent;color:var(--text3);}
+.str-cell.sc-idle   {background:var(--surface);}
+.str-row-group{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+
+/* index labels */
+.idx-row{display:flex;gap:3px;margin-top:2px;}
+.idx-cell{width:36px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);flex-shrink:0;}
+
+/* pointer label row */
+.ptr-row{display:flex;gap:3px;margin-bottom:3px;min-height:16px;}
+.ptr-cell{width:36px;text-align:center;font-size:10px;font-weight:700;color:var(--blue-mid);flex-shrink:0;}
+.ptr-cell.p-j{color:var(--purple-mid);}
+
+/* ═══════════════════════════════════════════
+   VAR TRACKER
+═══════════════════════════════════════════ */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);min-width:28px;text-align:center;}
+.var-val.found-val{color:var(--green-mid);}
+.var-val.neg-val{color:var(--red-mid);}
+
+/* CODE PANEL */
+.viz-code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.85;overflow-x:auto;}
+.viz-code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.viz-code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600;}
+
+/* INFO CARD */
+.info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;min-height:90px;}
+.info-card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.ph-init   {background:var(--blue-bg);color:var(--blue-mid);}
+.ph-build  {background:var(--cyan-bg);color:var(--cyan-mid);}
+.ph-search {background:var(--purple-bg);color:var(--purple-mid);}
+.ph-match  {background:var(--green-bg);color:var(--green-mid);}
+.ph-mis    {background:var(--amber-bg);color:var(--amber-mid);}
+.ph-result {background:var(--green-bg);color:var(--green-mid);}
+.ph-fail   {background:var(--red-bg);color:var(--red-mid);}
+.step-counter{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.info-card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.info-card-text{font-size:13.5px;color:var(--text2);line-height:1.65;}
+
+/* PROGRESS + CONTROLS */
+.progress-dots{display:flex;justify-content:center;gap:5px;margin:1rem 0;flex-wrap:wrap;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .25s,transform .25s;cursor:pointer;}
+.dot.active{background:var(--blue-mid);transform:scale(1.4);}
+.dot.done{background:var(--green-mid);}
+.controls{display:flex;justify-content:center;gap:10px;margin-top:1rem;}
+.btn{padding:10px 24px;border-radius:var(--radius);border:1.5px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn:hover{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid);}
+.btn.primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid);}
+.btn.primary:hover{opacity:.88;}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:8px;}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:4px;}
+.ld-cmp     {background:var(--purple-bg);border:2px solid var(--purple-mid);}
+.ld-match   {background:var(--green-bg); border:1px solid var(--green-border);}
+.ld-mis     {background:var(--red-bg);   border:1px solid var(--red-border);}
+.ld-found   {background:var(--green-bg); border:2px solid var(--green-mid);}
+
+/* lps building cell */
+.lps-cell{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  border:2px solid var(--border2);background:var(--bg2);color:var(--text3);
+  transition:all .3s;flex-shrink:0;
+}
+.lps-cell.lc-known {background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-mid);}
+.lps-cell.lc-cur   {background:var(--purple-bg);border-color:var(--purple-mid);color:var(--purple-mid);}
+.lps-cell.lc-future{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="problem-header">
+  <h1>#28 · Find the Index of the First Occurrence in a String</h1>
+  <div class="subtitle">Return the start index of <code>needle</code> inside <code>haystack</code>, or −1 if not found</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">KMP Algorithm</span>
+    <span class="tag tag-complexity">Time O(n+m)</span>
+    <span class="tag tag-complexity">Space O(m)</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — UNDERSTANDING
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p>We have a <strong>haystack</strong> (the big string, e.g. <code>"sadbutsad"</code>) and a <strong>needle</strong> (the pattern we're searching for, e.g. <code>"sad"</code>). Return the index where the needle first appears in the haystack, or <code>−1</code> if it doesn't appear at all.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The naive approach slides a window of size <code>m</code> across the haystack and compares character by character. It works, but when we get a mismatch mid-comparison, we throw away all the information we gathered. <strong>KMP reuses that information</strong> by precomputing how far to jump after a mismatch — it never re-reads any character in the haystack.</p>
+    </div>
+
+    <h4>Worked Example by Hand</h4>
+    <p><code>haystack = "aabxaab"</code>, <code>needle = "aab"</code></p>
+    <ul>
+      <li>Try at index 0: compare "aab" vs "aab" → <strong>match! Return 0</strong></li>
+    </ul>
+    <p><code>haystack = "mississippi"</code>, <code>needle = "issip"</code></p>
+    <ul>
+      <li>Try at index 1: "issip" vs "issis" → mismatch at position 4 ('p' ≠ 's')</li>
+      <li>KMP knows that after seeing "issi" before the mismatch, we can jump smartly instead of sliding just one position</li>
+    </ul>
+
+    <h4>Key Variables</h4>
+    <ul>
+      <li><strong>n</strong> = len(haystack), <strong>m</strong> = len(needle)</li>
+      <li><strong>i</strong> = pointer in haystack (never goes backwards in KMP!)</li>
+      <li><strong>j</strong> = pointer in needle (can jump back using the failure function)</li>
+      <li><strong>lps[]</strong> = "longest proper prefix which is also suffix" — the precomputed jump table</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: KMP Pattern Matching</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p>KMP runs in two phases: <strong>Phase 1</strong> — build the LPS (failure function) array from the needle alone. <strong>Phase 2</strong> — search the haystack using the LPS to skip redundant comparisons.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build the LPS table</strong> — For each position <code>k</code> in the needle, <code>lps[k]</code> = length of the longest prefix of <code>needle[0..k]</code> that is also a suffix (but not the entire string). This tells us how far to reset <code>j</code> on a mismatch.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize search pointers</strong> — <code>i = 0</code> (haystack), <code>j = 0</code> (needle). Both start at the beginning.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Compare characters</strong> — If <code>haystack[i] == needle[j]</code>: advance both <code>i</code> and <code>j</code>. If <code>j == m</code>: found! Return <code>i − m</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>On mismatch</strong> — If <code>j &gt; 0</code>: set <code>j = lps[j−1]</code> (jump back, but don't advance <code>i</code>). If <code>j == 0</code>: just advance <code>i</code>. We <em>never</em> move <code>i</code> backwards.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>End of haystack</strong> — If we exhaust the haystack without <code>j == m</code>, return <code>−1</code>.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 What is the LPS Array?</div>
+      <p>For <code>needle = "ababc"</code>:</p>
+      <div class="lps-table-wrap">
+        <table class="lps-table">
+          <tr><th>Index k</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+          <tr><th>needle[k]</th><td>a</td><td>b</td><td>a</td><td>b</td><td>c</td></tr>
+          <tr><th>lps[k]</th><td>0</td><td>0</td><td>1</td><td>2</td><td>0</td></tr>
+        </table>
+      </div>
+      <p style="margin-top:.5rem;">At index 3 (char 'b'), <code>lps[3] = 2</code>: the prefix "ab" == suffix "ab" within "abab". So on a mismatch after matching "abab", we didn't waste — we already matched "ab" from the front!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY IT WORKS
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: KMP Algorithm Deep-Dive</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The KMP Invariant</div>
+      <p>At every point during the search, <code>j</code> characters of the needle have been matched from position <code>i − j</code> in the haystack. The pointer <code>i</code> <strong>never moves backwards</strong>. When a mismatch occurs, we know the last <code>lps[j−1]</code> characters we matched are a valid prefix of the needle — so we restart matching from there instead of from scratch.</p>
+    </div>
+
+    <h4>KMP Algorithm — Origin and Class</h4>
+    <ul>
+      <li><strong>Origin:</strong> Knuth, Morris, and Pratt (1977). The canonical linear-time string matching algorithm.</li>
+      <li><strong>Core invariant:</strong> <code>i</code> only moves forward; <code>j</code> resets to <code>lps[j−1]</code> on mismatch, retaining valid prefix matches</li>
+      <li><strong>Why O(n+m):</strong> <code>i</code> advances at most n times. <code>j</code> can only increase as many times as <code>i</code> advances, so it can decrease at most n times total. Building LPS is O(m) by the same argument. Total: O(n+m).</li>
+      <li><strong>Generalization:</strong> Multiple pattern search → Aho-Corasick (build a trie of patterns + failure links)</li>
+      <li><strong>Recognize when:</strong> "Find pattern in text" + O(n) time or "avoid O(n·m)" → KMP</li>
+    </ul>
+
+    <h4>Why Brute Force is O(n·m)</h4>
+    <p>The naive approach tries every starting position (n positions) and compares up to m characters for each. Worst case: <code>"aaaa...a"</code> with needle <code>"aaa...ab"</code> — matches m−1 chars then fails at every position. KMP avoids this by not resetting to position 0 blindly.</p>
+
+    <h4>Edge Cases</h4>
+    <ul>
+      <li><strong>needle = ""</strong> — Return 0 (empty needle always found at index 0)</li>
+      <li><strong>needle longer than haystack</strong> — Return −1 immediately</li>
+      <li><strong>Single character needle</strong> — LPS = [0]; pure character scan</li>
+      <li><strong>Repeated pattern</strong> — LPS shines here: <code>"aaaa"</code> needle → large LPS values, O(n) with minimal resets</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — THE CODE (ANNOTATED)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <h4>Solution 1 — Brute Force &nbsp;<em style="color:var(--text3);font-size:12px;">(Good starting point)</em></h4>
+    <div class="code-block"><span class="cm">def</span> strStr(haystack: str, needle: str) -> int:
+    n, m = len(haystack), len(needle)
+    <span class="cm">for</span> i <span class="cm">in</span> range(n - m + 1):      <span class="cm"># only start where needle can still fit</span>
+        <span class="cm">if</span> haystack[i:i+m] == needle:  <span class="cm"># O(m) slice comparison</span>
+            <span class="cm">return</span> i
+    <span class="cm">return</span> -1</div>
+
+    <h4>Solution 2 — KMP &nbsp;<em style="color:var(--green-mid);font-size:12px;">(Interview Pick)</em></h4>
+    <div class="code-block"><span class="cm">def</span> strStr(haystack: str, needle: str) -> int:
+    n, m = len(haystack), len(needle)
+
+    <span class="cm"># ── Phase 1: Build LPS (failure function) ─────────────────</span>
+    lps = [0] * m
+    length, k = 0, 1      <span class="cm"># length = current prefix-suffix length</span>
+    <span class="cm">while</span> k &lt; m:
+        <span class="cm">if</span> needle[k] == needle[length]:
+            length += 1
+            lps[k] = length
+            k += 1
+        <span class="cm">elif</span> length > 0:
+            length = lps[length - 1]  <span class="cm"># fall back, don't advance k</span>
+        <span class="cm">else</span>:
+            lps[k] = 0
+            k += 1
+
+    <span class="cm"># ── Phase 2: Search haystack ───────────────────────────────</span>
+    i, j = 0, 0            <span class="cm"># i = haystack pointer, j = needle pointer</span>
+    <span class="cm">while</span> i &lt; n:
+        <span class="cm">if</span> haystack[i] == needle[j]:
+            i += 1; j += 1
+        <span class="cm">if</span> j == m:
+            <span class="cm">return</span> i - m      <span class="cm"># full needle matched; start index</span>
+        <span class="cm">elif</span> i &lt; n <span class="cm">and</span> haystack[i] != needle[j]:
+            <span class="cm">if</span> j > 0:
+                j = lps[j - 1]     <span class="cm"># jump j, NOT i</span>
+            <span class="cm">else</span>:
+                i += 1             <span class="cm"># no prefix match; just advance i</span>
+    <span class="cm">return</span> -1
+
+<span class="cm">    # Solution 3 — Python built-in (know but don't rely on in interviews)</span>
+<span class="cm">    # return haystack.find(needle)</span></div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Advancing i on mismatch when j > 0</div>
+      <p>When there's a mismatch and <code>j &gt; 0</code>, you must set <code>j = lps[j−1]</code> but <strong>NOT</strong> advance <code>i</code>. The characters from <code>i−lps[j−1]</code> to <code>i</code> already match the beginning of the needle — moving <code>i</code> would skip an overlap.</p>
+    </div>
+
+    <table class="comparison-table">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force</td><td>O(n·m)</td><td>O(1)</td><td>Fine for small inputs; simple to code</td></tr>
+        <tr><td>KMP</td><td>O(n+m)</td><td>O(m)</td><td>Optimal; expected in serious interviews</td></tr>
+        <tr><td>Python built-in</td><td>O(n·m)*</td><td>O(1)</td><td>CPython uses optimized BMH internally; mention but don't submit</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Clarify and State Brute Force</div>
+        <p>Start with the sliding window O(n·m) brute force. It's easy to implement and correct. Ask: "Can we do better?" — the interviewer will usually say yes, which opens KMP discussion.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Waste in Brute Force</div>
+        <p>Draw on the whiteboard: "aaaxaaax" needle in "aaaxaaaxaaaaxaaax" haystack. After matching "aaax" at position 0 and failing, brute force throws away the "aaa" information. KMP doesn't — it reuses the prefix-suffix overlap in the needle.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Introduce the LPS Table</div>
+        <p>Explain: "I'll preprocess the needle to compute lps[k] = length of longest proper prefix of needle[0..k] that is also a suffix. This is O(m) space and time, computed by running KMP on the needle itself." Build the table on the whiteboard for the needle.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Execute the Search</div>
+        <p>Two pointers i (haystack) and j (needle). Match → advance both. Full match → return i−m. Mismatch with j&gt;0 → j = lps[j−1] (don't move i). Mismatch with j=0 → advance i. Code is ~20 lines; very implementable under pressure.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"The brute force is O(n*m) — for each position in haystack we compare up to m chars.
+The inefficiency is that after a partial match then mismatch, we discard work.
+
+KMP precomputes a 'failure function' on the needle: lps[k] = the length of the
+longest prefix of needle[0..k] that also appears as a suffix. This tells us, after
+a mismatch at needle[j], how far back to reset j without retreating in haystack.
+
+Phase 1 builds lps in O(m). Phase 2 scans haystack once in O(n). i never goes
+backwards — so total is O(n+m), space O(m) for the lps array."</div>
+    </div>
+
+    <div class="concept-box insight" style="margin-top:1rem;">
+      <div class="concept-box-title">🎯 Potential Follow-ups</div>
+      <ul>
+        <li><strong>"Find all occurrences, not just the first"</strong> — Continue after a match by setting <code>j = lps[m−1]</code> instead of returning</li>
+        <li><strong>"Multiple patterns"</strong> — Aho-Corasick algorithm (trie + failure links); extends KMP naturally</li>
+        <li><strong>"Case insensitive"</strong> — Lowercase both strings before KMP</li>
+        <li><strong>"Rabin-Karp approach"</strong> — Rolling hash, O(n+m) average with O(nm) worst case; simpler to implement than KMP</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">🎮 Interactive Walkthrough</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p style="color:var(--text2);font-size:13.5px;margin-bottom:.75rem;">
+      <code>haystack = "aabxaab"</code> &nbsp;·&nbsp; <code>needle = "aab"</code> &nbsp;·&nbsp; <code>lps = [0, 1, 0]</code> &nbsp;→&nbsp; expected: <strong>0</strong>
+    </p>
+
+    <!-- LPS table (static display for reference) -->
+    <div class="str-row-group">
+      <div class="viz-label">LPS Array (precomputed for "aab")</div>
+      <div style="display:flex;gap:3px;margin-bottom:4px;" id="lps-cells"></div>
+      <div style="display:flex;gap:3px;" id="lps-idx"></div>
+    </div>
+
+    <!-- Haystack row -->
+    <div class="str-row-group">
+      <div class="viz-label">Haystack</div>
+      <div class="ptr-row" id="ptr-i-row"></div>
+      <div class="string-row" id="haystack-row"></div>
+      <div class="idx-row" id="haystack-idx"></div>
+    </div>
+
+    <!-- Needle row -->
+    <div class="str-row-group">
+      <div class="viz-label">Needle (j pointer)</div>
+      <div class="ptr-row p-j" id="ptr-j-row"></div>
+      <div class="string-row" id="needle-row"></div>
+      <div class="idx-row" id="needle-idx"></div>
+    </div>
+
+    <!-- Variable tracker -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-i">
+        <span class="var-name">i</span>
+        <span class="var-val" id="vv-i">0</span>
+      </div>
+      <div class="var-box" id="vb-j">
+        <span class="var-name">j</span>
+        <span class="var-val" id="vv-j">0</span>
+      </div>
+      <div class="var-box" id="vb-result">
+        <span class="var-name">result</span>
+        <span class="var-val" id="vv-result">—</span>
+      </div>
+    </div>
+
+    <!-- Code panel -->
+    <div class="viz-code-panel" id="code-panel">
+      <div class="viz-code-line" id="cl0">i, j = 0, 0</div>
+      <div class="viz-code-line" id="cl1">while i &lt; n:</div>
+      <div class="viz-code-line" id="cl2">    if haystack[i] == needle[j]:  # match</div>
+      <div class="viz-code-line" id="cl3">        i += 1; j += 1</div>
+      <div class="viz-code-line" id="cl4">    if j == m: return i - m       # found!</div>
+      <div class="viz-code-line" id="cl5">    elif haystack[i] != needle[j]:  # mismatch</div>
+      <div class="viz-code-line" id="cl6">        if j &gt; 0: j = lps[j - 1]   # use LPS jump</div>
+      <div class="viz-code-line" id="cl7">        else: i += 1                # advance i</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <span class="phase-badge ph-init" id="phase-badge">INIT</span>
+        <span class="step-counter" id="step-counter">Step 1 / 9</span>
+      </div>
+      <div class="info-card-title" id="info-title">Initialize Pointers</div>
+      <div class="info-card-text"  id="info-text">Loading…</div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+      <button class="btn primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot ld-cmp"></div>Comparing</div>
+      <div class="legend-item"><div class="legend-dot ld-match"></div>Matched</div>
+      <div class="legend-item"><div class="legend-dot ld-mis"></div>Mismatch</div>
+      <div class="legend-item"><div class="legend-dot ld-found"></div>Found!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="takeaways">
+      <div class="takeaway">✓ Brute force O(n·m) is acceptable for small inputs; KMP is optimal at O(n+m)</div>
+      <div class="takeaway">✓ KMP's key idea: precompute the LPS array from the needle to avoid redundant comparisons</div>
+      <div class="takeaway">✓ On mismatch: jump j to lps[j−1] — do NOT move i backwards</div>
+      <div class="takeaway">✓ lps[k] = longest proper prefix of needle[0..k] that is also a suffix of that substring</div>
+      <div class="takeaway">✓ i only ever moves forward → O(n) for the search phase; building lps is O(m)</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use KMP</div>
+      <ul>
+        <li>"Find pattern in text" with O(n) requirement</li>
+        <li>Text contains many repeated characters (naive fails badly here)</li>
+        <li>Must handle multiple searches with the same needle → build lps once, reuse</li>
+        <li>Keywords: "first occurrence", "index of substring", "strStr", "pattern search"</li>
+      </ul>
+    </div>
+
+    <div class="related-problems" style="margin-top:1rem;">
+      <h4>Related Problems (Same Technique)</h4>
+      <ul>
+        <li><strong>Repeated Substring Pattern</strong> (Easy) — KMP failure function or s+s trick</li>
+        <li><strong>Longest Happy Prefix</strong> (Hard) — Direct application of LPS array</li>
+        <li><strong>Shortest Palindrome</strong> (Hard) — KMP on s + "#" + reverse(s)</li>
+        <li><strong>Implement strStr</strong> (Easy) — This exact problem in older LeetCode versions</li>
+        <li><strong>String Matching in an Array</strong> (Easy) — Apply strStr/KMP to each pair</li>
+        <li><strong>Number of Occurrences of a Substring</strong> — Find all occurrences with KMP continuation</li>
+      </ul>
+    </div>
+
+    <div class="concept-box key-concept" style="margin-top:1rem;">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 + 2.3 (String Matching Algorithms)<br>Sub-Pattern: <strong>Brute Force or KMP</strong></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ══════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const HAYSTACK = "aabxaab";
+const NEEDLE   = "aab";
+const LPS      = [0, 1, 0];   // for "aab"
+
+// Step schema:
+// { phase, phaseClass, activeLine, i, j, result(null|int),
+//   hStates: [...], nStates: [...], title, text }
+// hStates / nStates length matches HAYSTACK / NEEDLE
+// states: 'sc-idle' | 'sc-cmp' | 'sc-match' | 'sc-mismatch' | 'sc-found' | 'sc-skip'
+
+const steps = [
+  {
+    phase:"INIT", pc:"ph-init", al:0,
+    i:0, j:0, result:null, pI:true, pJ:true,
+    hS:["sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-idle","sc-idle","sc-idle"],
+    title:"Initialize: i=0, j=0",
+    text:"LPS array for \"aab\" is [0, 1, 0]. Meaning: lps[0]=0 (\"a\" has no proper prefix=suffix), lps[1]=1 (\"aa\": prefix \"a\" == suffix \"a\"), lps[2]=0 (\"aab\" has no proper prefix=suffix). Now set i=0 (haystack pointer), j=0 (needle pointer). We're ready to search."
+  },
+  {
+    phase:"COMPARE", pc:"ph-search", al:2,
+    i:0, j:0, result:null, pI:true, pJ:true,
+    hS:["sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"Compare haystack[0]='a' vs needle[0]='a'",
+    text:"haystack[i=0] = 'a' and needle[j=0] = 'a'. They match! We'll advance both pointers."
+  },
+  {
+    phase:"MATCH", pc:"ph-match", al:3,
+    i:1, j:1, result:null, pI:true, pJ:true,
+    hS:["sc-match","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-match","sc-cmp","sc-idle"],
+    title:"Match! i→1, j→1. Compare haystack[1]='a' vs needle[1]='a'",
+    text:"Both advanced: i=1, j=1. Now haystack[1]='a' vs needle[1]='a'. Another match! Still building up the match."
+  },
+  {
+    phase:"MATCH", pc:"ph-match", al:3,
+    i:2, j:2, result:null, pI:true, pJ:true,
+    hS:["sc-match","sc-match","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-match","sc-match","sc-cmp"],
+    title:"Match! i→2, j→2. Compare haystack[2]='b' vs needle[2]='b'",
+    text:"Both advance again: i=2, j=2. haystack[2]='b' vs needle[2]='b'. Another match! j is about to reach m=3."
+  },
+  {
+    phase:"FOUND", pc:"ph-result", al:4,
+    i:3, j:3, result:0, pI:true, pJ:true,
+    hS:["sc-found","sc-found","sc-found","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-found","sc-found","sc-found"],
+    title:"j == m=3! Found! Return i - m = 3 - 3 = 0",
+    text:"After advancing: i=3, j=3. j has reached m=3 — the entire needle matched! Return i − m = 3 − 3 = 0. The needle \"aab\" first appears at index 0 in \"aabxaab\"."
+  }
+];
+
+// We'll also add a second example walkthrough: "aabxaab", "xaab" to show a mismatch + LPS jump
+// But to keep the walkthroughs clean let's show a single clean example.
+// The steps above already show the happy path; let's add a mismatch demo with haystack="mississippi", needle="issip"
+// Actually let's add steps for a second more interesting example showing the LPS jump
+// haystack="aaaxaaax", needle="aaax" → match at 0 immediately, not interesting
+// Let's use haystack="aabxaab", needle="aab" but show ALL 7 chars of haystack and NOT just return at idx 0
+// Actually the example already finds at 0. Let me use haystack="xaabxaab", needle="aab" → answer = 1
+
+// Redefine with better example to show mismatch recovery
+const HAYSTACK2 = "xaabxaab";
+const NEEDLE2   = "aab";
+const LPS2      = [0, 1, 0];
+
+const steps2 = [
+  {
+    phase:"INIT", pc:"ph-init", al:0,
+    i:0, j:0, result:null,
+    hS:["sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-idle","sc-idle","sc-idle"],
+    title:"Initialize: i=0, j=0 | haystack=\"xaabxaab\", needle=\"aab\"",
+    text:"LPS for \"aab\" = [0, 1, 0]. Start with i=0 (haystack pointer) and j=0 (needle pointer). No characters matched yet."
+  },
+  {
+    phase:"COMPARE", pc:"ph-search", al:2,
+    i:0, j:0, result:null,
+    hS:["sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"Compare haystack[0]='x' vs needle[0]='a'",
+    text:"'x' ≠ 'a'. Mismatch! And j=0, so we can't use the LPS jump. The only option is to advance i."
+  },
+  {
+    phase:"MISMATCH", pc:"ph-mis", al:7,
+    i:1, j:0, result:null,
+    hS:["sc-skip","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"j=0 on mismatch → advance i only. i→1, j stays 0",
+    text:"Since j==0, we cannot jump via LPS. Simply advance i to 1. Now we compare haystack[1]='a' vs needle[0]='a'."
+  },
+  {
+    phase:"MATCH", pc:"ph-match", al:3,
+    i:2, j:1, result:null,
+    hS:["sc-skip","sc-match","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-match","sc-cmp","sc-idle"],
+    title:"Match! i→2, j→1. Compare haystack[2]='b' vs needle[1]='a'",
+    text:"haystack[1]='a' matched needle[0]='a'. Advance: i=2, j=1. Now compare haystack[2]='b' vs needle[1]='a'. Mismatch coming!"
+  },
+  {
+    phase:"MISMATCH", pc:"ph-mis", al:6,
+    i:2, j:1, result:null,
+    hS:["sc-skip","sc-match","sc-mismatch","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-match","sc-mismatch","sc-idle"],
+    title:"Mismatch! haystack[2]='b' ≠ needle[1]='a'. j>0 → jump j=lps[0]=0",
+    text:"j=1 > 0, so use LPS: j = lps[j−1] = lps[0] = 0. i stays at 2. The 1-char match 'a' we made is lost — lps[0]=0 means 'a' has no useful prefix-suffix. But i didn't go back! We re-examine haystack[2]='b'."
+  },
+  {
+    phase:"COMPARE", pc:"ph-search", al:2,
+    i:2, j:0, result:null,
+    hS:["sc-skip","sc-skip","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"After jump: i=2, j=0. Compare haystack[2]='b' vs needle[0]='a'",
+    text:"'b' ≠ 'a'. Mismatch again, j=0, so advance i to 3."
+  },
+  {
+    phase:"MISMATCH", pc:"ph-mis", al:7,
+    i:3, j:0, result:null,
+    hS:["sc-skip","sc-skip","sc-skip","sc-cmp","sc-idle","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"i→3. Compare haystack[3]='x' vs needle[0]='a' → mismatch, advance i",
+    text:"'x' ≠ 'a', j=0 again, so i→4."
+  },
+  {
+    phase:"COMPARE", pc:"ph-search", al:2,
+    i:4, j:0, result:null,
+    hS:["sc-skip","sc-skip","sc-skip","sc-skip","sc-cmp","sc-idle","sc-idle","sc-idle"],
+    nS:["sc-cmp","sc-idle","sc-idle"],
+    title:"i=4. Compare haystack[4]='a' vs needle[0]='a' → Match!",
+    text:"haystack[4]='a' == needle[0]='a'. First match of this attempt! Advance both: i→5, j→1."
+  },
+  {
+    phase:"MATCH", pc:"ph-match", al:3,
+    i:5, j:1, result:null,
+    hS:["sc-skip","sc-skip","sc-skip","sc-skip","sc-match","sc-cmp","sc-idle","sc-idle"],
+    nS:["sc-match","sc-cmp","sc-idle"],
+    title:"Match! i→5, j→1. Compare haystack[5]='a' vs needle[1]='a'",
+    text:"haystack[5]='a' == needle[1]='a'. Another match. Advance: i→6, j→2."
+  },
+  {
+    phase:"MATCH", pc:"ph-match", al:3,
+    i:6, j:2, result:null,
+    hS:["sc-skip","sc-skip","sc-skip","sc-skip","sc-match","sc-match","sc-cmp","sc-idle"],
+    nS:["sc-match","sc-match","sc-cmp"],
+    title:"Match! i→6, j→2. Compare haystack[6]='b' vs needle[2]='b'",
+    text:"haystack[6]='b' == needle[2]='b'. Third match! Advance: i→7, j→3. j is about to equal m=3."
+  },
+  {
+    phase:"FOUND", pc:"ph-result", al:4,
+    i:7, j:3, result:4,
+    hS:["sc-skip","sc-skip","sc-skip","sc-skip","sc-found","sc-found","sc-found","sc-idle"],
+    nS:["sc-found","sc-found","sc-found"],
+    title:"j == m=3! Found! Return i - m = 7 - 3 = 4",
+    text:"j==m. The whole needle matched. Return i − m = 7 − 3 = 4. The needle \"aab\" first appears in \"xaabxaab\" at index 4. ✓"
+  }
+];
+
+// Use the second (more instructive) demo
+const DEMO_H = HAYSTACK2;
+const DEMO_N = NEEDLE2;
+const DEMO_LPS = LPS2;
+const allSteps = steps2;
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let cur = 0;
+const N_STEPS = allSteps.length;
+
+// ─────────────────────────────────────────
+// BUILD STATIC PARTS
+// ─────────────────────────────────────────
+function buildStatic() {
+  // LPS cells
+  const lpsC = document.getElementById('lps-cells');
+  const lpsI = document.getElementById('lps-idx');
+  DEMO_N.split('').forEach((ch, k) => {
+    const c = document.createElement('div');
+    c.className = 'lps-cell lc-known';
+    c.textContent = ch;
+    c.title = 'lps[' + k + '] = ' + DEMO_LPS[k];
+    lpsC.appendChild(c);
+    const iEl = document.createElement('div');
+    iEl.className = 'idx-cell';
+    iEl.textContent = DEMO_LPS[k];
+    lpsI.appendChild(iEl);
+  });
+  // add a space + lps values row label
+  const label = document.createElement('div');
+  label.style.cssText = 'font-size:10px;color:var(--text3);margin-top:4px;';
+  label.textContent = '↑ lps values';
+  document.getElementById('lps-cells').parentElement.appendChild(label);
+
+  // Haystack index labels
+  const hIdx = document.getElementById('haystack-idx');
+  DEMO_H.split('').forEach((_, k) => {
+    const iEl = document.createElement('div');
+    iEl.className = 'idx-cell';
+    iEl.textContent = k;
+    hIdx.appendChild(iEl);
+  });
+
+  // Needle index labels
+  const nIdx = document.getElementById('needle-idx');
+  DEMO_N.split('').forEach((_, k) => {
+    const iEl = document.createElement('div');
+    iEl.className = 'idx-cell';
+    iEl.textContent = k;
+    nIdx.appendChild(iEl);
+  });
+}
+
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
+function render() {
+  const s = allSteps[cur];
+  const prev = cur > 0 ? allSteps[cur - 1] : null;
+
+  // ── Haystack cells ──
+  const hRow = document.getElementById('haystack-row');
+  hRow.innerHTML = '';
+  DEMO_H.split('').forEach((ch, k) => {
+    const cell = document.createElement('div');
+    cell.className = 'str-cell ' + (s.hS[k] || 'sc-idle');
+    cell.textContent = ch;
+    hRow.appendChild(cell);
+  });
+
+  // ── Needle cells ──
+  const nRow = document.getElementById('needle-row');
+  nRow.innerHTML = '';
+  DEMO_N.split('').forEach((ch, k) => {
+    const cell = document.createElement('div');
+    cell.className = 'str-cell ' + (s.nS[k] || 'sc-idle');
+    cell.textContent = ch;
+    nRow.appendChild(cell);
+  });
+
+  // ── Pointer labels — i row ──
+  const pIRow = document.getElementById('ptr-i-row');
+  pIRow.innerHTML = '';
+  DEMO_H.split('').forEach((_, k) => {
+    const cell = document.createElement('div');
+    cell.className = 'ptr-cell';
+    cell.textContent = k === s.i ? 'i' : '';
+    pIRow.appendChild(cell);
+  });
+
+  // ── Pointer labels — j row ──
+  const pJRow = document.getElementById('ptr-j-row');
+  pJRow.innerHTML = '';
+  DEMO_N.split('').forEach((_, k) => {
+    const cell = document.createElement('div');
+    cell.className = 'ptr-cell p-j';
+    cell.textContent = k === s.j ? 'j' : '';
+    pJRow.appendChild(cell);
+  });
+
+  // ── Variable tracker ──
+  const iChanged = prev && prev.i !== s.i;
+  const jChanged = prev && prev.j !== s.j;
+  const rChanged = s.result !== null && (!prev || prev.result === null);
+
+  document.getElementById('vb-i').className = 'var-box' + (iChanged ? ' changed' : '');
+  document.getElementById('vv-i').textContent = s.i;
+
+  document.getElementById('vb-j').className = 'var-box' + (jChanged ? ' changed' : '');
+  document.getElementById('vv-j').textContent = s.j;
+
+  document.getElementById('vb-result').className = 'var-box' + (rChanged ? ' changed' : '');
+  const resEl = document.getElementById('vv-result');
+  resEl.textContent = s.result !== null ? s.result : '—';
+  resEl.className = 'var-val' + (s.result !== null ? ' found-val' : '');
+
+  // ── Code panel ──
+  for (let k = 0; k < 8; k++) {
+    const el = document.getElementById('cl' + k);
+    el.className = 'viz-code-line' + (s.al === k ? ' active' : '');
+  }
+
+  // ── Info card ──
+  document.getElementById('phase-badge').className = 'phase-badge ' + s.pc;
+  document.getElementById('phase-badge').textContent = s.phase;
+  document.getElementById('step-counter').textContent = 'Step ' + (cur + 1) + ' / ' + N_STEPS;
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-text').textContent = s.text;
+
+  // ── Progress dots ──
+  const dotsEl = document.getElementById('progress-dots');
+  dotsEl.innerHTML = '';
+  for (let k = 0; k < N_STEPS; k++) {
+    const cls = k === cur ? 'dot active' : k < cur ? 'dot done' : 'dot';
+    const d = document.createElement('div');
+    d.className = cls;
+    d.onclick = (function(idx) { return function() { cur = idx; render(); }; })(k);
+    dotsEl.appendChild(d);
+  }
+}
+
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+function go(dir) {
+  cur = Math.max(0, Math.min(N_STEPS - 1, cur + dir));
+  render();
+}
+function reset() { cur = 0; render(); }
+
+// ─────────────────────────────────────────
+// COLLAPSIBLES
+// ─────────────────────────────────────────
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.section-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chev) chev.classList.toggle('open', !isOpen);
+}
+
+// ─────────────────────────────────────────
+// KEYBOARD NAV
+// ─────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+buildStatic();
+render();
+</script>
+</body>
+</html>
