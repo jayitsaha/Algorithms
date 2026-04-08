@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#409 · Longest Palindrome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;   --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE;  --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;  --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;    --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;   --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+    --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#F09595;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; }
+.container { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+p { margin: 0.5rem 0; color: var(--text2); }
+ul, ol { padding-left: 1.5rem; color: var(--text2); line-height: 1.9; }
+strong { color: var(--text); font-weight: 700; }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--bg2); padding: 1px 5px; border-radius: 4px; }
+h4 { font-size: 15px; font-weight: 700; color: var(--text); margin: 1rem 0 0.5rem; }
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.problem-header { padding: 28px 0 20px; }
+.problem-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+.problem-header .subtitle { color: var(--text2); margin-top: 4px; font-size: 15px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+.tag-easy       { background: var(--green-bg);  color: var(--green-mid); }
+.tag-pattern    { background: var(--blue-bg);   color: var(--blue-mid); }
+.tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+/* ═══════════════════════════════════════════
+   CARD + COLLAPSIBLE
+═══════════════════════════════════════════ */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; cursor: pointer; user-select: none; }
+.section-number { width: 28px; height: 28px; background: var(--blue-bg); color: var(--blue-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--text); flex: 1; }
+.section-chevron { color: var(--text3); transition: transform 0.25s; font-size: 12px; }
+.section-chevron.open { transform: rotate(180deg); }
+.section-body { display: none; }
+.section-body.open { display: block; }
+
+/* ═══════════════════════════════════════════
+   CONCEPT BOXES
+═══════════════════════════════════════════ */
+.concept-box { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+.concept-box-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+.concept-box.insight     { background: var(--green-bg);  border: 1px solid var(--green-border); }
+.concept-box.insight     .concept-box-title { color: var(--green-mid); }
+.concept-box.warning     { background: var(--amber-bg);  border: 1px solid var(--amber-border); }
+.concept-box.warning     .concept-box-title { color: var(--amber-mid); }
+.concept-box.key-concept { background: var(--blue-bg);   border: 1px solid var(--blue-border); }
+.concept-box.key-concept .concept-box-title { color: var(--blue-mid); }
+.concept-box.danger      { background: var(--red-bg);    border: 1px solid var(--red-border); }
+.concept-box.danger      .concept-box-title { color: var(--red-mid); }
+.concept-box p, .concept-box ul { margin-top: 0; }
+
+/* ═══════════════════════════════════════════
+   ALGORITHM STEPS
+═══════════════════════════════════════════ */
+.algorithm-steps { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
+.algo-step { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: var(--bg2); border-radius: var(--radius); }
+.step-num  { width: 24px; height: 24px; background: var(--purple-bg); color: var(--purple-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.step-text { color: var(--text); line-height: 1.5; }
+
+/* ═══════════════════════════════════════════
+   EDUCATIONAL CODE BLOCKS
+═══════════════════════════════════════════ */
+.code-block { background: var(--bg2); border-radius: var(--radius); padding: 14px 16px; font-family: var(--mono); font-size: 12.5px; line-height: 1.85; overflow-x: auto; margin: 1rem 0; }
+.code-block .comment { color: var(--text3); }
+
+/* ═══════════════════════════════════════════
+   INTERVIEW STRATEGY
+═══════════════════════════════════════════ */
+.strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+.strategy-step  { padding: 14px 16px; background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%); border-radius: var(--radius); border: 1px solid var(--purple-border); }
+.step-label     { font-weight: 700; font-size: 14px; color: var(--purple-mid); margin-bottom: 6px; }
+.interview-script          { margin-top: 1.25rem; padding: 14px; background: var(--bg2); border-radius: var(--radius); }
+.interview-script h4       { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; margin-top: 0; }
+.script-content { font-family: var(--mono); font-size: 12px; line-height: 2; color: var(--text2); padding: 12px; background: var(--surface); border-radius: var(--radius); border-left: 3px solid var(--green-mid); }
+
+/* ═══════════════════════════════════════════
+   SUMMARY TAKEAWAYS
+═══════════════════════════════════════════ */
+.takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+.takeaway  { padding: 8px 12px; background: var(--green-bg); border-radius: var(--radius); color: var(--green-text); font-size: 14px; font-weight: 500; border-left: 3px solid var(--green-border); }
+
+/* ═══════════════════════════════════════════
+   COMPARISON TABLE
+═══════════════════════════════════════════ */
+.comparison-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 14px; }
+.comparison-table th, .comparison-table td { padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+.comparison-table th { background: var(--bg2); font-weight: 700; color: var(--text2); font-size: 12px; text-transform: uppercase; }
+.comparison-table td { background: var(--surface); }
+.comparison-table tr:hover td { background: var(--bg2); }
+
+/* ═══════════════════════════════════════════
+   PALINDROME STRUCTURE DIAGRAM (Section 1)
+═══════════════════════════════════════════ */
+.pair-diagram { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin: 1.25rem 0; flex-wrap: wrap; }
+.pair-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pair-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+.pair-chars { display: flex; gap: 4px; }
+.pair-char-box { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 15px; font-weight: 700; }
+.pair-char-box.pair-l { background: var(--blue-bg);   color: var(--blue-mid);  border: 1px solid var(--blue-border); }
+.pair-char-box.pair-r { background: var(--blue-bg);   color: var(--blue-mid);  border: 1px solid var(--blue-border); }
+.pair-char-box.pair-c { background: var(--red-bg);    color: var(--red-mid);   border: 2px solid var(--red-border); width: 38px; height: 38px; font-size: 17px; }
+.pair-divider { font-size: 22px; color: var(--border2); margin-bottom: 4px; }
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — FREQ CARDS
+═══════════════════════════════════════════ */
+.freq-grid {
+  display: flex; justify-content: center; gap: 14px;
+  flex-wrap: wrap; margin: 1.25rem 0;
+}
+.freq-card {
+  width: 84px; min-height: 105px; border-radius: var(--radius); border: 2px solid var(--border2);
+  background: var(--surface); display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 5px; padding: 10px 6px;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.fc-char  { font-family: var(--mono); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; }
+.fc-count { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.fc-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text3); text-align: center; }
+
+.freq-card.fc-current  { border-color: var(--purple-mid); background: var(--purple-bg); transform: scale(1.1) translateY(-4px); box-shadow: 0 6px 20px rgba(83,74,183,0.28); }
+.freq-card.fc-current  .fc-char  { color: var(--purple-mid); }
+.freq-card.fc-current  .fc-label { color: var(--purple-mid); }
+.freq-card.fc-done-even { border-color: var(--green-border); background: var(--green-bg); }
+.freq-card.fc-done-even .fc-char  { color: var(--green-mid); }
+.freq-card.fc-done-even .fc-label { color: var(--green-mid); }
+.freq-card.fc-done-odd  { border-color: var(--amber-border); background: var(--amber-bg); }
+.freq-card.fc-done-odd  .fc-char  { color: var(--amber-mid); }
+.freq-card.fc-done-odd  .fc-label { color: var(--amber-mid); }
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — PALINDROME BUILDER
+═══════════════════════════════════════════ */
+.pal-zone {
+  background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.5rem;
+  margin: 1rem 0; text-align: center;
+}
+.pal-zone-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 10px; }
+.palindrome-builder { display: flex; align-items: flex-end; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.pal-section { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pal-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+.pal-chars { display: flex; gap: 4px; min-height: 42px; align-items: center; }
+.pal-char { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 16px; font-weight: 700; transition: all 0.3s; }
+.pal-char.left-char   { background: var(--blue-bg);   color: var(--blue-mid);  border: 1px solid var(--blue-border); }
+.pal-char.right-char  { background: var(--blue-bg);   color: var(--blue-mid);  border: 1px solid var(--blue-border); }
+.pal-char.center-char { background: var(--red-bg);    color: var(--red-mid);   border: 2px solid var(--red-border); width: 40px; height: 40px; font-size: 18px; }
+.pal-char.empty-slot  { background: var(--bg2); border: 1.5px dashed var(--border2); color: var(--text3); font-size: 14px; border-radius: 8px; }
+.pal-length-label { margin-top: 8px; font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.pal-length-label span { color: var(--purple-mid); font-weight: 700; }
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — VARIABLE TRACKER
+═══════════════════════════════════════════ */
+.var-tracker { display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+.var-box { display: flex; align-items: center; gap: 8px; background: var(--bg2); border-radius: var(--radius); padding: 8px 14px; border: 1px solid transparent; transition: background 0.3s, border-color 0.3s; }
+.var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+.var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); white-space: nowrap; }
+.var-val  { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text); min-width: 30px; text-align: center; }
+.var-val.true-val  { color: var(--green-mid); }
+.var-val.false-val { color: var(--red-mid); }
+.var-val.result-val{ color: var(--purple-mid); }
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — CODE PANEL
+═══════════════════════════════════════════ */
+.viz-code-panel { margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius); padding: 12px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.85; overflow-x: auto; }
+.viz-code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+.viz-code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 600; }
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE WALKTHROUGH — INFO CARD
+═══════════════════════════════════════════ */
+.info-card { background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 1.25rem; min-height: 90px; }
+.info-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+.phase-init   { background: var(--blue-bg);   color: var(--blue-mid); }
+.phase-odd    { background: var(--amber-bg);  color: var(--amber-mid); }
+.phase-even   { background: var(--green-bg);  color: var(--green-mid); }
+.phase-center { background: var(--red-bg);    color: var(--red-mid); }
+.phase-result { background: var(--purple-bg); color: var(--purple-mid); }
+.step-counter { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.info-card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.info-card-text  { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
+
+/* ═══════════════════════════════════════════
+   PROGRESS DOTS + CONTROLS
+═══════════════════════════════════════════ */
+.progress-dots { display: flex; justify-content: center; gap: 6px; margin: 1rem 0; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); transition: background 0.25s, transform 0.25s; cursor: pointer; }
+.dot.active { background: var(--blue-mid); transform: scale(1.4); }
+.dot.done   { background: var(--green-mid); }
+.controls { display: flex; justify-content: center; gap: 10px; margin-top: 1rem; }
+.btn { padding: 10px 24px; border-radius: var(--radius); border: 1.5px solid var(--border2); background: var(--surface); color: var(--text); font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn:hover { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-mid); }
+.btn.primary { background: var(--blue-mid); color: #fff; border-color: var(--blue-mid); }
+.btn.primary:hover { opacity: 0.88; }
+.kbd-hint { text-align: center; font-size: 12px; color: var(--text3); margin-top: 8px; }
+
+/* ═══════════════════════════════════════════
+   LEGEND
+═══════════════════════════════════════════ */
+.legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+.legend-dot.ld-processing { background: var(--purple-bg); border: 2px solid var(--purple-mid); }
+.legend-dot.ld-even       { background: var(--green-bg);  border: 1px solid var(--green-border); }
+.legend-dot.ld-odd        { background: var(--amber-bg);  border: 1px solid var(--amber-border); }
+.legend-dot.ld-center     { background: var(--red-bg);    border: 2px solid var(--red-border); }
+
+/* ═══════════════════════════════════════════
+   RELATED PROBLEMS
+═══════════════════════════════════════════ */
+.related-problems h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+
+/* highlight for "result" state on the palindrome */
+.result-flash { animation: resflash 0.7s ease; }
+@keyframes resflash { 0%{opacity:.4} 50%{opacity:1} 100%{opacity:1} }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="problem-header">
+  <h1>#409 · Longest Palindrome</h1>
+  <div class="subtitle">Find the length of the longest palindrome buildable from the given characters</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Count Pairs + One Odd</span>
+    <span class="tag tag-complexity">Time O(n)</span>
+    <span class="tag tag-complexity">Space O(1)</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — UNDERSTANDING
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p>We have a string of characters. We can <strong>rearrange them in any order</strong>. The question: what is the <em>length</em> of the longest palindrome we can form? (We don't need to return the palindrome itself — just the length.)</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A palindrome mirrors around its center. Every character on the left side has a twin on the right side. This means <strong>characters must come in pairs</strong> — one for each side — <em>except</em> at most one character which can sit alone in the center.</p>
+    </div>
+
+    <h4>What makes a palindrome? The pair structure:</h4>
+    <div class="pair-diagram">
+      <div class="pair-group">
+        <div class="pair-group-label">Left half</div>
+        <div class="pair-chars">
+          <div class="pair-char-box pair-l">d</div>
+          <div class="pair-char-box pair-l">c</div>
+          <div class="pair-char-box pair-l">c</div>
+        </div>
+      </div>
+      <div class="pair-divider">|</div>
+      <div class="pair-group">
+        <div class="pair-group-label">Center</div>
+        <div class="pair-chars">
+          <div class="pair-char-box pair-c">a</div>
+        </div>
+      </div>
+      <div class="pair-divider">|</div>
+      <div class="pair-group">
+        <div class="pair-group-label">Right half (mirror)</div>
+        <div class="pair-chars">
+          <div class="pair-char-box pair-r">c</div>
+          <div class="pair-char-box pair-r">c</div>
+          <div class="pair-char-box pair-r">d</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Example: <code>s = "abccccdd"</code> → character counts:</p>
+    <ul>
+      <li><code>'a'</code> appears <strong>1×</strong> (odd) → contributes <strong>0</strong> to pairs; <em>can be center</em></li>
+      <li><code>'b'</code> appears <strong>1×</strong> (odd) → contributes <strong>0</strong> to pairs; <em>can also be center</em></li>
+      <li><code>'c'</code> appears <strong>4×</strong> (even) → contributes <strong>4</strong> (2 pairs, both sides)</li>
+      <li><code>'d'</code> appears <strong>2×</strong> (even) → contributes <strong>2</strong> (1 pair, both sides)</li>
+    </ul>
+    <p>Total: 0 + 0 + 4 + 2 = <strong>6</strong>, plus <strong>+1</strong> for the center (we pick 'a' or 'b') = <strong>7</strong>.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — THE ALGORITHM
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Count Pairs + One Odd</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p>The approach is greedy: maximize how many characters we can use, given palindrome constraints.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Count frequencies.</strong> Build a frequency map of all characters. This takes O(n) time.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Harvest even pairs.</strong> For each frequency <code>count</code>, add <code>count − (count % 2)</code>. This is the largest even number ≤ count. Even count → take all. Odd count → take count−1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Flag odd counts.</strong> If any character has an odd count, set <code>has_odd = True</code>. That "leftover" character can go in the center.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return</strong> <code>length + (1 if has_odd else 0)</code>. The center bonus is at most +1, regardless of how many odd counts exist.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Core Formula</div>
+      <p>For each character frequency <code>count</code>:<br>
+      Even portion used = <code>count − (count % 2)</code><br><br>
+      This equals <code>count</code> when even, or <code>count − 1</code> when odd.<br>
+      Any "wasted" leftover (one at most per odd character) qualifies for the single center slot.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY IT WORKS
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>A palindrome <strong>requires</strong> every non-center character to appear an even number of times across the whole string. Our algorithm greedily takes the maximum even portion of each character's count — <code>count − (count % 2)</code> — which is provably the maximum we can use from that character without violating palindrome structure.<br><br>Because at most <strong>one</strong> center position exists, at most <strong>one</strong> odd remainder can be promoted to the center. The algorithm flags any odd count but adds only <strong>+1</strong> total, not +n.</p>
+    </div>
+
+    <h4>Proof of Optimality</h4>
+    <ul>
+      <li>We can't use more than <code>count</code> of any character (it doesn't appear more)</li>
+      <li>We can't use an odd count on both sides — that would make the string asymmetric</li>
+      <li>We can place at most 1 character in the center</li>
+      <li>∴ Our greedy take is maximal at every step → total is globally maximal ✓</li>
+    </ul>
+
+    <h4>Edge Cases</h4>
+    <ul>
+      <li><strong>All even counts</strong> — <code>has_odd = False</code>, no center; return <code>len(s)</code></li>
+      <li><strong>Single char</strong> — <code>s = "a"</code> → length = 0, has_odd = True → return <strong>1</strong> ✓</li>
+      <li><strong>All same</strong> — <code>s = "aaaa"</code> → length = 4, has_odd = False → return <strong>4</strong> ✓</li>
+      <li><strong>All distinct</strong> — <code>s = "abc"</code> → length = 0, has_odd = True → return <strong>1</strong> ✓</li>
+      <li><strong>Case sensitive</strong> — <code>'A'</code> and <code>'a'</code> are treated as different characters</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — THE CODE (ANNOTATED)
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <h4>Solution 1 — Frequency Count + Greedy &nbsp;<em style="color:var(--green-mid); font-size:12px;">(Interview Pick)</em></h4>
+    <div class="code-block"><span class="comment">from collections import Counter</span>
+
+def longestPalindrome(s: str) -> int:
+    freq = Counter(s)        <span class="comment"># O(n) scan; at most 52 unique chars</span>
+    length = 0               <span class="comment"># accumulate palindrome length</span>
+    has_odd = False          <span class="comment"># any character with a leftover?</span>
+    for count in freq.values():
+        length += count - (count % 2)  <span class="comment"># take all even pairs (floor to even)</span>
+        if count % 2 == 1:
+            has_odd = True             <span class="comment"># a leftover char exists</span>
+    return length + (1 if has_odd else 0)  <span class="comment"># center bonus</span></div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the center</div>
+      <p>Students often just sum the even pairs and forget +1 for the center. <code>s = "a"</code> → even sum = 0, but correct answer is 1 (the single 'a' goes in the center). Always add +1 if <code>has_odd</code> is True.</p>
+    </div>
+
+    <h4>Solution 2 — Set-based Pairing &nbsp;<em style="color:var(--text3); font-size:12px;">(Intuitive "Sock Matching")</em></h4>
+    <div class="code-block">def longestPalindrome(s: str) -> int:
+    unpaired = set()         <span class="comment"># chars seen an odd number of times so far</span>
+    length = 0
+    for c in s:
+        if c in unpaired:    <span class="comment"># found its pair!</span>
+            length += 2
+            unpaired.remove(c)   <span class="comment"># pair consumed</span>
+        else:
+            unpaired.add(c)      <span class="comment"># still waiting for its pair</span>
+    return length + (1 if unpaired else 0)  <span class="comment"># any leftover → center</span></div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Same Idea, Different View</div>
+      <p>Solution 2 "matches socks" in real time. Every time you find a pair, count +2. At the end, if any unpaired character remains in the set, one of them becomes the center (+1).</p>
+    </div>
+
+    <h4>Solution 3 — One-liner Shortcut</h4>
+    <div class="code-block"><span class="comment">from collections import Counter</span>
+
+def longestPalindrome(s: str) -> int:
+    odd_count = sum(v % 2 for v in Counter(s).values())
+    return len(s) - odd_count + (1 if odd_count else 0)</div>
+    <p style="font-size:13px;">Start with <code>len(s)</code>. Each odd-count character wastes 1 (the leftover), so subtract <code>odd_count</code>. But if any waste was present, one reclaimed char goes in the center: +1.</p>
+
+    <table class="comparison-table">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Freq Count + Greedy</td><td>O(n)</td><td>O(1)*</td><td>Clearest logic for interviews</td></tr>
+        <tr><td>Set-based Pairing</td><td>O(n)</td><td>O(1)*</td><td>Intuitive; processes char by char</td></tr>
+        <tr><td>One-liner Shortcut</td><td>O(n)</td><td>O(1)*</td><td>Compact but less explainable live</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:var(--text3);">*O(1) space because there are at most 52 unique characters (a-z + A-Z), a finite constant.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — INTERVIEW STRATEGY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>Signals: We're building a <em>symmetric</em> structure (palindrome) from a pool of characters. Symmetry → pairing. "How many characters can we use?" with pairing constraints → <strong>frequency count + greedy</strong>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Explore Palindrome Requirements</div>
+        <p>Ask: "What rules must a palindrome follow?" Every character except at most one must appear an even number of times across the string. So: maximize even-count usage, then optionally add 1 center.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Formalize the Decision</div>
+        <p>For each character count: even → use all. Odd → use <code>count − 1</code> (the biggest even ≤ count). Flag that an odd count exists. After processing all chars: if flag set, add 1 for the center.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Code and Analyze</div>
+        <p><code>Counter(s)</code> in one line. Loop over <code>.values()</code>. Accumulate with <code>count − count%2</code>. Track <code>has_odd</code>. Return <code>length + has_odd</code>. Time O(n), Space O(1).</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"A palindrome mirrors around its center, so every character must appear in pairs —
+one for each side — except at most one that can sit in the center.
+
+So my approach: count character frequencies, then for each count take the largest
+even portion (count minus count-mod-2). If any count was odd, I can add +1 for the
+center. This greedily maximizes the palindrome length.
+
+Time is O(n) for counting, space is O(1) since there are only 52 possible characters."</div>
+    </div>
+
+    <div class="concept-box insight" style="margin-top:1rem;">
+      <div class="concept-box-title">🎯 Potential Follow-ups</div>
+      <ul>
+        <li><strong>"Return the actual palindrome string"</strong> — Track which char is center; sort remaining pairs; build left half + center + reversed left half</li>
+        <li><strong>"What if we can only use each character at most once?"</strong> — Then each char contributes at most 1 to a pair, so collect chars that appear ≥ 2 times</li>
+        <li><strong>"At most k different characters"</strong> — Add a filter step before the frequency count</li>
+        <li><strong>"Streaming input"</strong> — Maintain a running frequency map and running odd-count tally; answer is <code>n − odd_count + (1 if odd_count else 0)</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INTERACTIVE WALKTHROUGH
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">🎮 Interactive Walkthrough</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <p style="color:var(--text2); font-size:13.5px; margin-bottom:4px;">Example: <code>s = "abccccdd"</code> &nbsp;→&nbsp; expected output: <strong>7</strong></p>
+
+    <!-- FREQUENCY CARDS -->
+    <div id="freq-grid" class="freq-grid"></div>
+
+    <!-- PALINDROME BUILDER -->
+    <div class="pal-zone">
+      <div class="pal-zone-title">Palindrome Preview</div>
+      <div class="palindrome-builder">
+        <div class="pal-section">
+          <div class="pal-section-label">Left</div>
+          <div class="pal-chars" id="pal-left"></div>
+        </div>
+        <div class="pal-section">
+          <div class="pal-section-label">Center</div>
+          <div class="pal-chars" id="pal-center"></div>
+        </div>
+        <div class="pal-section">
+          <div class="pal-section-label">Right</div>
+          <div class="pal-chars" id="pal-right"></div>
+        </div>
+      </div>
+      <div class="pal-length-label" id="pal-length-label">length: <span>0</span></div>
+    </div>
+
+    <!-- VARIABLE TRACKER -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-length">
+        <span class="var-name">length</span>
+        <span class="var-val" id="vv-length">0</span>
+      </div>
+      <div class="var-box" id="vb-hasodd">
+        <span class="var-name">has_odd</span>
+        <span class="var-val false-val" id="vv-hasodd">False</span>
+      </div>
+      <div class="var-box" id="vb-result">
+        <span class="var-name">result</span>
+        <span class="var-val" id="vv-result">—</span>
+      </div>
+    </div>
+
+    <!-- CODE PANEL -->
+    <div class="viz-code-panel" id="code-panel">
+      <div class="viz-code-line" id="cl0">freq = Counter(s)</div>
+      <div class="viz-code-line" id="cl1">length = 0</div>
+      <div class="viz-code-line" id="cl2">has_odd = False</div>
+      <div class="viz-code-line" id="cl3">for count in freq.values():</div>
+      <div class="viz-code-line" id="cl4">    length += count - (count % 2)</div>
+      <div class="viz-code-line" id="cl5">    if count % 2 == 1:</div>
+      <div class="viz-code-line" id="cl6">        has_odd = True</div>
+      <div class="viz-code-line" id="cl7">return length + (1 if has_odd else 0)</div>
+    </div>
+
+    <!-- INFO CARD -->
+    <div class="info-card">
+      <div class="info-card-header">
+        <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+        <span class="step-counter" id="step-counter">Step 1 / 8</span>
+      </div>
+      <div class="info-card-title" id="info-title">Build Frequency Map</div>
+      <div class="info-card-text" id="info-text">Loading…</div>
+    </div>
+
+    <!-- PROGRESS DOTS -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+      <button class="btn primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot ld-processing"></div>Processing</div>
+      <div class="legend-item"><div class="legend-dot ld-even"></div>Even count (all used)</div>
+      <div class="legend-item"><div class="legend-dot ld-odd"></div>Odd count (count−1 used)</div>
+      <div class="legend-item"><div class="legend-dot ld-center"></div>Center character</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SUMMARY
+══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="section-chevron open">▼</span>
+  </div>
+  <div class="section-body open">
+    <div class="takeaways">
+      <div class="takeaway">✓ In a palindrome, every character except at most one must appear in pairs</div>
+      <div class="takeaway">✓ Even-count characters contribute fully; odd-count characters contribute count − 1</div>
+      <div class="takeaway">✓ At most ONE character can go in the center, providing a +1 bonus</div>
+      <div class="takeaway">✓ Solution is greedy — the local optimal choice (take max even) is globally optimal</div>
+      <div class="takeaway">✓ Time O(n), Space O(1) — this is the optimal solution</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Building a <strong>symmetric structure</strong> from a character multiset</li>
+        <li>"How many characters can we arrange into X form?" with pairing logic</li>
+        <li>Any problem asking to <strong>count characters usable given pairing constraints</strong></li>
+        <li>Sub-pattern: <strong>Count Pairs + One Odd</strong> (DSA guide Section 2.1)</li>
+      </ul>
+    </div>
+
+    <div class="related-problems" style="margin-top:1rem;">
+      <h4>Related Problems (Same Technique)</h4>
+      <ul>
+        <li><strong>Valid Anagram</strong> (Easy) — Frequency count comparison</li>
+        <li><strong>Palindrome Permutation</strong> (Easy) — Same core insight; return bool instead of length</li>
+        <li><strong>Group Anagrams</strong> (Medium) — Frequency count as a hashing key</li>
+        <li><strong>Find All Anagrams in a String</strong> (Medium) — Sliding window + frequency count</li>
+        <li><strong>Minimum Steps to Make Two Strings Anagram</strong> (Medium) — Frequency difference counting</li>
+        <li><strong>Longest Palindromic Subsequence</strong> (Medium) — DP variant of the same palindrome concept</li>
+      </ul>
+    </div>
+
+    <div class="concept-box key-concept" style="margin-top:1rem;">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 2.1 (Basic String Operations)<br>Sub-Pattern: <strong>Count Pairs + One Odd</strong></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ══════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const CHARS = ['a', 'b', 'c', 'd'];
+const FREQ  = { a: 1, b: 1, c: 4, d: 2 };
+
+// pairChars: characters placed in pairs so far (insertion order = inner→outer)
+// leftEl shows these REVERSED (outer→inner from the left)
+// rightEl shows these IN ORDER (inner→outer from left = c,c,d)
+
+const steps = [
+  {
+    title: "Build Frequency Map",
+    phase: "init", phaseClass: "phase-init",
+    activeLine: 0,
+    length: 0, hasOdd: false, showResult: false,
+    charStates: { a: '', b: '', c: '', d: '' },
+    pairChars: [], centerChar: null,
+    text: 's = "abccccdd". Scan the string and count each character\'s frequency: a→1, b→1, c→4, d→2. Counter does this in O(n). Now we process each frequency value.'
+  },
+  {
+    title: "Initialize: length=0, has_odd=False",
+    phase: "init", phaseClass: "phase-init",
+    activeLine: 1,
+    length: 0, hasOdd: false, showResult: false,
+    charStates: { a: '', b: '', c: '', d: '' },
+    pairChars: [], centerChar: null,
+    text: "Set length = 0 (will accumulate the palindrome length we can build) and has_odd = False (will become True if any character has a leftover that can't form a pair)."
+  },
+  {
+    title: "Process 'a' (count=1): Odd → has_odd = True",
+    phase: "odd", phaseClass: "phase-odd",
+    activeLine: 6,
+    length: 0, hasOdd: true, showResult: false,
+    charStates: { a: 'current', b: '', c: '', d: '' },
+    pairChars: [], centerChar: null,
+    text: "count = 1 (odd). length += 1 − (1 % 2) = 1 − 1 = 0. No pairs to add. Then: count % 2 == 1 → has_odd = True. 'a' contributes 0 to pairs but signals a center character is available."
+  },
+  {
+    title: "Process 'b' (count=1): Odd (has_odd already True)",
+    phase: "odd", phaseClass: "phase-odd",
+    activeLine: 5,
+    length: 0, hasOdd: true, showResult: false,
+    charStates: { a: 'done-odd', b: 'current', c: '', d: '' },
+    pairChars: [], centerChar: null,
+    text: "count = 1 (odd). length += 0. Check: count % 2 == 1 is True, but has_odd is already True — only ONE center slot exists! 'b' also has a leftover, but since has_odd is already set, we don't change anything."
+  },
+  {
+    title: "Process 'c' (count=4): Even → length += 4",
+    phase: "even", phaseClass: "phase-even",
+    activeLine: 4,
+    length: 4, hasOdd: true, showResult: false,
+    charStates: { a: 'done-odd', b: 'done-odd', c: 'current', d: '' },
+    pairChars: ['c', 'c'], centerChar: null,
+    text: "count = 4 (even). length += 4 − (4 % 2) = 4 − 0 = 4. length = 4. All 4 'c's contribute as 2 pairs: two 'c's on the left, two on the right. Palindrome so far: c c [?] c c."
+  },
+  {
+    title: "Process 'd' (count=2): Even → length += 2",
+    phase: "even", phaseClass: "phase-even",
+    activeLine: 4,
+    length: 6, hasOdd: true, showResult: false,
+    charStates: { a: 'done-odd', b: 'done-odd', c: 'done-even', d: 'current' },
+    pairChars: ['c', 'c', 'd'], centerChar: null,
+    text: "count = 2 (even). length += 2 − 0 = 2. length = 6. One 'd' on the left, one on the right. Palindrome grows: d c c [?] c c d. No leftover from 'd', so has_odd stays True (from 'a'/'b' earlier)."
+  },
+  {
+    title: "has_odd = True → Place center character (+1)",
+    phase: "center", phaseClass: "phase-center",
+    activeLine: 7,
+    length: 7, hasOdd: true, showResult: true,
+    charStates: { a: 'done-odd', b: 'done-odd', c: 'done-even', d: 'done-even' },
+    pairChars: ['c', 'c', 'd'], centerChar: 'a',
+    text: "has_odd = True → return length + 1 = 6 + 1 = 7. Pick any odd-count character for the center (we use 'a'). The complete palindrome: \"d c c [a] c c d\" = \"dccaccd\". Length = 7."
+  },
+  {
+    title: "Return 7 ✓ — Longest palindrome length",
+    phase: "result", phaseClass: "phase-result",
+    activeLine: 7,
+    length: 7, hasOdd: true, showResult: true,
+    charStates: { a: 'done-odd', b: 'done-odd', c: 'done-even', d: 'done-even' },
+    pairChars: ['c', 'c', 'd'], centerChar: 'a',
+    text: 'Answer: 7. The longest palindrome buildable from "abccccdd" has length 7. For example: "dccaccd" or "dccbccd". Note: \'b\' had count=1 (odd) and could also be the center, but we can only use one — so \'b\' goes unused.'
+  }
+];
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let cur = 0;
+const N = steps.length;
+
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
+function render() {
+  const s = steps[cur];
+  const prev = cur > 0 ? steps[cur - 1] : null;
+
+  // ── Frequency cards ──
+  const grid = document.getElementById('freq-grid');
+  grid.innerHTML = '';
+  CHARS.forEach(ch => {
+    const state = s.charStates[ch];
+    let cls = '';
+    if (state === 'current')   cls = 'fc-current';
+    else if (state === 'done-even') cls = 'fc-done-even';
+    else if (state === 'done-odd')  cls = 'fc-done-odd';
+
+    const isOdd = FREQ[ch] % 2 === 1;
+    let label = 'count: ' + FREQ[ch];
+    if (state === 'current')  label = isOdd ? 'odd → +0' : 'even → +' + FREQ[ch];
+    else if (state === 'done-even') label = 'even ✓';
+    else if (state === 'done-odd')  label = 'odd | +' + (FREQ[ch] - 1);
+
+    grid.innerHTML += `<div class="freq-card ${cls}">
+      <div class="fc-char">${ch}</div>
+      <div class="fc-count">&times;${FREQ[ch]}</div>
+      <div class="fc-label">${label}</div>
+    </div>`;
+  });
+
+  // ── Palindrome builder ──
+  const leftEl   = document.getElementById('pal-left');
+  const centerEl = document.getElementById('pal-center');
+  const rightEl  = document.getElementById('pal-right');
+  const pc = s.pairChars || [];
+  const rev = [...pc].reverse();
+
+  leftEl.innerHTML   = rev.length
+    ? rev.map(ch => `<div class="pal-char left-char">${ch}</div>`).join('')
+    : '<div class="pal-char empty-slot">—</div>';
+
+  centerEl.innerHTML = s.centerChar
+    ? `<div class="pal-char center-char">${s.centerChar}</div>`
+    : '<div class="pal-char empty-slot">?</div>';
+
+  rightEl.innerHTML  = pc.length
+    ? pc.map(ch => `<div class="pal-char right-char">${ch}</div>`).join('')
+    : '<div class="pal-char empty-slot">—</div>';
+
+  const palLenEl = document.getElementById('pal-length-label');
+  const displayLen = pc.length * 2 + (s.centerChar ? 1 : 0);
+  palLenEl.innerHTML = `length: <span>${displayLen || 0}</span>`;
+
+  // ── Variable tracker ──
+  const lenChanged  = prev && prev.length  !== s.length;
+  const oddChanged  = prev && prev.hasOdd  !== s.hasOdd;
+  const resChanged  = s.showResult && (!prev || !prev.showResult);
+
+  document.getElementById('vb-length').className = 'var-box' + (lenChanged  ? ' changed' : '');
+  document.getElementById('vv-length').textContent = s.length;
+
+  document.getElementById('vb-hasodd').className = 'var-box' + (oddChanged  ? ' changed' : '');
+  const oddEl = document.getElementById('vv-hasodd');
+  oddEl.textContent = s.hasOdd ? 'True' : 'False';
+  oddEl.className   = 'var-val ' + (s.hasOdd ? 'true-val' : 'false-val');
+
+  document.getElementById('vb-result').className = 'var-box' + (resChanged ? ' changed' : '');
+  const resEl = document.getElementById('vv-result');
+  resEl.textContent = s.showResult ? s.length : '—';
+  resEl.className   = 'var-val' + (s.showResult ? ' result-val' : '');
+
+  // ── Code panel ──
+  for (let i = 0; i < 8; i++) {
+    const el = document.getElementById('cl' + i);
+    el.className = 'viz-code-line' + (s.activeLine === i ? ' active' : '');
+  }
+
+  // ── Info card ──
+  document.getElementById('phase-badge').className   = 'phase-badge ' + s.phaseClass;
+  document.getElementById('phase-badge').textContent = s.phase.toUpperCase();
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} / ${N}`;
+  document.getElementById('info-title').textContent   = s.title;
+  document.getElementById('info-text').textContent    = s.text;
+
+  // ── Progress dots ──
+  const dotsEl = document.getElementById('progress-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const cls = i === cur ? 'dot active' : i < cur ? 'dot done' : 'dot';
+    dotsEl.innerHTML += `<div class="${cls}" onclick="jumpTo(${i})"></div>`;
+  }
+}
+
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+function go(dir) {
+  cur = Math.max(0, Math.min(N - 1, cur + dir));
+  render();
+}
+function reset() {
+  cur = 0;
+  render();
+}
+function jumpTo(i) {
+  cur = i;
+  render();
+}
+
+// ─────────────────────────────────────────
+// COLLAPSIBLES
+// ─────────────────────────────────────────
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.section-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chev) chev.classList.toggle('open', !isOpen);
+}
+
+// ─────────────────────────────────────────
+// KEYBOARD NAV
+// ─────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

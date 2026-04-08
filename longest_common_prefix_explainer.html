@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#14 · Longest Common Prefix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Prefix shrink animation table ── */
+.shrink-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:1rem 0}
+.shrink-table th,.shrink-table td{padding:9px 14px;text-align:left;border:1px solid var(--border)}
+.shrink-table th{background:var(--bg2);font-weight:600}
+.shrink-table tr.row-shrink td{background:var(--amber-bg);color:var(--amber-text)}
+.shrink-table tr.row-match td{background:var(--green-bg);color:var(--green-text);font-weight:700}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── String Grid Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-section{display:flex;flex-direction:column;gap:10px}
+.str-row{display:flex;align-items:center;gap:10px}
+.str-row-label{
+  min-width:80px;font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--text3);text-align:right;flex-shrink:0;padding-right:4px;
+}
+.str-row-label.active-label{color:var(--blue-mid);font-weight:700}
+.cells-row{display:flex;gap:4px;align-items:center}
+.cell{
+  width:40px;height:40px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s,opacity 0.3s;
+  flex-shrink:0;position:relative;
+}
+/* Cell state classes */
+.cell.st-pr{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.st-rm{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);text-decoration:line-through;opacity:0.7}
+.cell.st-gd{background:var(--bg2);border-color:var(--border);color:var(--text3);opacity:0.35}
+.cell.st-mt{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.st-ms{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.cell.st-ck{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.st-nm{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.st-dn{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);opacity:0.55}
+.cell.st-em{background:var(--bg2);border-color:var(--border);color:var(--text3);opacity:0.2}
+.idx-row{display:flex;gap:4px;padding-left:94px;margin-top:2px}
+.idx-slot{width:40px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+
+/* Prefix result display */
+.prefix-display{
+  margin-top:1.25rem;padding:14px 18px;background:var(--surface);
+  border-radius:var(--radius);border:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap
+}
+.prefix-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);flex-shrink:0}
+.prefix-value{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue-mid);letter-spacing:4px;min-width:80px}
+.match-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;margin-left:auto}
+.badge-none{background:var(--bg2);color:var(--text3)}
+.badge-false{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border)}
+.badge-true{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:32px;text-align:center;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-compare{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-shrink{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-prefix{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-checking{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-match{background:var(--green-bg);border-color:var(--green-border)}
+.sw-mismatch{background:var(--red-bg);border-color:var(--red-border)}
+.sw-removed{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-done{background:var(--green-bg);border-color:var(--green-border);opacity:0.5}
+
+/* ── Complexity table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #14</div>
+  <h1>Longest Common Prefix</h1>
+  <p class="subtitle">Find the longest common prefix string amongst an array of strings.</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Horizontal Scan</span>
+    <span class="tag tag-complexity">Time: O(S)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem  -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A <strong>prefix</strong> is a string that forms the beginning of another string. The <em>longest common prefix</em> is the longest string that appears at the beginning of <strong>every</strong> string in the array.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We don't need to compare all pairs. The LCP of a set of strings is the LCP of <em>any two</em> that bound the rest — or we can progressively narrow a candidate prefix by comparing it against each string one at a time. If the prefix ever becomes empty, return <code>""</code> immediately.</p>
+    </div>
+
+    <p style="margin-top:1rem;margin-bottom:0.75rem">Walk through <code>["flower", "flow", "flight"]</code> by hand:</p>
+    <table class="shrink-table">
+      <thead><tr><th>Step</th><th>Candidate Prefix</th><th>Compare With</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>Start</td><td><code>flower</code></td><td>—</td><td>Initialize from strs[0]</td></tr>
+        <tr class="row-shrink"><td>1</td><td><code>flower</code> → <code>flow</code></td><td>"flow"</td><td>Trim until "flow" starts with prefix</td></tr>
+        <tr class="row-shrink"><td>2</td><td><code>flow</code> → <code>fl</code></td><td>"flight"</td><td>Trim until "flight" starts with prefix</td></tr>
+        <tr class="row-match"><td>✓</td><td><code>fl</code></td><td>All matched</td><td>Return "fl"</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Edge cases:</strong> empty array → <code>""</code>; single string → that string; all identical → any of them; no common prefix (e.g., <code>["dog","car"]</code>) → <code>""</code>; one empty string in array → <code>""</code>.</p>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm              -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Horizontal Scan</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The <strong>Horizontal Scan</strong> treats <code>strs[0]</code> as the starting candidate prefix, then <em>trims</em> it against each subsequent string until every string starts with what remains.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Seed from strs[0]:</strong> <code>prefix = strs[0]</code>. The LCP of all strings cannot be longer than the first string, so starting here is safe. No character comparisons yet.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Compare with each remaining string:</strong> For each <code>s</code> in <code>strs[1:]</code>, check <code>s.startswith(prefix)</code>. If True, move on. If False, shrink the prefix.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Shrink by one char at a time:</strong> <code>prefix = prefix[:-1]</code> removes the last character. Repeat until <code>s.startswith(prefix)</code> is True. If prefix empties, return <code>""</code> immediately.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return the survivor:</strong> After all strings are processed, whatever remains in <code>prefix</code> is the LCP. It can never grow — it can only shrink or stay the same.</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Brute Force — O(n·m²)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          for i in range(min_len):<br>
+          &nbsp;&nbsp;c = strs[0][i]<br>
+          &nbsp;&nbsp;for s in strs[1:]:<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;if s[i] != c:<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return strs[0][:i]<br>
+          return strs[0][:min_len]
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Horizontal Scan — O(S)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          prefix = strs[0]<br>
+          for s in strs[1:]:<br>
+          &nbsp;&nbsp;while not s.startswith(prefix):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;prefix = prefix[:-1]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;if not prefix: return ""<br>
+          return prefix
+        </p>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Monotone Shrinking Property</div>
+      <p>The prefix only ever shrinks — never grows. Once a character is removed from the right, no future string can ever add it back. This is the key invariant: after comparing against string i, the prefix is the LCP of <code>strs[0..i]</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works               -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Loop Invariant</div>
+      <p>After processing <code>strs[0..i]</code>, <code>prefix</code> is exactly the <strong>longest common prefix of those i+1 strings</strong>. Starting with i=0, <code>prefix = strs[0]</code> is trivially the LCP of one string. Each iteration extends the invariant by one more string.</p>
+    </div>
+
+    <p><strong>Why shrinking one character at a time is correct:</strong> <code>s.startswith(prefix)</code> fails exactly when <code>prefix</code> has a character at some position that <code>s</code> doesn't match (either a different character or <code>s</code> is shorter). Removing the last character of <code>prefix</code> shortens the candidate — we keep shrinking until the remaining prefix is entirely a prefix of <code>s</code>. Since we shrink to the exact point of agreement, we lose no more characters than necessary.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why we can safely stop early:</strong> If <code>prefix</code> becomes <code>""</code>, no string can make it longer again (the prefix only monotonically shrinks). Return immediately — the answer is the empty string.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Not Always Start from the Shortest String?</div>
+      <p>You could sort and compare only the first and last strings (they have the most different characters), which gives O(S log n). But horizontal scan doesn't need sorting: O(S) total character comparisons is already optimal — you can't do better without reading every character at least once.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)       -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Horizontal Scan (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonPrefix(strs: list[str]) -> str:</span></div>
+<div class="ann-line"><span class="acode">    prefix = strs[0]                        </span><span class="aann">← Seed with first string; LCP ≤ len(strs[0])</span></div>
+<div class="ann-line"><span class="acode">    for s in strs[1:]:                      </span><span class="aann">← Compare prefix against each remaining string</span></div>
+<div class="ann-line"><span class="acode">        while not s.startswith(prefix):     </span><span class="aann">← If s doesn't start with prefix, shrink it</span></div>
+<div class="ann-line"><span class="acode">            prefix = prefix[:-1]            </span><span class="aann">← Drop last character (prefix can only shrink)</span></div>
+<div class="ann-line"><span class="acode">            if not prefix:                  </span><span class="aann">← Empty prefix = no common prefix at all</span></div>
+<div class="ann-line"><span class="acode">                return ""</span></div>
+<div class="ann-line"><span class="acode">    return prefix                           </span><span class="aann">← Survived all strings — this is the LCP</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Empty Check</div>
+      <p>Without <code>if not prefix: return ""</code>, <code>prefix[:-1]</code> on an empty string returns <code>""</code> again — the while loop runs forever. Always guard against the empty-prefix case.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Vertical Scan</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonPrefix(strs: list[str]) -> str:</span></div>
+<div class="ann-line"><span class="acode">    for i in range(len(strs[0])):           </span><span class="aann">← Scan column-by-column (position i in all strings)</span></div>
+<div class="ann-line"><span class="acode">        c = strs[0][i]                      </span><span class="aann">← Reference character from strs[0]</span></div>
+<div class="ann-line"><span class="acode">        for s in strs[1:]:                  </span><span class="aann">← Check same position in every other string</span></div>
+<div class="ann-line"><span class="acode">            if i >= len(s) or s[i] != c:    </span><span class="aann">← s ran out of chars OR mismatch at position i</span></div>
+<div class="ann-line"><span class="acode">                return strs[0][:i]          </span><span class="aann">← Return everything before the mismatch</span></div>
+<div class="ann-line"><span class="acode">    return strs[0]                          </span><span class="aann">← strs[0] is a prefix of all others</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — Sort + Compare Endpoints</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonPrefix(strs: list[str]) -> str:</span></div>
+<div class="ann-line"><span class="acode">    strs.sort()                             </span><span class="aann">← Lexicographic sort: most-different are first/last</span></div>
+<div class="ann-line"><span class="acode">    first, last = strs[0], strs[-1]         </span><span class="aann">← After sort, LCP(all) = LCP(first, last)</span></div>
+<div class="ann-line"><span class="acode">    i = 0                                   </span><span class="aann">← Shared prefix length</span></div>
+<div class="ann-line"><span class="acode">    while i < len(first) and first[i] == last[i]:</span></div>
+<div class="ann-line"><span class="acode">        i += 1                              </span><span class="aann">← Extend shared prefix one char at a time</span></div>
+<div class="ann-line"><span class="acode">    return first[:i]                        </span><span class="aann">← Prefix of length i</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Sort + Compare Works</div>
+      <p>After lexicographic sort, <code>strs[0]</code> is the lexicographically smallest and <code>strs[-1]</code> is largest. Any character that differs between them will also differ somewhere in the full array. So LCP(all strings) = LCP(first, last). Two-string LCP is then a simple while-loop scan.</p>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Horizontal Scan</td><td class="mark-good">O(S)</td><td class="mark-good">O(1)</td><td>S = total characters; optimal for worst case</td></tr>
+        <tr><td>Vertical Scan</td><td class="mark-good">O(S)</td><td class="mark-good">O(1)</td><td>Stops early if short prefix; same worst case</td></tr>
+        <tr><td>Sort + Compare</td><td>O(S log n)</td><td>O(1)</td><td>Sort overhead; elegant 2-string comparison</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy         -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Clarify the Problem</div>
+        <p style="font-size:14px;color:var(--text)">Ask: can the array be empty? Can strings be empty? The answer is yes to both — handle them. The LCP is always a prefix of <em>every</em> string, so it can't be longer than the shortest one.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start with a Concrete Example</div>
+        <p style="font-size:14px;color:var(--text)">"With [flower, flow, flight]: 'fl' is common. 'flo' fails for 'flight'. Let me think about how to systematically find it." This leads naturally to scanning.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Propose Brute Force + Optimize</div>
+        <p style="font-size:14px;color:var(--text)">"I could compare character by column (vertical scan) — O(S). Or I can reduce a prefix candidate against each string (horizontal scan) — also O(S). Both are optimal since we must read every character. I'll go with horizontal scan as it's clean."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State the Invariant</div>
+        <p style="font-size:14px;color:var(--text)">"At any point, <code>prefix</code> is the LCP of all strings seen so far. After the loop, it's the LCP of all strings. The only operation is shrinking — never growing — which makes it correct."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use horizontal scan: seed the prefix from strs[0], then for each
+subsequent string, shrink the prefix until that string starts with it.
+The prefix monotonically shrinks — it's the LCP of all strings seen so far.
+After the loop we have the global LCP.
+Time is O(S) — total characters — since each character is removed at most once.
+Space is O(1) excluding the output string."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-Ups</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do better than O(S)?"</strong> → No — you must read every character at least once to confirm it's shared.</li>
+        <li><strong>"What if the array is huge and you query multiple times?"</strong> → Build a Trie; then each query is O(m) where m = answer length.</li>
+        <li><strong>"Longest common suffix?"</strong> → Reverse all strings, run LCP, reverse the result.</li>
+        <li><strong>"Handle Unicode?"</strong> → Same algorithm; Python strings are Unicode by default.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough    -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:1rem;color:var(--text2);font-size:14px">Input: <code>strs = ["flower", "flow", "flight"]</code> — step through the horizontal scan algorithm.</p>
+
+    <!-- String Grid -->
+    <div class="viz-area">
+      <div id="strGrid" class="grid-section">
+        <!-- Row 0: strs[0] = flower (6 chars) -->
+        <div class="str-row">
+          <div class="str-row-label" id="lbl0">strs[0]</div>
+          <div class="cells-row" id="row0"></div>
+        </div>
+        <!-- Row 1: strs[1] = flow (4 chars + 2 empty) -->
+        <div class="str-row">
+          <div class="str-row-label" id="lbl1">strs[1]</div>
+          <div class="cells-row" id="row1"></div>
+        </div>
+        <!-- Row 2: strs[2] = flight (6 chars) -->
+        <div class="str-row">
+          <div class="str-row-label" id="lbl2">strs[2]</div>
+          <div class="cells-row" id="row2"></div>
+        </div>
+      </div>
+      <!-- Column index labels -->
+      <div class="idx-row" id="idxRow">
+        <div class="idx-slot">0</div>
+        <div class="idx-slot">1</div>
+        <div class="idx-slot">2</div>
+        <div class="idx-slot">3</div>
+        <div class="idx-slot">4</div>
+        <div class="idx-slot">5</div>
+      </div>
+
+      <!-- Prefix display -->
+      <div class="prefix-display" id="prefixDisplay">
+        <span class="prefix-label">prefix</span>
+        <span class="prefix-value" id="prefixVal">flower</span>
+        <span class="match-badge badge-none" id="matchBadge">—</span>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-prefix">
+          <span class="var-name">prefix</span>
+          <span class="var-val" id="vv-prefix">flower</span>
+        </div>
+        <div class="var-box" id="vb-s">
+          <span class="var-name">s</span>
+          <span class="var-val" id="vv-s">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="codePanel">
+      <div class="code-line" id="cl0">def longestCommonPrefix(strs):</div>
+      <div class="code-line" id="cl1">    prefix = strs[0]</div>
+      <div class="code-line" id="cl2">    for s in strs[1:]:</div>
+      <div class="code-line" id="cl3">        while not s.startswith(prefix):</div>
+      <div class="code-line" id="cl4">            prefix = prefix[:-1]</div>
+      <div class="code-line" id="cl5">            if not prefix:</div>
+      <div class="code-line" id="cl6">                return ""</div>
+      <div class="code-line" id="cl7">    return prefix</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div><span class="phase-badge" id="phaseBadge">Init</span></div>
+      <div class="step-counter" id="stepCounter">Step 1 of 14</div>
+      <div class="step-title" id="stepTitle">Initialize prefix</div>
+      <div class="step-body" id="stepBody">Set prefix = strs[0] = "flower". This is our starting candidate — the LCP can't be longer than the first string.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-prefix"></div>In prefix (strs[0])</div>
+      <div class="legend-item"><div class="legend-swatch sw-checking"></div>Checking (current s)</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div>Match</div>
+      <div class="legend-item"><div class="legend-swatch sw-mismatch"></div>Mismatch</div>
+      <div class="legend-item"><div class="legend-swatch sw-removed"></div>Just removed</div>
+      <div class="legend-item"><div class="legend-swatch sw-done" style="opacity:0.55"></div>Row done</div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions      -->
+<!-- ────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">The prefix is a monotonically shrinking candidate — each comparison can only make it shorter</div>
+      <div class="takeaway">Horizontal scan is O(S) time, O(1) space — optimal for this problem</div>
+      <div class="takeaway">Early exit when prefix becomes empty avoids unnecessary comparisons</div>
+      <div class="takeaway">Vertical scan is equivalent but stops at the first mismatch column instead</div>
+      <div class="takeaway">Sort + compare endpoints is elegant but O(S log n) due to sorting overhead</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Finding shared prefix/suffix among a set of strings</li>
+        <li>Progressive reduction: start with a candidate and trim until all elements agree</li>
+        <li>Any problem where you can initialize a "max possible" answer then monotonically reduce it</li>
+      </ul>
+    </div>
+
+    <h4 style="margin-top:1rem;margin-bottom:0.5rem;font-size:15px">Related Problems</h4>
+    <div class="related-list">
+      <div class="related-item"><strong>Valid Anagram</strong> <span class="related-diff diff-easy">Easy</span> — frequency comparison of characters in strings</div>
+      <div class="related-item"><strong>Is Subsequence</strong> <span class="related-diff diff-easy">Easy</span> — two-pointer greedy match through characters</div>
+      <div class="related-item"><strong>Rotate String</strong> <span class="related-diff diff-easy">Easy</span> — concatenation trick to check all string rotations</div>
+      <div class="related-item"><strong>Implement strStr (Find Index of First Occurrence)</strong> <span class="related-diff diff-easy">Easy</span> — substring search using KMP or brute force</div>
+      <div class="related-item"><strong>Group Anagrams</strong> <span class="related-diff diff-med">Medium</span> — group strings by shared character structure</div>
+      <div class="related-item"><strong>Longest Common Subsequence</strong> <span class="related-diff diff-med">Medium</span> — DP generalization: non-contiguous shared characters</div>
+      <div class="related-item"><strong>One Edit Distance</strong> <span class="related-diff diff-med">Medium</span> — check if strings differ by exactly one operation</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+// strs = ["flower","flow","flight"]
+// chars[row][col]: max 6 cols, em = empty padding
+const CHARS = [
+  ['f','l','o','w','e','r'],  // strs[0]
+  ['f','l','o','w','',''],    // strs[1]  — 2 empty
+  ['f','l','i','g','h','t'],  // strs[2]
+];
+
+// Step state: grids[row][col] = cell state string
+// States: pr=prefix(blue), rm=removed(amber), gd=gone(dim), mt=match(green),
+//         ms=mismatch(red), ck=checking(purple), nm=normal, dn=done(muted green), em=empty
+const steps = [
+  {
+    grids:[
+      ['pr','pr','pr','pr','pr','pr'],
+      ['nm','nm','nm','nm','em','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flower', s:'—', result:'—',
+    matchState:'none', activeLine:1,
+    phase:'phase-init', phaseLabel:'Init',
+    title:'Initialize prefix = strs[0]',
+    text:'Set <code>prefix = strs[0] = "flower"</code>. We always start with the first string as our candidate prefix — the LCP of all strings cannot be longer than this.'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','pr','pr'],
+      ['ck','ck','ck','ck','em','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flower', s:'"flow"', result:'—',
+    matchState:'none', activeLine:2,
+    phase:'phase-compare', phaseLabel:'Compare',
+    title:'Loop: s = strs[1] = "flow"',
+    text:'Enter the outer loop. Current comparison string: <code>s = "flow"</code>. We will check if "flow" starts with our current prefix "flower".'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','pr','pr'],
+      ['mt','mt','mt','mt','ms','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flower', s:'"flow"', result:'—',
+    matchState:'false', activeLine:3,
+    phase:'phase-compare', phaseLabel:'Check',
+    title:'"flow".startswith("flower")? → ✗ False',
+    text:'"flow" has only 4 characters but "flower" has 6 — "flow" cannot start with a 6-character prefix. The while condition is True, so we enter the shrink loop.'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','pr','rm'],
+      ['ck','ck','ck','ck','em','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flowe', s:'"flow"', result:'—',
+    matchState:'none', activeLine:4,
+    phase:'phase-shrink', phaseLabel:'Shrink',
+    title:'Shrink: prefix = prefix[:-1] = "flowe"',
+    text:'Remove the last character \'r\' from prefix. Now <code>prefix = "flowe"</code> (5 chars). Check again: does "flow" start with "flowe"?'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','pr','gd'],
+      ['mt','mt','mt','mt','ms','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flowe', s:'"flow"', result:'—',
+    matchState:'false', activeLine:3,
+    phase:'phase-compare', phaseLabel:'Check',
+    title:'"flow".startswith("flowe")? → ✗ False',
+    text:'"flow" still has only 4 chars while "flowe" has 5 — still too long. Keep shrinking.'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','rm','gd'],
+      ['ck','ck','ck','ck','em','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flow', s:'"flow"', result:'—',
+    matchState:'none', activeLine:4,
+    phase:'phase-shrink', phaseLabel:'Shrink',
+    title:'Shrink: prefix = prefix[:-1] = "flow"',
+    text:'Remove \'e\' from prefix. Now <code>prefix = "flow"</code> (4 chars). Check again: does "flow" start with "flow"?'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','gd','gd'],
+      ['mt','mt','mt','mt','em','em'],
+      ['nm','nm','nm','nm','nm','nm']
+    ],
+    prefix:'flow', s:'"flow"', result:'—',
+    matchState:'true', activeLine:3,
+    phase:'phase-match', phaseLabel:'Match ✓',
+    title:'"flow".startswith("flow")? → ✓ True!',
+    text:'"flow" starts with "flow" — all 4 characters match. Exit the while loop and move to the next string. prefix is now "flow".'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['ck','ck','ck','ck','ck','ck']
+    ],
+    prefix:'flow', s:'"flight"', result:'—',
+    matchState:'none', activeLine:2,
+    phase:'phase-compare', phaseLabel:'Compare',
+    title:'Loop: s = strs[2] = "flight"',
+    text:'strs[1] is done (shown dimmed). Now advance to <code>s = "flight"</code>. Check if "flight" starts with our current prefix "flow".'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','pr','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['mt','mt','ms','nm','nm','nm']
+    ],
+    prefix:'flow', s:'"flight"', result:'—',
+    matchState:'false', activeLine:3,
+    phase:'phase-compare', phaseLabel:'Check',
+    title:'"flight".startswith("flow")? → ✗ False',
+    text:'"flight"[0]="f" ✓, "flight"[1]="l" ✓, "flight"[2]="i" ✗ (expected "o"). The third character doesn\'t match — shrink.'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','rm','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['ck','ck','ck','ck','ck','ck']
+    ],
+    prefix:'flo', s:'"flight"', result:'—',
+    matchState:'none', activeLine:4,
+    phase:'phase-shrink', phaseLabel:'Shrink',
+    title:'Shrink: prefix = prefix[:-1] = "flo"',
+    text:'Remove \'w\' from prefix. Now <code>prefix = "flo"</code> (3 chars). Check again: does "flight" start with "flo"?'
+  },
+  {
+    grids:[
+      ['pr','pr','pr','gd','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['mt','mt','ms','nm','nm','nm']
+    ],
+    prefix:'flo', s:'"flight"', result:'—',
+    matchState:'false', activeLine:3,
+    phase:'phase-compare', phaseLabel:'Check',
+    title:'"flight".startswith("flo")? → ✗ False',
+    text:'"flight"[2]="i" still doesn\'t match "o" — the mismatch is still at index 2. Keep shrinking.'
+  },
+  {
+    grids:[
+      ['pr','pr','rm','gd','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['ck','ck','ck','ck','ck','ck']
+    ],
+    prefix:'fl', s:'"flight"', result:'—',
+    matchState:'none', activeLine:4,
+    phase:'phase-shrink', phaseLabel:'Shrink',
+    title:'Shrink: prefix = prefix[:-1] = "fl"',
+    text:'Remove \'o\' from prefix. Now <code>prefix = "fl"</code> (2 chars). Check again: does "flight" start with "fl"?'
+  },
+  {
+    grids:[
+      ['pr','pr','gd','gd','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['mt','mt','nm','nm','nm','nm']
+    ],
+    prefix:'fl', s:'"flight"', result:'—',
+    matchState:'true', activeLine:3,
+    phase:'phase-match', phaseLabel:'Match ✓',
+    title:'"flight".startswith("fl")? → ✓ True!',
+    text:'"flight"[0]="f" ✓, "flight"[1]="l" ✓. Both characters match! Exit the while loop.'
+  },
+  {
+    grids:[
+      ['pr','pr','gd','gd','gd','gd'],
+      ['dn','dn','dn','dn','em','em'],
+      ['dn','dn','dn','dn','dn','dn']
+    ],
+    prefix:'fl', s:'—', result:'"fl"',
+    matchState:'result', activeLine:7,
+    phase:'phase-result', phaseLabel:'Result',
+    title:'Return "fl" — Longest Common Prefix Found!',
+    text:'All strings processed. prefix has survived every comparison and equals "fl". This is the longest common prefix of ["flower", "flow", "flight"].'
+  }
+];
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let cur = 0;
+
+// ─── Init Grid ───────────────────────────────────────────────────────────────
+function buildGrid() {
+  for (let r = 0; r < 3; r++) {
+    const row = document.getElementById('row' + r);
+    row.innerHTML = '';
+    for (let c = 0; c < 6; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = 'cell_' + r + '_' + c;
+      const ch = CHARS[r][c];
+      cell.textContent = ch || '';
+      row.appendChild(cell);
+    }
+  }
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function render() {
+  const st = steps[cur];
+
+  // Grid cells
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 6; c++) {
+      const cell = document.getElementById('cell_' + r + '_' + c);
+      const state = st.grids[r][c];
+      // Clear all state classes
+      cell.className = 'cell';
+      cell.classList.add('st-' + state);
+      // Show char (empty cells: empty string)
+      cell.textContent = (state === 'em') ? '' : (CHARS[r][c] || '');
+    }
+  }
+
+  // Row labels — highlight active
+  for (let r = 0; r < 3; r++) {
+    const lbl = document.getElementById('lbl' + r);
+    const rowStates = st.grids[r];
+    const isActive = rowStates.some(s => s === 'ck' || s === 'mt' || s === 'ms');
+    lbl.className = 'str-row-label' + (isActive ? ' active-label' : '');
+  }
+
+  // Prefix display
+  const prefixVal = document.getElementById('prefixVal');
+  prefixVal.textContent = st.prefix;
+  const matchBadge = document.getElementById('matchBadge');
+  if (st.matchState === 'true') {
+    matchBadge.className = 'match-badge badge-true'; matchBadge.textContent = '✓ startswith';
+  } else if (st.matchState === 'false') {
+    matchBadge.className = 'match-badge badge-false'; matchBadge.textContent = '✗ startswith';
+  } else if (st.matchState === 'result') {
+    matchBadge.className = 'match-badge badge-true'; matchBadge.textContent = '✓ Done';
+  } else {
+    matchBadge.className = 'match-badge badge-none'; matchBadge.textContent = '—';
+  }
+
+  // Variable tracker
+  const prevSt = cur > 0 ? steps[cur - 1] : null;
+  setVar('prefix', st.prefix, prevSt && prevSt.prefix !== st.prefix);
+  setVar('s', st.s, prevSt && prevSt.s !== st.s);
+  setVar('result', st.result, prevSt && prevSt.result !== st.result);
+
+  // Code panel
+  for (let i = 0; i <= 7; i++) {
+    const cl = document.getElementById('cl' + i);
+    cl.className = 'code-line' + (i === st.activeLine ? ' active' : '');
+  }
+
+  // Info card
+  document.getElementById('phaseBadge').className = 'phase-badge ' + st.phase;
+  document.getElementById('phaseBadge').textContent = st.phaseLabel;
+  document.getElementById('stepCounter').textContent = 'Step ' + (cur + 1) + ' of ' + steps.length;
+  document.getElementById('stepTitle').textContent = st.title;
+  document.getElementById('stepBody').innerHTML = st.text;
+
+  // Dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : (i < cur ? ' visited' : ''));
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === steps.length - 1;
+}
+
+function setVar(name, val, changed) {
+  const vb = document.getElementById('vb-' + name);
+  const vv = document.getElementById('vv-' + name);
+  vv.textContent = val;
+  vb.className = 'var-box' + (changed ? ' changed' : '');
+}
+
+// ─── Controls ────────────────────────────────────────────────────────────────
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < steps.length) { cur = next; render(); }
+}
+function reset() { cur = 0; render(); }
+
+// ─── Collapse ────────────────────────────────────────────────────────────────
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed'); icon.textContent = '▾';
+  } else {
+    content.classList.add('collapsed'); icon.textContent = '▸';
+  }
+}
+
+// ─── Keyboard ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+buildGrid();
+render();
+</script>
+
+</body>
+</html>
