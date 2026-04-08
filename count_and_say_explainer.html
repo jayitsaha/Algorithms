@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Count and Say — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+  --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+  --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+  --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+  --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+  --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+  --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+  --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);padding:24px;max-width:860px;margin:0 auto;line-height:1.6;}
+
+/* Header */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:28px;font-weight:700;margin-bottom:4px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.toggle-icon{font-size:14px;color:var(--text3);transition:transform 0.2s;}
+.card.collapsed .card-content{display:none;}
+.card.collapsed .toggle-icon{transform:rotate(-90deg);}
+.card p{margin-bottom:0.75rem;color:var(--text2);line-height:1.7;}
+.card p:last-child{margin-bottom:0;}
+.card strong{color:var(--text);}
+.card ul,.card ol{margin:0.5rem 0 0.75rem 1.5rem;color:var(--text2);}
+.card li{margin-bottom:4px;}
+
+/* Concept boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box p{color:inherit;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* Algorithm steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/* Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* Sequence building table */
+.seq-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:14px;}
+.seq-table th{background:var(--bg2);padding:8px 12px;text-align:left;font-weight:600;border:1px solid var(--border);}
+.seq-table td{padding:8px 12px;border:1px solid var(--border);}
+.seq-table .mono{font-family:var(--mono);font-weight:500;}
+.seq-table tr:nth-child(even) td{background:var(--bg2);}
+
+/* RLE Flow diagram */
+.rle-flow{display:flex;align-items:center;justify-content:center;gap:12px;margin:1rem 0;flex-wrap:wrap;}
+.rle-box{padding:10px 16px;background:var(--surface);border:2px solid var(--border2);border-radius:var(--radius);text-align:center;font-size:13px;font-weight:600;min-width:100px;}
+.rle-box.scan{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-text);}
+.rle-box.group{border-color:var(--purple-border);background:var(--purple-bg);color:var(--purple-text);}
+.rle-box.emit{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+.rle-arrow{font-size:18px;color:var(--text3);}
+
+/* Static code block */
+.static-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;margin:0.75rem 0;}
+.static-code .line{white-space:pre;color:var(--text2);}
+.static-code .comment{color:var(--green-mid);font-style:italic;}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;font-size:14px;}
+.related-problems{margin-top:1rem;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{margin-left:1.25rem;}
+.related-problems li{margin-bottom:4px;color:var(--text2);font-size:14px;}
+
+/* ===== INTERACTIVE WALKTHROUGH ===== */
+.viz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.viz-title{font-size:18px;font-weight:700;margin-bottom:1.25rem;color:var(--text);text-align:center;}
+
+/* Sequence timeline */
+.sequence-timeline{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.seq-term{display:flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:var(--radius);background:var(--bg2);border:2px solid transparent;min-width:50px;}
+.seq-term.source{border-color:var(--blue-border);background:var(--blue-bg);}
+.seq-term.building{border-color:var(--amber-border);background:var(--amber-bg);}
+.seq-term.complete{border-color:var(--green-border);background:var(--green-bg);}
+.seq-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.seq-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);}
+.seq-arrow{color:var(--text3);font-size:14px;}
+
+/* Source & output areas */
+.area-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px;}
+.source-area,.output-area{margin-bottom:1rem;}
+
+/* Cell row with pointers */
+.cell-container{position:relative;display:flex;gap:4px;justify-content:center;padding-top:28px;}
+.cell{width:44px;height:44px;border-radius:8px;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);transition:all 0.3s;position:relative;}
+.cell.active{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-text);}
+.cell.check{border-color:var(--purple-border);background:var(--purple-bg);color:var(--purple-text);}
+.cell.done{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);opacity:0.7;}
+.cell.new-out{border-color:var(--amber-border);background:var(--amber-bg);color:var(--amber-text);box-shadow:0 0 10px rgba(239,159,39,0.3);}
+.cell.count-out{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-border);}
+.cell.char-out{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border);}
+
+/* Index labels */
+.index-row{display:flex;gap:4px;justify-content:center;margin-top:4px;}
+.index-label{width:44px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+/* Pointer labels above cells */
+.pointer-row{display:flex;gap:4px;justify-content:center;position:absolute;top:0;left:0;right:0;}
+.pointer{width:44px;text-align:center;font-size:10px;font-weight:700;font-family:var(--mono);opacity:0;transition:opacity 0.3s;}
+.pointer.visible{opacity:1;}
+.pointer.ptr-read{color:var(--blue-mid);}
+.pointer.ptr-check{color:var(--purple-mid);}
+
+/* Output pairs */
+.output-cells{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;}
+.output-pair{display:flex;gap:2px;margin-right:10px;flex-direction:column;align-items:center;}
+.output-pair .pair-cells{display:flex;gap:2px;}
+.pair-label{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px;white-space:nowrap;}
+
+/* Group info */
+.group-info{text-align:center;font-family:var(--mono);font-size:13px;padding:8px 16px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--radius);color:var(--blue-text);min-height:20px;margin:12px auto;max-width:400px;transition:all 0.3s;}
+.group-info.empty{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+
+/* Variable tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* Code panel */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info card */
+.info-card{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:16px;border:1px solid var(--border);}
+.info-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.info-phase{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 10px;border-radius:20px;}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-compare{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-write{background:var(--green-bg);color:var(--green-mid);}
+.phase-done{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-weight:500;margin-left:auto;font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* Progress dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background 0.3s;}
+.dot.active{background:var(--blue-mid);}
+.dot.past{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{padding:8px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn.primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn.primary:hover{background:var(--blue-border);color:white;}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;padding:12px;background:var(--bg2);border-radius:var(--radius);}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:16px;height:16px;border-radius:4px;border:2px solid;}
+.legend-swatch.s-active{background:var(--blue-bg);border-color:var(--blue-border);}
+.legend-swatch.s-check{background:var(--purple-bg);border-color:var(--purple-border);}
+.legend-swatch.s-done{background:var(--green-bg);border-color:var(--green-border);opacity:0.7;}
+.legend-swatch.s-new{background:var(--amber-bg);border-color:var(--amber-border);}
+.legend-swatch.s-count{background:var(--purple-bg);border-color:var(--purple-border);}
+.legend-swatch.s-char{background:var(--blue-bg);border-color:var(--blue-border);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Count and Say</h1>
+  <div class="subtitle">LeetCode #38 — Run-Length Encoding Sequence Generation</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">String</span>
+    <span class="tag tag-pattern">Run-Length Encoding</span>
+    <span class="tag tag-complexity">O(n · L)</span>
+  </div>
+</div>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card" id="card1">
+  <div class="section-header" onclick="toggleCard('card1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <p>The count-and-say sequence starts with <strong>"1"</strong>. Each subsequent term is generated by describing the previous term out loud — literally <strong>"say what you see"</strong>.</p>
+    <p>For each group of consecutive identical digits, record the <strong>count</strong> followed by the <strong>digit</strong>. This is called <strong>Run-Length Encoding (RLE)</strong>.</p>
+
+    <table class="seq-table">
+      <thead><tr><th>Term</th><th>String</th><th>How to read it (→ next term)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="mono">"1"</td><td>one 1 → <strong>"11"</strong></td></tr>
+        <tr><td>2</td><td class="mono">"11"</td><td>two 1s → <strong>"21"</strong></td></tr>
+        <tr><td>3</td><td class="mono">"21"</td><td>one 2, one 1 → <strong>"1211"</strong></td></tr>
+        <tr><td>4</td><td class="mono">"1211"</td><td>one 1, one 2, two 1s → <strong>"111221"</strong></td></tr>
+        <tr><td>5</td><td class="mono">"111221"</td><td>three 1s, two 2s, one 1 → <strong>"312211"</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Each term is just the <strong>verbal description</strong> of the previous one. Scan left to right, group consecutive identical digits, and for each group write <strong>count + digit</strong>. That's it — pure simulation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card" id="card2">
+  <div class="section-header" onclick="toggleCard('card2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Iterative RLE Scan</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <p>Starting from <strong>"1"</strong>, repeat the "describe" process <strong>n − 1</strong> times. Each description pass works like this:</p>
+
+    <div class="rle-flow">
+      <div class="rle-box scan">📖 Scan<br><small>Read left → right</small></div>
+      <div class="rle-arrow">→</div>
+      <div class="rle-box group">🔢 Group<br><small>Count same chars</small></div>
+      <div class="rle-arrow">→</div>
+      <div class="rle-box emit">✏️ Emit<br><small>Write count + char</small></div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Initialize</strong> — set <code>result = "1"</code> (term 1)</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>For each iteration</strong> (n − 1 times), scan <code>result</code> from left to right</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text"><strong>At position i</strong>, read <code>char = result[i]</code> and count how many consecutive copies follow</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text"><strong>Append</strong> <code>str(count) + char</code> to the next term's string</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text"><strong>Jump</strong> past the group (<code>i += count</code>) and repeat until end of string</span></div>
+      <div class="algo-step"><span class="step-num">6</span><span class="step-text"><strong>Replace</strong> <code>result</code> with the newly built string; repeat for next iteration</span></div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Core Mechanism</div>
+      <p>The inner scan uses a technique similar to <strong>Two Pointer: Same Direction</strong> — a read pointer <code>i</code> jumps through the string in variable-size groups. Each group produces exactly <strong>2 output characters</strong> (count + digit).</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: Why It Works -->
+<div class="card" id="card3">
+  <div class="section-header" onclick="toggleCard('card3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After <strong>k</strong> iterations of the outer loop, <code>result</code> holds the correct <strong>(k+1)</strong>th term of the count-and-say sequence.</p>
+    </div>
+
+    <p><strong>Base case:</strong> Before any iteration, <code>result = "1"</code> — correct for term 1.</p>
+    <p><strong>Inductive step:</strong> If <code>result</code> is the correct term k, then our RLE scan produces the correct term k+1 because:</p>
+    <ul>
+      <li>We start at position 0 and count consecutive identical characters</li>
+      <li>After writing a group, we jump <code>i += count</code>, which lands exactly at the start of the next group</li>
+      <li>This partitions the entire string into non-overlapping, exhaustive groups — <strong>no character is skipped or double-counted</strong></li>
+      <li>Each group produces the correct count + digit encoding</li>
+    </ul>
+
+    <p><strong>Edge cases:</strong></p>
+    <ul>
+      <li><strong>n = 1</strong> → Returns "1" immediately (0 iterations)</li>
+      <li><strong>Single-character string</strong> → One group of size 1, produces "1X" correctly</li>
+      <li><strong>All same digits</strong> → One large group, e.g., "111" → "31"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card" id="card4">
+  <div class="section-header" onclick="toggleCard('card4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="static-code">
+      <div class="line"><span class="comment"># Start with term 1</span></div>
+      <div class="line">def countAndSay(n: int) -> str:</div>
+      <div class="line">    result = "1"</div>
+      <div class="line">    <span class="comment"># Build each subsequent term by describing the previous</span></div>
+      <div class="line">    for _ in range(n - 1):</div>
+      <div class="line">        next_result = []</div>
+      <div class="line">        i = 0</div>
+      <div class="line">        <span class="comment"># Scan the current term left to right</span></div>
+      <div class="line">        while i < len(result):</div>
+      <div class="line">            char = result[i]       <span class="comment"># Current digit</span></div>
+      <div class="line">            count = 1              <span class="comment"># At least one occurrence</span></div>
+      <div class="line">            <span class="comment"># Count consecutive identical chars</span></div>
+      <div class="line">            while i + count < len(result) and result[i + count] == char:</div>
+      <div class="line">                count += 1</div>
+      <div class="line">            <span class="comment"># Emit: count followed by the character</span></div>
+      <div class="line">            next_result.append(str(count) + char)</div>
+      <div class="line">            i += count             <span class="comment"># Jump past this group</span></div>
+      <div class="line">        result = "".join(next_result)</div>
+      <div class="line">    return result</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Count vs Digit Order</div>
+      <p>The output is <strong>count THEN digit</strong> — "11" means "one 1", NOT "digit 1, once". Getting the order wrong produces a completely different (and wrong) sequence. Think: <strong>"How many? Of what?"</strong></p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Bounds Check in Inner Loop</div>
+      <p>The inner <code>while</code> must check <code>i + count < len(result)</code> <strong>before</strong> accessing <code>result[i + count]</code>. Python's <code>and</code> short-circuits, so this is safe — but forgetting the bounds check causes an index error at the end of the string.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card" id="card5">
+  <div class="section-header" onclick="toggleCard('card5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Clarify the Sequence</div>
+        <p>Build terms 1–4 by hand on the whiteboard. This shows the interviewer you understand the problem and reveals the RLE pattern.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Core Operation</div>
+        <p>Each term is computed from the previous by one pass of <strong>run-length encoding</strong>. Isolate this as a helper function or inner loop.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Design the RLE Scan</div>
+        <p>Use a pointer <code>i</code> that advances through the string. At each position, count consecutive identical characters using a nested while loop, then emit count + char.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Wrap in Iteration</div>
+        <p>Apply the RLE scan <strong>n − 1 times</strong> starting from "1". Each iteration transforms the current term into the next.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"This is essentially iterative run-length encoding. I'll start with '1' and apply an RLE pass n−1 times. Each pass scans left to right, groups consecutive identical digits, and builds the next string by appending count + digit for each group. Time is O(n · L) where L is the max term length, and space is O(L) for the intermediate strings."</div>
+    </div>
+
+    <div class="concept-box insight" style="margin-top:1rem;">
+      <div class="concept-box-title">💡 Follow-up Questions</div>
+      <p><strong>Growth rate?</strong> The string length grows by roughly a factor of ~1.304 per term (Conway's constant). <strong>Regex?</strong> Python's <code>re.findall(r'(.)\1*', s)</code> can replace the inner loop. <strong>Recursive?</strong> Yes, but iterative avoids stack depth issues for large n.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="viz-card">
+  <div class="section-header" style="cursor:default;">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+  </div>
+
+  <!-- Sequence timeline -->
+  <div class="sequence-timeline" id="seqTimeline">
+    <div class="seq-term" id="seq1"><span class="seq-label">n=1</span><span class="seq-val">"1"</span></div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-term" id="seq2"><span class="seq-label">n=2</span><span class="seq-val">"11"</span></div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-term" id="seq3"><span class="seq-label">n=3</span><span class="seq-val">"21"</span></div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-term" id="seq4"><span class="seq-label">n=4</span><span class="seq-val">"1211"</span></div>
+    <div class="seq-arrow">→</div>
+    <div class="seq-term" id="seq5"><span class="seq-label">n=5</span><span class="seq-val" id="seq5Val">?</span></div>
+  </div>
+
+  <!-- Source area -->
+  <div class="source-area">
+    <div class="area-label">Source (Term 4): "1211"</div>
+    <div class="cell-container" id="sourceContainer">
+      <div class="pointer-row" id="pointerRow"></div>
+    </div>
+    <div class="index-row" id="indexRow"></div>
+  </div>
+
+  <!-- Group info -->
+  <div class="group-info empty" id="groupInfo">Waiting to start...</div>
+
+  <!-- Output area -->
+  <div class="output-area">
+    <div class="area-label">Output (Building Term 5)</div>
+    <div class="output-cells" id="outputCells"></div>
+  </div>
+
+  <!-- Variable tracker -->
+  <div class="var-tracker" id="varTracker"></div>
+
+  <!-- Code panel -->
+  <div class="code-panel" id="codePanel"></div>
+
+  <!-- Info card -->
+  <div class="info-card">
+    <div class="info-header">
+      <span class="info-phase" id="infoPhase">INIT</span>
+      <span class="step-counter" id="stepCounter">0 / 12</span>
+    </div>
+    <div class="info-title" id="infoTitle">—</div>
+    <div class="info-text" id="infoText">—</div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progressDots"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn" id="prevBtn" onclick="go(-1)">◄ Prev</button>
+    <button class="btn primary" id="nextBtn" onclick="go(1)">Next ►</button>
+    <button class="btn" onclick="reset()">Reset</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch s-active"></div>Reading / Group</div>
+  <div class="legend-item"><div class="legend-swatch s-check"></div>Comparing next</div>
+  <div class="legend-item"><div class="legend-swatch s-done"></div>Processed</div>
+  <div class="legend-item"><div class="legend-swatch s-new"></div>Newly emitted</div>
+  <div class="legend-item"><div class="legend-swatch s-count"></div>Count digit</div>
+  <div class="legend-item"><div class="legend-swatch s-char"></div>Character digit</div>
+</div>
+
+<!-- SECTION 7: Summary -->
+<div class="card" id="card7" style="margin-top:1rem;">
+  <div class="section-header" onclick="toggleCard('card7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="takeaways">
+      <div class="takeaway">✓ Each term is the run-length encoding of the previous term</div>
+      <div class="takeaway">✓ The inner scan groups consecutive identical chars — simple simulation</div>
+      <div class="takeaway">✓ Output format is count + digit (e.g., "21" = two 1s, not twenty-one)</div>
+      <div class="takeaway">✓ Time: O(n · L), Space: O(L) where L is max term length</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Iterative sequence generation where each term depends on the previous</li>
+        <li>Run-length encoding / decoding tasks</li>
+        <li>String compression problems</li>
+        <li>Simulation problems with clear transformation rules</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>String Compression (LC 443)</strong> — RLE in-place on a char array</li>
+        <li><strong>Encode and Decode Strings (LC 271)</strong> — String encoding scheme</li>
+        <li><strong>Zigzag Conversion (LC 6)</strong> — String transformation by pattern</li>
+        <li><strong>Reverse Words in a String (LC 151)</strong> — String transformation</li>
+        <li><strong>Group Anagrams (LC 49)</strong> — Grouping by character frequency</li>
+        <li><strong>RLE Iterator (LC 900)</strong> — Iterating over RLE-encoded data</li>
+        <li><strong>Decompress Run-Length Encoded List (LC 1313)</strong> — RLE decode</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const SOURCE = ['1','2','1','1'];
+const CODE_LINES = [
+  'def countAndSay(n):',
+  '    result = "1"',
+  '    for _ in range(n - 1):',
+  '        next_result = []',
+  '        i = 0',
+  '        while i < len(result):',
+  '            char = result[i]',
+  '            count = 1',
+  '            while i+count < len(result) and result[i+count] == char:',
+  '                count += 1',
+  '            next_result.append(str(count) + char)',
+  '            i += count',
+  '        result = "".join(next_result)',
+  '    return result'
+];
+
+const steps = [
+  {
+    title: "Initialize: Building Term 5 from Term 4",
+    text: "We have countAndSay(4) = \"1211\". To compute countAndSay(5), we scan \"1211\" left to right, group consecutive identical digits, and describe each group as count + digit.",
+    phase: "INIT", phaseClass: "phase-init",
+    activeLine: 1,
+    readPtr: -1, checkPtr: -1,
+    srcStates: ['normal','normal','normal','normal'],
+    output: [], outputNew: [],
+    vars: { i: 0, char: '—', count: 0 },
+    changed: [],
+    groupLabel: ''
+  },
+  {
+    title: "Start Group 1: Read source[0] = '1'",
+    text: "Set i = 0. Read char = source[0] = '1' and count = 1. We've started a new group — how many consecutive '1's are there?",
+    phase: "SCAN", phaseClass: "phase-scan",
+    activeLine: 6,
+    readPtr: 0, checkPtr: -1,
+    srcStates: ['active','normal','normal','normal'],
+    output: [], outputNew: [],
+    vars: { i: 0, char: "'1'", count: 1 },
+    changed: ['i','char','count'],
+    groupLabel: "Group 1: '1' × ?"
+  },
+  {
+    title: "Compare: source[1] = '2' ≠ '1'",
+    text: "Check if source[0+1] = '2' equals char '1'. It doesn't! The inner while loop exits immediately. Group 1 has exactly one '1'.",
+    phase: "COMPARE", phaseClass: "phase-compare",
+    activeLine: 8,
+    readPtr: 0, checkPtr: 1,
+    srcStates: ['active','check','normal','normal'],
+    output: [], outputNew: [],
+    vars: { i: 0, char: "'1'", count: 1 },
+    changed: [],
+    groupLabel: "Group 1: '1' × 1 ✓"
+  },
+  {
+    title: "Emit: count + char = \"11\" (one '1')",
+    text: "Append str(1) + '1' = \"11\" to output. Advance i by count: i = 0 + 1 = 1. First group described!",
+    phase: "WRITE", phaseClass: "phase-write",
+    activeLine: 10,
+    readPtr: 1, checkPtr: -1,
+    srcStates: ['done','normal','normal','normal'],
+    output: ['1','1'], outputNew: [0,1],
+    vars: { i: 1, char: "'1'", count: 1 },
+    changed: ['i'],
+    groupLabel: ''
+  },
+  {
+    title: "Start Group 2: Read source[1] = '2'",
+    text: "Now at i = 1. Read char = source[1] = '2' and count = 1. New group started.",
+    phase: "SCAN", phaseClass: "phase-scan",
+    activeLine: 6,
+    readPtr: 1, checkPtr: -1,
+    srcStates: ['done','active','normal','normal'],
+    output: ['1','1'], outputNew: [],
+    vars: { i: 1, char: "'2'", count: 1 },
+    changed: ['char'],
+    groupLabel: "Group 2: '2' × ?"
+  },
+  {
+    title: "Compare: source[2] = '1' ≠ '2'",
+    text: "Check if source[1+1] = '1' equals char '2'. No match. Group 2 has exactly one '2'.",
+    phase: "COMPARE", phaseClass: "phase-compare",
+    activeLine: 8,
+    readPtr: 1, checkPtr: 2,
+    srcStates: ['done','active','check','normal'],
+    output: ['1','1'], outputNew: [],
+    vars: { i: 1, char: "'2'", count: 1 },
+    changed: [],
+    groupLabel: "Group 2: '2' × 1 ✓"
+  },
+  {
+    title: "Emit: count + char = \"12\" (one '2')",
+    text: "Append str(1) + '2' = \"12\". Advance i: 1 + 1 = 2. Output so far: \"1112\" — one 1, one 2.",
+    phase: "WRITE", phaseClass: "phase-write",
+    activeLine: 10,
+    readPtr: 2, checkPtr: -1,
+    srcStates: ['done','done','normal','normal'],
+    output: ['1','1','1','2'], outputNew: [2,3],
+    vars: { i: 2, char: "'2'", count: 1 },
+    changed: ['i'],
+    groupLabel: ''
+  },
+  {
+    title: "Start Group 3: Read source[2] = '1'",
+    text: "Now at i = 2. Read char = source[2] = '1' and count = 1. New group started.",
+    phase: "SCAN", phaseClass: "phase-scan",
+    activeLine: 6,
+    readPtr: 2, checkPtr: -1,
+    srcStates: ['done','done','active','normal'],
+    output: ['1','1','1','2'], outputNew: [],
+    vars: { i: 2, char: "'1'", count: 1 },
+    changed: ['char'],
+    groupLabel: "Group 3: '1' × ?"
+  },
+  {
+    title: "Compare: source[3] = '1' = '1' → Extend!",
+    text: "Check if source[2+1] = '1' equals char '1'. YES! They match. Increment count to 2. The group grows to include source[3].",
+    phase: "COMPARE", phaseClass: "phase-compare",
+    activeLine: 9,
+    readPtr: 2, checkPtr: 3,
+    srcStates: ['done','done','active','active'],
+    output: ['1','1','1','2'], outputNew: [],
+    vars: { i: 2, char: "'1'", count: 2 },
+    changed: ['count'],
+    groupLabel: "Group 3: '1' × 2"
+  },
+  {
+    title: "Bounds Check: i + count = 4 ≥ length",
+    text: "i + count = 2 + 2 = 4, which equals len(\"1211\") = 4. The inner while condition fails — we've reached the end of the string. Group 3 has two '1's.",
+    phase: "COMPARE", phaseClass: "phase-compare",
+    activeLine: 8,
+    readPtr: 2, checkPtr: -1,
+    srcStates: ['done','done','active','active'],
+    output: ['1','1','1','2'], outputNew: [],
+    vars: { i: 2, char: "'1'", count: 2 },
+    changed: [],
+    groupLabel: "Group 3: '1' × 2 ✓"
+  },
+  {
+    title: "Emit: count + char = \"21\" (two '1's)",
+    text: "Append str(2) + '1' = \"21\". Advance i: 2 + 2 = 4. Output complete: \"111221\" — one 1, one 2, two 1s.",
+    phase: "WRITE", phaseClass: "phase-write",
+    activeLine: 10,
+    readPtr: 4, checkPtr: -1,
+    srcStates: ['done','done','done','done'],
+    output: ['1','1','1','2','2','1'], outputNew: [4,5],
+    vars: { i: 4, char: "'1'", count: 2 },
+    changed: ['i'],
+    groupLabel: ''
+  },
+  {
+    title: "Loop Exits: i = 4 ≥ len(4)",
+    text: "The outer while condition i < len(result) is false (4 < 4). All groups described. Join pieces: \"11\" + \"12\" + \"21\" = \"111221\".",
+    phase: "DONE", phaseClass: "phase-done",
+    activeLine: 12,
+    readPtr: -1, checkPtr: -1,
+    srcStates: ['done','done','done','done'],
+    output: ['1','1','1','2','2','1'], outputNew: [],
+    vars: { i: 4, char: '—', count: '—' },
+    changed: [],
+    groupLabel: ''
+  },
+  {
+    title: "✅ Complete! countAndSay(5) = \"111221\"",
+    text: "Term 5 is built! The full sequence: \"1\" → \"11\" → \"21\" → \"1211\" → \"111221\". Each term is simply the run-length encoding of the previous term.",
+    phase: "DONE", phaseClass: "phase-done",
+    activeLine: 13,
+    readPtr: -1, checkPtr: -1,
+    srcStates: ['done','done','done','done'],
+    output: ['1','1','1','2','2','1'], outputNew: [],
+    vars: { i: '—', char: '—', count: '—' },
+    changed: [],
+    groupLabel: '',
+    complete: true
+  }
+];
+
+let cur = 0;
+
+function init() {
+  // Build source cells
+  const sc = document.getElementById('sourceContainer');
+  const pr = document.getElementById('pointerRow');
+  const ir = document.getElementById('indexRow');
+  pr.innerHTML = '';
+  SOURCE.forEach((_, idx) => {
+    const p = document.createElement('div');
+    p.className = 'pointer';
+    p.id = 'ptr-' + idx;
+    pr.appendChild(p);
+  });
+  // Source cells (after pointer row)
+  const existingCells = sc.querySelectorAll('.cell');
+  existingCells.forEach(c => c.remove());
+  SOURCE.forEach((ch, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'src-' + idx;
+    cell.textContent = ch;
+    sc.appendChild(cell);
+  });
+  // Index labels
+  ir.innerHTML = '';
+  SOURCE.forEach((_, idx) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'index-label';
+    lbl.textContent = idx;
+    ir.appendChild(lbl);
+  });
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line, idx) => {
+    const div = document.createElement('div');
+    div.className = 'code-line';
+    div.id = 'cl-' + idx;
+    div.textContent = line;
+    cp.appendChild(div);
+  });
+  // Progress dots
+  const pd = document.getElementById('progressDots');
+  pd.innerHTML = '';
+  steps.forEach((_, idx) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.id = 'dot-' + idx;
+    pd.appendChild(dot);
+  });
+  render();
+}
+
+function render() {
+  const s = steps[cur];
+
+  // Sequence timeline
+  ['seq1','seq2','seq3','seq4','seq5'].forEach(id => {
+    document.getElementById(id).className = 'seq-term';
+  });
+  document.getElementById('seq4').classList.add('source');
+  if (s.complete) {
+    document.getElementById('seq5').classList.add('complete');
+    document.getElementById('seq5Val').textContent = '"111221"';
+  } else {
+    document.getElementById('seq5').classList.add('building');
+    document.getElementById('seq5Val').textContent = s.output.length > 0 ? '"' + s.output.join('') + '..."' : '?';
+  }
+
+  // Source cells
+  SOURCE.forEach((_, idx) => {
+    const cell = document.getElementById('src-' + idx);
+    cell.className = 'cell ' + s.srcStates[idx];
+  });
+
+  // Pointers
+  SOURCE.forEach((_, idx) => {
+    const p = document.getElementById('ptr-' + idx);
+    p.className = 'pointer';
+    p.textContent = '';
+  });
+  if (s.readPtr >= 0 && s.readPtr < SOURCE.length) {
+    const rp = document.getElementById('ptr-' + s.readPtr);
+    rp.classList.add('ptr-read', 'visible');
+    rp.textContent = 'i↓';
+  }
+  if (s.checkPtr >= 0 && s.checkPtr < SOURCE.length) {
+    const cp = document.getElementById('ptr-' + s.checkPtr);
+    cp.classList.add('ptr-check', 'visible');
+    cp.textContent = '?↓';
+  }
+
+  // Group info
+  const gi = document.getElementById('groupInfo');
+  if (s.groupLabel) {
+    gi.textContent = s.groupLabel;
+    gi.className = 'group-info';
+  } else if (cur === 0) {
+    gi.textContent = 'Waiting to start...';
+    gi.className = 'group-info empty';
+  } else if (s.complete) {
+    gi.textContent = 'All 3 groups described → "111221"';
+    gi.className = 'group-info';
+    gi.style.borderColor = 'var(--green-border)';
+    gi.style.background = 'var(--green-bg)';
+    gi.style.color = 'var(--green-text)';
+  } else {
+    gi.textContent = 'Between groups...';
+    gi.className = 'group-info empty';
+  }
+  if (!s.complete) {
+    gi.style.borderColor = '';
+    gi.style.background = '';
+    gi.style.color = '';
+  }
+
+  // Output cells
+  const oc = document.getElementById('outputCells');
+  oc.innerHTML = '';
+  for (let p = 0; p < s.output.length; p += 2) {
+    const pair = document.createElement('div');
+    pair.className = 'output-pair';
+    const cells = document.createElement('div');
+    cells.className = 'pair-cells';
+
+    const countCell = document.createElement('div');
+    countCell.className = 'cell count-out';
+    if (s.outputNew.includes(p)) countCell.classList.add('new-out');
+    countCell.textContent = s.output[p];
+    countCell.style.width = '36px';
+    countCell.style.height = '36px';
+    countCell.style.fontSize = '16px';
+    cells.appendChild(countCell);
+
+    if (s.output[p + 1] !== undefined) {
+      const charCell = document.createElement('div');
+      charCell.className = 'cell char-out';
+      if (s.outputNew.includes(p + 1)) charCell.classList.add('new-out');
+      charCell.textContent = s.output[p + 1];
+      charCell.style.width = '36px';
+      charCell.style.height = '36px';
+      charCell.style.fontSize = '16px';
+      cells.appendChild(charCell);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'pair-label';
+      lbl.textContent = s.output[p] + "×'" + s.output[p + 1] + "'";
+      pair.appendChild(cells);
+      pair.appendChild(lbl);
+    } else {
+      pair.appendChild(cells);
+    }
+    oc.appendChild(pair);
+  }
+
+  // Variable tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = '';
+  for (const [name, val] of Object.entries(s.vars)) {
+    const box = document.createElement('div');
+    box.className = 'var-box';
+    if (s.changed.includes(name)) box.classList.add('changed');
+    box.innerHTML = '<span class="var-name">' + name + '</span><span class="var-val">' + val + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel active line
+  CODE_LINES.forEach((_, idx) => {
+    document.getElementById('cl-' + idx).className = 'code-line' + (idx === s.activeLine ? ' active' : '');
+  });
+
+  // Info card
+  document.getElementById('infoPhase').textContent = s.phase;
+  document.getElementById('infoPhase').className = 'info-phase ' + s.phaseClass;
+  document.getElementById('stepCounter').textContent = cur + ' / ' + (steps.length - 1);
+  document.getElementById('infoTitle').textContent = s.title;
+  document.getElementById('infoText').textContent = s.text;
+
+  // Progress dots
+  steps.forEach((_, idx) => {
+    const dot = document.getElementById('dot-' + idx);
+    dot.className = 'dot' + (idx === cur ? ' active' : idx < cur ? ' past' : '');
+  });
+
+  // Button states
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === steps.length - 1;
+}
+
+function go(delta) {
+  const next = cur + delta;
+  if (next >= 0 && next < steps.length) {
+    cur = next;
+    render();
+  }
+}
+
+function reset() {
+  cur = 0;
+  render();
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zigzag Conversion — Mathematical Index Jump Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem 2rem;}
+.header-inner{max-width:940px;margin:0 auto;}
+.problem-number{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+.tag-approach{background:var(--cyan-bg);color:var(--cyan-mid);}
+
+main{max-width:940px;margin:0 auto;padding:2rem;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.toggle-icon{font-size:14px;color:var(--text3);transition:transform 0.2s;}
+.card.collapsed .card-content{display:none;}
+.card.collapsed .toggle-icon{transform:rotate(-90deg);}
+p{margin-bottom:.75rem;line-height:1.65;}
+h3{font-size:15px;font-weight:700;margin:.75rem 0 .4rem;}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px;}
+ul{margin-left:1.25rem;line-height:2.1;}
+
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box p{color:inherit;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.55;font-size:14px;}
+
+/* Period/formula box */
+.formula-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.formula-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--cyan-mid);margin-bottom:.5rem;}
+.formula{font-family:var(--mono);font-size:15px;line-height:2.2;color:var(--text);}
+.formula .hl-blue{color:var(--blue-mid);font-weight:700;}
+.formula .hl-purple{color:var(--purple-mid);font-weight:700;}
+.formula .hl-amber{color:var(--amber-mid);font-weight:700;}
+.formula .hl-green{color:var(--green-mid);font-weight:700;}
+
+/* Zigzag grid diagram */
+.zz-grid-wrap{overflow-x:auto;margin:1rem 0;}
+.zz-grid{border-collapse:separate;border-spacing:3px;margin:0 auto;}
+.zz-grid td{width:33px;height:33px;text-align:center;font-family:var(--mono);font-size:15px;font-weight:700;border-radius:6px;}
+.zzc.r0{background:var(--blue-bg);color:var(--blue-text);}
+.zzc.r1{background:var(--purple-bg);color:var(--purple-text);}
+.zzc.r2{background:var(--amber-bg);color:var(--amber-text);}
+.zze{color:var(--text3);font-size:11px;}
+.zzc.downstroke{border:2px solid var(--green-border);box-shadow:0 0 6px rgba(59,109,17,0.3);}
+.zzc.upstroke{border:2px dashed var(--red-border);box-shadow:0 0 6px rgba(163,45,45,0.3);}
+
+/* Index pattern table */
+.idx-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.idx-table th{background:var(--bg2);padding:8px 10px;text-align:left;font-weight:700;border:1px solid var(--border);font-size:12px;}
+.idx-table td{padding:8px 10px;border:1px solid var(--border);font-family:var(--mono);font-size:12px;}
+.idx-table .row-0{background:var(--blue-bg);color:var(--blue-text);}
+.idx-table .row-1{background:var(--purple-bg);color:var(--purple-text);}
+.idx-table .row-2{background:var(--amber-bg);color:var(--amber-text);}
+
+/* Comparison grid */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0;}
+.comp-panel{padding:1rem;border-radius:var(--radius);}
+.comp-panel.sol1{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.comp-panel.sol2{background:var(--green-bg);border:1px solid var(--green-border);}
+.comp-panel h4{font-size:13px;font-weight:700;margin-bottom:8px;}
+.comp-panel.sol1 h4{color:var(--blue-mid);}
+.comp-panel.sol2 h4{color:var(--green-mid);}
+
+/* Static code block */
+.code-block{background:var(--bg2);border-radius:var(--radius);padding:1rem;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;color:var(--text2);margin:.75rem 0;}
+.cc{color:var(--text3);}
+
+/* Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0;}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:6px;}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{margin-bottom:.6rem;font-size:14px;}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:7px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;background:var(--green-bg);border-radius:var(--radius);font-size:14px;color:var(--green-text);border:1px solid var(--green-border);}
+.takeaway::before{content:"✓";font-weight:700;flex-shrink:0;}
+.related-list{list-style:none;display:flex;flex-direction:column;gap:5px;margin:.75rem 0;}
+.related-list li{padding:7px 12px;background:var(--bg2);border-radius:var(--radius);font-size:13px;}
+.related-list li strong{color:var(--blue-mid);}
+
+/* ══ INTERACTIVE VIZ ══ */
+.viz-container{background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;margin:1.25rem 0;}
+
+/* Source string cells */
+.src-wrap{overflow-x:auto;margin-bottom:1.25rem;}
+.src-cells{display:flex;gap:3px;}
+.src-cell{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:700;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--text);transition:all .25s;position:relative;}
+.src-cell.pick-down{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);transform:scale(1.08);}
+.src-cell.pick-up{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text);transform:scale(1.08);}
+.src-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+.src-cell.skip{opacity:0.4;}
+.src-idx{display:flex;gap:3px;margin-top:3px;}
+.src-idx-cell{width:40px;text-align:center;font-size:9px;color:var(--text3);font-family:var(--mono);}
+
+/* Row badge under source showing which row index this char belongs to */
+.row-badges{display:flex;gap:3px;margin-top:3px;}
+.row-badge{width:40px;text-align:center;font-size:9px;font-weight:700;font-family:var(--mono);border-radius:4px;padding:1px 0;}
+.row-badge.rb0{background:var(--blue-bg);color:var(--blue-mid);}
+.row-badge.rb1{background:var(--purple-bg);color:var(--purple-mid);}
+.row-badge.rb2{background:var(--amber-bg);color:var(--amber-mid);}
+
+/* Current row indicator */
+.cur-row-panel{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);margin-bottom:1rem;transition:border-color 0.3s;}
+.cur-row-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.cur-row-val{font-family:var(--mono);font-size:22px;font-weight:700;}
+.cur-row-desc{font-size:13px;color:var(--text2);flex:1;}
+
+/* Result building */
+.result-area{margin:1rem 0;}
+.result-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;}
+.result-cells{display:flex;gap:2px;flex-wrap:wrap;min-height:38px;align-items:center;}
+.res-char{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;border-radius:6px;transition:all 0.3s;}
+.res-char.rc0{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border);}
+.res-char.rc1{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);}
+.res-char.rc2{background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber-border);}
+.res-char.new{box-shadow:0 0 10px rgba(239,159,39,0.4);transform:scale(1.15);}
+.row-divider{width:2px;height:26px;background:var(--border2);margin:0 6px;border-radius:1px;}
+
+/* Formula panel */
+.formula-panel{padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:1rem 0;font-family:var(--mono);font-size:13px;line-height:2;min-height:50px;transition:all 0.3s;}
+.formula-panel .calc{color:var(--text2);}
+.formula-panel .result-val{font-weight:700;color:var(--green-mid);}
+.formula-panel .hl{font-weight:700;}
+.formula-panel .hl-b{color:var(--blue-mid);}
+.formula-panel .hl-r{color:var(--red-mid);}
+
+/* Variable tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:24px;text-align:center;}
+
+/* Code panel */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info card */
+.info-card{margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;}
+.info-top{display:flex;align-items:center;gap:12px;margin-bottom:.75rem;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:12px;}
+.phase-row0{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-row1{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-row2{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
+.phase-done{background:var(--green-bg);color:var(--green-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);margin-left:auto;}
+.info-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.info-text{font-size:14px;color:var(--text2);line-height:1.65;}
+
+/* Progress + controls */
+.progress-dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .3s,transform .2s;cursor:pointer;}
+.dot.active{background:var(--blue-mid);transform:scale(1.4);}
+.dot.visited{background:var(--text3);}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1.25rem;}
+.btn{padding:10px 24px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .2s,transform .1s;}
+.btn:hover{background:var(--bg2);}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid);}
+.btn-primary:hover{background:var(--blue-text);}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="problem-number">LeetCode #6 — Solution 2</div>
+    <h1>Zigzag Conversion — Mathematical Index Jump</h1>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">String Processing</span>
+      <span class="tag tag-approach">Mathematical</span>
+      <span class="tag tag-complexity">O(n) Time · O(1) Extra Space</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- SECTION 1 -->
+<div class="card" id="card1">
+  <div class="section-header" onclick="toggleCard('card1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <p>Write <code>s = "PAYPALISHIRING"</code> in a zigzag with <code>numRows = 3</code>, then read row by row:</p>
+    <div class="zz-grid-wrap">
+      <table class="zz-grid">
+        <tr>
+          <td class="zzc r0 downstroke">P</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+          <td class="zzc r0 downstroke">A</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+          <td class="zzc r0 downstroke">H</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+          <td class="zzc r0 downstroke">N</td><td class="zze">·</td>
+        </tr>
+        <tr>
+          <td class="zze">·</td><td class="zzc r1 downstroke">A</td><td class="zze">·</td><td class="zzc r1 upstroke">P</td>
+          <td class="zze">·</td><td class="zzc r1 downstroke">L</td><td class="zze">·</td><td class="zzc r1 upstroke">S</td>
+          <td class="zze">·</td><td class="zzc r1 downstroke">I</td><td class="zze">·</td><td class="zzc r1 upstroke">I</td>
+          <td class="zze">·</td><td class="zzc r1 downstroke">G</td>
+        </tr>
+        <tr>
+          <td class="zze">·</td><td class="zze">·</td><td class="zzc r2 downstroke">Y</td><td class="zze">·</td>
+          <td class="zze">·</td><td class="zze">·</td><td class="zzc r2 downstroke">I</td><td class="zze">·</td>
+          <td class="zze">·</td><td class="zze">·</td><td class="zzc r2 downstroke">R</td><td class="zze">·</td>
+          <td class="zze">·</td><td class="zze">·</td>
+        </tr>
+      </table>
+    </div>
+    <p>Solution 1 simulates this with row buffers. But this Solution 2 asks: <strong>can we skip the simulation and directly calculate which source indices belong to each row?</strong></p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight: The Zigzag is Periodic</div>
+      <p>The zigzag pattern repeats every <strong>period = 2 × (numRows − 1) = 4</strong> characters. Within each period, every row gets characters at <strong>predictable offsets</strong>. We can iterate row-by-row, jumping directly to each row's characters — no simulation needed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="card" id="card2">
+  <div class="section-header" onclick="toggleCard('card2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Period-Based Index Calculation</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="formula-box">
+      <div class="formula-box-title">📐 The Period Formulas</div>
+      <div class="formula">
+        <span class="hl-green">period</span> = 2 × (numRows − 1) = <strong>4</strong><br>
+        <span class="hl-blue">Downstroke index</span> = j &nbsp;&nbsp;&nbsp;(j = row, row + period, row + 2·period, ...)<br>
+        <span class="hl-purple">Upstroke index</span> = j + period − 2 × row<br>
+        <em style="font-size:12px;color:var(--text3)">Upstroke only exists for middle rows (not row 0 or last row)</em>
+      </div>
+    </div>
+
+    <p>Each row has two types of characters per period cycle:</p>
+    <ul>
+      <li><strong style="color:var(--green-mid)">Downstroke</strong> — the character placed while the zigzag goes DOWN. Found at index <code>j</code>.</li>
+      <li><strong style="color:var(--red-mid)">Upstroke</strong> — the character placed on the way back UP. Found at index <code>j + period - 2*row</code>. Only middle rows have these — top and bottom rows have one char per cycle.</li>
+    </ul>
+
+    <table class="idx-table">
+      <thead><tr><th>Row</th><th>Downstroke indices (j)</th><th>Upstroke indices (j + period − 2×row)</th><th>Characters</th></tr></thead>
+      <tbody>
+        <tr class="row-0"><td><strong>0</strong></td><td>0, 4, 8, 12</td><td>— (top row, no upstroke)</td><td>P A H N</td></tr>
+        <tr class="row-1"><td><strong>1</strong></td><td>1, 5, 9, 13</td><td>3, 7, 11 &nbsp;(j+4−2=j+2)</td><td>A P L S I I G</td></tr>
+        <tr class="row-2"><td><strong>2</strong></td><td>2, 6, 10</td><td>— (bottom row, no upstroke)</td><td>Y I R</td></tr>
+      </tbody>
+    </table>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text">Compute <code>period = 2 × (numRows − 1)</code></span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>For each row</strong> (0 to numRows−1):</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text">&emsp;Jump through source by <code>period</code>: <code>j = row, row+period, row+2·period, ...</code></span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text">&emsp;At each j, pick the <strong>downstroke</strong> char: <code>s[j]</code></span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text">&emsp;If middle row, compute <code>mid = j + period − 2×row</code>. If <code>mid &lt; len(s)</code>, pick the <strong>upstroke</strong> char: <code>s[mid]</code></span></div>
+      <div class="algo-step"><span class="step-num">6</span><span class="step-text"><strong>Join</strong> all picked chars → result</span></div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why O(1) Extra Space?</div>
+      <p>Unlike Solution 1 which stores characters in <code>numRows</code> separate buffers, this approach reads characters in the exact output order. We only need a single result list (which is the output itself). No intermediate row buffers needed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="card" id="card3">
+  <div class="section-header" onclick="toggleCard('card3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Deriving the Formulas</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing row <code>r</code>, the result contains exactly the characters that appear in rows <code>0..r</code> of the zigzag grid, in left-to-right reading order.</p>
+    </div>
+
+    <p><strong>Why period = 2 × (numRows − 1)?</strong></p>
+    <p>One full zigzag cycle goes: down <code>numRows</code> steps, then back up <code>numRows − 2</code> steps (excluding the top and bottom endpoints which are shared). Total = <code>numRows + (numRows − 2) = 2 × (numRows − 1)</code>.</p>
+
+    <p><strong>Why the downstroke is at index <code>j</code>?</strong></p>
+    <p>Row <code>r</code>'s first downstroke char is at position <code>r</code> in the source. Each period later, the next downstroke is at <code>r + period</code>, then <code>r + 2·period</code>, etc.</p>
+
+    <p><strong>Why the upstroke is at <code>j + period − 2×row</code>?</strong></p>
+    <p>The upstroke char is the "mirror" within the period. From position <code>j</code> (downstroke at row <code>r</code>), the next occurrence of row <code>r</code> on the upstroke is <code>period − 2r</code> positions later. For row 0 this equals <code>period</code> (the next downstroke — no separate upstroke). For the last row, <code>period − 2(numRows−1) = 0</code> — again no separate upstroke.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The mid &lt; len(s) Check</div>
+      <p>The upstroke index might exceed the string length if the string doesn't complete a full period. Always bounds-check <code>mid &lt; len(s)</code> before reading. Also, only emit upstroke for middle rows — top and bottom rows have <code>mid == j + period</code> or <code>mid == j</code>, which are already covered.</p>
+    </div>
+
+    <div class="comp-grid">
+      <div class="comp-panel sol1">
+        <h4>Solution 1: Row Buffers</h4>
+        <p style="font-size:13px;line-height:1.7">Scan string once, bounce row index, append to row buffers. <strong>O(n) time, O(n) space</strong>. Simpler code, easier to explain.</p>
+      </div>
+      <div class="comp-panel sol2">
+        <h4>Solution 2: Math Index Jump</h4>
+        <p style="font-size:13px;line-height:1.7">Iterate row by row, jump to each index mathematically. <strong>O(n) time, O(1) extra space</strong>. More complex code, shows deeper understanding.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card" id="card4">
+  <div class="section-header" onclick="toggleCard('card4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="code-block">def convert(s: str, numRows: int) -> str:
+    <span class="cc"># Edge cases: no zigzag possible</span>
+    if numRows == 1 or numRows >= len(s):
+        return s
+
+    period = 2 * (numRows - 1)     <span class="cc"># Full zigzag cycle length (e.g., 4 for 3 rows)</span>
+    result = []
+
+    for row in range(numRows):                <span class="cc"># Process each row top to bottom</span>
+        for j in range(row, len(s), period):  <span class="cc"># Jump by period within this row</span>
+            result.append(s[j])               <span class="cc"># Downstroke char — always exists</span>
+            mid = j + period - 2 * row        <span class="cc"># Upstroke char index</span>
+            <span class="cc"># Only middle rows have upstroke; bounds-check mid</span>
+            if row != 0 and row != numRows - 1 and mid < len(s):
+                result.append(s[mid])         <span class="cc"># Upstroke char</span>
+
+    return ''.join(result)</div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Row Guard</div>
+      <p>Without <code>row != 0 and row != numRows - 1</code>, the top/bottom rows would emit duplicates. For row 0: <code>mid = j + period</code>, which is the <em>next</em> downstroke — it would be added twice. For the last row: <code>mid = j</code>, the same index — also a duplicate.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">⏱ Complexity</div>
+      <p><strong>Time:</strong> O(n) — each character is visited exactly once across all row iterations.<br>
+      <strong>Space:</strong> O(1) extra — beyond the output list (which is mandatory), no row buffers needed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card" id="card5">
+  <div class="section-header" onclick="toggleCard('card5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">When to Offer This Solution</div>
+        <p>Start with Solution 1 (row buffers) — it's simpler and faster to code. Then say: <em>"I can also do this with O(1) extra space by computing indices mathematically."</em> This shows depth.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Derive the Period on the Whiteboard</div>
+        <p>Draw the zigzag for a small example. Count chars in one full down+up cycle. Show: <code>period = 2(numRows-1)</code>. Then identify the two formulas: downstroke at <code>j</code>, upstroke at <code>j + period - 2*row</code>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Emphasize the Guard Condition</div>
+        <p>Explicitly state: <em>"Top and bottom rows have no upstroke — only middle rows. And mid might exceed string length for partial periods."</em> This prevents bugs.</p>
+      </div>
+    </div>
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"The zigzag repeats every period = 2*(numRows-1) characters. For each row, I can jump through the source by this period to find the downstroke chars. Middle rows also have an upstroke char at offset period - 2*row within each cycle. I iterate row by row, collect chars in output order, and join. This avoids the row buffers entirely — O(1) extra space."</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive -->
+<div class="card">
+  <div class="section-header" style="cursor:default;">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+  </div>
+  <p style="color:var(--text2);font-size:13px;margin-bottom:1rem;">
+    <code>s = "PAYPALISHIRING"</code>, <code>numRows = 3</code>, <code>period = 4</code>
+    → <strong style="color:var(--green-mid)">"PAHNAPLSIIGYIR"</strong>
+  </p>
+
+  <div class="viz-container">
+    <!-- Source string with row badges -->
+    <div class="src-wrap">
+      <div class="src-cells" id="srcCells"></div>
+      <div class="src-idx" id="srcIdx"></div>
+      <div class="row-badges" id="rowBadges"></div>
+    </div>
+
+    <!-- Current row panel -->
+    <div class="cur-row-panel" id="curRowPanel">
+      <span class="cur-row-label">Processing</span>
+      <span class="cur-row-val" id="curRowVal">—</span>
+      <span class="cur-row-desc" id="curRowDesc">Ready to start</span>
+    </div>
+
+    <!-- Formula panel -->
+    <div class="formula-panel" id="formulaPanel">
+      Click Next to begin...
+    </div>
+
+    <!-- Result -->
+    <div class="result-area">
+      <div class="result-label">Result (building left to right)</div>
+      <div class="result-cells" id="resultCells"></div>
+    </div>
+
+    <!-- Variables -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- Code panel -->
+    <div class="code-panel" id="codePanel"></div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-top">
+        <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+        <span class="step-counter" id="stepCounter">0 / 0</span>
+      </div>
+      <div class="info-title" id="infoTitle">—</div>
+      <div class="info-text" id="infoText">—</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green-bg);border:1px solid var(--green-border)"></div>Downstroke pick</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red-bg);border:1px solid var(--red-border)"></div>Upstroke pick</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-bg);border:1px solid var(--blue-border)"></div>Row 0</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple-bg);border:1px solid var(--purple-border)"></div>Row 1</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-bg);border:1px solid var(--amber-border)"></div>Row 2</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card" id="card7">
+  <div class="section-header" onclick="toggleCard('card7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="card-content">
+    <div class="takeaways">
+      <div class="takeaway">The zigzag is periodic: <code>period = 2 × (numRows − 1)</code></div>
+      <div class="takeaway">Each row has downstroke chars at <code>row, row+period, row+2·period, ...</code></div>
+      <div class="takeaway">Middle rows also have upstroke chars at <code>j + period − 2×row</code></div>
+      <div class="takeaway">Top/bottom rows: one char per cycle. Middle rows: two chars per cycle</div>
+      <div class="takeaway">O(n) time, O(1) extra space — no intermediate row buffers</div>
+    </div>
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>When the interviewer asks for O(1) space after you present the simulation</li>
+        <li>Any periodic/cyclic pattern where you can pre-compute index offsets</li>
+        <li>When the output order differs from input order but follows a mathematical rule</li>
+      </ul>
+    </div>
+    <h3 style="margin-top:1rem;">Related Problems</h3>
+    <ul class="related-list">
+      <li><strong>Diagonal Traverse (#498)</strong> — Same periodic bouncing concept in 2D</li>
+      <li><strong>Spiral Matrix (#54)</strong> — Direction-based traversal with predictable patterns</li>
+      <li><strong>Rotate Image (#48)</strong> — Index math to map source → destination</li>
+      <li><strong>String Compression (#443)</strong> — Sequential string building with pattern</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<script>
+const S = 'PAYPALISHIRING';
+const N = S.length; // 14
+const NUM_ROWS = 3;
+const PERIOD = 4;
+
+// Row assignment for each source index (for badges)
+const ROW_MAP = [0,1,2,1,0,1,2,1,0,1,2,1,0,1];
+
+const CODE_LINES = [
+  'def convert(s, numRows):',
+  '    if numRows == 1 or numRows >= len(s): return s',
+  '    period = 2 * (numRows - 1)',
+  '    result = []',
+  '    for row in range(numRows):',
+  '        for j in range(row, len(s), period):',
+  '            result.append(s[j])            # downstroke',
+  '            mid = j + period - 2 * row',
+  '            if row != 0 and row != numRows-1 and mid < len(s):',
+  '                result.append(s[mid])      # upstroke',
+  '    return "".join(result)'
+];
+
+// Build steps programmatically
+// Step 0: init
+// Then for each row, for each j: downstroke step, optional upstroke step
+// Final: done
+const steps = [];
+
+steps.push({
+  phase: 'INIT', phaseClass: 'phase-init',
+  title: 'Initialize: period = 2×(3−1) = 4',
+  text: 'Compute period = 4. We\'ll iterate row by row (0, 1, 2). For each row, jump through the source by period=4 to find downstroke chars. Middle rows also get upstroke chars.',
+  activeLine: 2,
+  row: -1, pickIdx: -1, pickType: '',
+  result: [],
+  formula: 'period = 2 × (numRows − 1) = 2 × 2 = <strong>4</strong>',
+  vars: {row: '—', j: '—', mid: '—'},
+  changed: []
+});
+
+// Row 0: indices 0, 4, 8, 12 (downstroke only)
+const r0_indices = [0, 4, 8, 12];
+let accResult = [];
+r0_indices.forEach((j, ci) => {
+  accResult = [...accResult, {ch: S[j], row: 0, type: 'down'}];
+  steps.push({
+    phase: 'ROW 0', phaseClass: 'phase-row0',
+    title: `Row 0: Downstroke s[${j}] = '${S[j]}'`,
+    text: `j = ${j}. Downstroke: append s[${j}] = '${S[j]}'. Row 0 is the top row — no upstroke (row == 0 guard). ${ci < r0_indices.length - 1 ? `Next j = ${j} + 4 = ${j+4}.` : 'j + period = ' + (j+4) + ' ≥ 14, done with row 0.'}`,
+    activeLine: 6,
+    row: 0, pickIdx: j, pickType: 'down',
+    result: accResult.map(r => ({...r})),
+    formula: `j = <span class="hl hl-b">${j}</span> → s[${j}] = '<strong>${S[j]}</strong>'  (downstroke)`,
+    vars: {row: 0, j: j, mid: j + PERIOD},
+    changed: ci === 0 ? ['row', 'j'] : ['j']
+  });
+});
+
+// Row 1: indices 1,5,9,13 (down) + 3,7,11 (up)
+const r1_pairs = [[1,3],[5,7],[9,11],[13,-1]];
+r1_pairs.forEach(([j, mid], ci) => {
+  // Downstroke
+  accResult = [...accResult, {ch: S[j], row: 1, type: 'down'}];
+  steps.push({
+    phase: 'ROW 1', phaseClass: 'phase-row1',
+    title: `Row 1: Downstroke s[${j}] = '${S[j]}'`,
+    text: `j = ${j}. Downstroke: append s[${j}] = '${S[j]}'. Now compute mid = ${j} + 4 − 2×1 = ${j + 2}. ${mid >= 0 && mid < N ? `mid = ${mid} < 14, so upstroke exists.` : `j = 13 is the last char — mid = 15 ≥ 14, no upstroke.`}`,
+    activeLine: 6,
+    row: 1, pickIdx: j, pickType: 'down',
+    result: accResult.map(r => ({...r})),
+    formula: `j = <span class="hl hl-b">${j}</span> → s[${j}] = '<strong>${S[j]}</strong>'  (downstroke)<br>mid = ${j} + 4 − 2 = <span class="hl hl-r">${j+2}</span>`,
+    vars: {row: 1, j: j, mid: j + 2},
+    changed: ci === 0 ? ['row', 'j', 'mid'] : ['j', 'mid']
+  });
+  // Upstroke (if valid)
+  if (mid >= 0 && mid < N) {
+    accResult = [...accResult, {ch: S[mid], row: 1, type: 'up'}];
+    steps.push({
+      phase: 'ROW 1', phaseClass: 'phase-row1',
+      title: `Row 1: Upstroke s[${mid}] = '${S[mid]}'`,
+      text: `mid = ${mid}. Row 1 is a middle row and mid < 14 → append upstroke s[${mid}] = '${S[mid]}'. This is the char on the "way back up" in this cycle.`,
+      activeLine: 9,
+      row: 1, pickIdx: mid, pickType: 'up',
+      result: accResult.map(r => ({...r})),
+      formula: `mid = <span class="hl hl-r">${mid}</span> → s[${mid}] = '<strong>${S[mid]}</strong>'  (upstroke) ✓`,
+      vars: {row: 1, j: j, mid: mid},
+      changed: []
+    });
+  }
+});
+
+// Row 2: indices 2, 6, 10 (downstroke only — bottom row)
+const r2_indices = [2, 6, 10];
+r2_indices.forEach((j, ci) => {
+  accResult = [...accResult, {ch: S[j], row: 2, type: 'down'}];
+  steps.push({
+    phase: 'ROW 2', phaseClass: 'phase-row2',
+    title: `Row 2: Downstroke s[${j}] = '${S[j]}'`,
+    text: `j = ${j}. Downstroke: append s[${j}] = '${S[j]}'. Row 2 is the bottom row — no upstroke (row == numRows-1 guard). ${ci < r2_indices.length - 1 ? `Next j = ${j} + 4 = ${j+4}.` : 'j + period = ' + (j+4) + ' ≥ 14, done with row 2.'}`,
+    activeLine: 6,
+    row: 2, pickIdx: j, pickType: 'down',
+    result: accResult.map(r => ({...r})),
+    formula: `j = <span class="hl hl-b">${j}</span> → s[${j}] = '<strong>${S[j]}</strong>'  (downstroke, bottom row)`,
+    vars: {row: 2, j: j, mid: j},
+    changed: ci === 0 ? ['row', 'j'] : ['j']
+  });
+});
+
+// Final step
+steps.push({
+  phase: 'DONE', phaseClass: 'phase-done',
+  title: '✅ Complete! "PAHNAPLSIIGYIR"',
+  text: 'All rows processed. Row 0: "PAHN" | Row 1: "APLSIIG" | Row 2: "YIR". Join → "PAHNAPLSIIGYIR". We read each character exactly once — O(n) time, O(1) extra space.',
+  activeLine: 10,
+  row: -1, pickIdx: -1, pickType: '',
+  result: accResult.map(r => ({...r})),
+  formula: 'result = "PAHNAPLSIIGYIR" ✓',
+  vars: {row: '—', j: '—', mid: '—'},
+  changed: [],
+  done: true
+});
+
+let cur = 0;
+
+function init() {
+  // Build source cells
+  const sc = document.getElementById('srcCells');
+  const si = document.getElementById('srcIdx');
+  const rb = document.getElementById('rowBadges');
+  sc.innerHTML = ''; si.innerHTML = ''; rb.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'src-cell';
+    cell.id = 'sc' + i;
+    cell.textContent = S[i];
+    sc.appendChild(cell);
+
+    const idx = document.createElement('div');
+    idx.className = 'src-idx-cell';
+    idx.textContent = i;
+    si.appendChild(idx);
+
+    const badge = document.createElement('div');
+    badge.className = 'row-badge rb' + ROW_MAP[i];
+    badge.textContent = 'R' + ROW_MAP[i];
+    rb.appendChild(badge);
+  }
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line, i) => {
+    const d = document.createElement('div');
+    d.className = 'code-line';
+    d.id = 'cl' + i;
+    d.textContent = line;
+    cp.appendChild(d);
+  });
+
+  // Progress dots
+  const pd = document.getElementById('progressDots');
+  pd.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dt' + i;
+    d.onclick = () => { cur = i; render(); };
+    pd.appendChild(d);
+  });
+
+  render();
+}
+
+function render() {
+  const s = steps[cur];
+
+  // Collect all picked indices so far
+  const pickedSet = new Set();
+  s.result.forEach(r => {
+    const idx = S.indexOf(r.ch); // rough, better to track
+  });
+  // Build picked indices from step data more precisely
+  const pickedIndices = [];
+  // Rebuild from result by replaying logic
+  const tempResult = [];
+  for (let si = 0; si <= cur && si < steps.length; si++) {
+    if (steps[si].pickIdx >= 0) {
+      tempResult.push(steps[si].pickIdx);
+    }
+  }
+
+  // Source cells
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('sc' + i);
+    if (i === s.pickIdx && s.pickType === 'down') {
+      cell.className = 'src-cell pick-down';
+    } else if (i === s.pickIdx && s.pickType === 'up') {
+      cell.className = 'src-cell pick-up';
+    } else if (tempResult.includes(i)) {
+      cell.className = 'src-cell done';
+    } else {
+      cell.className = 'src-cell';
+    }
+  }
+
+  // Current row panel
+  const crp = document.getElementById('curRowPanel');
+  const crv = document.getElementById('curRowVal');
+  const crd = document.getElementById('curRowDesc');
+  if (s.row >= 0) {
+    const colors = ['var(--blue-mid)', 'var(--purple-mid)', 'var(--amber-mid)'];
+    const labels = ['Top row — downstroke only', 'Middle row — downstroke + upstroke', 'Bottom row — downstroke only'];
+    crv.textContent = 'Row ' + s.row;
+    crv.style.color = colors[s.row];
+    crp.style.borderColor = colors[s.row];
+    crd.textContent = labels[s.row];
+  } else {
+    crv.textContent = '—';
+    crv.style.color = '';
+    crp.style.borderColor = '';
+    crd.textContent = s.done ? 'All rows complete!' : 'Ready to start';
+  }
+
+  // Formula panel
+  document.getElementById('formulaPanel').innerHTML = s.formula;
+
+  // Result cells
+  const rc = document.getElementById('resultCells');
+  rc.innerHTML = '';
+  let lastRow = -1;
+  s.result.forEach((r, i) => {
+    if (r.row !== lastRow && lastRow >= 0) {
+      const div = document.createElement('div');
+      div.className = 'row-divider';
+      rc.appendChild(div);
+    }
+    lastRow = r.row;
+    const ch = document.createElement('div');
+    ch.className = 'res-char rc' + r.row;
+    if (i === s.result.length - 1 && s.pickIdx >= 0) ch.classList.add('new');
+    ch.textContent = r.ch;
+    rc.appendChild(ch);
+  });
+
+  // Variables
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = '';
+  const prevVars = cur > 0 ? steps[cur-1].vars : {};
+  for (const [name, val] of Object.entries(s.vars)) {
+    const box = document.createElement('div');
+    box.className = 'var-box';
+    if (s.changed.includes(name)) box.classList.add('changed');
+    box.innerHTML = `<span class="var-name">${name}</span><span class="var-val">${val}</span>`;
+    vt.appendChild(box);
+  }
+
+  // Code
+  CODE_LINES.forEach((_, i) => {
+    document.getElementById('cl' + i).className = 'code-line' + (i === s.activeLine ? ' active' : '');
+  });
+
+  // Info card
+  document.getElementById('phaseBadge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('phaseBadge').textContent = s.phase;
+  document.getElementById('stepCounter').textContent = `${cur + 1} / ${steps.length}`;
+  document.getElementById('infoTitle').textContent = s.title;
+  document.getElementById('infoText').textContent = s.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    document.getElementById('dt' + i).className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+  });
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < steps.length) { cur = next; render(); }
+}
+function reset() { cur = 0; render(); }
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+init();
+</script>
+</body>
+</html>
