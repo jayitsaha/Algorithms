@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zigzag Conversion — Interactive DSA Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem 2rem;}
+.header-inner{max-width:940px;margin:0 auto;}
+.problem-number{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+/* LAYOUT */
+main{max-width:940px;margin:0 auto;padding:2rem;}
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+p{margin-bottom:.75rem;line-height:1.65;}
+h3{font-size:15px;font-weight:700;margin:.75rem 0 .4rem;}
+h4{font-size:13px;font-weight:700;color:var(--text2);margin:.5rem 0 .25rem;}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px;}
+ul{margin-left:1.25rem;line-height:2.1;}
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+/* ZIGZAG GRID */
+.zz-grid-wrap{overflow-x:auto;margin:1rem 0;}
+.zz-grid{border-collapse:separate;border-spacing:3px;margin:0 auto;}
+.zz-grid td{width:33px;height:33px;text-align:center;font-family:var(--mono);font-size:15px;font-weight:700;border-radius:6px;}
+.zzc.r0{background:var(--blue-bg);color:var(--blue-text);}
+.zzc.r1{background:var(--purple-bg);color:var(--purple-text);}
+.zzc.r2{background:var(--amber-bg);color:var(--amber-text);}
+.zze{color:var(--text3);font-size:11px;}
+.zz-read-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.zz-read-label{font-size:12px;font-weight:700;color:var(--text3);font-family:var(--mono);}
+.zz-read-chars{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:1.5px;}
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.55;font-size:14px;}
+/* PERIOD BOX */
+.period-box{background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;font-family:var(--mono);font-size:14px;line-height:2;}
+.period-box-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:.4rem;}
+/* COMPARISON GRID */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0;}
+.comp-panel{padding:1rem;border-radius:var(--radius);}
+.comp-panel.bad{background:var(--red-bg);border:1px solid var(--red-border);}
+.comp-panel.good{background:var(--green-bg);border:1px solid var(--green-border);}
+.comp-panel h4{font-size:13px;font-weight:700;margin-bottom:8px;}
+.comp-panel.bad h4{color:var(--red-mid);}
+.comp-panel.good h4{color:var(--green-mid);}
+/* STATIC CODE BLOCK */
+.code-block{background:var(--bg2);border-radius:var(--radius);padding:1rem;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;color:var(--text2);margin:.75rem 0;}
+.cc{color:var(--text3);}
+/* STRATEGY */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0;}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:6px;}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{margin-bottom:.6rem;font-size:14px;}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:7px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;background:var(--green-bg);border-radius:var(--radius);font-size:14px;color:var(--green-text);border:1px solid var(--green-border);}
+.takeaway::before{content:"✓";font-weight:700;flex-shrink:0;}
+.related-list{list-style:none;display:flex;flex-direction:column;gap:5px;margin:.75rem 0;}
+.related-list li{padding:7px 12px;background:var(--bg2);border-radius:var(--radius);font-size:13px;}
+.related-list li strong{color:var(--blue-mid);}
+/* ══ INTERACTIVE VIZ ══ */
+.viz-container{background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;margin:1.25rem 0;}
+/* Source string */
+.src-str-wrap{overflow-x:auto;margin-bottom:1.25rem;}
+.ptr-row-s{display:flex;gap:3px;height:20px;}
+.ptr-cell-s{width:40px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mono);color:var(--blue-mid);opacity:0;transition:opacity .2s;}
+.ptr-cell-s.vis{opacity:1;}
+.src-cells-row{display:flex;gap:3px;}
+.src-cell{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:700;border-radius:8px;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:background .25s,border-color .25s,transform .2s;}
+.src-cell.comparing{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text);transform:scale(1.1);}
+.src-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+.src-cell.result-ok{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);}
+.src-idx-row{display:flex;gap:3px;margin-top:3px;}
+.src-idx-cell{width:40px;text-align:center;font-size:9px;color:var(--text3);font-family:var(--mono);}
+/* Row buckets */
+.row-buckets{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
+.row-bucket{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);transition:border-color .3s;}
+.row-num-label{font-size:12px;font-weight:700;padding:3px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
+.rl-0{background:var(--blue-bg);color:var(--blue-mid);}
+.rl-1{background:var(--purple-bg);color:var(--purple-mid);}
+.rl-2{background:var(--amber-bg);color:var(--amber-mid);}
+.bucket-chars{display:flex;flex-wrap:wrap;gap:4px;min-height:34px;align-items:center;flex:1;}
+.char-badge{width:31px;height:31px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:6px;border:1px solid transparent;}
+.char-badge.rb-0{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border);}
+.char-badge.rb-1{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-border);}
+.char-badge.rb-2{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border);}
+.result-band{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--green-bg);border:2px solid var(--green-border);border-radius:var(--radius);margin-top:10px;}
+.result-label{font-size:13px;font-weight:700;color:var(--green-mid);font-family:var(--mono);}
+.result-val{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--green-text);letter-spacing:1px;}
+/* Var tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:24px;text-align:center;}
+/* Code panel */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+/* Info card */
+.info-card{margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;}
+.info-top{display:flex;align-items:center;gap:12px;margin-bottom:.75rem;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:12px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-compare{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-flip-up{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-flip-dn{background:var(--green-bg);color:var(--green-mid);}
+.phase-result{background:var(--green-bg);color:var(--green-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.info-text{font-size:14px;color:var(--text2);line-height:1.65;}
+/* Progress + controls */
+.progress-dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .3s,transform .2s;cursor:pointer;}
+.dot.active{background:var(--blue-mid);transform:scale(1.4);}
+.dot.visited{background:var(--text3);}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1.25rem;}
+.btn{padding:10px 24px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .2s,transform .1s;}
+.btn:hover{background:var(--bg2);}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid);}
+.btn-primary:hover{background:var(--blue-text);}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="problem-number">LeetCode #6</div>
+    <h1>Zigzag Conversion</h1>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">String Processing</span>
+      <span class="tag tag-pattern">Row Index Oscillation</span>
+      <span class="tag tag-complexity">O(n) Time · O(n) Space</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ── SECTION 1: Understanding the Problem ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+  </div>
+  <p>Write the string <code>s</code> diagonally in a zigzag pattern across <code>numRows</code> rows — like a snake moving down then up, down then up. Then <strong>read every row left-to-right</strong> and concatenate them to form the output.</p>
+
+  <p>For <code>s = "PAYPALISHIRING"</code> and <code>numRows = 3</code>:</p>
+  <div class="zz-grid-wrap">
+    <table class="zz-grid">
+      <tr>
+        <td class="zzc r0">P</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+        <td class="zzc r0">A</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+        <td class="zzc r0">H</td><td class="zze">·</td><td class="zze">·</td><td class="zze">·</td>
+        <td class="zzc r0">N</td><td class="zze">·</td>
+      </tr>
+      <tr>
+        <td class="zze">·</td><td class="zzc r1">A</td><td class="zze">·</td><td class="zzc r1">P</td>
+        <td class="zze">·</td><td class="zzc r1">L</td><td class="zze">·</td><td class="zzc r1">S</td>
+        <td class="zze">·</td><td class="zzc r1">I</td><td class="zze">·</td><td class="zzc r1">I</td>
+        <td class="zze">·</td><td class="zzc r1">G</td>
+      </tr>
+      <tr>
+        <td class="zze">·</td><td class="zze">·</td><td class="zzc r2">Y</td><td class="zze">·</td>
+        <td class="zze">·</td><td class="zze">·</td><td class="zzc r2">I</td><td class="zze">·</td>
+        <td class="zze">·</td><td class="zze">·</td><td class="zzc r2">R</td><td class="zze">·</td>
+        <td class="zze">·</td><td class="zze">·</td>
+      </tr>
+    </table>
+    <div class="zz-read-row">
+      <span class="zz-read-label">Read →</span>
+      <span class="zz-read-chars" style="color:var(--blue-mid)">PAHN</span>
+      <span class="zz-read-label">+</span>
+      <span class="zz-read-chars" style="color:var(--purple-mid)">APLSIIG</span>
+      <span class="zz-read-label">+</span>
+      <span class="zz-read-chars" style="color:var(--amber-mid)">YIR</span>
+      <span class="zz-read-label">=</span>
+      <span class="zz-read-chars" style="color:var(--green-mid)">"PAHNAPLSIIGYIR"</span>
+    </div>
+  </div>
+
+  <div class="concept-box insight">
+    <div class="concept-box-title">💡 Key Insight: We Don't Need a 2D Grid</div>
+    <p>We never actually write characters into a 2D matrix. Instead, we keep <strong>one string buffer per row</strong> and simply append each character to its responsible row as we scan <code>s</code> from left to right. The zigzag path is simulated by a <em>bouncing row index</em> that oscillates between 0 and <code>numRows-1</code>.</p>
+  </div>
+  <div class="concept-box danger">
+    <div class="concept-box-title">⚠️ Edge Cases to Handle First</div>
+    <p><strong><code>numRows = 1</code></strong>: every character stays in row 0 — output equals input.<br>
+    <strong><code>numRows ≥ len(s)</code></strong>: each char gets its own row — output also equals input.<br>
+    In both cases, return <code>s</code> immediately and skip all the logic.</p>
+  </div>
+</div>
+
+<!-- ── SECTION 2: The Algorithm ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Row Buffer Simulation</span>
+  </div>
+  <p>Instead of simulating the 2D grid, <strong>simulate only the row index</strong>. Maintain a current row number and a direction (+1 for going down, −1 for going up). Each character gets appended to the buffer for its current row.</p>
+
+  <div class="algorithm-steps">
+    <div class="algo-step">
+      <span class="step-num">1</span>
+      <span class="step-text"><strong>Edge-case guard:</strong> if <code>numRows == 1</code> or <code>numRows ≥ len(s)</code>, return <code>s</code> immediately.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">2</span>
+      <span class="step-text"><strong>Create buffers:</strong> <code>rows = [''] * numRows</code> — one empty string per row.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">3</span>
+      <span class="step-text"><strong>Initialize state:</strong> <code>cur = 0</code> (start at row 0), <code>direction = +1</code> (going DOWN).</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">4</span>
+      <span class="step-text"><strong>Walk the string:</strong> for each character, append it to <code>rows[cur]</code>. Then check boundaries: if <code>cur == 0</code>, set direction = +1; if <code>cur == numRows-1</code>, set direction = −1. Finally advance: <code>cur += direction</code>.</span>
+    </div>
+    <div class="algo-step">
+      <span class="step-num">5</span>
+      <span class="step-text"><strong>Join and return:</strong> <code>''.join(rows)</code> concatenates all row buffers in order, row 0 first.</span>
+    </div>
+  </div>
+
+  <div class="period-box">
+    <div class="period-box-title">📐 The Period Formula</div>
+    <strong>period = 2 × (numRows − 1)</strong><br>
+    The zigzag pattern repeats every <em>period</em> characters. For numRows=3: period=4. Row 0 chars are at indices 0, 4, 8, 12 (every period). Row 2 chars are at 2, 6, 10 (period/2 offset). Middle rows have two chars per period. This formula is the basis of the mathematical O(1)-space approach.
+  </div>
+</div>
+
+<!-- ── SECTION 3: Why It Works ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+  </div>
+  <div class="concept-box key-concept">
+    <div class="concept-box-title">🔐 The Invariant</div>
+    <p>At every step, <code>rows[0..numRows-1]</code> collectively contain exactly the characters <code>s[0..i-1]</code> in their <strong>left-to-right reading order</strong>. No character is ever skipped, duplicated, or placed in the wrong row.</p>
+  </div>
+  <p><strong>Why append-then-advance is correct:</strong> We append <code>s[i]</code> to <code>rows[cur]</code> and <em>then</em> check boundaries. This means the boundary check sees the row <em>after</em> the write and correctly sets the direction for the <em>next</em> character — never skipping a row.</p>
+  <p><strong>Why the join produces the right string:</strong> Row 0 holds exactly the characters that appear first when reading left-to-right across the zigzag grid. Row 1 holds the next characters, and so on. Concatenating rows in order preserves this reading sequence exactly.</p>
+  <div class="comp-grid">
+    <div class="comp-panel bad">
+      <h4>❌ If You Flip Direction Before Appending</h4>
+      <p style="font-family:var(--mono);font-size:12px;line-height:2">When cur hits row 2, flip direction first,<br>then append → char lands on row 1 instead!<br>Result: wrong assignment for boundary chars.</p>
+    </div>
+    <div class="comp-panel good">
+      <h4>✓ Append First, Then Check Boundary</h4>
+      <p style="font-family:var(--mono);font-size:12px;line-height:2">Append char at cur (e.g. row 2),<br>then flip direction = -1,<br>then advance → next char at row 1. ✓</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 4: The Code ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+  </div>
+  <div class="code-block"><span class="cc"># O(n) time, O(n) space — optimal for this problem</span>
+def convert(s: str, numRows: int) -> str:
+    <span class="cc"># Short-circuit: no zigzag possible in 1 row or oversized numRows</span>
+    if numRows == 1 or numRows >= len(s):
+        return s
+
+    rows = [''] * numRows          <span class="cc"># One string buffer per row</span>
+    cur, direction = 0, 1          <span class="cc"># Start at row 0, going DOWN (+1)</span>
+
+    for char in s:
+        rows[cur] += char           <span class="cc"># Append to the current row</span>
+        if cur == 0:                <span class="cc"># Hit top → must go DOWN</span>
+            direction = 1
+        elif cur == numRows - 1:    <span class="cc"># Hit bottom → must go UP</span>
+            direction = -1
+        cur += direction            <span class="cc"># Move to next row</span>
+
+    return ''.join(rows)            <span class="cc"># Concat rows 0..numRows-1</span></div>
+  <div class="concept-box warning">
+    <div class="concept-box-title">⚠️ Why Not Check cur == 0 with an elif?</div>
+    <p>The <code>if/elif</code> here is purposeful: <code>cur == 0</code> and <code>cur == numRows-1</code> are mutually exclusive (a string with <code>numRows ≥ 2</code> can't have row 0 == row numRows-1). Using <code>if</code>/<code>elif</code> is correct and slightly faster since we avoid checking both conditions when one is true. If <code>numRows == 1</code>, we already returned early, so this edge case never reaches the loop.</p>
+  </div>
+  <div class="concept-box key-concept">
+    <div class="concept-box-title">⏱ Complexity</div>
+    <p><strong>Time:</strong> O(n) — single pass through <code>s</code>.<br>
+    <strong>Space:</strong> O(n) — total chars across all row buffers equals <code>len(s)</code>. This is optimal since the output itself is O(n).</p>
+  </div>
+</div>
+
+<!-- ── SECTION 5: Interview Strategy ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+  </div>
+  <div class="strategy-steps">
+    <div class="strategy-step">
+      <div class="step-label">Step 1: State Edge Cases Upfront</div>
+      <p>Immediately say: <em>"If numRows is 1 or ≥ len(s), the output equals the input — no transformation needed."</em> This shows you're thinking about constraints before diving into code.</p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 2: Reject the 2D Matrix Approach</div>
+      <p>Interviewers expect you to see through the "grid" framing. Say: <em>"I could allocate a 2D matrix, but that wastes space. Instead, I only need one buffer per row — the column index never matters for reading the output."</em></p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 3: Define the Bouncing State</div>
+      <p>Explain: <em>"I'll track a current row index that oscillates between 0 and numRows-1. A direction variable (+1 / -1) controls whether we move down or up. Flip it when we hit either boundary."</em></p>
+    </div>
+    <div class="strategy-step">
+      <div class="step-label">Step 4: Offer the Mathematical Extension</div>
+      <p>Bonus: <em>"There's also an O(1) space approach using math: period = 2*(numRows-1). For each row, I can directly calculate which source indices map to it. But it adds code complexity for the same O(n) time, so the row-simulation is usually preferred."</em></p>
+    </div>
+  </div>
+  <div class="interview-script">
+    <h4>🗣️ What to Say to the Interviewer</h4>
+    <div class="script-content">"The key realization is that we don't need columns — just rows. I'll walk through the string once, maintaining a current row index that bounces between 0 and numRows-1. I append each char to its row's buffer and flip the direction when hitting a boundary. Then I join all buffers. Edge cases first: numRows==1 or numRows≥n both return s unchanged."</div>
+  </div>
+</div>
+
+<!-- ── SECTION 6: Interactive Walkthrough ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+  </div>
+  <p style="color:var(--text2);font-size:13px;">Demo: <code>s = "PAYPALISHIRING"</code>, <code>numRows = 3</code> → <strong style="color:var(--green-mid)">"PAHNAPLSIIGYIR"</strong></p>
+
+  <div class="viz-container">
+    <!-- Source string -->
+    <div class="src-str-wrap">
+      <div class="ptr-row-s">
+        <div class="ptr-cell-s" id="sp0">i</div><div class="ptr-cell-s" id="sp1">i</div>
+        <div class="ptr-cell-s" id="sp2">i</div><div class="ptr-cell-s" id="sp3">i</div>
+        <div class="ptr-cell-s" id="sp4">i</div><div class="ptr-cell-s" id="sp5">i</div>
+        <div class="ptr-cell-s" id="sp6">i</div><div class="ptr-cell-s" id="sp7">i</div>
+        <div class="ptr-cell-s" id="sp8">i</div><div class="ptr-cell-s" id="sp9">i</div>
+        <div class="ptr-cell-s" id="sp10">i</div><div class="ptr-cell-s" id="sp11">i</div>
+        <div class="ptr-cell-s" id="sp12">i</div><div class="ptr-cell-s" id="sp13">i</div>
+      </div>
+      <div class="src-cells-row">
+        <div class="src-cell" id="sc0">P</div><div class="src-cell" id="sc1">A</div>
+        <div class="src-cell" id="sc2">Y</div><div class="src-cell" id="sc3">P</div>
+        <div class="src-cell" id="sc4">A</div><div class="src-cell" id="sc5">L</div>
+        <div class="src-cell" id="sc6">I</div><div class="src-cell" id="sc7">S</div>
+        <div class="src-cell" id="sc8">H</div><div class="src-cell" id="sc9">I</div>
+        <div class="src-cell" id="sc10">R</div><div class="src-cell" id="sc11">I</div>
+        <div class="src-cell" id="sc12">N</div><div class="src-cell" id="sc13">G</div>
+      </div>
+      <div class="src-idx-row">
+        <div class="src-idx-cell">0</div><div class="src-idx-cell">1</div>
+        <div class="src-idx-cell">2</div><div class="src-idx-cell">3</div>
+        <div class="src-idx-cell">4</div><div class="src-idx-cell">5</div>
+        <div class="src-idx-cell">6</div><div class="src-idx-cell">7</div>
+        <div class="src-idx-cell">8</div><div class="src-idx-cell">9</div>
+        <div class="src-idx-cell">10</div><div class="src-idx-cell">11</div>
+        <div class="src-idx-cell">12</div><div class="src-idx-cell">13</div>
+      </div>
+    </div>
+
+    <!-- Row buckets -->
+    <div class="row-buckets">
+      <div class="row-bucket" id="rb0">
+        <span class="row-num-label rl-0" id="rl0">Row 0</span>
+        <div class="bucket-chars" id="cb0"></div>
+      </div>
+      <div class="row-bucket" id="rb1">
+        <span class="row-num-label rl-1" id="rl1">Row 1</span>
+        <div class="bucket-chars" id="cb1"></div>
+      </div>
+      <div class="row-bucket" id="rb2">
+        <span class="row-num-label rl-2" id="rl2">Row 2</span>
+        <div class="bucket-chars" id="cb2"></div>
+      </div>
+    </div>
+
+    <!-- Result band (step 15 only) -->
+    <div class="result-band" id="result-band">
+      <span class="result-label">Result:</span>
+      <span class="result-val">"PAHNAPLSIIGYIR"</span>
+    </div>
+
+    <!-- Variable tracker -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-cur"><span class="var-name">cur_row</span><span class="var-val" id="vv-cur">0</span></div>
+      <div class="var-box" id="vb-dir"><span class="var-name">direction</span><span class="var-val" id="vv-dir">↓</span></div>
+    </div>
+
+    <!-- Code panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl0">def convert(s, numRows):</div>
+      <div class="code-line" id="cl1">    if numRows == 1 or numRows >= len(s): return s</div>
+      <div class="code-line" id="cl2">    rows = [''] * numRows</div>
+      <div class="code-line" id="cl3">    cur, direction = 0, 1</div>
+      <div class="code-line" id="cl4">    for char in s:</div>
+      <div class="code-line" id="cl5">        rows[cur] += char</div>
+      <div class="code-line" id="cl6">        if cur == 0: direction = 1</div>
+      <div class="code-line" id="cl7">        elif cur == numRows - 1: direction = -1</div>
+      <div class="code-line" id="cl8">        cur += direction</div>
+      <div class="code-line" id="cl9">    return ''.join(rows)</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-top">
+        <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+        <span class="step-counter" id="step-counter">Step 1 / 16</span>
+      </div>
+      <div class="info-title" id="info-title">Initialize: 3 empty row buffers, cur=0, dir=↓</div>
+      <div class="info-text" id="info-text">Create 3 empty string buffers (rows=['','','']). Set cur=0 (next char goes to row 0) and direction=+1 (going DOWN ↓). The direction will bounce: +1 when going down, −1 when going up, flipping at each boundary row.</div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-bg);border:1px solid var(--blue-border)"></div>Current char (i)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--bg2);border:1px solid var(--border)"></div>Already placed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-bg);border:1px solid var(--blue-border)"></div>Row 0 chars</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple-bg);border:1px solid var(--purple-border)"></div>Row 1 chars</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-bg);border:1px solid var(--amber-border)"></div>Row 2 chars</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 7: Summary ── -->
+<div class="card">
+  <div class="section-header">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+  </div>
+  <div class="takeaways">
+    <div class="takeaway">The "2D grid" framing is a red herring — one string buffer per row is all you need</div>
+    <div class="takeaway">A single direction variable (+1/−1) controls the zigzag oscillation cleanly</div>
+    <div class="takeaway">Always append to <code>rows[cur]</code> <em>before</em> checking boundaries — not after</div>
+    <div class="takeaway">Edge cases first: <code>numRows==1</code> and <code>numRows≥len(s)</code> both return <code>s</code></div>
+    <div class="takeaway">The period formula <code>2*(numRows-1)</code> enables an O(1) space math-only solution</div>
+  </div>
+  <div class="concept-box insight">
+    <div class="concept-box-title">🎯 When to Use This Pattern (Row Index Oscillation)</div>
+    <ul>
+      <li>Any problem that involves writing/reading characters in a "wave" or "snake" pattern</li>
+      <li>Problems where a 2D layout is described but the column index never matters</li>
+      <li>Interview hint: the phrase "write in a zigzag/wave pattern, read row by row"</li>
+      <li>Variants: different step sizes, diagonal patterns, spiral reading</li>
+    </ul>
+  </div>
+  <h3 style="margin-top:1rem;">Related Problems</h3>
+  <ul class="related-list">
+    <li><strong>Reverse Words in a String (#151)</strong> (Medium) — String Transformation; manipulate character layout without extra parsing</li>
+    <li><strong>Count and Say (#38)</strong> (Medium) — Row-length encoding; sequential string construction similar to buffer accumulation</li>
+    <li><strong>Determine if Two Strings Are Close (#1657)</strong> (Medium) — Frequency Sorting Comparison; string equivalence under transformation</li>
+    <li><strong>Text Justification (#68)</strong> (Hard) — Greedy Line Building; distribute characters row by row with structure constraints</li>
+    <li><strong>Spiral Matrix (#54)</strong> (Medium) — Path simulation; like zigzag but 2D, uses direction arrays instead of ±1</li>
+    <li><strong>Diagonal Traverse (#498)</strong> (Medium) — Same oscillation concept but applied to a 2D matrix traversal</li>
+  </ul>
+</div>
+
+</main>
+
+<script>
+// ── Step Data ──
+// 16 steps: INIT (0) + 14 char placements (1-14) + RESULT (15)
+
+const ROW_STATES = [
+  ['', '', ''],
+  ['P', '', ''],
+  ['P', 'A', ''],
+  ['P', 'A', 'Y'],
+  ['P', 'AP', 'Y'],
+  ['PA', 'AP', 'Y'],
+  ['PA', 'APL', 'Y'],
+  ['PA', 'APL', 'YI'],
+  ['PA', 'APLS', 'YI'],
+  ['PAH', 'APLS', 'YI'],
+  ['PAH', 'APLSI', 'YI'],
+  ['PAH', 'APLSI', 'YIR'],
+  ['PAH', 'APLSII', 'YIR'],
+  ['PAHN', 'APLSII', 'YIR'],
+  ['PAHN', 'APLSIIG', 'YIR'],
+  ['PAHN', 'APLSIIG', 'YIR']
+];
+
+// Which row was just written to (-1 = none)
+const ACTIVE_ROW = [-1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, -1];
+
+// cur_row VALUE shown at each step (after operation)
+const CUR_ROW_D = ['0','1','2','1','0','1','2','1','0','1','2','1','0','1','2','—'];
+// direction shown at each step
+const DIR_D = ['↓','↓','↓','↑','↑','↓','↓','↑','↑','↓','↓','↑','↑','↓','↓','—'];
+
+// Active lines in code panel (0-indexed, cl0..cl9)
+const AL = [2, 5, 5, 7, 5, 6, 5, 7, 5, 6, 5, 7, 5, 6, 5, 9];
+
+const PHASES = ['INIT','APPEND','APPEND','FLIP ↑','APPEND','FLIP ↓','APPEND','FLIP ↑','APPEND','FLIP ↓','APPEND','FLIP ↑','APPEND','FLIP ↓','APPEND','RESULT'];
+const PHASE_CLS = ['phase-init','phase-compare','phase-compare','phase-flip-up','phase-compare','phase-flip-dn','phase-compare','phase-flip-up','phase-compare','phase-flip-dn','phase-compare','phase-flip-up','phase-compare','phase-flip-dn','phase-compare','phase-result'];
+
+const TITLES = [
+  'Initialize: rows=["","",""], cur=0, dir=↓',
+  "Place 'P' → rows[0]    cur: 0 → 1",
+  "Place 'A' → rows[1]    cur: 1 → 2",
+  "Place 'Y' → rows[2]    FLIP ↑    cur: 2 → 1",
+  "Place 'P' → rows[1]    cur: 1 → 0",
+  "Place 'A' → rows[0]    FLIP ↓    cur: 0 → 1",
+  "Place 'L' → rows[1]    cur: 1 → 2",
+  "Place 'I' → rows[2]    FLIP ↑    cur: 2 → 1",
+  "Place 'S' → rows[1]    cur: 1 → 0",
+  "Place 'H' → rows[0]    FLIP ↓    cur: 0 → 1",
+  "Place 'I' → rows[1]    cur: 1 → 2",
+  "Place 'R' → rows[2]    FLIP ↑    cur: 2 → 1",
+  "Place 'I' → rows[1]    cur: 1 → 0",
+  "Place 'N' → rows[0]    FLIP ↓    cur: 0 → 1",
+  "Place 'G' → rows[1]    cur: 1 → 2",
+  'All 14 chars placed → join → "PAHNAPLSIIGYIR"'
+];
+
+const TEXTS = [
+  'Create 3 empty string buffers (rows=["","",""]). Set cur=0 (next char goes to row 0) and direction=+1 (going DOWN ↓). The direction bounces: +1 when going down, −1 when going up — it flips every time we hit a boundary row.',
+  "'P' appended to rows[0]. Check: cur==0 (top boundary) → direction stays +1 ↓ (already going down). Advance: cur += 1 → cur=1. Next char goes to row 1.",
+  "'A' appended to rows[1]. Middle row — no boundary hit, direction unchanged ↓. Advance: cur += 1 → cur=2. Next char goes to row 2.",
+  "'Y' appended to rows[2]. Check: cur==numRows-1 (BOTTOM boundary!) → FLIP direction = −1 (now going UP ↑). Advance: cur += −1 → cur=1. The wave reverses here.",
+  "'P' appended to rows[1]. Middle row — no flip, direction stays ↑ (−1). Advance: cur += −1 → cur=0. rows[1] now has 'AP'.",
+  "'A' appended to rows[0]. Check: cur==0 (TOP boundary!) → FLIP direction = +1 (now going DOWN ↓). Advance: cur += 1 → cur=1. rows[0] now has 'PA'.",
+  "'L' appended to rows[1]. Middle row — no flip, direction stays ↓. Advance: cur += 1 → cur=2. rows[1] now has 'APL'.",
+  "'I' appended to rows[2]. BOTTOM boundary → FLIP direction = −1 (↑). Advance: cur+= −1 → cur=1. rows[2] now has 'YI'.",
+  "'S' appended to rows[1]. Middle row — no flip ↑. Advance: cur += −1 → cur=0. rows[1] now has 'APLS'.",
+  "'H' appended to rows[0]. TOP boundary → FLIP direction = +1 (↓). Advance: cur += 1 → cur=1. rows[0] now has 'PAH'.",
+  "'I' appended to rows[1]. Middle row — no flip ↓. Advance: cur += 1 → cur=2. rows[1] now has 'APLSI'.",
+  "'R' appended to rows[2]. BOTTOM boundary → FLIP direction = −1 (↑). Advance: cur += −1 → cur=1. rows[2] complete: 'YIR'.",
+  "'I' appended to rows[1]. Middle row — no flip ↑. Advance: cur += −1 → cur=0. rows[1] now has 'APLSII'.",
+  "'N' appended to rows[0]. TOP boundary → FLIP direction = +1 (↓). Advance: cur += 1 → cur=1. rows[0] complete: 'PAHN'.",
+  "'G' appended to rows[1]. Middle row — no flip ↓. Advance: cur += 1 → cur=2. rows[1] complete: 'APLSIIG'. All 14 chars placed!",
+  'Done! Row 0: "PAHN" | Row 1: "APLSIIG" | Row 2: "YIR". Join in order → "PAHN"+"APLSIIG"+"YIR" = "PAHNAPLSIIGYIR".'
+];
+
+// Source pointer index per step (-1 = none)
+const SRC_PTRS = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1];
+
+// Row border colors
+const ROW_COLORS = ['var(--blue-mid)', 'var(--purple-mid)', 'var(--amber-mid)'];
+
+let cur = 0;
+
+function getSrcStates(k) {
+  if (k === 0) return Array(14).fill('');
+  if (k === 15) return Array(14).fill('result-ok');
+  const ptr = SRC_PTRS[k];
+  return Array.from({length: 14}, (_, i) =>
+    i === ptr ? 'comparing' : i < ptr ? 'done' : ''
+  );
+}
+
+function renderStep(idx) {
+  // Phase badge
+  const pb = document.getElementById('phase-badge');
+  pb.className = 'phase-badge ' + PHASE_CLS[idx];
+  pb.textContent = PHASES[idx];
+  document.getElementById('step-counter').textContent = `Step ${idx + 1} / 16`;
+
+  // Info card
+  document.getElementById('info-title').textContent = TITLES[idx];
+  document.getElementById('info-text').textContent = TEXTS[idx];
+
+  // Source cells
+  const srcStates = getSrcStates(idx);
+  for (let i = 0; i < 14; i++) {
+    const cell = document.getElementById('sc' + i);
+    const st = srcStates[i];
+    cell.className = 'src-cell' + (st ? ' ' + st : '');
+    const ptr = document.getElementById('sp' + i);
+    ptr.className = 'ptr-cell-s' + (i === SRC_PTRS[idx] ? ' vis' : '');
+  }
+
+  // Row buckets
+  for (let r = 0; r < 3; r++) {
+    const active = r === ACTIVE_ROW[idx];
+    const rb = document.getElementById('rb' + r);
+    rb.style.borderColor = active ? ROW_COLORS[r] : '';
+    rb.style.background = active ? '' : '';
+
+    const cb = document.getElementById('cb' + r);
+    const content = ROW_STATES[idx][r];
+    cb.innerHTML = content.split('').map(c =>
+      `<span class="char-badge rb-${r}">${c}</span>`
+    ).join('');
+  }
+
+  // Result band (step 15 only)
+  document.getElementById('result-band').style.display = idx === 15 ? 'flex' : 'none';
+
+  // Variable tracker
+  const prevCur = idx > 0 ? CUR_ROW_D[idx - 1] : null;
+  const prevDir = idx > 0 ? DIR_D[idx - 1] : null;
+  document.getElementById('vv-cur').textContent = CUR_ROW_D[idx];
+  document.getElementById('vb-cur').className = 'var-box' + (prevCur !== null && CUR_ROW_D[idx] !== prevCur ? ' changed' : '');
+  document.getElementById('vv-dir').textContent = DIR_D[idx];
+  document.getElementById('vb-dir').className = 'var-box' + (prevDir !== null && DIR_D[idx] !== prevDir ? ' changed' : '');
+
+  // Code panel
+  for (let i = 0; i <= 9; i++) {
+    document.getElementById('cl' + i).className = 'code-line' + (i === AL[idx] ? ' active' : '');
+  }
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === idx ? ' active' : i < idx ? ' visited' : '');
+  });
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === 15;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(15, cur + dir));
+  renderStep(cur);
+}
+
+function reset() { cur = 0; renderStep(0); }
+
+// Build progress dots
+const dc = document.getElementById('progress-dots');
+for (let i = 0; i < 16; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => { cur = i; renderStep(i); };
+  dc.appendChild(d);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+renderStep(0);
+</script>
+</body>
+</html>
