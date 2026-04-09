@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Justification — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:860px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.header .subtitle{font-size:14px;color:var(--text2);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-hard{background:var(--red-bg);color:var(--red-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.card.collapsed .card-body{display:none;}
+.card-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.card-header:hover{opacity:0.85;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.collapse-icon{font-size:18px;color:var(--text3);transition:transform 0.25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card-body{margin-top:1rem;}
+
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;font-size:14px;}
+
+/* STRATEGY */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* WALKTHROUGH — WORD POOL */
+.word-pool{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:0.75rem 0;}
+.word-chip{font-family:var(--mono);font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;background:var(--bg2);border:2px solid var(--border);color:var(--text2);transition:all 0.25s;}
+.word-chip.used{opacity:0.35;}
+.word-chip.current{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-mid);}
+.word-chip.packing{border-color:var(--green-border);background:var(--green-bg);color:var(--green-mid);}
+.word-chip.overflow{border-color:var(--red-border);background:var(--red-bg);color:var(--red-mid);}
+
+/* LINE BUILDER */
+.line-builder{margin:1rem 0;padding:16px;background:var(--bg2);border-radius:var(--radius);min-height:64px;}
+.line-builder-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px;}
+.line-cells{display:flex;gap:0;justify-content:center;}
+.line-cell{width:22px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all 0.2s;flex-shrink:0;}
+.line-cell:first-child{border-radius:4px 0 0 4px;}
+.line-cell:last-child{border-radius:0 4px 4px 0;}
+.line-cell.char{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text);}
+.line-cell.space{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);font-size:10px;}
+.line-cell.extra-space{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid);font-size:10px;}
+.line-cell.pad{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);font-size:10px;}
+.line-cell.empty{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+
+/* OUTPUT LINES */
+.output-lines{margin:1rem 0;}
+.output-line{display:flex;gap:0;margin-bottom:4px;justify-content:center;}
+.output-line .line-cell{width:18px;height:26px;font-size:11px;}
+.output-label{font-size:11px;color:var(--text3);font-family:var(--mono);width:40px;display:flex;align-items:center;justify-content:flex-end;margin-right:6px;flex-shrink:0;}
+.output-line.building .line-cell{border-color:var(--purple-border);}
+
+/* SPACE DISTRIBUTION VIZ */
+.space-dist{display:flex;gap:12px;justify-content:center;margin:1rem 0;flex-wrap:wrap;}
+.slot-viz{text-align:center;}
+.slot-label{font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;}
+.slot-blocks{display:flex;gap:2px;justify-content:center;}
+.slot-block{width:12px;height:12px;border-radius:2px;}
+.slot-block.base{background:var(--amber-mid);}
+.slot-block.extra{background:var(--purple-mid);}
+
+/* VAR TRACKER */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:16px;text-align:center;}
+
+/* CODE PANEL */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+.code-comment{color:var(--text3);font-style:italic;}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 10px;border-radius:20px;margin-bottom:8px;}
+.phase-pack{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-justify{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-last{background:var(--green-bg);color:var(--green-mid);}
+.phase-done{background:var(--cyan-bg);color:var(--cyan-mid);}
+.phase-init{background:var(--amber-bg);color:var(--amber-mid);}
+.info-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.info-step{font-size:11px;color:var(--text3);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all 0.25s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.4);}
+.dot.done{background:var(--green-mid);}
+
+/* CONTROLS */
+.controls{display:flex;gap:8px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:white;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:1rem;font-size:11px;color:var(--text2);}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-swatch{width:14px;height:14px;border-radius:3px;border:2px solid;}
+.legend-swatch.sw-char{background:var(--blue-bg);border-color:var(--blue-border);}
+.legend-swatch.sw-space{background:var(--amber-bg);border-color:var(--amber-border);}
+.legend-swatch.sw-extra{background:var(--purple-bg);border-color:var(--purple-border);}
+.legend-swatch.sw-pad{background:var(--green-bg);border-color:var(--green-border);}
+
+/* COMPARISON TABLE */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.cmp-table th,.cmp-table td{padding:8px 12px;border:1px solid var(--border);text-align:left;}
+.cmp-table th{background:var(--bg2);font-weight:600;color:var(--text);}
+.cmp-table td{color:var(--text2);}
+
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{font-size:14px;color:var(--text);padding:8px 12px;background:var(--bg2);border-radius:var(--radius);}
+.related-problems{margin-top:1rem;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;font-size:13px;color:var(--text2);}
+.related-problems li{margin:0.25rem 0;}
+
+/* MISC */
+p{margin:0.5rem 0;}
+strong{color:var(--text);}
+code{font-family:var(--mono);font-size:0.9em;padding:2px 5px;background:var(--bg2);border-radius:4px;}
+ul,ol{padding-left:1.25rem;margin:0.5rem 0;}
+li{margin:0.25rem 0;font-size:14px;color:var(--text2);}
+
+/* FORMULA BOX */
+.formula-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.formula-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.5rem;}
+.formula-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Text Justification</h1>
+  <div class="subtitle">LeetCode #68 — Greedy Line Building + Space Distribution</div>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">String Transformation</span>
+    <span class="tag tag-pattern">Greedy Line Building</span>
+    <span class="tag tag-complexity">O(n·maxWidth)</span>
+    <span class="tag tag-complexity">O(n·maxWidth)</span>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="card" id="sec1">
+  <div class="card-header" onclick="toggleCard('sec1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p>Given words and a maximum width, produce lines exactly <code>maxWidth</code> characters wide. Words are packed greedily (as many as fit), then spaces are distributed evenly between them. The last line is left-justified with trailing spaces.</p>
+
+    <p><strong>Example:</strong> <code>words = ["This","is","an","example","of","text","justification."]</code>, <code>maxWidth = 16</code></p>
+    <p>Line 1: <code>"This····is····an"</code> — 3 words, 10 chars, 6 extra spaces split into 3+3.<br>
+    Line 2: <code>"example··of·text"</code> — 3 words, 13 chars, 3 spaces split into 2+1.<br>
+    Line 3: <code>"justification.··"</code> — last line, left-justified, pad right.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The hard part isn't finding which words go on each line — it's <strong>distributing spaces</strong>. Use divmod: <code>total_spaces ÷ gaps = base_spaces</code> with <code>remainder</code> extra spaces sprinkled left-to-right.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Three Special Cases</div>
+      <ul>
+        <li><strong>Single word on a line:</strong> Left-justify, pad right with spaces</li>
+        <li><strong>Last line:</strong> Left-justify (single space between words), pad right</li>
+        <li><strong>Middle lines:</strong> Fully justify — distribute extra spaces left-to-right</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="card" id="sec2">
+  <div class="card-header" onclick="toggleCard('sec2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Greedy Pack + Justify</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p>Two distinct phases per line:</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Pack words greedily:</strong> Starting from word <code>i</code>, keep adding words while <code>total_chars + spaces_needed ≤ maxWidth</code>. The line gets words <code>[i..j-1]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Calculate spaces:</strong> <code>total_spaces = maxWidth - chars_in_words</code>. Number of gaps = <code>word_count - 1</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Distribute evenly:</strong> <code>base = total_spaces // gaps</code>, <code>extra = total_spaces % gaps</code>. First <code>extra</code> gaps get <code>base+1</code> spaces, rest get <code>base</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Handle edges:</strong> Single word → pad right. Last line → one space between, pad right.</span>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-title">📐 Space Distribution Formula</div>
+      <div class="formula-content">
+        gaps = word_count - 1<br>
+        total_spaces = maxWidth - sum(len(word) for word in line_words)<br>
+        base, extra = divmod(total_spaces, gaps)<br>
+        gap[k] = base + (1 if k &lt; extra else 0)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="card" id="sec3">
+  <div class="card-header" onclick="toggleCard('sec3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Greedy Invariant</div>
+      <p>Pack as many words as possible per line. This is optimal because (1) words can't be split, (2) fewer words per line means more wasted padding later, and (3) the problem requires maximum packing.</p>
+    </div>
+
+    <p><strong>Why divmod gives even distribution:</strong> If we have <code>total_spaces = 7</code> and <code>gaps = 3</code>, then <code>7 ÷ 3 = 2 remainder 1</code>. That means 2 base spaces per gap, plus 1 extra space for the first gap: gaps get [3, 2, 2] = 7 total. The left-bias rule is exactly what <code>k &lt; extra</code> achieves.</p>
+
+    <p><strong>Edge cases:</strong></p>
+    <ul>
+      <li><strong>Single word:</strong> gaps = 0, so divmod would divide by zero. Handle separately — all spaces go right.</li>
+      <li><strong>Last line:</strong> Override the justify logic — just use 1 space between, pad right.</li>
+      <li><strong>Word exactly fills line:</strong> total_spaces = gaps (one space each), extra = 0. Works perfectly.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card" id="sec4">
+  <div class="card-header" onclick="toggleCard('sec4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="code-panel" style="line-height:2;">
+      <div class="code-line"><span class="code-comment"># Greedy Pack + Justify (Interview Pick)</span></div>
+      <div class="code-line">def fullJustify(words, maxWidth):</div>
+      <div class="code-line">    res, line, line_len = [], [], 0</div>
+      <div class="code-line">    for word in words:</div>
+      <div class="code-line">        <span class="code-comment"># Can we fit this word? (chars + 1 space per word already in line)</span></div>
+      <div class="code-line">        if line_len + len(word) + len(line) > maxWidth:</div>
+      <div class="code-line">            <span class="code-comment"># Line is full — justify and emit</span></div>
+      <div class="code-line">            for i in range(maxWidth - line_len):</div>
+      <div class="code-line">                line[i % (len(line)-1 or 1)] += ' '</div>
+      <div class="code-line">            res.append(''.join(line))</div>
+      <div class="code-line">            line, line_len = [], 0</div>
+      <div class="code-line">        line.append(word)</div>
+      <div class="code-line">        line_len += len(word)</div>
+      <div class="code-line">    <span class="code-comment"># Last line — left justified, pad right</span></div>
+      <div class="code-line">    res.append(' '.join(line).ljust(maxWidth))</div>
+      <div class="code-line">    return res</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Clever i % (len(line)-1 or 1) Trick</div>
+      <p>When distributing extra spaces, we cycle through gaps using modulo. If only 1 word on the line, <code>len(line)-1 = 0</code> would cause ZeroDivisionError. The <code>or 1</code> handles single-word lines — all spaces go after the word.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📊 Complexity</div>
+      <p><strong>Time:</strong> O(n · maxWidth) — each word is processed, space distribution is O(maxWidth) per line.<br>
+      <strong>Space:</strong> O(n · maxWidth) — output lines.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card" id="sec5">
+  <div class="card-header" onclick="toggleCard('sec5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Decompose into Sub-Problems</div>
+        <p>"I see two distinct sub-problems: (1) deciding which words go on each line (greedy packing), and (2) formatting a line with justified spaces. Let me solve them separately."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Edge Cases Early</div>
+        <p>Three cases: normal middle lines (full justify), single word on a line (pad right), and last line (left justify). Clarify these with the interviewer before coding.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: The Space Formula</div>
+        <p>"For a middle line with W words and C total characters: total_spaces = maxWidth - C, gaps = W - 1. Use divmod for even distribution with left bias."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll use a greedy approach: scan words, greedily pack as many as fit per line. When a line is full, justify it by distributing spaces evenly using divmod, with extra spaces biased left. For the last line, I'll left-justify instead. The key edge case is a single word on a line — all padding goes right. This is O(n · maxWidth) time, O(n · maxWidth) space for the output."</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: WALKTHROUGH -->
+<div class="card" id="sec6">
+  <div class="card-header" onclick="toggleCard('sec6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p style="text-align:center;font-size:13px;color:var(--text3);margin-bottom:8px;">
+      <code>words = ["This","is","an","example","of","text","justification."]</code>, <code>maxWidth = 16</code>
+    </p>
+
+    <!-- Word pool -->
+    <div class="word-pool" id="wordPool"></div>
+
+    <!-- Line builder -->
+    <div class="line-builder">
+      <div class="line-builder-label" id="lineLabel">Current Line</div>
+      <div class="line-cells" id="lineCells"></div>
+    </div>
+
+    <!-- Space distribution -->
+    <div class="space-dist" id="spaceDist" style="display:none;"></div>
+
+    <!-- Output -->
+    <div class="output-lines" id="outputLines"></div>
+
+    <!-- Var tracker -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- Code panel -->
+    <div class="code-panel" id="codePanel">
+      <div class="code-line" data-ln="0">def fullJustify(words, maxWidth):</div>
+      <div class="code-line" data-ln="1">    res, line, line_len = [], [], 0</div>
+      <div class="code-line" data-ln="2">    for word in words:</div>
+      <div class="code-line" data-ln="3">        if line_len + len(word) + len(line) > maxWidth:</div>
+      <div class="code-line" data-ln="4">            for i in range(maxWidth - line_len):</div>
+      <div class="code-line" data-ln="5">                line[i % (len(line)-1 or 1)] += ' '</div>
+      <div class="code-line" data-ln="6">            res.append(''.join(line))</div>
+      <div class="code-line" data-ln="7">            line, line_len = [], 0</div>
+      <div class="code-line" data-ln="8">        line.append(word)</div>
+      <div class="code-line" data-ln="9">        line_len += len(word)</div>
+      <div class="code-line" data-ln="10">    res.append(' '.join(line).ljust(maxWidth))</div>
+      <div class="code-line" data-ln="11">    return res</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card" id="infoCard">
+      <div class="info-badge phase-init" id="infoBadge">INIT</div>
+      <div class="info-step" id="infoStep">Step 0 / 0</div>
+      <div class="info-title" id="infoTitle">Ready</div>
+      <div class="info-text" id="infoText">Press Next to begin.</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" onclick="reset()">Reset</button>
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-char"></div> Character</div>
+      <div class="legend-item"><div class="legend-swatch sw-space"></div> Base space</div>
+      <div class="legend-item"><div class="legend-swatch sw-extra"></div> Extra space</div>
+      <div class="legend-item"><div class="legend-swatch sw-pad"></div> Trailing pad</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card" id="sec7">
+  <div class="card-header" onclick="toggleCard('sec7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ <strong>Greedy packing:</strong> fit as many words per line as possible.</div>
+      <div class="takeaway">✓ <strong>divmod for even spacing:</strong> base spaces per gap + extra distributed left-to-right.</div>
+      <div class="takeaway">✓ <strong>Three cases:</strong> middle lines (full justify), single word (pad right), last line (left justify).</div>
+      <div class="takeaway">✓ <strong>Modulo trick:</strong> <code>i % (gaps or 1)</code> distributes spaces in round-robin and handles single-word lines.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Text formatting with alignment constraints</li>
+        <li>Greedy bin/line packing with fixed capacity</li>
+        <li>"Distribute evenly with left bias" → divmod</li>
+      </ul>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Greedy Pack + Justify</td><td>O(n·W)</td><td>O(n·W)</td><td>Clean, concise, interview pick</td></tr>
+        <tr><td>Explicit divmod</td><td>O(n·W)</td><td>O(n·W)</td><td>More readable, same complexity</td></tr>
+      </tbody>
+    </table>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Rearrange Spaces Between Words (LC 1592)</strong> — Simpler space distribution</li>
+        <li><strong>Sentence Screen Fitting (LC 418)</strong> — Greedy line packing variant</li>
+        <li><strong>Add Bold Tag in String (LC 616)</strong> — String transformation</li>
+        <li><strong>Zigzag Conversion (LC 6)</strong> — Row-based string layout</li>
+        <li><strong>Word Break (LC 139)</strong> — Greedy/DP word fitting</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleCard(id){document.getElementById(id).classList.toggle('collapsed');}
+
+const WORDS = ["This","is","an","example","of","text","justification."];
+const MW = 16;
+
+// Pre-computed justified lines for output display
+const FINAL_LINES = [
+  {chars:"This    is    an", cells: buildCells(["This","is","an"], [4,4], false)},
+  {chars:"example  of text", cells: buildCells(["example","of","text"], [2,1], false)},
+  {chars:"justification.  ", cells: buildCells(["justification."], [], true)}
+];
+
+function buildCells(words, gaps, isLast) {
+  const cells = [];
+  if (isLast) {
+    for (let w = 0; w < words.length; w++) {
+      for (const ch of words[w]) cells.push({ch, type:'char'});
+      if (w < words.length - 1) cells.push({ch:'·', type:'space'});
+    }
+    while (cells.length < MW) cells.push({ch:'·', type:'pad'});
+  } else {
+    for (let w = 0; w < words.length; w++) {
+      for (const ch of words[w]) cells.push({ch, type:'char'});
+      if (w < words.length - 1) {
+        const g = gaps[w];
+        // first space is base, rest could be extra
+        const basePerGap = Math.min(...gaps);
+        for (let s = 0; s < g; s++) {
+          cells.push({ch:'·', type: s < basePerGap ? 'space' : 'extra-space'});
+        }
+      }
+    }
+  }
+  return cells;
+}
+
+const steps = [
+  // 0: Init
+  {
+    phase:'INIT', phaseClass:'phase-init', activeLine:1,
+    title:'Initialize',
+    text:'res=[], line=[], line_len=0. We\'ll greedily pack words into line, then justify when full.',
+    wordStates: Array(7).fill(''),
+    lineWords:[], lineChars:0,
+    outputCount:0,
+    vars:{word:'—',line_len:'0',words_in_line:'0'}, changed:[]
+  },
+  // 1: Try "This" — fits
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "This" into line',
+    text:'line is empty, so "This" (4 chars) fits. line=["This"], line_len=4.',
+    wordStates:['current','','','','','',''],
+    lineWords:['This'], lineChars:4,
+    outputCount:0,
+    vars:{word:'"This"',line_len:'4',words_in_line:'1'}, changed:['word','line_len','words_in_line']
+  },
+  // 2: Try "is" — fits (4 + 2 + 1 space = 7 ≤ 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "is" into line',
+    text:'line_len(4) + len("is")(2) + len(line)(1 space needed) = 7 ≤ 16. Fits! line=["This","is"], line_len=6.',
+    wordStates:['packing','current','','','','',''],
+    lineWords:['This','is'], lineChars:6,
+    outputCount:0,
+    vars:{word:'"is"',line_len:'6',words_in_line:'2'}, changed:['word','line_len','words_in_line']
+  },
+  // 3: Try "an" — fits (6 + 2 + 2 = 10 ≤ 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "an" into line',
+    text:'6 + 2 + 2 = 10 ≤ 16. Fits! line=["This","is","an"], line_len=8.',
+    wordStates:['packing','packing','current','','','',''],
+    lineWords:['This','is','an'], lineChars:8,
+    outputCount:0,
+    vars:{word:'"an"',line_len:'8',words_in_line:'3'}, changed:['word','line_len','words_in_line']
+  },
+  // 4: Try "example" — OVERFLOW (8 + 7 + 3 = 18 > 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:3,
+    title:'"example" doesn\'t fit!',
+    text:'8 + 7 + 3 = 18 > 16. Line is full! Must justify ["This","is","an"] before adding "example".',
+    wordStates:['packing','packing','packing','overflow','','',''],
+    lineWords:['This','is','an'], lineChars:8,
+    outputCount:0,
+    vars:{word:'"example"',line_len:'8',words_in_line:'3'}, changed:['word']
+  },
+  // 5: Justify line 1 — distribute 8 spaces across 2 gaps
+  {
+    phase:'JUSTIFY', phaseClass:'phase-justify', activeLine:5,
+    title:'Justify Line 1: Distribute spaces',
+    text:'total_spaces = 16 - 8 = 8. gaps = 2. divmod(8, 2) = (4, 0). Each gap gets 4 spaces. "This····is····an" — perfectly even!',
+    wordStates:['used','used','used','overflow','','',''],
+    lineWords:['This','is','an'], lineChars:8,
+    outputCount:0,
+    showJustify: {words:['This','is','an'], totalSpaces:8, gaps:2, base:4, extra:0},
+    vars:{total_spaces:'8',gaps:'2',base:'4',extra:'0'}, changed:['total_spaces','gaps','base','extra']
+  },
+  // 6: Emit line 1
+  {
+    phase:'JUSTIFY', phaseClass:'phase-justify', activeLine:6,
+    title:'Emit Line 1',
+    text:'res.append("This····is····an"). Line emitted! Reset: line=[], line_len=0.',
+    wordStates:['used','used','used','current','','',''],
+    lineWords:[], lineChars:0,
+    outputCount:1,
+    vars:{word:'"example"',line_len:'0',words_in_line:'0'}, changed:['line_len','words_in_line']
+  },
+  // 7: Pack "example"
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "example" into new line',
+    text:'Fresh line. "example" (7 chars) fits. line=["example"], line_len=7.',
+    wordStates:['used','used','used','current','','',''],
+    lineWords:['example'], lineChars:7,
+    outputCount:1,
+    vars:{word:'"example"',line_len:'7',words_in_line:'1'}, changed:['word','line_len','words_in_line']
+  },
+  // 8: Pack "of" — fits (7 + 2 + 1 = 10 ≤ 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "of" into line',
+    text:'7 + 2 + 1 = 10 ≤ 16. Fits! line=["example","of"], line_len=9.',
+    wordStates:['used','used','used','packing','current','',''],
+    lineWords:['example','of'], lineChars:9,
+    outputCount:1,
+    vars:{word:'"of"',line_len:'9',words_in_line:'2'}, changed:['word','line_len','words_in_line']
+  },
+  // 9: Pack "text" — fits (9 + 4 + 2 = 15 ≤ 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "text" into line',
+    text:'9 + 4 + 2 = 15 ≤ 16. Fits! line=["example","of","text"], line_len=13.',
+    wordStates:['used','used','used','packing','packing','current',''],
+    lineWords:['example','of','text'], lineChars:13,
+    outputCount:1,
+    vars:{word:'"text"',line_len:'13',words_in_line:'3'}, changed:['word','line_len','words_in_line']
+  },
+  // 10: Try "justification." — OVERFLOW (13 + 14 + 3 = 30 > 16)
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:3,
+    title:'"justification." doesn\'t fit!',
+    text:'13 + 14 + 3 = 30 > 16. Line is full! Must justify ["example","of","text"].',
+    wordStates:['used','used','used','packing','packing','packing','overflow'],
+    lineWords:['example','of','text'], lineChars:13,
+    outputCount:1,
+    vars:{word:'"justification."',line_len:'13',words_in_line:'3'}, changed:['word']
+  },
+  // 11: Justify line 2 — distribute 3 spaces across 2 gaps
+  {
+    phase:'JUSTIFY', phaseClass:'phase-justify', activeLine:5,
+    title:'Justify Line 2: Distribute spaces',
+    text:'total_spaces = 16 - 13 = 3. gaps = 2. divmod(3, 2) = (1, 1). Gap 1 gets 1+1=2 spaces, Gap 2 gets 1 space. "example··of·text" — left gets more!',
+    wordStates:['used','used','used','used','used','used','overflow'],
+    lineWords:['example','of','text'], lineChars:13,
+    outputCount:1,
+    showJustify: {words:['example','of','text'], totalSpaces:3, gaps:2, base:1, extra:1},
+    vars:{total_spaces:'3',gaps:'2',base:'1',extra:'1'}, changed:['total_spaces','gaps','base','extra']
+  },
+  // 12: Emit line 2
+  {
+    phase:'JUSTIFY', phaseClass:'phase-justify', activeLine:6,
+    title:'Emit Line 2',
+    text:'res.append("example··of·text"). Emitted! Reset line.',
+    wordStates:['used','used','used','used','used','used','current'],
+    lineWords:[], lineChars:0,
+    outputCount:2,
+    vars:{word:'"justification."',line_len:'0',words_in_line:'0'}, changed:['line_len','words_in_line']
+  },
+  // 13: Pack "justification."
+  {
+    phase:'PACK', phaseClass:'phase-pack', activeLine:8,
+    title:'Pack "justification." into new line',
+    text:'"justification." (14 chars) fits. line=["justification."], line_len=14.',
+    wordStates:['used','used','used','used','used','used','current'],
+    lineWords:['justification.'], lineChars:14,
+    outputCount:2,
+    vars:{word:'"justification."',line_len:'14',words_in_line:'1'}, changed:['word','line_len','words_in_line']
+  },
+  // 14: No more words — last line
+  {
+    phase:'LAST', phaseClass:'phase-last', activeLine:10,
+    title:'Last Line: Left justify',
+    text:'No more words. Last line gets special treatment: left-justify with single space between words, then pad right. "justification.··" (14 chars + 2 trailing spaces = 16).',
+    wordStates:['used','used','used','used','used','used','used'],
+    lineWords:['justification.'], lineChars:14,
+    outputCount:2,
+    showJustify: {words:['justification.'], totalSpaces:2, gaps:0, base:0, extra:0, isLast:true},
+    vars:{line_len:'14',pad:'2'}, changed:['pad']
+  },
+  // 15: Done
+  {
+    phase:'DONE', phaseClass:'phase-done', activeLine:11,
+    title:'Done! 3 fully justified lines',
+    text:'Line 1: "This····is····an" (even gaps). Line 2: "example··of·text" (left-biased extra). Line 3: "justification.··" (last line, left-justified).',
+    wordStates: Array(7).fill('used'),
+    lineWords:[], lineChars:0,
+    outputCount:3,
+    vars:{result:'3 lines'}, changed:['result']
+  }
+];
+
+let cur = 0;
+
+function renderLineCells(words, justifyInfo) {
+  if (!words.length) return '';
+  let cells = [];
+  if (justifyInfo) {
+    if (justifyInfo.isLast) {
+      // Last line: left-justify
+      for (let w = 0; w < words.length; w++) {
+        for (const ch of words[w]) cells.push(`<div class="line-cell char">${ch}</div>`);
+        if (w < words.length - 1) cells.push(`<div class="line-cell space">·</div>`);
+      }
+      const used = cells.length;
+      for (let i = used; i < MW; i++) cells.push(`<div class="line-cell pad">·</div>`);
+    } else {
+      const {base, extra, gaps} = justifyInfo;
+      for (let w = 0; w < words.length; w++) {
+        for (const ch of words[w]) cells.push(`<div class="line-cell char">${ch}</div>`);
+        if (w < words.length - 1) {
+          const gapSize = base + (w < extra ? 1 : 0);
+          for (let s = 0; s < gapSize; s++) {
+            cells.push(`<div class="line-cell ${s < base ? 'space' : 'extra-space'}">·</div>`);
+          }
+        }
+      }
+    }
+  } else {
+    // Packing mode — show words with minimal spaces
+    for (let w = 0; w < words.length; w++) {
+      for (const ch of words[w]) cells.push(`<div class="line-cell char">${ch}</div>`);
+      if (w < words.length - 1) cells.push(`<div class="line-cell space">·</div>`);
+    }
+    const used = cells.length;
+    for (let i = used; i < MW; i++) cells.push(`<div class="line-cell empty">_</div>`);
+  }
+  return cells.join('');
+}
+
+function renderOutputLine(lineIdx, building) {
+  const line = FINAL_LINES[lineIdx];
+  let html = `<div class="output-line${building ? ' building' : ''}">`;
+  html += `<div class="output-label">L${lineIdx+1}</div>`;
+  for (const c of line.cells) {
+    html += `<div class="line-cell ${c.type}">${c.ch}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderSpaceDist(info) {
+  if (!info || info.gaps === 0) return '';
+  let html = '';
+  for (let g = 0; g < info.gaps; g++) {
+    const sz = info.base + (g < info.extra ? 1 : 0);
+    html += '<div class="slot-viz">';
+    html += `<div class="slot-label">Gap ${g+1}</div>`;
+    html += '<div class="slot-blocks">';
+    for (let s = 0; s < sz; s++) {
+      html += `<div class="slot-block ${s < info.base ? 'base' : 'extra'}"></div>`;
+    }
+    html += '</div></div>';
+  }
+  return html;
+}
+
+function render() {
+  const st = steps[cur];
+
+  // Word pool
+  document.getElementById('wordPool').innerHTML = WORDS.map((w, i) => {
+    let cls = 'word-chip';
+    if (st.wordStates[i]) cls += ' ' + st.wordStates[i];
+    return `<div class="${cls}">"${w}"</div>`;
+  }).join('');
+
+  // Line builder
+  document.getElementById('lineLabel').textContent =
+    st.showJustify ? 'Justified Line' : `Current Line (${st.lineWords.length} words, ${st.lineChars} chars)`;
+  document.getElementById('lineCells').innerHTML =
+    st.lineWords.length ? renderLineCells(st.lineWords, st.showJustify) : '<span style="color:var(--text3);font-size:12px;">empty</span>';
+
+  // Space distribution
+  const sdEl = document.getElementById('spaceDist');
+  if (st.showJustify && st.showJustify.gaps > 0) {
+    sdEl.style.display = 'flex';
+    sdEl.innerHTML = renderSpaceDist(st.showJustify);
+  } else {
+    sdEl.style.display = 'none';
+  }
+
+  // Output lines
+  let outHtml = '';
+  for (let i = 0; i < Math.min(st.outputCount, 3); i++) {
+    outHtml += renderOutputLine(i, false);
+  }
+  document.getElementById('outputLines').innerHTML = outHtml;
+
+  // Var tracker
+  document.getElementById('varTracker').innerHTML = Object.entries(st.vars).map(([k,v]) => {
+    const ch = st.changed.includes(k) ? ' changed' : '';
+    return `<div class="var-box${ch}"><span class="var-name">${k}</span><span class="var-val">${v}</span></div>`;
+  }).join('');
+
+  // Code highlight
+  document.querySelectorAll('#codePanel .code-line').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.ln) === st.activeLine);
+  });
+
+  // Info card
+  document.getElementById('infoBadge').className = 'info-badge ' + st.phaseClass;
+  document.getElementById('infoBadge').textContent = st.phase;
+  document.getElementById('infoStep').textContent = `Step ${cur} / ${steps.length - 1}`;
+  document.getElementById('infoTitle').textContent = st.title;
+  document.getElementById('infoText').textContent = st.text;
+
+  // Progress dots
+  document.getElementById('progressDots').innerHTML = steps.map((_, i) => {
+    let cls = 'dot';
+    if (i === cur) cls += ' active';
+    else if (i < cur) cls += ' done';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next < 0 || next >= steps.length) return;
+  cur = next;
+  render();
+}
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

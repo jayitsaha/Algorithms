@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the Word — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:900px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.header .subtitle{font-size:14px;color:var(--text2);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-hard{background:var(--red-bg);color:var(--red-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.card.collapsed .card-body{display:none;}
+.card-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.card-header:hover{opacity:0.85;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.collapse-icon{font-size:18px;color:var(--text3);transition:transform 0.25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card-body{margin-top:1rem;}
+.card-body p{margin-bottom:0.75rem;font-size:14px;color:var(--text2);line-height:1.7;}
+.card-body strong{color:var(--text);}
+.card-body ul{margin:0.5rem 0 0.75rem 1.25rem;font-size:14px;color:var(--text2);}
+.card-body li{margin-bottom:0.35rem;}
+
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box p{margin-bottom:0.5rem;font-size:14px;line-height:1.6;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;font-size:14px;}
+
+/* STRATEGY */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.step-label-text{font-size:14px;color:var(--text2);line-height:1.6;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{font-size:14px;margin-bottom:8px;}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* ANNOTATED CODE */
+.annotated-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;margin:1rem 0;}
+.annotated-code .line{white-space:pre;color:var(--text2);}
+.annotated-code .comment{color:var(--green-mid);font-style:italic;}
+.annotated-code .keyword{color:var(--purple-mid);}
+
+/* WALKTHROUGH AREA */
+.walk-area{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+
+/* CANDIDATE POOL */
+.pool-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px;}
+.word-pool{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;justify-content:center;}
+.word-chip{display:flex;gap:2px;border-radius:var(--radius);padding:6px 8px;border:2px solid var(--border);background:var(--surface);transition:all 0.3s;}
+.word-chip .letter{width:26px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;border-radius:4px;background:var(--bg2);color:var(--text);transition:all 0.3s;}
+.word-chip.candidate{border-color:var(--blue-border);background:var(--blue-bg);}
+.word-chip.candidate .letter{background:var(--surface);}
+.word-chip.guessing{border-color:var(--purple-border);background:var(--purple-bg);transform:scale(1.05);}
+.word-chip.guessing .letter{background:var(--surface);color:var(--purple-mid);}
+.word-chip.eliminated{border-color:var(--border);background:var(--bg2);opacity:0.35;}
+.word-chip.eliminated .letter{background:transparent;color:var(--text3);text-decoration:line-through;}
+.word-chip.survived{border-color:var(--green-border);background:var(--green-bg);}
+.word-chip.survived .letter{background:var(--surface);color:var(--green-mid);}
+.word-chip.found{border-color:var(--amber-border);background:var(--amber-bg);transform:scale(1.08);}
+.word-chip.found .letter{background:var(--surface);color:var(--amber-mid);font-weight:700;}
+.word-chip.best{border-color:var(--cyan-border);background:var(--cyan-bg);}
+.word-chip.best .letter{background:var(--surface);color:var(--cyan-mid);}
+.word-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);text-align:center;margin-top:4px;width:100%;}
+
+/* MATCH COMPARISON */
+.comparison-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:1rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius);}
+.comp-row{display:flex;gap:4px;align-items:center;}
+.comp-row-label{width:60px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);text-align:right;margin-right:8px;}
+.comp-cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:600;border-radius:6px;border:2px solid transparent;transition:all 0.3s;}
+.comp-cell.match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);}
+.comp-cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text);}
+.comp-result{display:flex;gap:4px;align-items:center;}
+.comp-result-icon{width:36px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.match-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;font-family:var(--mono);margin-top:6px;}
+.match-badge.positive{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border);}
+
+/* MINIMAX TABLE */
+.minimax-table-wrap{overflow-x:auto;margin:1rem 0;}
+.minimax-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
+.minimax-table th,.minimax-table td{padding:8px 10px;text-align:center;border:1px solid var(--border);}
+.minimax-table th{background:var(--bg2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);}
+.minimax-table td{transition:all 0.3s;}
+.minimax-table td.word-cell{text-align:left;font-weight:600;color:var(--text);background:var(--surface);}
+.minimax-table td.max-cell{background:var(--red-bg);color:var(--red-mid);font-weight:700;}
+.minimax-table td.max-val{font-weight:700;}
+.minimax-table tr.best-row{background:var(--green-bg);}
+.minimax-table tr.best-row td.word-cell{color:var(--green-mid);}
+.minimax-table tr.best-row td.max-val{color:var(--green-mid);}
+
+/* FILTER PANEL */
+.filter-panel{margin:1rem 0;}
+.filter-row{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:var(--radius);margin-bottom:6px;border:1px solid var(--border);transition:all 0.3s;}
+.filter-row.kept{background:var(--green-bg);border-color:var(--green-border);}
+.filter-row.removed{background:var(--red-bg);border-color:var(--red-border);opacity:0.7;}
+.filter-word{font-family:var(--mono);font-size:13px;font-weight:600;min-width:80px;}
+.filter-match{font-family:var(--mono);font-size:13px;color:var(--text2);}
+.filter-verdict{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-left:auto;}
+.filter-row.kept .filter-verdict{color:var(--green-mid);}
+.filter-row.removed .filter-verdict{color:var(--red-mid);}
+
+/* GUESS HISTORY */
+.guess-history{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.guess-entry{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--bg2);border-radius:var(--radius);border:2px solid var(--border);min-width:100px;transition:all 0.3s;}
+.guess-entry.active{border-color:var(--purple-border);background:var(--purple-bg);}
+.guess-entry.done{border-color:var(--green-border);background:var(--green-bg);}
+.guess-entry.success{border-color:var(--amber-border);background:var(--amber-bg);}
+.guess-round{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.guess-word{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
+.guess-result{font-family:var(--mono);font-size:12px;color:var(--text2);}
+
+/* VAR TRACKER */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* CODE PANEL */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;padding:3px 10px;border-radius:20px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-analyze{background:var(--cyan-bg);color:var(--cyan-mid);}
+.phase-select{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-guess{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-filter{background:var(--red-bg);color:var(--red-mid);}
+.phase-done{background:var(--green-bg);color:var(--green-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin:1.25rem 0 0.75rem;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all 0.25s;cursor:pointer;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:0.75rem;}
+.btn{padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:#fff;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:1rem;padding:10px;background:var(--bg2);border-radius:var(--radius);}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:1px solid var(--border);}
+
+/* ACTION AREA */
+.action-area{min-height:120px;margin:1rem 0;transition:opacity 0.3s;}
+
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--text2);}
+.takeaway strong{color:var(--text);}
+.takeaway::before{content:"✓";color:var(--green-mid);font-weight:700;}
+
+/* RELATED */
+.related-problems{margin:1rem 0;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{margin-left:1.25rem;font-size:14px;color:var(--text2);}
+.related-problems li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>843. Guess the Word</h1>
+  <div class="subtitle">Minimax Elimination — Narrow candidates by maximizing information per guess</div>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Minimax / Elimination</span>
+    <span class="tag tag-pattern">Interactive</span>
+    <span class="tag tag-complexity">O(n²) per guess</span>
+    <span class="tag tag-complexity">O(n) space</span>
+  </div>
+</div>
+
+<!-- SECTION 1: UNDERSTANDING -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>You have a list of 6-letter words. One is the <strong>secret</strong>. You can call <code>Master.guess(word)</code> which returns how many letters match <em>exactly</em> (same position and same character). You have at most 10 guesses to find the secret.</p>
+    <p><strong>Reframe:</strong> This is an <strong>information game</strong>. Each guess gives us a number 0–6. We must choose guesses that <em>maximally narrow down</em> which word could be the secret, so we find it within the guess limit.</p>
+    <p><strong>Example by hand:</strong> If we guess "abcdef" and get back 3, then the secret must share exactly 3 characters (in the same positions) with "abcdef". Any word that doesn't share exactly 3 can be eliminated.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>After each guess returning match count <strong>m</strong>, we can <strong>eliminate every candidate</strong> that doesn't also produce exactly <strong>m</strong> matches against our guess. The best guess is the one that produces the smallest worst-case group of survivors — this is the <strong>minimax</strong> strategy.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Random Guessing Can Fail</div>
+      <p>With ~100 words and 10 guesses, random guessing risks picking words that have 0 matches with many others. A 0-match result barely narrows the field — most 6-letter words differ in all positions. Minimax avoids this by choosing guesses that <em>spread</em> candidates across multiple match buckets.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: THE ALGORITHM -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Minimax Elimination</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>We maintain a <strong>candidate list</strong> — initially all words. Each round, we pick the best word to guess, get the match count, then filter candidates.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> All words are candidates.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Minimax selection:</strong> For every candidate word W, compute how many candidates would fall into each match bucket (0–6) if W were the guess. The <em>worst case</em> for W is the largest bucket. Pick the W with the <strong>smallest worst case</strong>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Guess:</strong> Call <code>Master.guess(W)</code> → returns match count <strong>m</strong>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Filter:</strong> Keep only candidates whose match count against W equals <strong>m</strong>. The secret must be in this group.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Repeat</strong> from step 2 until match count = 6 (found!) or guesses exhausted.</span>
+      </div>
+    </div>
+
+    <!-- Decision tree diagram -->
+    <div style="margin:1.25rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius);text-align:center;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:0.5px;margin-bottom:12px;">Decision Flow per Round</div>
+      <div style="display:flex;justify-content:center;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div style="padding:8px 14px;background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--cyan-mid);">N candidates</div>
+        <span style="color:var(--text3);">→</span>
+        <div style="padding:8px 14px;background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--purple-mid);">Minimax pick</div>
+        <span style="color:var(--text3);">→</span>
+        <div style="padding:8px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--amber-mid);">Guess → m</div>
+        <span style="color:var(--text3);">→</span>
+        <div style="padding:8px 14px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--red-mid);">Filter to m</div>
+        <span style="color:var(--text3);">→</span>
+        <div style="padding:8px 14px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--green-mid);">≤ N candidates</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: WHY IT WORKS -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After every guess, <strong>the secret word is always in the candidate list</strong>. If we guess word G and get back m, then <code>match(G, secret) = m</code>. So we keep only words W where <code>match(G, W) = m</code>. The secret satisfies this, so it survives every filter.</p>
+    </div>
+
+    <p><strong>Why minimax guarantees convergence:</strong> The minimax strategy picks the guess that minimizes the <em>worst-case</em> number of survivors. In the worst case, the adversary places the secret in the largest bucket. By minimizing this maximum bucket size, we guarantee the candidate list shrinks as fast as possible.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Information Theory View</div>
+      <p>Each guess returns one of 7 outcomes (0–6 matches). The best guess is one that <em>spreads</em> candidates as evenly as possible across these outcomes, maximizing the information gained. Minimax is the pessimistic version: it optimizes for the worst case rather than the average.</p>
+    </div>
+
+    <p><strong>Edge cases:</strong></p>
+    <ul>
+      <li><strong>All words identical at some positions:</strong> Those positions give no information — algorithm still works because filtering uses all 6 positions.</li>
+      <li><strong>1 candidate left:</strong> Guess it directly — guaranteed match of 6.</li>
+      <li><strong>Many 0-match pairs:</strong> Minimax avoids words with large 0-match groups, preferring words that distinguish candidates.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 4: THE CODE (ANNOTATED) -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="annotated-code">
+<div class="line"><span class="keyword">def</span> findSecretWord(self, words, master):</div>
+<div class="line">    <span class="keyword">def</span> match(a, b):                          <span class="comment"># Count exact position matches</span></div>
+<div class="line">        <span class="keyword">return</span> sum(x == y <span class="keyword">for</span> x, y <span class="keyword">in</span> zip(a, b))</div>
+<div class="line">    candidates = list(words)                    <span class="comment"># Start with all words as candidates</span></div>
+<div class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(10):                        <span class="comment"># At most 10 guesses allowed</span></div>
+<div class="line">        best, best_max = candidates[0], len(candidates) <span class="comment"># Track best guess word</span></div>
+<div class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> candidates:                 <span class="comment"># Try each candidate as potential guess</span></div>
+<div class="line">            groups = [0] * 7                    <span class="comment"># Buckets for match counts 0-6</span></div>
+<div class="line">            <span class="keyword">for</span> other <span class="keyword">in</span> candidates:              <span class="comment"># Count matches with every candidate</span></div>
+<div class="line">                groups[match(word, other)] += 1  <span class="comment"># Tally into the right bucket</span></div>
+<div class="line">            worst = max(groups)                 <span class="comment"># Worst case: largest bucket</span></div>
+<div class="line">            <span class="keyword">if</span> worst < best_max:                <span class="comment"># Better than current best?</span></div>
+<div class="line">                best_max = worst                 <span class="comment"># Update best worst-case</span></div>
+<div class="line">                best = word                      <span class="comment"># Update best guess word</span></div>
+<div class="line">        result = master.guess(best)              <span class="comment"># Make the guess</span></div>
+<div class="line">        <span class="keyword">if</span> result == 6: <span class="keyword">return</span>               <span class="comment"># Found the secret!</span></div>
+<div class="line">        candidates = [w <span class="keyword">for</span> w <span class="keyword">in</span> candidates   <span class="comment"># Keep only words matching</span></div>
+<div class="line">                       <span class="keyword">if</span> match(w, best) == result]  <span class="comment"># same count with our guess</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Guessing from all words, not candidates</div>
+      <p>You must guess from the <strong>remaining candidates</strong>, not from all original words. Words eliminated in previous rounds cannot be the secret, so guessing them wastes information.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why match() is symmetric</div>
+      <p><code>match(a, b) == match(b, a)</code> — exact position matches are symmetric. When filtering, we check <code>match(candidate, guess) == m</code>. This is the same as asking "would guessing this candidate against the real guess produce the same count?"</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: INTERVIEW STRATEGY -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Problem Type</div>
+        <p class="step-label-text">Interactive guessing with feedback → <strong>elimination game</strong>. Similar to Mastermind / 20-Questions. Key signal: limited guesses + match feedback → need to maximize information per guess.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start Simple — Random + Filter</div>
+        <p class="step-label-text">First propose: pick any word, guess it, filter candidates. This works but might not converge fast enough. Interviewer will ask: "Can you do better?"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize Guess Selection</div>
+        <p class="step-label-text">Realize: some guesses split candidates more evenly than others. A word with many 0-match pairs gives little information. The optimal strategy is <strong>minimax</strong>: pick the word whose worst-case bucket is smallest.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Mention Alternative Heuristics</div>
+        <p class="step-label-text">If minimax is too complex to code live, mention: "We could also pick the word with the fewest 0-match pairs — this heuristic works well in practice and is simpler to implement."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"This is an interactive elimination problem. After each guess, I get a match count which lets me filter the candidate list. The key question is: which word should I guess to maximize information?
+
+I'll use a minimax approach: for each candidate, I compute the distribution of match counts against all other candidates. The 'worst case' is the largest bucket. I pick the word whose worst case is smallest — this guarantees the fastest shrinkage of the candidate set.
+
+Each round costs O(n²) to evaluate all pairs, but n shrinks rapidly. Total work is dominated by the first round: O(n²). With 10 guesses and smart selection, this reliably finds the secret."</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: INTERACTIVE WALKTHROUGH -->
+<div class="card" id="walkthrough-card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p style="font-size:12px;color:var(--text3);margin-bottom:4px;"><strong>Example:</strong> words = ["acckzz", "ccbazz", "eiowzz", "abcczz", "aackzz", "ccakzz"], secret = "ccakzz"</p>
+
+    <!-- CANDIDATE POOL -->
+    <div class="pool-label">Candidate Pool</div>
+    <div class="word-pool" id="wordPool"></div>
+
+    <!-- GUESS HISTORY -->
+    <div class="pool-label">Guess History</div>
+    <div class="guess-history" id="guessHistory"></div>
+
+    <!-- ACTION AREA -->
+    <div class="action-area" id="actionArea"></div>
+
+    <!-- VAR TRACKER -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- CODE PANEL -->
+    <div class="code-panel" id="codePanel"></div>
+
+    <!-- INFO CARD -->
+    <div class="info-card" id="infoCard"></div>
+
+    <!-- PROGRESS DOTS -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn" onclick="reset()">Reset</button>
+      <button class="btn btn-primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-bg);border-color:var(--blue-border);"></div>Candidate</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--purple-bg);border-color:var(--purple-border);"></div>Guessing</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan-bg);border-color:var(--cyan-border);"></div>Minimax Best</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green-bg);border-color:var(--green-border);"></div>Survived</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--bg2);opacity:0.35;"></div>Eliminated</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-bg);border-color:var(--amber-border);"></div>Secret Found</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: SUMMARY -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway"><strong>Minimax = minimize the worst case.</strong> Pick the guess whose largest match-count bucket is smallest.</div>
+      <div class="takeaway"><strong>Filtering is the core mechanic.</strong> After each guess, keep only candidates consistent with the observed match count.</div>
+      <div class="takeaway"><strong>match() is symmetric</strong> — <code>match(a,b) == match(b,a)</code>, so filtering works regardless of direction.</div>
+      <div class="takeaway"><strong>O(n²) per round converges fast</strong> — candidates shrink rapidly, so later rounds are cheap.</div>
+      <div class="takeaway"><strong>Heuristic alternative:</strong> Minimizing zero-match pairs is simpler and usually sufficient.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <p>Interactive query problems with limited attempts. Anytime you have: (1) a hidden target, (2) a comparison oracle, (3) a guess budget. Examples include Mastermind, 20 Questions, and binary search with errors.</p>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Bulls and Cows</strong> (Medium) — Same match-counting mechanic, but single guess scoring</li>
+        <li><strong>Find the Duplicate Number</strong> (Medium) — Elimination with constraints</li>
+        <li><strong>Random Pick with Weight</strong> (Medium) — Probabilistic selection</li>
+        <li><strong>Online Election</strong> (Medium) — Interactive query patterns</li>
+        <li><strong>Mastermind</strong> (Classic) — Direct inspiration for this problem</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const WORDS = ["acckzz","ccbazz","eiowzz","abcczz","aackzz","ccakzz"];
+const SECRET = "ccakzz";
+
+function match(a,b){let c=0;for(let i=0;i<6;i++) if(a[i]===b[i]) c++;return c;}
+
+// Pre-compute match matrix
+const M = {};
+WORDS.forEach(w => { M[w]={}; WORDS.forEach(o => { M[w][o]=match(w,o); }); });
+
+// Minimax distributions
+function getDistribution(word, cands){
+  const g=[0,0,0,0,0,0,0];
+  cands.forEach(o => g[match(word,o)]++);
+  return g;
+}
+
+const CODE_LINES = [
+  'def findSecretWord(self, words, master):',
+  '    def match(a, b):',
+  '        return sum(x == y for x, y in zip(a, b))',
+  '    candidates = list(words)',
+  '    for _ in range(10):',
+  '        best, best_max = candidates[0], len(candidates)',
+  '        for word in candidates:',
+  '            groups = [0] * 7',
+  '            for other in candidates:',
+  '                groups[match(word, other)] += 1',
+  '            worst = max(groups)',
+  '            if worst < best_max:',
+  '                best_max = worst',
+  '                best = word',
+  '        result = master.guess(best)',
+  '        if result == 6: return',
+  '        candidates = [w for w in candidates',
+  '                       if match(w, best) == result]'
+];
+
+// Steps data
+const steps = [
+  // Step 0: INIT
+  {
+    phase:'INIT', phaseClass:'phase-init', activeLine:3,
+    title:'Initial Setup',
+    text:'We have 6 candidate words, each 6 letters long. The secret "ccakzz" is hidden among them. We have up to 10 guesses to find it. All words start as candidates.',
+    wordStates:{ acckzz:'candidate', ccbazz:'candidate', eiowzz:'candidate', abcczz:'candidate', aackzz:'candidate', ccakzz:'candidate' },
+    candidates:WORDS.slice(), guessWord:null, matchCount:null, round:0, guesses:[],
+    vars:{round:'—',candidates:6,guess:'—',matches:'—'}, changed:['candidates'],
+    actionType:'none'
+  },
+  // Step 1: MINIMAX ANALYSIS Round 1
+  {
+    phase:'ANALYZE', phaseClass:'phase-analyze', activeLine:6,
+    title:'Minimax Analysis — Round 1',
+    text:'For each candidate, compute match-count distribution against all 6 words. The "Max Group" column shows the worst-case bucket size. We want the smallest max — that\'s our best guess. Three words tie with max group = 2: "acckzz", "aackzz", and "ccakzz". We pick "acckzz" (first found).',
+    wordStates:{ acckzz:'best', ccbazz:'candidate', eiowzz:'candidate', abcczz:'candidate', aackzz:'candidate', ccakzz:'candidate' },
+    candidates:WORDS.slice(), guessWord:null, matchCount:null, round:1, guesses:[],
+    vars:{round:1,candidates:6,guess:'—',matches:'—'}, changed:['round'],
+    actionType:'minimax',
+    minimaxData:{
+      words:WORDS.slice(),
+      candidates:WORDS.slice(),
+      bestWord:'acckzz'
+    }
+  },
+  // Step 2: GUESS Round 1 — comparison
+  {
+    phase:'GUESS', phaseClass:'phase-guess', activeLine:14,
+    title:'Round 1: Guessing "acckzz"',
+    text:'We guess "acckzz" and compare character-by-character with the secret "ccakzz". Position 0: a≠c ✗. Position 1: c=c ✓. Position 2: c≠a ✗. Position 3: k=k ✓. Position 4: z=z ✓. Position 5: z=z ✓. Master returns 4.',
+    wordStates:{ acckzz:'guessing', ccbazz:'candidate', eiowzz:'candidate', abcczz:'candidate', aackzz:'candidate', ccakzz:'candidate' },
+    candidates:WORDS.slice(), guessWord:'acckzz', matchCount:4, round:1,
+    guesses:[{word:'acckzz',result:4,status:'active'}],
+    vars:{round:1,candidates:6,guess:'acckzz',matches:4}, changed:['guess','matches'],
+    actionType:'compare',
+    compareData:{guess:'acckzz',secret:SECRET}
+  },
+  // Step 3: FILTER Round 1
+  {
+    phase:'FILTER', phaseClass:'phase-filter', activeLine:16,
+    title:'Filter — Keep only match = 4',
+    text:'Keep candidates whose match count against "acckzz" equals 4. "acckzz" itself scores 6 → eliminated. "ccbazz" scores 3 → eliminated. "eiowzz" scores 2 → eliminated. "abcczz" scores 4 ✓ kept. "aackzz" scores 5 → eliminated. "ccakzz" scores 4 ✓ kept. Candidates: 6 → 2.',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'survived', aackzz:'eliminated', ccakzz:'survived' },
+    candidates:['abcczz','ccakzz'], guessWord:'acckzz', matchCount:4, round:1,
+    guesses:[{word:'acckzz',result:4,status:'done'}],
+    vars:{round:1,candidates:2,guess:'acckzz',matches:4}, changed:['candidates'],
+    actionType:'filter',
+    filterData:{
+      guess:'acckzz', requiredMatch:4,
+      rows:[
+        {word:'acckzz',m:6,kept:false},
+        {word:'ccbazz',m:3,kept:false},
+        {word:'eiowzz',m:2,kept:false},
+        {word:'abcczz',m:4,kept:true},
+        {word:'aackzz',m:5,kept:false},
+        {word:'ccakzz',m:4,kept:true}
+      ]
+    }
+  },
+  // Step 4: MINIMAX Round 2
+  {
+    phase:'ANALYZE', phaseClass:'phase-analyze', activeLine:6,
+    title:'Minimax Analysis — Round 2',
+    text:'Only 2 candidates remain: "abcczz" and "ccakzz". Both have identical minimax distributions (max group = 1) since each produces unique match counts against the other. We pick "abcczz" (first candidate).',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'best', aackzz:'eliminated', ccakzz:'candidate' },
+    candidates:['abcczz','ccakzz'], guessWord:null, matchCount:null, round:2,
+    guesses:[{word:'acckzz',result:4,status:'done'}],
+    vars:{round:2,candidates:2,guess:'—',matches:'—'}, changed:['round'],
+    actionType:'minimax',
+    minimaxData:{
+      words:WORDS.slice(),
+      candidates:['abcczz','ccakzz'],
+      bestWord:'abcczz'
+    }
+  },
+  // Step 5: GUESS Round 2
+  {
+    phase:'GUESS', phaseClass:'phase-guess', activeLine:14,
+    title:'Round 2: Guessing "abcczz"',
+    text:'Comparing "abcczz" with the secret "ccakzz": Position 0: a≠c ✗. Position 1: b≠c ✗. Position 2: c≠a ✗. Position 3: c≠k ✗. Position 4: z=z ✓. Position 5: z=z ✓. Master returns 2.',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'guessing', aackzz:'eliminated', ccakzz:'candidate' },
+    candidates:['abcczz','ccakzz'], guessWord:'abcczz', matchCount:2, round:2,
+    guesses:[{word:'acckzz',result:4,status:'done'},{word:'abcczz',result:2,status:'active'}],
+    vars:{round:2,candidates:2,guess:'abcczz',matches:2}, changed:['guess','matches'],
+    actionType:'compare',
+    compareData:{guess:'abcczz',secret:SECRET}
+  },
+  // Step 6: FILTER Round 2
+  {
+    phase:'FILTER', phaseClass:'phase-filter', activeLine:16,
+    title:'Filter — Keep only match = 2',
+    text:'"abcczz" vs itself = 6 ≠ 2 → eliminated. "ccakzz" vs "abcczz" = 2 ✓ → kept. Only one candidate remains: "ccakzz".',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'eliminated', aackzz:'eliminated', ccakzz:'survived' },
+    candidates:['ccakzz'], guessWord:'abcczz', matchCount:2, round:2,
+    guesses:[{word:'acckzz',result:4,status:'done'},{word:'abcczz',result:2,status:'done'}],
+    vars:{round:2,candidates:1,guess:'abcczz',matches:2}, changed:['candidates'],
+    actionType:'filter',
+    filterData:{
+      guess:'abcczz', requiredMatch:2,
+      rows:[
+        {word:'abcczz',m:6,kept:false},
+        {word:'ccakzz',m:2,kept:true}
+      ]
+    }
+  },
+  // Step 7: FINAL GUESS
+  {
+    phase:'GUESS', phaseClass:'phase-guess', activeLine:14,
+    title:'Round 3: Final Guess "ccakzz"',
+    text:'Only one candidate left — "ccakzz". We guess it and compare: c=c ✓, c=c ✓, a=a ✓, k=k ✓, z=z ✓, z=z ✓. All 6 positions match! Master returns 6. Secret found!',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'eliminated', aackzz:'eliminated', ccakzz:'found' },
+    candidates:['ccakzz'], guessWord:'ccakzz', matchCount:6, round:3,
+    guesses:[{word:'acckzz',result:4,status:'done'},{word:'abcczz',result:2,status:'done'},{word:'ccakzz',result:6,status:'success'}],
+    vars:{round:3,candidates:1,guess:'ccakzz',matches:6}, changed:['round','guess','matches'],
+    actionType:'compare',
+    compareData:{guess:'ccakzz',secret:SECRET}
+  },
+  // Step 8: DONE
+  {
+    phase:'DONE', phaseClass:'phase-done', activeLine:15,
+    title:'Secret Found! 🎉',
+    text:'The secret "ccakzz" was found in just 3 guesses out of 10 allowed. Minimax elimination shrunk the candidate pool from 6 → 2 → 1 → found, guaranteeing efficient convergence at each step.',
+    wordStates:{ acckzz:'eliminated', ccbazz:'eliminated', eiowzz:'eliminated', abcczz:'eliminated', aackzz:'eliminated', ccakzz:'found' },
+    candidates:[], guessWord:null, matchCount:null, round:3,
+    guesses:[{word:'acckzz',result:4,status:'done'},{word:'abcczz',result:2,status:'done'},{word:'ccakzz',result:6,status:'success'}],
+    vars:{round:3,candidates:0,guess:'ccakzz',matches:6}, changed:[],
+    actionType:'none'
+  }
+];
+
+let cur = 0;
+
+function render(){
+  const s = steps[cur];
+
+  // Word pool
+  const pool = document.getElementById('wordPool');
+  pool.innerHTML = '';
+  WORDS.forEach(w => {
+    const st = s.wordStates[w] || 'candidate';
+    const chip = document.createElement('div');
+    chip.className = 'word-chip ' + st;
+    let html = '';
+    for(let i=0;i<6;i++){
+      html += `<div class="letter">${w[i]}</div>`;
+    }
+    chip.innerHTML = html;
+    pool.appendChild(chip);
+  });
+
+  // Guess history
+  const hist = document.getElementById('guessHistory');
+  hist.innerHTML = '';
+  if(s.guesses.length === 0){
+    hist.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;">No guesses yet</div>';
+  } else {
+    s.guesses.forEach((g,i) => {
+      const e = document.createElement('div');
+      e.className = 'guess-entry ' + g.status;
+      e.innerHTML = `<span class="guess-round">Round ${i+1}</span><span class="guess-word">${g.word}</span><span class="guess-result">matches: ${g.result}</span>`;
+      hist.appendChild(e);
+    });
+  }
+
+  // Action area
+  const area = document.getElementById('actionArea');
+  area.innerHTML = '';
+  if(s.actionType === 'minimax'){
+    area.innerHTML = renderMinimax(s.minimaxData);
+  } else if(s.actionType === 'compare'){
+    area.innerHTML = renderCompare(s.compareData, s.matchCount);
+  } else if(s.actionType === 'filter'){
+    area.innerHTML = renderFilter(s.filterData);
+  }
+
+  // Var tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = '';
+  const varNames = {round:'Round',candidates:'Candidates',guess:'Guess',matches:'Matches'};
+  Object.entries(varNames).forEach(([k,label]) => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (s.changed.includes(k) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${label}</span><span class="var-val">${s.vars[k]}</span>`;
+    vt.appendChild(box);
+  });
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line,i) => {
+    const d = document.createElement('div');
+    d.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+    d.textContent = line;
+    cp.appendChild(d);
+  });
+
+  // Info card
+  const ic = document.getElementById('infoCard');
+  ic.innerHTML = `
+    <div class="info-top">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-counter">Step ${cur + 1} / ${steps.length}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-text">${s.text}</div>
+  `;
+
+  // Progress dots
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = '';
+  steps.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+}
+
+function renderMinimax(data){
+  const cands = data.candidates;
+  let html = '<div class="minimax-table-wrap"><table class="minimax-table"><thead><tr><th>Word</th>';
+  for(let m=0;m<=6;m++) html += `<th>${m}</th>`;
+  html += '<th>Max</th></tr></thead><tbody>';
+
+  cands.forEach(w => {
+    const dist = getDistribution(w, cands);
+    const mx = Math.max(...dist);
+    const isBest = w === data.bestWord;
+    html += `<tr class="${isBest ? 'best-row' : ''}">`;
+    html += `<td class="word-cell">${w}</td>`;
+    for(let m=0;m<=6;m++){
+      const isMax = dist[m] === mx && dist[m] > 0;
+      html += `<td class="${isMax ? 'max-cell' : ''}">${dist[m] || '·'}</td>`;
+    }
+    html += `<td class="max-val">${mx}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function renderCompare(data, matchCount){
+  const g = data.guess, s = data.secret;
+  let html = '<div class="comparison-panel">';
+  // Guess row
+  html += '<div class="comp-row"><span class="comp-row-label">Guess</span>';
+  for(let i=0;i<6;i++){
+    const cls = g[i]===s[i] ? 'match' : 'mismatch';
+    html += `<div class="comp-cell ${cls}">${g[i]}</div>`;
+  }
+  html += '</div>';
+  // Secret row
+  html += '<div class="comp-row"><span class="comp-row-label">Secret</span>';
+  for(let i=0;i<6;i++){
+    const cls = g[i]===s[i] ? 'match' : 'mismatch';
+    html += `<div class="comp-cell ${cls}">${s[i]}</div>`;
+  }
+  html += '</div>';
+  // Result row
+  html += '<div class="comp-row"><span class="comp-row-label">Match?</span>';
+  for(let i=0;i<6;i++){
+    html += `<div class="comp-result-icon">${g[i]===s[i] ? '✓' : '✗'}</div>`;
+  }
+  html += '</div>';
+  // Badge
+  html += `<div class="match-badge positive">Exact Matches: ${matchCount}</div>`;
+  html += '</div>';
+  return html;
+}
+
+function renderFilter(data){
+  let html = '<div class="filter-panel">';
+  html += `<div class="pool-label" style="margin-bottom:8px;">Filtering: keep words with match("${data.guess}", w) = ${data.requiredMatch}</div>`;
+  data.rows.forEach(r => {
+    const cls = r.kept ? 'kept' : 'removed';
+    html += `<div class="filter-row ${cls}">
+      <span class="filter-word">${r.word}</span>
+      <span class="filter-match">match = ${r.m} ${r.m === data.requiredMatch ? '= ' + data.requiredMatch : '≠ ' + data.requiredMatch}</span>
+      <span class="filter-verdict">${r.kept ? '✓ Keep' : '✗ Remove'}</span>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function go(d){
+  const n = cur + d;
+  if(n >= 0 && n < steps.length){ cur = n; render(); }
+}
+function reset(){ cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+  if(e.key === 'r' || e.key === 'R') reset();
+});
+
+function toggleCard(header){
+  header.parentElement.classList.toggle('collapsed');
+}
+
+render();
+</script>
+</body>
+</html>
