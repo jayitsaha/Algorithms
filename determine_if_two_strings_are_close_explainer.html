@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Determine if Two Strings Are Close – Step-by-Step Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:1.5rem}
+.container{max-width:880px;margin:0 auto}
+
+/* Header */
+.header{text-align:center;margin-bottom:2rem}
+.header h1{font-size:clamp(20px,4vw,28px);font-weight:700;letter-spacing:-.5px}
+.header .subtitle{font-size:14px;color:var(--text2);margin-top:4px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.tag-technique{background:var(--cyan-bg);color:var(--cyan-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.card.collapsed .card-body{display:none}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text)}
+.collapse-icon{margin-left:auto;font-size:14px;color:var(--text3);transition:transform .2s}
+.card.collapsed .collapse-icon{transform:rotate(-90deg)}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.step-text{color:var(--text);line-height:1.5}
+
+/* Decision Tree */
+.decision-tree{display:flex;flex-direction:column;gap:12px;margin:1rem 0}
+.dt-node{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:var(--radius);font-size:14px}
+.dt-check{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.dt-pass{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-text)}
+.dt-fail{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red-text)}
+.dt-icon{font-size:18px;flex-shrink:0}
+.dt-label{font-weight:600}
+
+/* Comparison Table */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1rem 0}
+.cmp-panel{border-radius:var(--radius);padding:14px;border:1px solid var(--border)}
+.cmp-panel h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.cmp-panel.w1{background:var(--blue-bg);border-color:var(--blue-border)}.cmp-panel.w1 h4{color:var(--blue-mid)}
+.cmp-panel.w2{background:var(--purple-bg);border-color:var(--purple-border)}.cmp-panel.w2 h4{color:var(--purple-mid)}
+.freq-row{display:flex;justify-content:space-between;padding:3px 0;font-family:var(--mono);font-size:13px}
+.freq-char{font-weight:600;color:var(--text)}
+.freq-count{color:var(--text2)}
+
+/* Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius)}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Static Code */
+.static-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;white-space:pre;color:var(--text2);margin:.75rem 0}
+.static-code .cmt{color:var(--text3)}
+
+/* Proof */
+.proof-block{background:var(--bg2);border-radius:var(--radius);padding:16px;margin:1rem 0;font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2)}
+.proof-block .hl{color:var(--blue-mid);font-weight:600}
+.proof-block .hl-g{color:var(--green-mid);font-weight:600}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px}
+.related-problems ul{list-style:none;padding:0;margin:.5rem 0}
+.related-problems li{padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+.related-problems li:last-child{border:none}
+.related-problems li strong{color:var(--text)}
+
+/* ── Visualization ── */
+.viz-container{margin-top:1rem}
+.phase-badge{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 12px;border-radius:20px;margin-bottom:16px}
+.phase-setup{background:var(--bg2);color:var(--text3)}
+.phase-count{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-check-set{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-check-freq{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-done{background:var(--green-bg);color:var(--green-mid)}
+.phase-fail{background:var(--red-bg);color:var(--red-mid)}
+
+/* Strings display */
+.string-pair{display:flex;flex-direction:column;gap:12px;margin:0 auto}
+.string-row{display:flex;align-items:center;gap:8px}
+.string-label{font-size:12px;font-weight:700;width:52px;text-align:right;flex-shrink:0}
+.string-label.w1{color:var(--blue-mid)}
+.string-label.w2{color:var(--purple-mid)}
+.cell-row{display:flex;gap:3px}
+.cell{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-family:var(--mono);font-size:17px;font-weight:600;border:2px solid var(--border);background:var(--surface);transition:all .25s}
+.cell.normal{background:var(--surface);color:var(--text);border-color:var(--border)}
+.cell.read{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-mid)}
+.cell.active{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-mid);transform:scale(1.08)}
+.cell.word{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-mid)}
+.cell.found{background:var(--green-bg);color:var(--green-text);border-color:var(--green-mid)}
+.cell.done{background:var(--cyan-bg);color:var(--cyan-text);border-color:var(--cyan-mid)}
+.cell.fail{background:var(--red-bg);color:var(--red-text);border-color:var(--red-mid)}
+
+/* Freq Bars */
+.freq-section{margin-top:1.25rem}
+.freq-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px}
+.freq-bars{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.freq-group{display:flex;flex-direction:column;align-items:center;gap:4px}
+.freq-char-label{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text)}
+.bar-pair{display:flex;gap:3px;align-items:flex-end;height:80px}
+.bar{width:20px;border-radius:4px 4px 0 0;transition:all .3s;min-height:0}
+.bar.w1{background:var(--blue-mid);opacity:.75}
+.bar.w2{background:var(--purple-mid);opacity:.75}
+.bar.match{opacity:1}
+.bar.mismatch{border:2px solid var(--red-mid);opacity:1}
+.bar-count{font-family:var(--mono);font-size:10px;color:var(--text2);text-align:center}
+
+/* Sorted freq display */
+.sorted-freq{display:flex;gap:6px;justify-content:center;margin:8px 0;flex-wrap:wrap}
+.sf-chip{padding:4px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:13px;font-weight:600}
+.sf-chip.w1{background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border)}
+.sf-chip.w2{background:var(--purple-bg);color:var(--purple-mid);border:1px solid var(--purple-border)}
+.sf-chip.ok{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.sf-chip.bad{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border)}
+
+/* Set display */
+.set-display{display:flex;gap:6px;justify-content:center;margin:6px 0;flex-wrap:wrap}
+.set-chip{padding:4px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:14px;font-weight:600}
+.set-chip.w1{background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border)}
+.set-chip.w2{background:var(--purple-bg);color:var(--purple-mid);border:1px solid var(--purple-border)}
+.set-chip.ok{border:2px solid var(--green-mid)}
+.set-chip.bad{border:2px solid var(--red-mid)}
+
+/* Var tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:20px;text-align:center}
+
+/* Code panel */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500}
+
+/* Info card */
+.info-card{margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.step-counter{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px}
+.info-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.info-text{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* Progress dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--border);transition:all .2s;cursor:pointer}
+.dot.active{background:var(--blue-mid);border-color:var(--blue-mid);transform:scale(1.3)}
+.dot.visited{background:var(--blue-bg);border-color:var(--blue-border)}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--bg2);border-color:var(--border2)}
+.btn-reset{color:var(--red-mid);border-color:var(--red-border)}
+.btn-reset:hover{background:var(--red-bg)}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
+
+/* Legend */
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--border)}
+.sw-w1{background:var(--blue-bg);border-color:var(--blue-mid)}
+.sw-w2{background:var(--purple-bg);border-color:var(--purple-mid)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-mid)}
+.sw-ok{background:var(--green-bg);border-color:var(--green-mid)}
+.sw-fail{background:var(--red-bg);border-color:var(--red-mid)}
+.sw-done{background:var(--cyan-bg);border-color:var(--cyan-mid)}
+
+@media(max-width:600px){
+  .cell{width:32px;height:32px;font-size:14px}
+  .cmp-grid{grid-template-columns:1fr}
+  .bar-pair{height:60px}.bar{width:16px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══ Header ═══ -->
+<div class="header">
+  <h1>Determine if Two Strings Are Close</h1>
+  <div class="subtitle">LeetCode #1657 · Frequency Sorting Comparison</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-technique">Frequency Sort</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(1) Space</span>
+  </div>
+</div>
+
+<!-- ═══ Section 1 ═══ -->
+<div class="card" id="card-1">
+  <div class="section-header" onclick="toggleCard('card-1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Two strings are "close" if you can transform one into the other using two operations any number of times:</p>
+    <ul style="margin:.5rem 0 .5rem 1.25rem;color:var(--text2)">
+      <li><strong>Op 1 — Swap any two characters:</strong> This means you can rearrange characters in any order. So "abc" and "cab" are always reachable from each other.</li>
+      <li><strong>Op 2 — Swap all occurrences of two characters:</strong> e.g., all a's become b's and all b's become a's. This swaps the <em>frequency counts</em> between two characters.</li>
+    </ul>
+
+    <p style="margin-top:.75rem"><strong>Example:</strong> word1 = "aabbcc", word2 = "ccbbaa"</p>
+    <div class="cmp-grid">
+      <div class="cmp-panel w1"><h4>word1: aabbcc</h4>
+        <div class="freq-row"><span class="freq-char">a</span><span class="freq-count">× 2</span></div>
+        <div class="freq-row"><span class="freq-char">b</span><span class="freq-count">× 2</span></div>
+        <div class="freq-row"><span class="freq-char">c</span><span class="freq-count">× 2</span></div>
+      </div>
+      <div class="cmp-panel w2"><h4>word2: ccbbaa</h4>
+        <div class="freq-row"><span class="freq-char">a</span><span class="freq-count">× 2</span></div>
+        <div class="freq-row"><span class="freq-char">b</span><span class="freq-count">× 2</span></div>
+        <div class="freq-row"><span class="freq-char">c</span><span class="freq-count">× 2</span></div>
+      </div>
+    </div>
+    <p style="margin-top:.5rem;color:var(--text2)">Same characters, same frequencies → just rearrange with Op 1 → <strong>True</strong></p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Op 1 lets you rearrange freely (any permutation). Op 2 lets you swap frequency <em>labels</em> between characters. So two strings are close iff they have the <strong>same character set</strong> and the <strong>same multiset of frequencies</strong> (when sorted).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 2 ═══ -->
+<div class="card" id="card-2">
+  <div class="section-header" onclick="toggleCard('card-2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Three-Check Comparison</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>We don't need to simulate the operations. Instead, we check three necessary and sufficient conditions:</p>
+
+    <div class="decision-tree">
+      <div class="dt-node dt-check"><span class="dt-icon">1️⃣</span><span class="dt-label">Check 1: Same length?</span></div>
+      <div class="dt-node dt-check"><span class="dt-icon">2️⃣</span><span class="dt-label">Check 2: Same character set?</span></div>
+      <div class="dt-node dt-check"><span class="dt-icon">3️⃣</span><span class="dt-label">Check 3: Same sorted frequency list?</span></div>
+      <div class="dt-node dt-pass"><span class="dt-icon">✅</span><span class="dt-label">All pass → return True</span></div>
+      <div class="dt-node dt-fail"><span class="dt-icon">❌</span><span class="dt-label">Any fail → return False</span></div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Length check</strong> — If lengths differ, impossible (no operation adds/removes characters)</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>Count frequencies</strong> — Use Counter for both strings</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text"><strong>Compare character sets</strong> — Both must have exactly the same letters (Op 2 can't create new characters)</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text"><strong>Compare sorted frequencies</strong> — Sort the frequency lists and check equality (Op 2 can shuffle frequencies between existing characters)</span></div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Sorted Frequencies?</div>
+      <p>Op 2 swaps the counts between two characters. This means we can reassign which character gets which count, but the <em>set of counts itself</em> must remain the same. Sorting both frequency lists normalizes them for comparison.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 3 ═══ -->
+<div class="card" id="card-3">
+  <div class="section-header" onclick="toggleCard('card-3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>Neither operation can change: (1) the set of distinct characters, or (2) the multiset of frequency values. Op 1 preserves all counts. Op 2 only swaps counts between two existing characters — same frequencies, different labels.</p>
+    </div>
+
+    <div class="proof-block">
+      <span class="hl">Op 1 (swap positions):</span> Characters stay the same, just reordered.<br>
+      → <span class="hl-g">Set of chars: unchanged. Frequency multiset: unchanged.</span><br><br>
+      <span class="hl">Op 2 (swap all a↔b):</span> Count of 'a' and count of 'b' trade places.<br>
+      → <span class="hl-g">Set of chars: unchanged (both existed). Frequency multiset: unchanged (same values, swapped labels).</span><br><br>
+      <span class="hl">Sufficiency:</span> If char sets match and sorted freqs match, we can:<br>
+      1. Use Op 2 to assign the right frequency to each character<br>
+      2. Use Op 1 to arrange characters into the exact target order ✓
+    </div>
+
+    <h4 style="margin-top:1rem">Edge Cases</h4>
+    <ul style="margin:.5rem 0 0 1.25rem;color:var(--text2)">
+      <li><strong>Different lengths:</strong> Immediately false (no ops add/remove chars)</li>
+      <li><strong>word1 has 'a' but word2 doesn't:</strong> False — Op 2 can't create new characters</li>
+      <li><strong>Same chars but different frequency distributions:</strong> e.g., [1,1,3] vs [1,2,2] → False</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake</div>
+      <p>Don't just check if character sets match! "aab" and "abb" have the same char set {a,b} but different sorted frequencies: [1,2] vs [1,2] — wait, those ARE equal. But "aaab" vs "aabb" → {a,b} same, but [1,3] vs [2,2] → NOT close.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 4 ═══ -->
+<div class="card" id="card-4">
+  <div class="section-header" onclick="toggleCard('card-4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="static-code"><span class="cmt"># Solution 1 — Counter + Sorted Frequencies (Interview Pick)</span>
+from collections import Counter
+
+def closeStrings(word1: str, word2: str) -> bool:
+    if len(word1) != len(word2):          <span class="cmt"># Check 1: same length</span>
+        return False
+    c1, c2 = Counter(word1), Counter(word2)
+    if c1.keys() != c2.keys():            <span class="cmt"># Check 2: same char set</span>
+        return False
+    return sorted(c1.values()) == sorted(c2.values())  <span class="cmt"># Check 3</span></div>
+
+    <div class="static-code"><span class="cmt"># Solution 2 — Manual 26-Array (No imports)</span>
+def closeStrings(word1: str, word2: str) -> bool:
+    if len(word1) != len(word2):
+        return False
+    freq1, freq2 = [0]*26, [0]*26
+    for c in word1: freq1[ord(c)-97] += 1
+    for c in word2: freq2[ord(c)-97] += 1
+    <span class="cmt"># Same char set: both have non-zero at same positions</span>
+    for i in range(26):
+        if (freq1[i] == 0) != (freq2[i] == 0):
+            return False
+    freq1.sort(); freq2.sort()
+    return freq1 == freq2</div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Interview Tip</div>
+      <p>Solution 1 is cleaner for interviews. Solution 2 shows you understand the O(1) space argument — only 26 letters, so the frequency arrays are constant size regardless of input.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 5 ═══ -->
+<div class="card" id="card-5">
+  <div class="section-header" onclick="toggleCard('card-5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Understand What the Operations Preserve</div>
+        <p>Don't try to simulate! Instead ask: "What properties are <em>invariant</em> under these operations?" Op 1 = any rearrangement → order doesn't matter. Op 2 = swap frequency labels → which char has which count doesn't matter.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Invariants</div>
+        <p>Two things can NEVER change: (1) the set of characters that appear, and (2) the multiset of frequency values. These are necessary AND sufficient conditions.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Translate to Code</div>
+        <p>Counter for both strings → compare .keys() for char set → compare sorted(.values()) for frequency multiset. Three checks, one-liner each.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="margin-bottom:8px">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"The key insight is figuring out what's invariant under these operations. Op 1 lets me rearrange freely, so character positions don't matter — only frequencies. Op 2 lets me swap frequencies between characters, so it doesn't matter which character has which count — only the multiset of counts matters. But Op 2 can't create new characters, so the character set must match. I'll check three things: same length, same character sets, and same sorted frequency lists."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 6: Interactive Walkthrough ═══ -->
+<div class="card" id="card-6">
+  <div class="section-header" onclick="toggleCard('card-6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="viz-container">
+      <div id="phase-badge" class="phase-badge phase-setup">Setup</div>
+
+      <div class="string-pair">
+        <div class="string-row"><span class="string-label w1">word1</span><div class="cell-row" id="w1-cells"></div></div>
+        <div class="string-row"><span class="string-label w2">word2</span><div class="cell-row" id="w2-cells"></div></div>
+      </div>
+
+      <div class="freq-section" id="freq-section" style="display:none">
+        <div class="freq-section-title" id="freq-title">Character Frequencies</div>
+        <div class="freq-bars" id="freq-bars"></div>
+      </div>
+
+      <div id="set-section" style="display:none;margin-top:1rem">
+        <div class="freq-section-title">Character Sets</div>
+        <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+          <div><div style="font-size:11px;color:var(--blue-mid);font-weight:600;margin-bottom:4px;text-align:center">WORD1</div><div class="set-display" id="set1"></div></div>
+          <div><div style="font-size:11px;color:var(--purple-mid);font-weight:600;margin-bottom:4px;text-align:center">WORD2</div><div class="set-display" id="set2"></div></div>
+        </div>
+      </div>
+
+      <div id="sorted-section" style="display:none;margin-top:1rem">
+        <div class="freq-section-title">Sorted Frequency Lists</div>
+        <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+          <div><div style="font-size:11px;color:var(--blue-mid);font-weight:600;margin-bottom:4px;text-align:center">WORD1</div><div class="sorted-freq" id="sorted1"></div></div>
+          <div><div style="font-size:11px;color:var(--purple-mid);font-weight:600;margin-bottom:4px;text-align:center">WORD2</div><div class="sorted-freq" id="sorted2"></div></div>
+        </div>
+      </div>
+
+      <div class="var-tracker" id="var-tracker"></div>
+
+      <div class="code-panel" id="code-panel"></div>
+
+      <div class="info-card" id="info-card">
+        <div class="step-counter" id="step-counter"></div>
+        <div class="info-title" id="info-title"></div>
+        <div class="info-text" id="info-text"></div>
+      </div>
+
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <div class="controls">
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-reset" onclick="reset()">Reset</button>
+        <button class="btn" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-w1"></div>word1</div>
+        <div class="legend-item"><div class="legend-swatch sw-w2"></div>word2</div>
+        <div class="legend-item"><div class="legend-swatch sw-active"></div>Processing</div>
+        <div class="legend-item"><div class="legend-swatch sw-ok"></div>Match</div>
+        <div class="legend-item"><div class="legend-swatch sw-fail"></div>Mismatch</div>
+        <div class="legend-item"><div class="legend-swatch sw-done"></div>Result</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 7 ═══ -->
+<div class="card" id="card-7">
+  <div class="section-header" onclick="toggleCard('card-7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ Don't simulate — find <strong>invariants</strong> of the operations</div>
+      <div class="takeaway">✓ Op 1 (swap) = any rearrangement → only frequencies matter</div>
+      <div class="takeaway">✓ Op 2 (transform) = swap frequency labels → only the multiset of counts matters</div>
+      <div class="takeaway">✓ Three checks: same length, same char set, same sorted frequencies</div>
+      <div class="takeaway">✓ O(n) time, O(1) space (only 26 lowercase letters)</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin:0;padding-left:1.25rem">
+        <li>"Can you transform X into Y using operations?"</li>
+        <li>Problems where you need to reason about <em>what operations preserve</em></li>
+        <li>Frequency-based equivalence (anagram variants, isomorphic strings)</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4 style="margin-bottom:4px">Related Problems</h4>
+      <ul>
+        <li><strong>Valid Anagram</strong> (Easy) — Same frequency comparison, simpler case</li>
+        <li><strong>Group Anagrams</strong> (Medium) — Group by sorted char or frequency tuple</li>
+        <li><strong>Isomorphic Strings</strong> (Easy) — Character mapping invariant</li>
+        <li><strong>Word Pattern</strong> (Easy) — Bijective mapping check</li>
+        <li><strong>Ransom Note</strong> (Easy) — Frequency subset check</li>
+        <li><strong>Find All Anagrams in a String</strong> (Medium) — Sliding window + frequency</li>
+        <li><strong>Minimum Window Substring</strong> (Hard) — Frequency matching with window</li>
+        <li><strong>Zigzag Conversion</strong> (Medium) — String transformation, same guide section</li>
+      </ul>
+      <p style="margin-top:.5rem;font-size:13px;color:var(--text3)">These problems share the core technique: frequency-based string analysis to determine equivalence or matching.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleCard(id){document.getElementById(id).classList.toggle('collapsed')}
+
+/* ── Example data ── */
+const W1 = "cabbba";
+const W2 = "abbccc";
+
+/* Character frequencies */
+function getFreq(s){const f={};for(const c of s)f[c]=(f[c]||0)+1;return f}
+const F1 = getFreq(W1); // {c:1, a:2, b:3}
+const F2 = getFreq(W2); // {a:1, b:2, c:3}
+const allChars = [...new Set([...Object.keys(F1),...Object.keys(F2)])].sort();
+
+const CODE_LINES = [
+  'def closeStrings(word1, word2):',
+  '    if len(word1) != len(word2):',
+  '        return False',
+  '    c1 = Counter(word1)',
+  '    c2 = Counter(word2)',
+  '    if c1.keys() != c2.keys():',
+  '        return False',
+  '    return sorted(c1.values()) == sorted(c2.values())'
+];
+
+const STEPS = [
+  { // 0
+    w1States: Array(6).fill('normal'), w2States: Array(6).fill('normal'),
+    showFreq:false, showSets:false, showSorted:false,
+    phase:'Setup', phaseClass:'phase-setup', activeLine:0,
+    title:'Two Strings to Compare',
+    text:'word1 = "cabbba", word2 = "abbccc". Are these "close"? We need to check if we can transform one into the other using character swaps (Op 1) and frequency-label swaps (Op 2).',
+    vars:{Check:'—',Len1:'6',Len2:'6',Result:'—'}, changed:[]
+  },
+  { // 1
+    w1States: Array(6).fill('read'), w2States: Array(6).fill('word'),
+    showFreq:false, showSets:false, showSorted:false,
+    phase:'Check 1', phaseClass:'phase-count', activeLine:1,
+    title:'Check 1: Same Length?',
+    text:'len(word1) = 6, len(word2) = 6. Lengths match! ✓ If they differed, we\'d return False immediately — no operation can add or remove characters.',
+    vars:{Check:'Length',Len1:'6',Len2:'6',Result:'✓'}, changed:['Check','Result']
+  },
+  { // 2
+    w1States: ['active','active','active','active','active','active'],
+    w2States: Array(6).fill('normal'),
+    showFreq:true, showSets:false, showSorted:false,
+    freqHighlight:'w1',
+    phase:'Count', phaseClass:'phase-count', activeLine:3,
+    title:'Count Frequencies: word1',
+    text:'Counter("cabbba") → {c:1, a:2, b:3}. Character "b" appears most (3 times), then "a" (2), then "c" (1).',
+    vars:{Check:'Freq',Len1:'6',Len2:'6',Result:'—'}, changed:['Check','Result']
+  },
+  { // 3
+    w1States: Array(6).fill('normal'),
+    w2States: ['active','active','active','active','active','active'],
+    showFreq:true, showSets:false, showSorted:false,
+    freqHighlight:'w2',
+    phase:'Count', phaseClass:'phase-count', activeLine:4,
+    title:'Count Frequencies: word2',
+    text:'Counter("abbccc") → {a:1, b:2, c:3}. Here "c" appears most (3 times), then "b" (2), then "a" (1). Notice: different chars have different counts than word1!',
+    vars:{Check:'Freq',Len1:'6',Len2:'6',Result:'—'}, changed:[]
+  },
+  { // 4
+    w1States: Array(6).fill('read'), w2States: Array(6).fill('word'),
+    showFreq:true, showSets:true, showSorted:false,
+    freqHighlight:'both', setsMatch:true,
+    phase:'Check 2', phaseClass:'phase-check-set', activeLine:5,
+    title:'Check 2: Same Character Set?',
+    text:'word1 chars: {a, b, c}. word2 chars: {a, b, c}. Same set! ✓ Both strings use exactly the same letters. Op 2 can only swap between existing characters, so this is required.',
+    vars:{Check:'Char Set',Len1:'6',Len2:'6',Result:'✓'}, changed:['Check','Result']
+  },
+  { // 5
+    w1States: Array(6).fill('read'), w2States: Array(6).fill('word'),
+    showFreq:true, showSets:true, showSorted:true,
+    freqHighlight:'both', setsMatch:true, sortedMatch:null,
+    phase:'Check 3', phaseClass:'phase-check-freq', activeLine:7,
+    title:'Check 3: Sort Both Frequency Lists',
+    text:'word1 frequencies: {c:1, a:2, b:3} → sorted values: [1, 2, 3]. word2 frequencies: {a:1, b:2, c:3} → sorted values: [1, 2, 3]. Sorting normalizes which character has which count.',
+    vars:{Check:'Sort Freq',Len1:'6',Len2:'6',Result:'—'}, changed:['Check','Result']
+  },
+  { // 6
+    w1States: Array(6).fill('read'), w2States: Array(6).fill('word'),
+    showFreq:true, showSets:true, showSorted:true,
+    freqHighlight:'both', setsMatch:true, sortedMatch:true,
+    phase:'Check 3', phaseClass:'phase-check-freq', activeLine:7,
+    title:'Compare Sorted Frequencies: [1,2,3] == [1,2,3]',
+    text:'Both sorted frequency lists are [1, 2, 3]. They match! ✓ This means Op 2 can reassign: give "a" the count that "c" had (1→3), etc. The frequency distribution is compatible.',
+    vars:{Check:'Sort Freq',Len1:'6',Len2:'6',Result:'✓'}, changed:['Result']
+  },
+  { // 7
+    w1States: Array(6).fill('done'), w2States: Array(6).fill('done'),
+    showFreq:true, showSets:true, showSorted:true,
+    freqHighlight:'both', setsMatch:true, sortedMatch:true,
+    phase:'Result: True ✓', phaseClass:'phase-done', activeLine:7,
+    title:'All Three Checks Pass → True',
+    text:'✅ "cabbba" and "abbccc" ARE close! Using Op 2: swap a↔c to get matching frequencies per character, then Op 1 to rearrange into exact positions. The three checks (length, char set, sorted freq) are necessary AND sufficient.',
+    vars:{Check:'Done',Len1:'6',Len2:'6',Result:'True ✓'}, changed:['Check','Result']
+  }
+];
+
+let cur = 0;
+
+function render(){
+  const s = STEPS[cur];
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phase;
+  badge.className = 'phase-badge ' + s.phaseClass;
+
+  // String cells
+  renderCells('w1-cells', W1, s.w1States);
+  renderCells('w2-cells', W2, s.w2States);
+
+  // Freq bars
+  const freqSec = document.getElementById('freq-section');
+  freqSec.style.display = s.showFreq ? '' : 'none';
+  if(s.showFreq) renderFreqBars(s.freqHighlight);
+
+  // Sets
+  const setSec = document.getElementById('set-section');
+  setSec.style.display = s.showSets ? '' : 'none';
+  if(s.showSets) renderSets(s.setsMatch);
+
+  // Sorted
+  const sortSec = document.getElementById('sorted-section');
+  sortSec.style.display = s.showSorted ? '' : 'none';
+  if(s.showSorted) renderSorted(s.sortedMatch);
+
+  // Variables
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for(const [k,v] of Object.entries(s.vars)){
+    const box = document.createElement('div');
+    box.className = 'var-box' + (s.changed.includes(k) ? ' changed' : '');
+    box.innerHTML = '<span class="var-name">'+k+'</span><span class="var-val">'+v+'</span>';
+    vt.appendChild(box);
+  }
+
+  // Code
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line,i)=>{
+    const div = document.createElement('div');
+    div.className = 'code-line' + (i===s.activeLine?' active':'');
+    div.textContent = line;
+    cp.appendChild(div);
+  });
+
+  // Info
+  document.getElementById('step-counter').textContent = 'Step '+(cur+1)+' of '+STEPS.length;
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-text').textContent = s.text;
+
+  // Dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  STEPS.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot'+(i===cur?' active':(i<cur?' visited':''));
+    d.addEventListener('click',()=>{cur=i;render()});
+    dots.appendChild(d);
+  });
+}
+
+function renderCells(id, word, states){
+  const row = document.getElementById(id);
+  row.innerHTML = '';
+  for(let i=0;i<word.length;i++){
+    const c = document.createElement('div');
+    c.className = 'cell '+states[i];
+    c.textContent = word[i];
+    row.appendChild(c);
+  }
+}
+
+function renderFreqBars(highlight){
+  const bars = document.getElementById('freq-bars');
+  bars.innerHTML = '';
+  const maxF = Math.max(...Object.values(F1),...Object.values(F2));
+  allChars.forEach(ch=>{
+    const g = document.createElement('div');
+    g.className = 'freq-group';
+    const label = document.createElement('div');
+    label.className = 'freq-char-label';
+    label.textContent = ch;
+    const pair = document.createElement('div');
+    pair.className = 'bar-pair';
+    const b1 = document.createElement('div');
+    b1.className = 'bar w1' + (highlight==='w1'||highlight==='both'?' match':'');
+    b1.style.height = ((F1[ch]||0)/maxF*70)+'px';
+    const b2 = document.createElement('div');
+    b2.className = 'bar w2' + (highlight==='w2'||highlight==='both'?' match':'');
+    b2.style.height = ((F2[ch]||0)/maxF*70)+'px';
+    pair.appendChild(b1);pair.appendChild(b2);
+    const cnt = document.createElement('div');
+    cnt.className = 'bar-count';
+    cnt.textContent = (F1[ch]||0)+' / '+(F2[ch]||0);
+    g.appendChild(label);g.appendChild(pair);g.appendChild(cnt);
+    bars.appendChild(g);
+  });
+}
+
+function renderSets(match){
+  const s1 = document.getElementById('set1');
+  const s2 = document.getElementById('set2');
+  s1.innerHTML = '';s2.innerHTML = '';
+  const chars1 = Object.keys(F1).sort();
+  const chars2 = Object.keys(F2).sort();
+  const cls = match ? ' ok' : ' bad';
+  chars1.forEach(c=>{const d=document.createElement('div');d.className='set-chip w1'+cls;d.textContent=c;s1.appendChild(d)});
+  chars2.forEach(c=>{const d=document.createElement('div');d.className='set-chip w2'+cls;d.textContent=c;s2.appendChild(d)});
+}
+
+function renderSorted(match){
+  const s1 = document.getElementById('sorted1');
+  const s2 = document.getElementById('sorted2');
+  s1.innerHTML = '';s2.innerHTML = '';
+  const v1 = Object.values(F1).sort((a,b)=>a-b);
+  const v2 = Object.values(F2).sort((a,b)=>a-b);
+  const cls = match===true?' ok':(match===false?' bad':'');
+  v1.forEach(v=>{const d=document.createElement('div');d.className='sf-chip w1'+cls;d.textContent=v;s1.appendChild(d)});
+  v2.forEach(v=>{const d=document.createElement('div');d.className='sf-chip w2'+cls;d.textContent=v;s2.appendChild(d)});
+}
+
+function go(dir){const n=cur+dir;if(n>=0&&n<STEPS.length){cur=n;render()}}
+function reset(){cur=0;render()}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')go(1);
+  if(e.key==='ArrowLeft')go(-1);
+  if(e.key==='r'||e.key==='R')reset();
+});
+
+render();
+</script>
+</body>
+</html>

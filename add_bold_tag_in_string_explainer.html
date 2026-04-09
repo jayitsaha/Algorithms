@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Bold Tag in String — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN TOKENS ═══ */
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+    --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+    --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+    --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+    --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+    --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+    --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+  }
+}
+
+/* ═══ RESET & BASE ═══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:820px;margin:0 auto;}
+
+/* ═══ HEADER ═══ */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.header .subtitle{font-size:14px;color:var(--text2);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.card.collapsed .card-body{display:none;}
+.card-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.card-header:hover{opacity:0.85;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.collapse-icon{font-size:18px;color:var(--text3);transition:transform 0.25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card-body{margin-top:1rem;}
+
+/* ═══ CONCEPT BOXES ═══ */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* ═══ ALGORITHM STEPS ═══ */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/* ═══ STRATEGY ═══ */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* ═══ WALKTHROUGH — STRING DISPLAY ═══ */
+.viz-area{text-align:center;margin:1.25rem 0;}
+.string-row{display:inline-flex;gap:2px;justify-content:center;flex-wrap:wrap;}
+.char-cell{width:36px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:600;border-radius:6px;background:var(--bg2);border:2px solid var(--border);color:var(--text);transition:all 0.25s;position:relative;}
+.char-cell .idx{position:absolute;bottom:-16px;font-size:9px;color:var(--text3);font-weight:400;}
+
+/* Cell states */
+.char-cell.scanning{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-text);}
+.char-cell.matched{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+.char-cell.bold-marked{border-color:var(--amber-border);background:var(--amber-bg);color:var(--amber-text);}
+.char-cell.bold-final{border-color:var(--purple-border);background:var(--purple-bg);color:var(--purple-text);}
+.char-cell.done{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+
+/* ═══ BOLD ARRAY ROW ═══ */
+.bold-row{display:inline-flex;gap:2px;justify-content:center;flex-wrap:wrap;margin-top:24px;}
+.bold-cell{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;border-radius:4px;background:var(--bg2);border:1px solid var(--border);color:var(--text3);transition:all 0.25s;}
+.bold-cell.on{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);}
+.bold-cell.highlight{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid);}
+.bold-row-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-top:18px;margin-bottom:4px;}
+
+/* ═══ WORDS PANEL ═══ */
+.words-panel{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.word-chip{font-family:var(--mono);font-size:13px;font-weight:600;padding:6px 14px;border-radius:20px;background:var(--bg2);border:2px solid var(--border);color:var(--text2);transition:all 0.25s;}
+.word-chip.active{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-mid);}
+.word-chip.matched-word{border-color:var(--green-border);background:var(--green-bg);color:var(--green-mid);}
+
+/* ═══ RESULT STRING ═══ */
+.result-display{font-family:var(--mono);font-size:15px;font-weight:500;padding:12px 18px;background:var(--bg2);border-radius:var(--radius);margin-top:1rem;text-align:center;color:var(--text);line-height:1.8;word-break:break-all;}
+.result-display b{color:var(--purple-mid);font-weight:700;}
+.result-display .tag-char{color:var(--red-mid);font-weight:700;}
+
+/* ═══ INTERVAL VIZ ═══ */
+.interval-track{position:relative;height:36px;background:var(--bg2);border-radius:var(--radius);margin:1rem 0;overflow:hidden;}
+.interval-bar{position:absolute;top:4px;height:28px;border-radius:4px;transition:all 0.3s;}
+.interval-bar.raw{background:var(--blue-bg);border:2px solid var(--blue-border);}
+.interval-bar.merged{background:var(--purple-bg);border:2px solid var(--purple-border);}
+
+/* ═══ VAR TRACKER ═══ */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* ═══ CODE PANEL ═══ */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+.code-comment{color:var(--text3);font-style:italic;}
+
+/* ═══ INFO CARD ═══ */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 10px;border-radius:20px;margin-bottom:8px;}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-mark{background:var(--green-bg);color:var(--green-mid);}
+.phase-merge{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-build{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-done{background:var(--cyan-bg);color:var(--cyan-mid);}
+.info-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.info-step{font-size:11px;color:var(--text3);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* ═══ PROGRESS DOTS ═══ */
+.progress-dots{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all 0.25s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.4);}
+.dot.done{background:var(--green-mid);}
+
+/* ═══ CONTROLS ═══ */
+.controls{display:flex;gap:8px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:white;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* ═══ LEGEND ═══ */
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:1rem;font-size:11px;color:var(--text2);}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-swatch{width:14px;height:14px;border-radius:3px;border:2px solid;}
+.legend-swatch.sw-scan{background:var(--blue-bg);border-color:var(--blue-border);}
+.legend-swatch.sw-match{background:var(--green-bg);border-color:var(--green-border);}
+.legend-swatch.sw-bold{background:var(--amber-bg);border-color:var(--amber-border);}
+.legend-swatch.sw-merge{background:var(--purple-bg);border-color:var(--purple-border);}
+
+/* ═══ DECISION TREE (static) ═══ */
+.decision-tree{display:flex;flex-direction:column;gap:10px;margin:1rem 0;align-items:center;}
+.dt-node{padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:600;text-align:center;max-width:340px;}
+.dt-node.question{background:var(--blue-bg);border:2px solid var(--blue-border);color:var(--blue-text);}
+.dt-node.action{background:var(--green-bg);border:2px solid var(--green-border);color:var(--green-text);}
+.dt-node.result{background:var(--purple-bg);border:2px solid var(--purple-border);color:var(--purple-text);}
+.dt-arrow{font-size:16px;color:var(--text3);}
+
+/* ═══ COMPARISON TABLE ═══ */
+.cmp-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.cmp-table th,.cmp-table td{padding:8px 12px;border:1px solid var(--border);text-align:left;}
+.cmp-table th{background:var(--bg2);font-weight:600;color:var(--text);}
+.cmp-table td{color:var(--text2);}
+
+/* ═══ TAKEAWAYS ═══ */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{font-size:14px;color:var(--text);padding:8px 12px;background:var(--bg2);border-radius:var(--radius);}
+.related-problems{margin-top:1rem;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;font-size:13px;color:var(--text2);}
+.related-problems li{margin-bottom:4px;}
+
+/* ═══ MISC ═══ */
+p{margin:0.5rem 0;}
+strong{color:var(--text);}
+code{font-family:var(--mono);font-size:0.9em;padding:2px 5px;background:var(--bg2);border-radius:4px;}
+ul,ol{padding-left:1.25rem;margin:0.5rem 0;}
+li{margin:0.25rem 0;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<div class="header">
+  <h1>Add Bold Tag in String</h1>
+  <div class="subtitle">LeetCode #616 — Boolean Array + Interval Merge</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">String Transformation</span>
+    <span class="tag tag-pattern">Interval Merging</span>
+    <span class="tag tag-complexity">O(n·m·k)</span>
+    <span class="tag tag-complexity">O(n)</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 1 ═══════════════════════════ -->
+<div class="card" id="sec1">
+  <div class="card-header" onclick="toggleCard('sec1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p>Given a string <code>s</code> and an array <code>words</code>, we need to wrap every substring of <code>s</code> that matches any word in <code>words</code> with <code>&lt;b&gt;</code> and <code>&lt;/b&gt;</code> tags. The twist: <strong>overlapping or adjacent</strong> bold regions must be merged into a single pair of tags.</p>
+
+    <p><strong>Example:</strong> <code>s = "abcxyz123"</code>, <code>words = ["abc", "123"]</code></p>
+    <p>→ <code>"abc"</code> matches at [0,3), <code>"123"</code> matches at [6,9) → Result: <code>"&lt;b&gt;abc&lt;/b&gt;xyz&lt;b&gt;123&lt;/b&gt;"</code></p>
+
+    <p><strong>Trickier example:</strong> <code>s = "aaabbcc"</code>, <code>words = ["aaa", "aab", "bc"]</code></p>
+    <p>→ <code>"aaa"</code> at [0,3), <code>"aab"</code> at [1,4), <code>"bc"</code> at [4,6) — all overlap or are adjacent → One merged region [0,6) → <code>"&lt;b&gt;aaabbc&lt;/b&gt;c"</code></p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Don't think about inserting tags directly. Instead, <strong>mark which characters should be bold</strong> (boolean array), then scan for contiguous bold regions to place tags. This naturally handles overlaps and adjacency.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 2 ═══════════════════════════ -->
+<div class="card" id="sec2">
+  <div class="card-header" onclick="toggleCard('sec2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Boolean Array + Merge</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p>The approach has two clear phases:</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Mark bold characters:</strong> Create a boolean array <code>bold[i]</code> of length <code>n</code>. For every word, find every occurrence in <code>s</code> and mark bold[start..start+len-1] = True.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Build result string:</strong> Scan <code>bold[]</code>. When we enter a True region, insert <code>&lt;b&gt;</code>. When we leave it, insert <code>&lt;/b&gt;</code>. Copy characters in between.</span>
+      </div>
+    </div>
+
+    <p>The boolean array is the magic: it automatically merges overlapping and adjacent matches because multiple words can set the same positions to True.</p>
+
+    <div class="decision-tree">
+      <div class="dt-node question">For each word w in words</div>
+      <div class="dt-arrow">↓</div>
+      <div class="dt-node question">Find all occurrences of w in s</div>
+      <div class="dt-arrow">↓</div>
+      <div class="dt-node action">Mark bold[start .. start+len(w)-1] = True</div>
+      <div class="dt-arrow">↓</div>
+      <div class="dt-node question">After all words processed, scan bold[]</div>
+      <div class="dt-arrow">↓</div>
+      <div class="dt-node result">Insert &lt;b&gt; at True-start, &lt;/b&gt; at True-end</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 3 ═══════════════════════════ -->
+<div class="card" id="sec3">
+  <div class="card-header" onclick="toggleCard('sec3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After Phase 1, <code>bold[i] = True</code> if and only if character <code>s[i]</code> is covered by at least one matching word occurrence. This means contiguous True regions exactly correspond to merged bold intervals — overlapping/adjacent matches are automatically unified.</p>
+    </div>
+
+    <p><strong>Why merging is free:</strong> If word "aab" covers indices [1,3] and word "bc" covers [3,5], both set <code>bold[3]=True</code>. The resulting contiguous run [1,5] naturally produces one <code>&lt;b&gt;</code> tag pair.</p>
+
+    <p><strong>Edge cases handled:</strong></p>
+    <ul>
+      <li><strong>No matches:</strong> bold[] stays all False → return s unchanged</li>
+      <li><strong>Entire string bold:</strong> bold[] all True → one <code>&lt;b&gt;s&lt;/b&gt;</code> wrapper</li>
+      <li><strong>Adjacent matches:</strong> Two words covering [0,2] and [3,5] → bold[0..5] all True → single tag pair</li>
+      <li><strong>Single character words:</strong> Each occurrence marks exactly one position</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Adjacent vs Gap</div>
+      <p>"Adjacent" means two substrings share a boundary (end of one = start of next). The boolean array handles this correctly: [0,2] and [3,5] leave contiguous True values. But if there's a gap ([0,2] and [4,5]), index 3 stays False, creating two separate tag pairs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 4 ═══════════════════════════ -->
+<div class="card" id="sec4">
+  <div class="card-header" onclick="toggleCard('sec4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="code-panel" style="line-height:2;">
+      <div class="code-line"><span class="code-comment"># Solution 1: Boolean Array (Interview Pick)</span></div>
+      <div class="code-line">def addBoldTag(s, words):</div>
+      <div class="code-line">    n = len(s)</div>
+      <div class="code-line">    bold = [False] * n          <span class="code-comment"># bold[i]: should char i be bold?</span></div>
+      <div class="code-line">    for word in words:          <span class="code-comment"># try every word</span></div>
+      <div class="code-line">        start = s.find(word)    <span class="code-comment"># find first occurrence</span></div>
+      <div class="code-line">        while start != -1:      <span class="code-comment"># while we keep finding it</span></div>
+      <div class="code-line">            for i in range(start, start + len(word)):</div>
+      <div class="code-line">                bold[i] = True  <span class="code-comment"># mark these chars bold</span></div>
+      <div class="code-line">            start = s.find(word, start + 1) <span class="code-comment"># find next</span></div>
+      <div class="code-line">    res = []</div>
+      <div class="code-line">    for i in range(n):</div>
+      <div class="code-line">        if bold[i] and (i == 0 or not bold[i-1]):</div>
+      <div class="code-line">            res.append('&lt;b&gt;')  <span class="code-comment"># start of bold region</span></div>
+      <div class="code-line">        res.append(s[i])</div>
+      <div class="code-line">        if bold[i] and (i == n-1 or not bold[i+1]):</div>
+      <div class="code-line">            res.append('&lt;/b&gt;') <span class="code-comment"># end of bold region</span></div>
+      <div class="code-line">    return ''.join(res)</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake</div>
+      <p>Don't try to insert <code>&lt;b&gt;</code> tags as you find matches — indices shift when you insert text! The boolean array approach avoids this entirely by separating marking from building.</p>
+    </div>
+
+    <p style="margin-top:1rem;"><strong>Time:</strong> O(n × m × k) — n=len(s), m=len(words), k=avg word length. For each word, <code>find()</code> scans O(n×k), and we mark O(k) positions per match.</p>
+    <p><strong>Space:</strong> O(n) for the bold array.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 5 ═══════════════════════════ -->
+<div class="card" id="sec5">
+  <div class="card-header" onclick="toggleCard('sec5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Merge overlapping regions" + "string matching" → Think interval merging. But instead of sorting intervals, a <strong>boolean array</strong> is simpler — it's a sweep-line over characters.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Separate Marking from Building</div>
+        <p>The key design decision: mark ALL bold positions first, THEN build the string. This two-pass approach avoids the headache of shifting indices.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Handle Boundaries</div>
+        <p>A bold region starts when <code>bold[i]=True</code> and either <code>i=0</code> or <code>bold[i-1]=False</code>. It ends when <code>bold[i]=True</code> and either <code>i=n-1</code> or <code>bold[i+1]=False</code>.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll use a boolean array approach. First, for each word, I'll find all occurrences in s and mark those positions as bold. The boolean array automatically merges overlaps. Then I'll scan the array — wherever a True region starts, I insert &lt;b&gt;, and where it ends, &lt;/b&gt;. This is O(n·m·k) time, O(n) space. For a follow-up, I could optimize matching with a Trie for O(n·L) where L is the max word length."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 6: WALKTHROUGH ═══════════════════════════ -->
+<div class="card" id="sec6">
+  <div class="card-header" onclick="toggleCard('sec6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <p style="text-align:center;font-size:13px;color:var(--text3);margin-bottom:12px;"><code>s = "aaabbcc"</code>, <code>words = ["aaa", "aab", "bc"]</code></p>
+
+    <!-- Words panel -->
+    <div class="words-panel" id="wordsPanel"></div>
+
+    <!-- String viz -->
+    <div class="viz-area">
+      <div class="string-row" id="stringRow"></div>
+      <div class="bold-row-label">bold[]</div>
+      <div class="bold-row" id="boldRow"></div>
+    </div>
+
+    <!-- Variable tracker -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- Code panel -->
+    <div class="code-panel" id="codePanel">
+      <div class="code-line" data-ln="0">def addBoldTag(s, words):</div>
+      <div class="code-line" data-ln="1">    bold = [False] * len(s)</div>
+      <div class="code-line" data-ln="2">    for word in words:</div>
+      <div class="code-line" data-ln="3">        start = s.find(word)</div>
+      <div class="code-line" data-ln="4">        while start != -1:</div>
+      <div class="code-line" data-ln="5">            for i in range(start, start+len(word)):</div>
+      <div class="code-line" data-ln="6">                bold[i] = True</div>
+      <div class="code-line" data-ln="7">            start = s.find(word, start+1)</div>
+      <div class="code-line" data-ln="8">    res = []</div>
+      <div class="code-line" data-ln="9">    for i in range(len(s)):</div>
+      <div class="code-line" data-ln="10">        if bold[i] and (i==0 or not bold[i-1]):</div>
+      <div class="code-line" data-ln="11">            res.append('&lt;b&gt;')</div>
+      <div class="code-line" data-ln="12">        res.append(s[i])</div>
+      <div class="code-line" data-ln="13">        if bold[i] and (i==n-1 or not bold[i+1]):</div>
+      <div class="code-line" data-ln="14">            res.append('&lt;/b&gt;')</div>
+      <div class="code-line" data-ln="15">    return ''.join(res)</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card" id="infoCard">
+      <div class="info-badge phase-scan" id="infoBadge">INIT</div>
+      <div class="info-step" id="infoStep">Step 0 / 0</div>
+      <div class="info-title" id="infoTitle">Ready</div>
+      <div class="info-text" id="infoText">Press Next to begin.</div>
+    </div>
+
+    <!-- Result display -->
+    <div class="result-display" id="resultDisplay" style="display:none;"></div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" onclick="reset()">Reset</button>
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn btn-primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-scan"></div> Scanning</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div> Match found</div>
+      <div class="legend-item"><div class="legend-swatch sw-bold"></div> Marked bold</div>
+      <div class="legend-item"><div class="legend-swatch sw-merge"></div> Final bold region</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SECTION 7 ═══════════════════════════ -->
+<div class="card" id="sec7">
+  <div class="card-header" onclick="toggleCard('sec7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ <strong>Boolean array as sweep-line</strong> — marks which chars need bold, automatically merging overlaps.</div>
+      <div class="takeaway">✓ <strong>Two-pass design:</strong> Phase 1 marks positions, Phase 2 builds the result — no shifting indices.</div>
+      <div class="takeaway">✓ <strong>Boundary detection:</strong> A bold region starts when bold[i] and !bold[i-1], ends when bold[i] and !bold[i+1].</div>
+      <div class="takeaway">✓ <strong>Trie optimization:</strong> For large word lists or long max word length, build a Trie for O(n·L) matching.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>Wrapping/tagging substrings that may overlap or be adjacent</li>
+        <li>"Merge overlapping intervals" on a 1D character array</li>
+        <li>Any problem where multiple matches need to be unified into contiguous regions</li>
+      </ul>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Boolean Array (this)</td><td>O(n·m·k)</td><td>O(n)</td><td>Simplest, great for interview</td></tr>
+        <tr><td>Trie + Boolean Array</td><td>O(n·L + Σ|w|)</td><td>O(n + Σ|w|)</td><td>Faster matching, more code</td></tr>
+        <tr><td>Sorted Intervals</td><td>O(n·m·k + I·log I)</td><td>O(n + I)</td><td>Classic interval merge approach</td></tr>
+      </tbody>
+    </table>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Merge Intervals (LC 56)</strong> — Same merge concept on explicit intervals</li>
+        <li><strong>Bold Words in String (LC 758)</strong> — Identical problem, different name</li>
+        <li><strong>Tag Validator (LC 591)</strong> — Parsing with HTML-like tags</li>
+        <li><strong>Find All Anagrams in a String (LC 438)</strong> — Multiple pattern matching</li>
+        <li><strong>Implement strStr() (LC 28)</strong> — Basic string matching</li>
+        <li><strong>Text Justification (LC 68)</strong> — String transformation with complex rules</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div> <!-- /.container -->
+
+<script>
+// ═══════════════════════════ COLLAPSIBLE CARDS ═══════════════════════════
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ═══════════════════════════ WALKTHROUGH DATA ═══════════════════════════
+const S = "aaabbcc";
+const WORDS = ["aaa", "aab", "bc"];
+const N = S.length;
+
+// Steps for the walkthrough
+const steps = [
+  // Step 0 — Init
+  {
+    phase: 'INIT', phaseClass: 'phase-scan', activeLine: 1,
+    title: 'Initialize bold array',
+    text: 'Create bold[] = [F, F, F, F, F, F, F] — all False. We\'ll scan each word and mark matching positions.',
+    bold: [false,false,false,false,false,false,false],
+    charStates: ['','','','','','',''],
+    activeWord: -1, scanRange: null,
+    vars: { word: '—', start: '—', marking: '—' }, changed: []
+  },
+  // Step 1 — word "aaa", find first occurrence at 0
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 3,
+    title: 'Word "aaa": Find first occurrence',
+    text: 's.find("aaa") returns 0 — "aaa" starts at index 0.',
+    bold: [false,false,false,false,false,false,false],
+    charStates: ['scanning','scanning','scanning','','','',''],
+    activeWord: 0, scanRange: [0,2],
+    vars: { word: '"aaa"', start: '0', marking: '—' }, changed: ['word','start']
+  },
+  // Step 2 — mark [0,1,2] bold
+  {
+    phase: 'MARK', phaseClass: 'phase-mark', activeLine: 6,
+    title: 'Mark bold[0..2] = True',
+    text: '"aaa" covers indices 0, 1, 2. Mark all three as bold.',
+    bold: [true,true,true,false,false,false,false],
+    charStates: ['matched','matched','matched','','','',''],
+    activeWord: 0, scanRange: [0,2],
+    vars: { word: '"aaa"', start: '0', marking: '[0,1,2]' }, changed: ['marking']
+  },
+  // Step 3 — find next "aaa" from index 1 → not found
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 7,
+    title: 'Word "aaa": Find next occurrence',
+    text: 's.find("aaa", 1) returns -1 — no more "aaa" matches. Done with this word.',
+    bold: [true,true,true,false,false,false,false],
+    charStates: ['bold-marked','bold-marked','bold-marked','','','',''],
+    activeWord: 0, scanRange: null,
+    vars: { word: '"aaa"', start: '-1', marking: '—' }, changed: ['start','marking']
+  },
+  // Step 4 — word "aab", find first occurrence at 1
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 3,
+    title: 'Word "aab": Find first occurrence',
+    text: 's.find("aab") returns 1 — "aab" starts at index 1. Notice it overlaps with the "aaa" match!',
+    bold: [true,true,true,false,false,false,false],
+    charStates: ['bold-marked','scanning','scanning','scanning','','',''],
+    activeWord: 1, scanRange: [1,3],
+    vars: { word: '"aab"', start: '1', marking: '—' }, changed: ['word','start']
+  },
+  // Step 5 — mark [1,2,3] bold
+  {
+    phase: 'MARK', phaseClass: 'phase-mark', activeLine: 6,
+    title: 'Mark bold[1..3] = True',
+    text: '"aab" covers indices 1, 2, 3. Indices 1, 2 already True — setting them again is harmless. Index 3 becomes True — extending the bold region!',
+    bold: [true,true,true,true,false,false,false],
+    charStates: ['bold-marked','matched','matched','matched','','',''],
+    activeWord: 1, scanRange: [1,3],
+    vars: { word: '"aab"', start: '1', marking: '[1,2,3]' }, changed: ['marking']
+  },
+  // Step 6 — find next "aab" from index 2 → not found
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 7,
+    title: 'Word "aab": Find next occurrence',
+    text: 's.find("aab", 2) returns -1 — no more "aab" matches.',
+    bold: [true,true,true,true,false,false,false],
+    charStates: ['bold-marked','bold-marked','bold-marked','bold-marked','','',''],
+    activeWord: 1, scanRange: null,
+    vars: { word: '"aab"', start: '-1', marking: '—' }, changed: ['start','marking']
+  },
+  // Step 7 — word "bc", find first occurrence at 4
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 3,
+    title: 'Word "bc": Find first occurrence',
+    text: 's.find("bc") returns 4 — "bc" starts at index 4. This is adjacent to the previous bold region [0,3]!',
+    bold: [true,true,true,true,false,false,false],
+    charStates: ['bold-marked','bold-marked','bold-marked','bold-marked','scanning','scanning',''],
+    activeWord: 2, scanRange: [4,5],
+    vars: { word: '"bc"', start: '4', marking: '—' }, changed: ['word','start']
+  },
+  // Step 8 — mark [4,5] bold
+  {
+    phase: 'MARK', phaseClass: 'phase-mark', activeLine: 6,
+    title: 'Mark bold[4..5] = True',
+    text: '"bc" covers indices 4, 5. Now bold = [T,T,T,T,T,T,F]. The bold region has grown to [0..5] — "aaa", "aab", and "bc" merged into one contiguous region!',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-marked','bold-marked','bold-marked','bold-marked','matched','matched',''],
+    activeWord: 2, scanRange: [4,5],
+    vars: { word: '"bc"', start: '4', marking: '[4,5]' }, changed: ['marking']
+  },
+  // Step 9 — find next "bc" from index 5 → not found
+  {
+    phase: 'SCAN', phaseClass: 'phase-scan', activeLine: 7,
+    title: 'Word "bc": Find next occurrence',
+    text: 's.find("bc", 5) returns -1 — no more "bc" matches. All words processed!',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-marked','bold-marked','bold-marked','bold-marked','bold-marked','bold-marked',''],
+    activeWord: 2, scanRange: null,
+    vars: { word: '"bc"', start: '-1', marking: '—' }, changed: ['start','marking']
+  },
+  // Step 10 — Phase 2: build result — scan bold, detect region start at i=0
+  {
+    phase: 'BUILD', phaseClass: 'phase-build', activeLine: 10,
+    title: 'Phase 2: Build result — i=0',
+    text: 'bold[0]=True and i==0 → start of bold region! Append "<b>" then "a".',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-final','bold-marked','bold-marked','bold-marked','bold-marked','bold-marked',''],
+    activeWord: -1, scanRange: null, buildIdx: 0,
+    vars: { i: '0', res: '"<b>a"' }, changed: ['i','res']
+  },
+  // Step 11 — i=1..4 (middle of bold region)
+  {
+    phase: 'BUILD', phaseClass: 'phase-build', activeLine: 12,
+    title: 'Build result — i=1 through 4',
+    text: 'bold[1..4] are True but not region boundaries — just append each character. Result grows: "<b>aabb".',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-final','bold-final','bold-final','bold-final','bold-final','bold-marked',''],
+    activeWord: -1, scanRange: null, buildIdx: 4,
+    vars: { i: '4', res: '"<b>aabbb"' }, changed: ['i','res']
+  },
+  // Step 12 — i=5 end of bold region
+  {
+    phase: 'BUILD', phaseClass: 'phase-build', activeLine: 14,
+    title: 'Build result — i=5 (end of bold)',
+    text: 'bold[5]=True and bold[6]=False → end of bold region! Append "c" then "</b>".',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-final','bold-final','bold-final','bold-final','bold-final','bold-final',''],
+    activeWord: -1, scanRange: null, buildIdx: 5,
+    vars: { i: '5', res: '"<b>aaabbc</b>"' }, changed: ['i','res']
+  },
+  // Step 13 — i=6, not bold
+  {
+    phase: 'BUILD', phaseClass: 'phase-build', activeLine: 12,
+    title: 'Build result — i=6 (not bold)',
+    text: 'bold[6]=False → just append "c" with no tags.',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['bold-final','bold-final','bold-final','bold-final','bold-final','bold-final','done'],
+    activeWord: -1, scanRange: null, buildIdx: 6,
+    vars: { i: '6', res: '"<b>aaabbc</b>c"' }, changed: ['i','res']
+  },
+  // Step 14 — Done
+  {
+    phase: 'DONE', phaseClass: 'phase-done', activeLine: 15,
+    title: 'Result: "<b>aaabbc</b>c"',
+    text: 'Three words with overlapping/adjacent matches all merged into one bold region [0..5]. Index 6 stays unbolded. Final: "<b>aaabbc</b>c".',
+    bold: [true,true,true,true,true,true,false],
+    charStates: ['done','done','done','done','done','done','done'],
+    activeWord: -1, scanRange: null,
+    vars: { result: '"<b>aaabbc</b>c"' }, changed: ['result'],
+    showResult: true
+  }
+];
+
+// ═══════════════════════════ RENDER ═══════════════════════════
+let cur = 0;
+
+function render() {
+  const st = steps[cur];
+
+  // Words panel
+  const wp = document.getElementById('wordsPanel');
+  wp.innerHTML = WORDS.map((w, i) => {
+    let cls = 'word-chip';
+    if (i === st.activeWord) cls += ' active';
+    else if (i < st.activeWord || (st.activeWord === -1 && cur > 9)) cls += ' matched-word';
+    return `<div class="${cls}">"${w}"</div>`;
+  }).join('');
+
+  // String row
+  const sr = document.getElementById('stringRow');
+  sr.innerHTML = S.split('').map((ch, i) => {
+    let cls = 'char-cell';
+    if (st.charStates[i]) cls += ' ' + st.charStates[i];
+    return `<div class="${cls}">${ch}<span class="idx">${i}</span></div>`;
+  }).join('');
+
+  // Bold row
+  const br = document.getElementById('boldRow');
+  br.innerHTML = st.bold.map((b, i) => {
+    let cls = 'bold-cell';
+    if (b) cls += ' on';
+    // Highlight cells being set this step
+    if (st.scanRange && i >= st.scanRange[0] && i <= st.scanRange[1] && st.phase === 'MARK') cls += ' highlight';
+    return `<div class="${cls}">${b ? 'T' : 'F'}</div>`;
+  }).join('');
+
+  // Var tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = Object.entries(st.vars).map(([k, v]) => {
+    const ch = st.changed.includes(k) ? ' changed' : '';
+    return `<div class="var-box${ch}"><span class="var-name">${k}</span><span class="var-val">${v}</span></div>`;
+  }).join('');
+
+  // Code highlight
+  document.querySelectorAll('#codePanel .code-line').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.ln) === st.activeLine);
+  });
+
+  // Info card
+  document.getElementById('infoBadge').className = 'info-badge ' + st.phaseClass;
+  document.getElementById('infoBadge').textContent = st.phase;
+  document.getElementById('infoStep').textContent = `Step ${cur} / ${steps.length - 1}`;
+  document.getElementById('infoTitle').textContent = st.title;
+  document.getElementById('infoText').textContent = st.text;
+
+  // Result display
+  const rd = document.getElementById('resultDisplay');
+  if (st.showResult) {
+    rd.style.display = 'block';
+    rd.innerHTML = '<span class="tag-char">&lt;b&gt;</span>aaabbc<span class="tag-char">&lt;/b&gt;</span>c';
+  } else {
+    rd.style.display = 'none';
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progressDots');
+  pd.innerHTML = steps.map((_, i) => {
+    let cls = 'dot';
+    if (i === cur) cls += ' active';
+    else if (i < cur) cls += ' done';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next < 0 || next >= steps.length) return;
+  cur = next;
+  render();
+}
+
+function reset() {
+  cur = 0;
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

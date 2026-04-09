@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse Words in a String – Step-by-Step Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design Tokens ── */
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+  --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+  --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+  --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+  --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+  --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+  --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+  --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+}}
+
+/* ── Base ── */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:1.5rem}
+.container{max-width:860px;margin:0 auto}
+
+/* ── Header ── */
+.header{text-align:center;margin-bottom:2rem}
+.header h1{font-size:clamp(22px,4vw,30px);font-weight:700;letter-spacing:-0.5px}
+.header .subtitle{font-size:14px;color:var(--text2);margin-top:4px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.tag-technique{background:var(--cyan-bg);color:var(--cyan-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.card.collapsed .card-body{display:none}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text)}
+.collapse-icon{margin-left:auto;font-size:14px;color:var(--text3);transition:transform .2s}
+.card.collapsed .collapse-icon{transform:rotate(-90deg)}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.step-text{color:var(--text);line-height:1.5}
+
+/* ── Before/After Comparison ── */
+.comparison{display:flex;flex-direction:column;gap:8px;margin:1rem 0;font-family:var(--mono);font-size:13px}
+.comp-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius)}
+.comp-label{font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;width:100px;flex-shrink:0}
+.comp-val{letter-spacing:1.5px}
+.comp-row.step-a{background:var(--bg2)}.comp-row.step-a .comp-label{color:var(--text3)}
+.comp-row.step-b{background:var(--amber-bg)}.comp-row.step-b .comp-label{color:var(--amber-mid)}
+.comp-row.step-c{background:var(--green-bg)}.comp-row.step-c .comp-label{color:var(--green-mid)}
+
+/* ── Strategy Steps ── */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius)}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Static Code ── */
+.static-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;white-space:pre;color:var(--text2);margin:.75rem 0}
+.static-code .cmt{color:var(--text3)}
+
+/* ── Proof Section ── */
+.proof-block{background:var(--bg2);border-radius:var(--radius);padding:16px;margin:1rem 0;font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2)}
+.proof-block .hl-blue{color:var(--blue-mid);font-weight:600}
+.proof-block .hl-green{color:var(--green-mid);font-weight:600}
+
+/* ── Takeaways ── */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+
+/* ── Related Problems ── */
+.related-problems ul{list-style:none;padding:0;margin:.5rem 0}
+.related-problems li{padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+.related-problems li:last-child{border:none}
+.related-problems li strong{color:var(--text)}
+
+/* ── Visualization ── */
+.viz-container{margin-top:1rem}
+.phase-badge{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 12px;border-radius:20px;margin-bottom:16px}
+.phase-setup{background:var(--bg2);color:var(--text3)}
+.phase-reverse-all{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-reverse-words{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-done{background:var(--green-bg);color:var(--green-mid)}
+
+.array-wrap{display:flex;flex-direction:column;align-items:center;margin:0 auto;overflow-x:auto;padding:8px 0}
+.ptr-row{display:flex;gap:4px;height:24px;margin-bottom:4px;min-width:max-content}
+.cell-row{display:flex;gap:4px;min-width:max-content}
+.idx-row{display:flex;gap:4px;margin-top:4px;min-width:max-content}
+
+.ptr-slot{width:42px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:4px}
+.ptr-blue{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-green{background:var(--green-bg);color:var(--green-mid)}
+.ptr-purple{background:var(--purple-bg);color:var(--purple-mid)}
+
+.cell{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-family:var(--mono);font-size:18px;font-weight:600;border:2px solid var(--border);background:var(--surface);transition:all .25s}
+.cell.normal{background:var(--surface);color:var(--text);border-color:var(--border)}
+.cell.sp{background:var(--bg2);color:var(--text3);border-color:var(--border);opacity:.55;font-size:10px}
+.cell.read{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-mid)}
+.cell.write{background:var(--green-bg);color:var(--green-text);border-color:var(--green-mid)}
+.cell.active{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-mid);transform:scale(1.08)}
+.cell.word{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-mid)}
+.cell.found{background:var(--green-bg);color:var(--green-text);border-color:var(--green-mid)}
+.cell.done{background:var(--cyan-bg);color:var(--cyan-text);border-color:var(--cyan-mid)}
+.cell.faded{opacity:.35}
+
+.idx-label{width:42px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500}
+
+/* ── Info Card ── */
+.info-card{margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.step-counter{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px}
+.info-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.info-text{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* ── Progress Dots ── */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--border);transition:all .2s;cursor:pointer}
+.dot.active{background:var(--blue-mid);border-color:var(--blue-mid);transform:scale(1.3)}
+.dot.visited{background:var(--blue-bg);border-color:var(--blue-border)}
+
+/* ── Controls ── */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--bg2);border-color:var(--border2)}
+.btn-reset{color:var(--red-mid);border-color:var(--red-border)}
+.btn-reset:hover{background:var(--red-bg)}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--border)}
+.sw-read{background:var(--blue-bg);border-color:var(--blue-mid)}
+.sw-write{background:var(--green-bg);border-color:var(--green-mid)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-mid)}
+.sw-word{background:var(--purple-bg);border-color:var(--purple-mid)}
+.sw-found{background:var(--green-bg);border-color:var(--green-mid)}
+.sw-done{background:var(--cyan-bg);border-color:var(--cyan-mid)}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .cell{width:34px;height:34px;font-size:15px}
+  .ptr-slot,.idx-label{width:34px}
+  .var-tracker{gap:8px}
+  .var-box{padding:6px 10px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══ Header ═══ -->
+<div class="header">
+  <h1>Reverse Words in a String</h1>
+  <div class="subtitle">LeetCode #151 · Solution 3: Two-Pass Reversal Trick</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-technique">Reversal Trick</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(1) Extra Space*</span>
+  </div>
+</div>
+
+<!-- ═══ Section 1: Understanding the Problem ═══ -->
+<div class="card" id="card-1">
+  <div class="section-header" onclick="toggleCard('card-1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Given a string containing words separated by spaces (possibly multiple), return the <strong>words in reverse order</strong> with exactly one space between them. No leading or trailing spaces.</p>
+
+    <p style="margin-top:.75rem"><strong>Concrete example:</strong></p>
+    <div class="comparison">
+      <div class="comp-row step-a"><span class="comp-label">Input</span><span class="comp-val">"&nbsp;&nbsp;the&nbsp;sky&nbsp;&nbsp;is&nbsp;blue&nbsp;&nbsp;"</span></div>
+      <div class="comp-row step-c"><span class="comp-label">Output</span><span class="comp-val">"blue is sky the"</span></div>
+    </div>
+
+    <p>We're reversing the <em>order of words</em>, not individual characters. We also need to clean up any extra whitespace.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>If you reverse the <em>entire</em> string, the words end up in the right order — but each word is spelled backwards. One more pass to reverse each word individually fixes everything.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 2: The Algorithm ═══ -->
+<div class="card" id="card-2">
+  <div class="section-header" onclick="toggleCard('card-2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Pass Reversal Trick</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>This classic technique reverses word order using only character-level reversals — no extra arrays or word lists needed.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Clean spaces</strong> — Remove leading, trailing, and duplicate spaces</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>Reverse entire string</strong> — All characters flip positions. Words are now in correct order but each is reversed</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text"><strong>Reverse each word</strong> — Scan for word boundaries, reverse characters within each word</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Visual transformation:</strong></p>
+    <div class="comparison">
+      <div class="comp-row step-a"><span class="comp-label">Original</span><span class="comp-val">t h e · s k y · i s · b l u e</span></div>
+      <div class="comp-row step-b"><span class="comp-label">Full Reverse</span><span class="comp-val">e u l b · s i · y k s · e h t</span></div>
+      <div class="comp-row step-c"><span class="comp-label">Each Word Rev</span><span class="comp-val">b l u e · i s · s k y · t h e</span></div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Two Reversals Work</div>
+      <p>Reversing at two different scopes (whole string vs. individual words) flips only the word order while preserving character order within each word. Think of it like: <em>"Flip the entire sentence, then flip each word right-side up."</em></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 3: Why It Works ═══ -->
+<div class="card" id="card-3">
+  <div class="section-header" onclick="toggleCard('card-3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Reversal Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>For any sequence of words W₁ W₂ … Wₙ, reversing the full string produces rev(Wₙ) rev(Wₙ₋₁) … rev(W₁). Reversing each word individually then yields Wₙ Wₙ₋₁ … W₁ — the words in reverse order, spelled correctly.</p>
+    </div>
+
+    <div class="proof-block">
+      <span class="hl-blue">Original:</span>     [W₁] [W₂] [W₃] [W₄]<br>
+      <span class="hl-blue">Full reverse:</span>  [rev(W₄)] [rev(W₃)] [rev(W₂)] [rev(W₁)]<br>
+      <span class="hl-green">Word reverse:</span>  [W₄] [W₃] [W₂] [W₁]  ✓
+    </div>
+
+    <h4 style="margin-top:1rem">Edge Cases</h4>
+    <ul style="margin:.5rem 0 0 1.25rem;color:var(--text2)">
+      <li><strong>Single word:</strong> Full reverse = word reverse → same result (correct)</li>
+      <li><strong>Extra spaces:</strong> Handled by the cleaning step before reversal</li>
+      <li><strong>Already reversed:</strong> Algorithm still works — double reversal is identity</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ In Python, Strings Are Immutable</div>
+      <p>True O(1) extra space only works in languages with mutable strings (C, Java char arrays). In Python, we convert to a list first, adding O(n) space. The <em>algorithm</em> is still O(1) extra — it's the language limitation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 4: The Code (Annotated) ═══ -->
+<div class="card" id="card-4">
+  <div class="section-header" onclick="toggleCard('card-4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Solution 3 — Two-Pass Reversal Trick:</p>
+    <div class="static-code"><span class="cmt"># Clean spaces → reverse all → reverse each word</span>
+def reverseWords(s):
+    words = s.split()                     <span class="cmt"># Split on any whitespace, removes extras</span>
+    chars = list(' '.join(words))         <span class="cmt"># Rejoin with single spaces → mutable list</span>
+
+    def reverse(l, r):                    <span class="cmt"># In-place sub-array reversal</span>
+        while l &lt; r:
+            chars[l], chars[r] = chars[r], chars[l]
+            l += 1; r -= 1
+
+    <span class="cmt"># Phase 1: Reverse entire character array</span>
+    reverse(0, len(chars) - 1)
+
+    <span class="cmt"># Phase 2: Reverse each individual word</span>
+    start = 0
+    for i in range(len(chars) + 1):
+        if i == len(chars) or chars[i] == ' ':
+            reverse(start, i - 1)         <span class="cmt"># Reverse word from start to i-1</span>
+            start = i + 1                 <span class="cmt"># Next word starts after the space</span>
+
+    return ''.join(chars)</div>
+
+    <p style="margin-top:.75rem"><strong>All three solutions at a glance:</strong></p>
+    <div class="static-code"><span class="cmt"># Solution 1 — Split + Reverse + Join (Interview Pick)</span>
+def reverseWords(s):
+    return " ".join(s.split()[::-1])      <span class="cmt"># One-liner: O(n) time, O(n) space</span>
+
+<span class="cmt"># Solution 2 — Right-to-Left Two-Pointer</span>
+def reverseWords(s):
+    result, i = [], len(s) - 1
+    while i >= 0:
+        while i >= 0 and s[i] == ' ':     <span class="cmt"># Skip spaces</span>
+            i -= 1
+        if i &lt; 0: break
+        j = i
+        while j >= 0 and s[j] != ' ':     <span class="cmt"># Find word start</span>
+            j -= 1
+        result.append(s[j+1:i+1])         <span class="cmt"># Extract word</span>
+        i = j - 1
+    return " ".join(result)</div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Interview Tip</div>
+      <p>Start with Solution 1 — it shows you understand the problem. If the interviewer asks "Can you do it in O(1) extra space?", switch to Solution 3 (the reversal trick).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 5: Interview Strategy ═══ -->
+<div class="card" id="card-5">
+  <div class="section-header" onclick="toggleCard('card-5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Reverse the order of groups" is a classic <strong>reversal trick</strong> signal. Other signals: "in-place", "O(1) space", "rearrange blocks".</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start With the Simple Approach</div>
+        <p>Immediately offer <code>split → reverse → join</code>. This shows you understand the problem and can code quickly. Complexity: O(n) time, O(n) space.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize When Asked</div>
+        <p>"For O(1) extra space, I'd use the reversal trick: reverse the entire string, then reverse each individual word. This works because two reversals at different scopes flip only the word order."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Edge Cases</div>
+        <p>Mention: leading/trailing spaces, multiple spaces between words, single-word input, empty string. Show you handle them in the cleaning step.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="margin-bottom:8px">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I see we need to reverse word order. The quickest approach is split-reverse-join for O(n) time and space. If we need O(1) extra space, we can use the reversal trick: reverse all characters so words are in the right order but backwards, then reverse each word to fix the spelling. I'll use a helper reverse function with two pointers."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 6: Interactive Walkthrough ═══ -->
+<div class="card" id="card-6">
+  <div class="section-header" onclick="toggleCard('card-6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="viz-container">
+      <div id="phase-badge" class="phase-badge phase-setup">Setup</div>
+
+      <div class="array-wrap">
+        <div class="ptr-row" id="ptr-row"></div>
+        <div class="cell-row" id="cell-row"></div>
+        <div class="idx-row" id="idx-row"></div>
+      </div>
+
+      <div class="var-tracker" id="var-tracker"></div>
+
+      <div class="code-panel" id="code-panel"></div>
+
+      <div class="info-card" id="info-card">
+        <div class="step-counter" id="step-counter"></div>
+        <div class="info-title" id="info-title"></div>
+        <div class="info-text" id="info-text"></div>
+      </div>
+
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <div class="controls">
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-reset" onclick="reset()">Reset</button>
+        <button class="btn" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-read"></div>Left Pointer</div>
+        <div class="legend-item"><div class="legend-swatch sw-write"></div>Right Pointer</div>
+        <div class="legend-item"><div class="legend-swatch sw-active"></div>Being Swapped</div>
+        <div class="legend-item"><div class="legend-swatch sw-word"></div>Current Word</div>
+        <div class="legend-item"><div class="legend-swatch sw-found"></div>Word Reversed</div>
+        <div class="legend-item"><div class="legend-swatch sw-done"></div>Final</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Section 7: Summary ═══ -->
+<div class="card" id="card-7">
+  <div class="section-header" onclick="toggleCard('card-7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ <strong>Split + Reverse + Join</strong> is the fast interview answer (one-liner in Python)</div>
+      <div class="takeaway">✓ <strong>Two-Pass Reversal</strong> is the O(1) extra space answer (for follow-up)</div>
+      <div class="takeaway">✓ The reversal trick works because <em>reversing at two scopes</em> flips only word order</div>
+      <div class="takeaway">✓ Always handle space cleaning first — leading, trailing, and multiple spaces</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use the Reversal Trick</div>
+      <ul style="margin:0;padding-left:1.25rem">
+        <li>Reverse the order of groups/blocks in-place</li>
+        <li>Rotate an array by k positions (reverse all → reverse halves)</li>
+        <li>Any "rearrange blocks without extra space" problem</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4 style="margin-bottom:4px">Related Problems</h4>
+      <ul>
+        <li><strong>Reverse Words in a String II</strong> (Medium) — In-place char array variant</li>
+        <li><strong>Rotate Array</strong> (Medium) — Same reversal trick: reverse all, then reverse halves</li>
+        <li><strong>Reverse String</strong> (Easy) — Basic two-pointer reversal</li>
+        <li><strong>Reverse Vowels of a String</strong> (Easy) — Two-pointer selective swap</li>
+        <li><strong>Reverse Only Letters</strong> (Easy) — Skip non-letters while swapping</li>
+        <li><strong>One Edit Distance</strong> (Medium) — String transformation, same section</li>
+        <li><strong>Zigzag Conversion</strong> (Medium) — String transformation via index mapping</li>
+        <li><strong>Text Justification</strong> (Hard) — Advanced string building with spaces</li>
+      </ul>
+      <p style="margin-top:.5rem;font-size:13px;color:var(--text3)">These problems share core techniques: in-place string manipulation and the reversal trick.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ── Card collapse ── */
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/* ── Code Lines ── */
+const CODE_LINES = [
+  'def reverseWords(s):',
+  '    words = s.split()',
+  "    chars = list(' '.join(words))",
+  '',
+  '    def reverse(l, r):',
+  '        while l < r:',
+  '            chars[l], chars[r] = chars[r], chars[l]',
+  '            l += 1; r -= 1',
+  '',
+  '    # Phase 1: Reverse entire string',
+  '    reverse(0, len(chars) - 1)',
+  '',
+  '    # Phase 2: Reverse each word',
+  '    start = 0',
+  '    for i in range(len(chars) + 1):',
+  '        if i == len(chars) or chars[i] == \' \':',
+  '            reverse(start, i - 1)',
+  '            start = i + 1',
+  '',
+  "    return ''.join(chars)"
+];
+
+/* ── Step Data ── */
+const STEPS = [
+  { // 0
+    chars: ['t','h','e',' ','s','k','y',' ','i','s',' ','b','l','u','e'],
+    states:['normal','normal','normal','sp','normal','normal','normal','sp','normal','normal','sp','normal','normal','normal','normal'],
+    ptrs: [],
+    activeLine: 0,
+    phase: 'Setup', phaseClass: 'phase-setup',
+    title: 'Original String: "the sky is blue"',
+    text: 'We need to reverse the word order → "blue is sky the". Our strategy: reverse ALL characters (putting words in correct order but backwards), then reverse each individual word to fix the spelling.',
+    vars: { Phase:'Setup', L:'\u2014', R:'\u2014', Word:'\u2014' },
+    changed: []
+  },
+  { // 1
+    chars: ['t','h','e',' ','s','k','y',' ','i','s',' ','b','l','u','e'],
+    states:['normal','normal','normal','sp','normal','normal','normal','sp','normal','normal','sp','normal','normal','normal','normal'],
+    ptrs: [],
+    activeLine: 2,
+    phase: 'Prepare', phaseClass: 'phase-setup',
+    title: 'Clean Spaces & Build Character Array',
+    text: 's.split() splits on any whitespace and discards empties. We rejoin with single spaces and convert to a mutable list: ["t","h","e"," ","s","k","y"," ","i","s"," ","b","l","u","e"] — 15 characters.',
+    vars: { Phase:'Prepare', L:'\u2014', R:'\u2014', Word:'\u2014' },
+    changed: ['Phase']
+  },
+  { // 2
+    chars: ['t','h','e',' ','s','k','y',' ','i','s',' ','b','l','u','e'],
+    states:['read','normal','normal','sp','normal','normal','normal','sp','normal','normal','sp','normal','normal','normal','write'],
+    ptrs: [{idx:0,label:'L',cls:'ptr-blue'},{idx:14,label:'R',cls:'ptr-green'}],
+    activeLine: 10,
+    phase: 'Phase 1', phaseClass: 'phase-reverse-all',
+    title: 'Phase 1: Begin Full Reverse',
+    text: 'Place L at index 0 and R at index 14. We\'ll swap the characters at L and R, then move them inward until they meet. This reverses the entire string.',
+    vars: { Phase:'Full Rev', L:'0', R:'14', Word:'\u2014' },
+    changed: ['Phase','L','R']
+  },
+  { // 3
+    chars: ['e','h','e',' ','s','k','y',' ','i','s',' ','b','l','u','t'],
+    states:['active','normal','normal','sp','normal','normal','normal','sp','normal','normal','sp','normal','normal','normal','active'],
+    ptrs: [{idx:0,label:'L',cls:'ptr-blue'},{idx:14,label:'R',cls:'ptr-green'}],
+    activeLine: 6,
+    phase: 'Phase 1', phaseClass: 'phase-reverse-all',
+    title: 'Swap chars[0] ↔ chars[14]: "t" ↔ "e"',
+    text: 'First swap: "t" at the start trades places with "e" at the end. L and R will continue moving inward, performing 7 total swaps to reverse all 15 characters.',
+    vars: { Phase:'Full Rev', L:'0', R:'14', Word:'\u2014' },
+    changed: []
+  },
+  { // 4
+    chars: ['e','u','l','b',' ','s','k','y',' ','i','s',' ','e','h','t'],
+    states:['faded','faded','faded','sp','active','normal','normal','sp','normal','normal','active','sp','faded','faded','faded'],
+    ptrs: [{idx:4,label:'L',cls:'ptr-blue'},{idx:10,label:'R',cls:'ptr-green'}],
+    activeLine: 6,
+    phase: 'Phase 1', phaseClass: 'phase-reverse-all',
+    title: 'Midway: Swap chars[4] ↔ chars[10]',
+    text: 'After swaps at (0,14), (1,13), (2,12), (3,11) — now swapping positions 4 and 10. Notice spaces are being repositioned too. Outer characters are already placed (faded).',
+    vars: { Phase:'Full Rev', L:'4', R:'10', Word:'\u2014' },
+    changed: ['L','R']
+  },
+  { // 5
+    chars: ['e','u','l','b',' ','s','i',' ','y','k','s',' ','e','h','t'],
+    states:['done','done','done','sp','done','done','done','sp','done','done','done','sp','done','done','done'],
+    ptrs: [],
+    activeLine: 10,
+    phase: 'Phase 1 ✓', phaseClass: 'phase-reverse-all',
+    title: 'Full Reverse Complete → "eulb si yks eht"',
+    text: 'After 7 swaps, the entire string is reversed. The words are now in the correct order ("eulb" was "blue", "si" was "is", etc.) — but each word is spelled backwards! Phase 2 will fix this.',
+    vars: { Phase:'Rev All ✓', L:'7', R:'7', Word:'\u2014' },
+    changed: ['Phase','L','R']
+  },
+  { // 6
+    chars: ['e','u','l','b',' ','s','i',' ','y','k','s',' ','e','h','t'],
+    states:['word','word','word','word','sp','normal','normal','sp','normal','normal','normal','sp','normal','normal','normal'],
+    ptrs: [{idx:0,label:'start',cls:'ptr-blue'},{idx:3,label:'i-1',cls:'ptr-green'}],
+    activeLine: 16,
+    phase: 'Phase 2', phaseClass: 'phase-reverse-words',
+    title: 'Find Word 1: "eulb" at indices 0–3',
+    text: 'Scanning from start=0, we hit a space at i=4. Word 1 spans indices 0 to 3: "eulb". Now reverse this sub-range to get "blue".',
+    vars: { Phase:'Rev Words', L:'0', R:'3', Word:'"eulb"' },
+    changed: ['Phase','L','R','Word']
+  },
+  { // 7
+    chars: ['b','l','u','e',' ','s','i',' ','y','k','s',' ','e','h','t'],
+    states:['found','found','found','found','sp','normal','normal','sp','normal','normal','normal','sp','normal','normal','normal'],
+    ptrs: [],
+    activeLine: 16,
+    phase: 'Phase 2', phaseClass: 'phase-reverse-words',
+    title: 'Word 1 Reversed: "eulb" → "blue" ✓',
+    text: 'Two swaps (e↔b, u↔l) reverse the word: "eulb" becomes "blue". First word is now correct!',
+    vars: { Phase:'Rev Words', L:'\u2014', R:'\u2014', Word:'"blue" ✓' },
+    changed: ['Word']
+  },
+  { // 8
+    chars: ['b','l','u','e',' ','i','s',' ','y','k','s',' ','e','h','t'],
+    states:['found','found','found','found','sp','found','found','sp','normal','normal','normal','sp','normal','normal','normal'],
+    ptrs: [{idx:5,label:'start',cls:'ptr-blue'},{idx:6,label:'i-1',cls:'ptr-green'}],
+    activeLine: 16,
+    phase: 'Phase 2', phaseClass: 'phase-reverse-words',
+    title: 'Word 2 Reversed: "si" → "is" ✓',
+    text: 'Word at indices 5–6: "si" → one swap (s↔i) → "is". Two words done!',
+    vars: { Phase:'Rev Words', L:'5', R:'6', Word:'"is" ✓' },
+    changed: ['L','R','Word']
+  },
+  { // 9
+    chars: ['b','l','u','e',' ','i','s',' ','s','k','y',' ','e','h','t'],
+    states:['found','found','found','found','sp','found','found','sp','found','found','found','sp','normal','normal','normal'],
+    ptrs: [{idx:8,label:'start',cls:'ptr-blue'},{idx:10,label:'i-1',cls:'ptr-green'}],
+    activeLine: 16,
+    phase: 'Phase 2', phaseClass: 'phase-reverse-words',
+    title: 'Word 3 Reversed: "yks" → "sky" ✓',
+    text: 'Word at indices 8–10: "yks" → one swap (y↔s), middle k stays → "sky". Three words done!',
+    vars: { Phase:'Rev Words', L:'8', R:'10', Word:'"sky" ✓' },
+    changed: ['L','R','Word']
+  },
+  { // 10
+    chars: ['b','l','u','e',' ','i','s',' ','s','k','y',' ','t','h','e'],
+    states:['found','found','found','found','sp','found','found','sp','found','found','found','sp','found','found','found'],
+    ptrs: [{idx:12,label:'start',cls:'ptr-blue'},{idx:14,label:'i-1',cls:'ptr-green'}],
+    activeLine: 16,
+    phase: 'Phase 2', phaseClass: 'phase-reverse-words',
+    title: 'Word 4 Reversed: "eht" → "the" ✓',
+    text: 'Word at indices 12–14: "eht" → one swap (e↔t), middle h stays → "the". All words reversed!',
+    vars: { Phase:'Rev Words', L:'12', R:'14', Word:'"the" ✓' },
+    changed: ['L','R','Word']
+  },
+  { // 11
+    chars: ['b','l','u','e',' ','i','s',' ','s','k','y',' ','t','h','e'],
+    states:['done','done','done','done','sp','done','done','sp','done','done','done','sp','done','done','done'],
+    ptrs: [],
+    activeLine: 19,
+    phase: 'Done ✓', phaseClass: 'phase-done',
+    title: 'Result: "blue is sky the"',
+    text: 'Join the character array back into a string → "blue is sky the". The two-pass reversal trick worked: reversing at the string level swapped word order, reversing at the word level fixed spelling. O(n) time, O(1) extra space!',
+    vars: { Phase:'Done ✓', L:'\u2014', R:'\u2014', Word:'All ✓' },
+    changed: ['Phase','Word']
+  }
+];
+
+/* ── State ── */
+let cur = 0;
+
+/* ── Render ── */
+function render() {
+  const s = STEPS[cur];
+  const n = s.chars.length;
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phase;
+  badge.className = 'phase-badge ' + s.phaseClass;
+
+  // Pointers
+  const ptrRow = document.getElementById('ptr-row');
+  ptrRow.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'ptr-slot';
+    const ptr = s.ptrs.find(p => p.idx === i);
+    if (ptr) {
+      const lbl = document.createElement('span');
+      lbl.className = 'ptr-label ' + ptr.cls;
+      lbl.textContent = ptr.label;
+      slot.appendChild(lbl);
+    }
+    ptrRow.appendChild(slot);
+  }
+
+  // Cells
+  const cellRow = document.getElementById('cell-row');
+  cellRow.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + s.states[i];
+    cell.textContent = s.chars[i] === ' ' ? '·' : s.chars[i];
+    cellRow.appendChild(cell);
+  }
+
+  // Indices
+  const idxRow = document.getElementById('idx-row');
+  idxRow.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'idx-label';
+    lbl.textContent = i;
+    idxRow.appendChild(lbl);
+  }
+
+  // Variables
+  const vt = document.getElementById('var-tracker');
+  vt.innerHTML = '';
+  for (const [k, v] of Object.entries(s.vars)) {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (s.changed.includes(k) ? ' changed' : '');
+    box.innerHTML = '<span class="var-name">' + k + '</span><span class="var-val">' + v + '</span>';
+    vt.appendChild(box);
+  }
+
+  // Code panel
+  const cp = document.getElementById('code-panel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+    div.textContent = line;
+    cp.appendChild(div);
+  });
+
+  // Info card
+  document.getElementById('step-counter').textContent = 'Step ' + (cur + 1) + ' of ' + STEPS.length;
+  document.getElementById('info-title').textContent = s.title;
+  document.getElementById('info-text').textContent = s.text;
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  STEPS.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === cur ? ' active' : (i < cur ? ' visited' : ''));
+    dot.addEventListener('click', () => { cur = i; render(); });
+    dots.appendChild(dot);
+  });
+}
+
+/* ── Navigation ── */
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < STEPS.length) { cur = next; render(); }
+}
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+/* ── Init ── */
+render();
+</script>
+</body>
+</html>
