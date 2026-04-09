@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Bold Tag in String (Trie) — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN TOKENS ═══ */
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --pink-bg:#FDE7F0;--pink-border:#F48FB1;--pink-text:#880E4F;--pink-mid:#E91E63;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+  --pink-bg:#4A0E2A;--pink-border:#F06292;--pink-text:#F8BBD0;--pink-mid:#F48FB1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:900px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.header .subtitle{font-size:14px;color:var(--text2);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+.tag-ds{background:var(--cyan-bg);color:var(--cyan-mid);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.card.collapsed .card-body{display:none;}
+.card-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.card-header:hover{opacity:0.85;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.collapse-icon{font-size:18px;color:var(--text3);transition:transform 0.25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card-body{margin-top:1rem;}
+.card-body p{margin-bottom:0.75rem;font-size:14px;color:var(--text2);line-height:1.7;}
+.card-body strong{color:var(--text);}
+.card-body ul,.card-body ol{margin:0.5rem 0 0.75rem 1.25rem;font-size:14px;color:var(--text2);}
+.card-body li{margin-bottom:0.35rem;}
+.card-body code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--purple-mid);}
+
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box p{margin-bottom:0.5rem;font-size:14px;line-height:1.6;}
+.concept-box ul{margin:0.25rem 0 0.5rem 1rem;font-size:14px;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;font-size:14px;}
+
+/* STRATEGY */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.step-label-text{font-size:14px;color:var(--text2);line-height:1.6;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{font-size:14px;margin-bottom:8px;}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* ANNOTATED CODE */
+.annotated-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;margin:1rem 0;}
+.annotated-code .line{white-space:pre;color:var(--text2);}
+.annotated-code .comment{color:var(--green-mid);font-style:italic;}
+.annotated-code .keyword{color:var(--purple-mid);}
+
+/* ═══ TRIE VISUALISATION ═══ */
+.trie-viz{position:relative;margin:1rem 0;overflow:hidden;}
+.trie-svg{width:100%;display:block;}
+.trie-node{transition:all 0.3s;}
+.trie-node circle{fill:var(--surface);stroke:var(--border2);stroke-width:2;transition:all 0.3s;}
+.trie-node text{font-family:var(--mono);font-size:14px;font-weight:600;fill:var(--text);text-anchor:middle;dominant-baseline:central;}
+.trie-node.root circle{fill:var(--bg2);stroke:var(--text3);}
+.trie-node.active circle{fill:var(--blue-bg);stroke:var(--blue-mid);stroke-width:3;}
+.trie-node.end-node circle{fill:var(--green-bg);stroke:var(--green-mid);stroke-width:3;}
+.trie-node.end-node.active circle{fill:var(--amber-bg);stroke:var(--amber-mid);stroke-width:3;}
+.trie-node.inserting circle{fill:var(--purple-bg);stroke:var(--purple-mid);stroke-width:3;}
+.trie-node.matched circle{fill:var(--green-bg);stroke:var(--green-mid);stroke-width:3;}
+.trie-node.building circle{fill:var(--cyan-bg);stroke:var(--cyan-mid);stroke-width:3;}
+.trie-edge{stroke:var(--border2);stroke-width:2;fill:none;transition:all 0.3s;}
+.trie-edge.active{stroke:var(--blue-mid);stroke-width:3;}
+.trie-edge.inserting{stroke:var(--purple-mid);stroke-width:3;}
+.trie-edge.matched{stroke:var(--green-mid);stroke-width:3;}
+.trie-edge-label{font-family:var(--mono);font-size:12px;font-weight:600;fill:var(--text2);text-anchor:middle;dominant-baseline:central;transition:all 0.3s;}
+.trie-edge-label.active{fill:var(--blue-mid);}
+.trie-edge-label.inserting{fill:var(--purple-mid);}
+.end-marker{font-size:10px;fill:var(--green-mid);font-weight:700;text-anchor:middle;}
+
+/* ═══ STRING DISPLAY ═══ */
+.viz-area{text-align:center;margin:1.25rem 0;}
+.pool-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px;}
+.string-row{display:inline-flex;gap:2px;justify-content:center;flex-wrap:wrap;}
+.char-cell{width:36px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:600;border-radius:6px;background:var(--bg2);border:2px solid var(--border);color:var(--text);transition:all 0.25s;position:relative;}
+.char-cell .idx{position:absolute;bottom:-16px;font-size:9px;color:var(--text3);font-weight:400;}
+.char-cell.scanning{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-text);}
+.char-cell.matched{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+.char-cell.bold-marked{border-color:var(--amber-border);background:var(--amber-bg);color:var(--amber-text);}
+.char-cell.trie-walking{border-color:var(--purple-border);background:var(--purple-bg);color:var(--purple-text);}
+.char-cell.bold-final{border-color:var(--cyan-border);background:var(--cyan-bg);color:var(--cyan-text);}
+.char-cell.done{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+
+/* BOLD ARRAY */
+.bold-row{display:inline-flex;gap:2px;justify-content:center;margin-top:1rem;}
+.bold-cell{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);transition:all 0.25s;}
+.bold-cell.on{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);}
+.bold-cell.changed{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);}
+
+/* WORD CHIPS */
+.word-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0.75rem 0;}
+.word-chip{display:inline-flex;gap:2px;padding:6px 10px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);transition:all 0.3s;}
+.word-chip .letter{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);}
+.word-chip.inserting{border-color:var(--purple-border);background:var(--purple-bg);}
+.word-chip.inserting .letter{color:var(--purple-mid);}
+.word-chip.active{border-color:var(--blue-border);background:var(--blue-bg);}
+.word-chip.done-word{border-color:var(--green-border);background:var(--green-bg);opacity:0.7;}
+.word-chip-label{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);display:block;text-align:center;margin-top:2px;}
+
+/* VAR TRACKER */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* CODE PANEL */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:11px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;padding:3px 10px;border-radius:20px;}
+.phase-build{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-mark{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-result{background:var(--green-bg);color:var(--green-mid);}
+.phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;gap:5px;justify-content:center;margin:1.25rem 0 0.75rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all 0.25s;cursor:pointer;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:0.75rem;}
+.btn{padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:#fff;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:1rem;padding:10px;background:var(--bg2);border-radius:var(--radius);}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:1px solid var(--border);}
+
+/* RESULT DISPLAY */
+.result-display{text-align:center;padding:1rem;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius);margin:1rem 0;font-family:var(--mono);font-size:14px;color:var(--green-text);}
+
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--text2);}
+.takeaway strong{color:var(--text);}
+.takeaway::before{content:"✓";color:var(--green-mid);font-weight:700;}
+
+/* RELATED */
+.related-problems{margin:1rem 0;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{margin-left:1.25rem;font-size:14px;color:var(--text2);}
+.related-problems li{margin-bottom:4px;}
+
+/* COMPARISON TABLE */
+.comp-table{width:100%;border-collapse:collapse;font-size:13px;margin:1rem 0;}
+.comp-table th,.comp-table td{padding:10px 12px;text-align:left;border:1px solid var(--border);}
+.comp-table th{background:var(--bg2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);}
+.comp-table td{color:var(--text2);}
+.comp-table td:first-child{font-weight:600;color:var(--text);}
+
+/* TRIE STATIC DIAGRAM */
+.trie-static{display:flex;justify-content:center;margin:1rem 0;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>616. Add Bold Tag in String</h1>
+  <div class="subtitle">Solution 2 — Trie + Boolean Array (with full Trie deep-dive)</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-ds">Trie Data Structure</span>
+    <span class="tag tag-pattern">Multi-Pattern Matching</span>
+    <span class="tag tag-complexity">O(n·L + W·L) time</span>
+    <span class="tag tag-complexity">O(W·L + n) space</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 1: WHAT IS A TRIE? -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">What is a Trie? (From Zero)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>A <strong>Trie</strong> (pronounced "try", from re<em>trie</em>val) is a tree data structure for storing strings. Unlike a hash set where you store whole words, a Trie stores strings <strong>character by character</strong> — each edge represents one character, and paths from the root spell out words.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Core Idea</div>
+      <p>Imagine a dictionary organized as a tree. The root is empty. Each branch adds one letter. When you reach a node marked as "end of word", the path from root to that node spells a complete word. Words sharing a <strong>common prefix</strong> share the same path up to where they diverge.</p>
+    </div>
+
+    <p><strong>Real-world analogy:</strong> Think of your phone's autocomplete. As you type "c-a-t", the system walks down a tree: root → c → a → t. At "t" it knows "cat" is a word. If you type "c-a-r", it branches at "a" → goes to "r" instead of "t". The prefix "ca" was shared, saving space.</p>
+
+    <p><strong>Why not just use a list or set?</strong></p>
+    <ul>
+      <li><strong>List:</strong> To check if "cat" is a prefix of anything, you'd scan every word → O(W) per check</li>
+      <li><strong>Set:</strong> Fast lookup for exact words, but can't do "does any word START with 'ca'?" efficiently</li>
+      <li><strong>Trie:</strong> Walk the tree character by character. At any node you know: "Is this a prefix? Is this a full word?" — O(L) per query where L is word length</li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 When to Use a Trie</div>
+      <ul>
+        <li>Searching for <strong>multiple patterns</strong> in a string simultaneously</li>
+        <li><strong>Prefix matching</strong> — "find all words starting with X"</li>
+        <li><strong>Autocomplete / spell-check</strong> systems</li>
+        <li>When you'd otherwise call <code>str.startswith()</code> for many words → Trie does them all at once</li>
+      </ul>
+    </div>
+
+    <!-- TRIE STRUCTURE DIAGRAM -->
+    <p><strong>A Trie with words "aaa", "aab", "bc":</strong></p>
+    <div class="trie-static">
+      <svg width="360" height="260" viewBox="0 0 360 260" class="trie-svg">
+        <!-- Edges -->
+        <line x1="180" y1="35" x2="110" y2="95" stroke="var(--border2)" stroke-width="2"/>
+        <line x1="180" y1="35" x2="280" y2="95" stroke="var(--border2)" stroke-width="2"/>
+        <line x1="110" y1="115" x2="110" y2="165" stroke="var(--border2)" stroke-width="2"/>
+        <line x1="280" y1="115" x2="280" y2="165" stroke="var(--border2)" stroke-width="2"/>
+        <line x1="110" y1="185" x2="70" y2="230" stroke="var(--border2)" stroke-width="2"/>
+        <line x1="110" y1="185" x2="150" y2="230" stroke="var(--border2)" stroke-width="2"/>
+        <!-- Edge labels -->
+        <text x="138" y="60" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--blue-mid)" text-anchor="middle">'a'</text>
+        <text x="237" y="60" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--red-mid)" text-anchor="middle">'b'</text>
+        <text x="100" y="143" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--blue-mid)" text-anchor="middle">'a'</text>
+        <text x="290" y="143" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--red-mid)" text-anchor="middle">'c'</text>
+        <text x="78" y="213" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--blue-mid)" text-anchor="middle">'a'</text>
+        <text x="142" y="213" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--purple-mid)" text-anchor="middle">'b'</text>
+        <!-- Nodes -->
+        <circle cx="180" cy="28" r="18" fill="var(--bg2)" stroke="var(--text3)" stroke-width="2"/>
+        <text x="180" y="28" font-family="var(--mono)" font-size="11" fill="var(--text3)" text-anchor="middle" dominant-baseline="central">root</text>
+
+        <circle cx="110" cy="100" r="18" fill="var(--surface)" stroke="var(--border2)" stroke-width="2"/>
+        <text x="110" y="100" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--text)" text-anchor="middle" dominant-baseline="central">a</text>
+
+        <circle cx="280" cy="100" r="18" fill="var(--surface)" stroke="var(--border2)" stroke-width="2"/>
+        <text x="280" y="100" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--text)" text-anchor="middle" dominant-baseline="central">b</text>
+
+        <circle cx="110" cy="175" r="18" fill="var(--surface)" stroke="var(--border2)" stroke-width="2"/>
+        <text x="110" y="175" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--text)" text-anchor="middle" dominant-baseline="central">a</text>
+
+        <circle cx="280" cy="175" r="18" fill="var(--green-bg)" stroke="var(--green-mid)" stroke-width="3"/>
+        <text x="280" y="175" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--green-text)" text-anchor="middle" dominant-baseline="central">c</text>
+        <text x="280" y="198" font-size="10" fill="var(--green-mid)" font-weight="700" text-anchor="middle">★ "bc"</text>
+
+        <circle cx="70" cy="240" r="18" fill="var(--green-bg)" stroke="var(--green-mid)" stroke-width="3"/>
+        <text x="70" y="240" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--green-text)" text-anchor="middle" dominant-baseline="central">a</text>
+        <text x="70" y="259" font-size="10" fill="var(--green-mid)" font-weight="700" text-anchor="middle">★ "aaa"</text>
+
+        <circle cx="150" cy="240" r="18" fill="var(--green-bg)" stroke="var(--green-mid)" stroke-width="3"/>
+        <text x="150" y="240" font-family="var(--mono)" font-size="14" font-weight="600" fill="var(--green-text)" text-anchor="middle" dominant-baseline="central">b</text>
+        <text x="150" y="259" font-size="10" fill="var(--green-mid)" font-weight="700" text-anchor="middle">★ "aab"</text>
+      </svg>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--text3);">Green nodes (★) mark <code>is_end = True</code> — a complete word ends here</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Misconception</div>
+      <p>Node labels don't store the full word — each node just represents the last character added. The <strong>path from root</strong> spells the word. The green "a" at the bottom-left isn't "a", it's the end of root → a → a → a = "aaa".</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 2: HOW TRIE INSERT WORKS -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">How Trie Operations Work</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p><strong>A Trie node</strong> has exactly two things:</p>
+    <ol>
+      <li><code>children</code> — a dictionary mapping characters to child TrieNodes</li>
+      <li><code>is_end</code> — a boolean marking "a complete word ends at this node"</li>
+    </ol>
+
+    <div class="annotated-code">
+<div class="line"><span class="keyword">class</span> TrieNode:</div>
+<div class="line">    <span class="keyword">def</span> __init__(self):</div>
+<div class="line">        self.children = {}   <span class="comment"># char → TrieNode</span></div>
+<div class="line">        self.is_end = False  <span class="comment"># does a word end here?</span></div>
+    </div>
+
+    <p><strong>Insert a word:</strong> Walk from root. For each character, if the child doesn't exist, create it. At the last character, mark <code>is_end = True</code>.</p>
+
+    <div class="annotated-code">
+<div class="line"><span class="keyword">def</span> insert(root, word):</div>
+<div class="line">    node = root                <span class="comment"># Start at root</span></div>
+<div class="line">    <span class="keyword">for</span> ch <span class="keyword">in</span> word:           <span class="comment"># Walk character by character</span></div>
+<div class="line">        <span class="keyword">if</span> ch <span class="keyword">not in</span> node.children:</div>
+<div class="line">            node.children[ch] = TrieNode()  <span class="comment"># Create if missing</span></div>
+<div class="line">        node = node.children[ch]  <span class="comment"># Move down</span></div>
+<div class="line">    node.is_end = True         <span class="comment"># Mark end of word</span></div>
+    </div>
+
+    <p><strong>Search / Walk:</strong> Follow the same path. If at any point a character isn't in <code>children</code>, the word (or prefix) doesn't exist. If you reach the end and <code>is_end</code> is True, the whole word exists.</p>
+
+    <div class="annotated-code">
+<div class="line"><span class="keyword">def</span> search(root, word):</div>
+<div class="line">    node = root</div>
+<div class="line">    <span class="keyword">for</span> ch <span class="keyword">in</span> word:</div>
+<div class="line">        <span class="keyword">if</span> ch <span class="keyword">not in</span> node.children:</div>
+<div class="line">            <span class="keyword">return</span> False       <span class="comment"># Path doesn't exist</span></div>
+<div class="line">        node = node.children[ch]</div>
+<div class="line">    <span class="keyword">return</span> node.is_end         <span class="comment"># True only if full word</span></div>
+    </div>
+
+    <table class="comp-table">
+      <thead><tr><th>Operation</th><th>Time</th><th>How It Works</th></tr></thead>
+      <tbody>
+        <tr><td>Insert</td><td>O(L)</td><td>Walk L characters, create nodes as needed</td></tr>
+        <tr><td>Search</td><td>O(L)</td><td>Walk L characters, check is_end</td></tr>
+        <tr><td>Prefix check</td><td>O(L)</td><td>Walk L characters (ignore is_end)</td></tr>
+        <tr><td>Space</td><td>O(W·L)</td><td>W words, max L characters each</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Key Advantage for This Problem</div>
+      <p>For "Add Bold Tag", we need to check if <strong>any word from the dictionary</strong> starts at position <code>i</code> in the string. Without a Trie, we'd try every word separately → O(W·L) per position. With a Trie, we walk <strong>once</strong> from position <code>i</code>, and the Trie simultaneously checks all words that could match → O(L) per position. If 3 words share the prefix "aa", we only walk "aa" once, not three times.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 3: THE ALGORITHM -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">The Algorithm: Trie + Boolean Array</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>We combine a Trie (for fast multi-word matching) with a boolean array (for merging intervals):</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build the Trie:</strong> Insert all dictionary words into a Trie.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Scan string with Trie:</strong> For each position <code>i</code> in <code>s</code>, walk the Trie from root following <code>s[i], s[i+1], ...</code>. Whenever we hit a node with <code>is_end = True</code>, mark all characters in that range as bold.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Build result:</strong> Scan the <code>bold[]</code> array. Insert <code>&lt;b&gt;</code> at the start of each bold region and <code>&lt;/b&gt;</code> at the end. Overlapping/adjacent words are automatically merged!</span>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why This Beats Brute Force</div>
+      <p><strong>Without Trie (Solution 1):</strong> For each word, call <code>s.find(word)</code> repeatedly → O(n·W·L) total.<br>
+      <strong>With Trie (Solution 2):</strong> For each position in <code>s</code>, do one Trie walk → O(n·L) total.<br>
+      When W (word count) is large, Trie is dramatically faster because shared prefixes are walked only once.</p>
+    </div>
+
+    <table class="comp-table">
+      <thead><tr><th>Aspect</th><th>Solution 1 (find)</th><th>Solution 2 (Trie)</th></tr></thead>
+      <tbody>
+        <tr><td>Per-position work</td><td>Try each word: O(W·L)</td><td>One Trie walk: O(L)</td></tr>
+        <tr><td>Shared prefixes</td><td>Re-compared each word</td><td>Walked once in Trie</td></tr>
+        <tr><td>Total time</td><td>O(n · W · L)</td><td>O(n · L + W · L)</td></tr>
+        <tr><td>Build cost</td><td>None</td><td>O(W · L) to build Trie</td></tr>
+        <tr><td>Best for</td><td>Few short words</td><td>Many words / shared prefixes</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 4: WHY IT WORKS -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After scanning position <code>i</code>, <code>bold[k] = True</code> for every index <code>k</code> that is covered by at least one dictionary word starting at or before position <code>i</code>. The Trie guarantees we find <em>every</em> dictionary word starting at <code>i</code> in a single walk.</p>
+    </div>
+
+    <p><strong>Trie walk correctness:</strong> Starting at position <code>i</code>, we follow <code>s[i], s[i+1], ...</code> in the Trie. Every time we reach an <code>is_end</code> node, we've found a word that starts at <code>i</code>. If we hit a dead end (character not in children), no longer words can match from <code>i</code>.</p>
+
+    <p><strong>Boolean array merging:</strong> If "aaa" marks indices [0,1,2] and "aab" marks [1,2,3], both set <code>bold[1] = bold[2] = True</code>. The overlapping region is automatically merged — we just check where bold regions start and end.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Trie Walk Doesn't Stop at First Match</div>
+      <p>When we find a word at <code>is_end</code>, we don't stop — we keep walking! "aaa" contains "aa" as a prefix. If both "aa" and "aab" are in the dictionary, one walk from position 0 finds "aa" at depth 2 then keeps going to find "aab" at depth 3. This is critical for correctness.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 5: THE CODE -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="annotated-code">
+<div class="line"><span class="keyword">class</span> TrieNode:                         <span class="comment"># Each node in the Trie</span></div>
+<div class="line">    <span class="keyword">def</span> __init__(self):</div>
+<div class="line">        self.children = {}               <span class="comment"># char → TrieNode mapping</span></div>
+<div class="line">        self.is_end = False              <span class="comment"># True if a word ends here</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">def</span> addBoldTag(s, words):                <span class="comment"># Main function</span></div>
+<div class="line">    root = TrieNode()                    <span class="comment"># Create empty Trie root</span></div>
+<div class="line">    <span class="keyword">for</span> word <span class="keyword">in</span> words:                   <span class="comment"># Phase 1: Build Trie</span></div>
+<div class="line">        node = root</div>
+<div class="line">        <span class="keyword">for</span> ch <span class="keyword">in</span> word:                  <span class="comment"># Walk/create path</span></div>
+<div class="line">            <span class="keyword">if</span> ch <span class="keyword">not in</span> node.children:</div>
+<div class="line">                node.children[ch] = TrieNode()</div>
+<div class="line">            node = node.children[ch]</div>
+<div class="line">        node.is_end = True               <span class="comment"># Mark word boundary</span></div>
+<div class="line"></div>
+<div class="line">    n = len(s)</div>
+<div class="line">    bold = [False] * n                   <span class="comment"># Phase 2: Boolean mask</span></div>
+<div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):                  <span class="comment"># Try each start position</span></div>
+<div class="line">        node = root                      <span class="comment"># Reset to Trie root</span></div>
+<div class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(i, n):             <span class="comment"># Walk forward in s</span></div>
+<div class="line">            <span class="keyword">if</span> s[j] <span class="keyword">not in</span> node.children: <span class="comment"># Dead end in Trie</span></div>
+<div class="line">                <span class="keyword">break</span></div>
+<div class="line">            node = node.children[s[j]]   <span class="comment"># Move to next Trie node</span></div>
+<div class="line">            <span class="keyword">if</span> node.is_end:                 <span class="comment"># Found a complete word!</span></div>
+<div class="line">                <span class="keyword">for</span> k <span class="keyword">in</span> range(i, j + 1):  <span class="comment"># Mark range bold</span></div>
+<div class="line">                    bold[k] = True</div>
+<div class="line"></div>
+<div class="line">    res = []                             <span class="comment"># Phase 3: Build output</span></div>
+<div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</div>
+<div class="line">        <span class="keyword">if</span> bold[i] <span class="keyword">and</span> (i == 0 <span class="keyword">or not</span> bold[i-1]):</div>
+<div class="line">            res.append("&lt;b&gt;")          <span class="comment"># Start of bold region</span></div>
+<div class="line">        res.append(s[i])</div>
+<div class="line">        <span class="keyword">if</span> bold[i] <span class="keyword">and</span> (i == n-1 <span class="keyword">or not</span> bold[i+1]):</div>
+<div class="line">            res.append("&lt;/b&gt;")         <span class="comment"># End of bold region</span></div>
+<div class="line">    <span class="keyword">return</span> "".join(res)</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why We Don't Break After Finding a Word</div>
+      <p>After <code>if node.is_end: mark bold</code>, we <strong>continue the inner loop</strong>. If dictionary has "aa" and "aab", starting at position 1 in "aaabbcc" we find "aa" (marks [1,2]) then keep walking to find nothing at 'b' (Trie doesn't have "aab..." from 'b'). But if the example were different and "aab" branched further, we'd catch that too.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 6: INTERVIEW STRATEGY -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p class="step-label-text">"Multiple dictionary words to search in a string" → This screams Trie. Any time you see a dictionary of patterns to match simultaneously, think Trie or Aho-Corasick.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start with the Naive Solution</div>
+        <p class="step-label-text">First mention: "I could search each word with .find() and mark ranges." Complexity is O(n·W·L). Then say: "I can optimize the matching phase using a Trie."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Explain the Trie Advantage</div>
+        <p class="step-label-text">"By building a Trie from dictionary words, I walk the string once from each position. Shared prefixes are explored only once, reducing matching to O(n·L)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Explain Bold Merging</div>
+        <p class="step-label-text">"I use a boolean array — each index is marked if any word covers it. Overlapping/adjacent bold regions merge automatically when I scan for transitions."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll build a Trie from the dictionary words. Then for each starting position in s, I walk the Trie following characters in s. Every time I reach a node marked as end-of-word, I mark those indices bold. After processing all positions, I scan the bold array and insert tags at transitions. This runs in O(n·L) for matching plus O(W·L) to build the Trie, much better than checking each word individually."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 7: INTERACTIVE WALKTHROUGH -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card" id="walkthrough-card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px;"><strong>Example:</strong> s = "aaabbcc", words = ["aaa", "aab", "bc"]</p>
+
+    <!-- TRIE VISUALISATION -->
+    <div class="pool-label">Trie</div>
+    <div class="trie-viz" id="trieViz">
+      <svg id="trieSvg" width="100%" height="280" viewBox="0 0 460 280" class="trie-svg"></svg>
+    </div>
+
+    <!-- DICTIONARY WORDS -->
+    <div class="pool-label">Dictionary Words</div>
+    <div class="word-chips" id="wordChips"></div>
+
+    <!-- STRING ROW -->
+    <div class="viz-area">
+      <div class="pool-label">String s = "aaabbcc"</div>
+      <div class="string-row" id="stringRow"></div>
+
+      <!-- BOLD ARRAY -->
+      <div class="pool-label" style="margin-top:1.5rem;">Bold Array</div>
+      <div class="bold-row" id="boldRow"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-display" id="resultDisplay" style="display:none;"></div>
+
+    <!-- VAR TRACKER -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- CODE PANEL -->
+    <div class="code-panel" id="codePanel"></div>
+
+    <!-- INFO CARD -->
+    <div class="info-card" id="infoCard"></div>
+
+    <!-- PROGRESS -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn" onclick="reset()">Reset</button>
+      <button class="btn btn-primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--purple-bg);border-color:var(--purple-border);"></div>Trie Insert / Walk</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-bg);border-color:var(--blue-border);"></div>Scanning</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green-bg);border-color:var(--green-border);"></div>Matched / End Node</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-bg);border-color:var(--amber-border);"></div>Marking Bold</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan-bg);border-color:var(--cyan-border);"></div>Final Result</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 8: TRIE COMPLEXITY & VARIANTS -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">8</span>
+    <span class="section-title">Trie Deep-Dive: Complexity, Variants & Interview Patterns</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p><strong>Space complexity of a Trie:</strong></p>
+    <ul>
+      <li><strong>Worst case:</strong> O(Σ · N) where Σ is alphabet size and N is total nodes. With a dict (like Python), only present edges are stored.</li>
+      <li><strong>Array-based:</strong> Each node stores a fixed array of 26 pointers. Faster but wastes space if most are null.</li>
+      <li><strong>HashMap-based (our approach):</strong> Each node stores only existing children. More memory-efficient for sparse alphabets.</li>
+    </ul>
+
+    <table class="comp-table">
+      <thead><tr><th>Trie Variant</th><th>Use Case</th><th>Key Difference</th></tr></thead>
+      <tbody>
+        <tr><td>Standard Trie</td><td>Exact word/prefix lookup</td><td>What we use here — children dict + is_end flag</td></tr>
+        <tr><td>Compressed (Radix) Trie</td><td>Space optimization</td><td>Chains of single-child nodes compressed into one edge with a string label</td></tr>
+        <tr><td>Suffix Trie/Tree</td><td>Substring search</td><td>Insert ALL suffixes of a string — enables O(m) substring search</td></tr>
+        <tr><td>Aho-Corasick</td><td>Multi-pattern streaming</td><td>Trie + failure links (like KMP). Finds all dictionary matches in O(n + matches)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Trie vs Hash Set: When to Choose Which</div>
+      <ul>
+        <li><strong>Hash Set wins</strong> when you only need exact word lookup and don't care about prefixes</li>
+        <li><strong>Trie wins</strong> when you need prefix queries, or need to walk character-by-character matching against multiple patterns simultaneously</li>
+        <li>This problem uses the Trie's key strength: <em>simultaneous multi-pattern matching</em> by walking the string and the Trie in lockstep</li>
+      </ul>
+    </div>
+
+    <p><strong>Common Trie interview problems:</strong></p>
+    <ul>
+      <li><strong>208. Implement Trie</strong> — The classic: build insert, search, startsWith</li>
+      <li><strong>211. Design Add and Search Words</strong> — Trie + DFS for wildcard '.' matching</li>
+      <li><strong>212. Word Search II</strong> — Backtracking on grid + Trie for dictionary</li>
+      <li><strong>648. Replace Words</strong> — Find shortest prefix match using Trie</li>
+      <li><strong>676. Implement Magic Dictionary</strong> — Trie with one-character tolerance</li>
+      <li><strong>720. Longest Word in Dictionary</strong> — Trie + BFS to build words incrementally</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The "Trie Walk" Pattern</div>
+      <p>The pattern used in this problem — "for each position in the input, walk the Trie and trigger actions at end-nodes" — is the core Trie application pattern. Variations include: finding longest prefix match (stop at deepest is_end), finding all matches (collect every is_end), and counting distinct prefixes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SECTION 9: SUMMARY -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">9</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway"><strong>A Trie stores strings character-by-character as tree paths.</strong> Shared prefixes share tree paths, saving time and space.</div>
+      <div class="takeaway"><strong>Insert = walk + create. Search = walk + check is_end.</strong> Both are O(L) where L is word length.</div>
+      <div class="takeaway"><strong>Trie + Walk pattern:</strong> For each position in s, walk the Trie following characters. At each is_end node, a dictionary word was found.</div>
+      <div class="takeaway"><strong>Boolean array = free interval merge.</strong> Multiple overlapping words just set the same bold indices to True. Contiguous True regions become one tag pair.</div>
+      <div class="takeaway"><strong>O(n·L) beats O(n·W·L)</strong> when W is large — the Trie eliminates per-word scanning.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Reach for a Trie</div>
+      <ul>
+        <li>"Search for multiple patterns in a text" → Trie</li>
+        <li>"Find words with a given prefix" → Trie</li>
+        <li>"Autocomplete suggestions" → Trie</li>
+        <li>"Match any dictionary word starting at position i" → Trie (this problem!)</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>208. Implement Trie (Prefix Tree)</strong> (Medium) — Foundation for all Trie problems</li>
+        <li><strong>212. Word Search II</strong> (Hard) — Trie + backtracking on a 2D grid</li>
+        <li><strong>211. Design Add and Search Words</strong> (Medium) — Trie with wildcard matching</li>
+        <li><strong>648. Replace Words</strong> (Medium) — Find shortest prefix in Trie</li>
+        <li><strong>758. Bold Words in String</strong> (Medium) — Nearly identical problem</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const S = "aaabbcc";
+const WORDS = ["aaa", "aab", "bc"];
+
+// ═══ TRIE LAYOUT (pre-computed for SVG) ═══
+// Node positions { id, x, y, label, isEnd, endWord }
+const TRIE_NODES = [
+  { id:'root', x:230, y:30,  label:'∅',  isEnd:false },
+  { id:'a1',   x:140, y:100, label:'a',  isEnd:false },
+  { id:'b1',   x:340, y:100, label:'b',  isEnd:false },
+  { id:'a2',   x:140, y:175, label:'a',  isEnd:false },
+  { id:'c1',   x:340, y:175, label:'c',  isEnd:true, endWord:'bc' },
+  { id:'a3',   x:80,  y:250, label:'a',  isEnd:true, endWord:'aaa' },
+  { id:'b2',   x:200, y:250, label:'b',  isEnd:true, endWord:'aab' },
+];
+const TRIE_EDGES = [
+  { from:'root', to:'a1', label:'a' },
+  { from:'root', to:'b1', label:'b' },
+  { from:'a1',   to:'a2', label:'a' },
+  { from:'b1',   to:'c1', label:'c' },
+  { from:'a2',   to:'a3', label:'a' },
+  { from:'a2',   to:'b2', label:'b' },
+];
+
+// Insert order for build steps: word by word, char by char
+const INSERT_STEPS = [
+  // "aaa": root->a1, a1->a2, a2->a3(end)
+  { word:'aaa', nodeIds:['root','a1'],       edgeIds:['root-a1'],       newNodes:['a1'],  newEdges:['root-a1'], phase:'build', charIdx:0 },
+  { word:'aaa', nodeIds:['root','a1','a2'],  edgeIds:['root-a1','a1-a2'], newNodes:['a2'], newEdges:['a1-a2'], phase:'build', charIdx:1 },
+  { word:'aaa', nodeIds:['root','a1','a2','a3'], edgeIds:['root-a1','a1-a2','a2-a3'], newNodes:['a3'], newEdges:['a2-a3'], phase:'build', charIdx:2, markEnd:'a3' },
+  // "aab": root->a1, a1->a2 (exist), a2->b2(end)
+  { word:'aab', nodeIds:['root','a1'],       edgeIds:['root-a1'],       newNodes:[], newEdges:[], phase:'build', charIdx:0, existing:true },
+  { word:'aab', nodeIds:['root','a1','a2'],  edgeIds:['root-a1','a1-a2'], newNodes:[], newEdges:[], phase:'build', charIdx:1, existing:true },
+  { word:'aab', nodeIds:['root','a1','a2','b2'], edgeIds:['root-a1','a1-a2','a2-b2'], newNodes:['b2'], newEdges:['a2-b2'], phase:'build', charIdx:2, markEnd:'b2' },
+  // "bc": root->b1, b1->c1(end)
+  { word:'bc', nodeIds:['root','b1'],        edgeIds:['root-b1'],       newNodes:['b1'], newEdges:['root-b1'], phase:'build', charIdx:0 },
+  { word:'bc', nodeIds:['root','b1','c1'],   edgeIds:['root-b1','b1-c1'], newNodes:['c1'], newEdges:['b1-c1'], phase:'build', charIdx:1, markEnd:'c1' },
+];
+
+const CODE_LINES = [
+  'class TrieNode:',
+  '    def __init__(self):',
+  '        self.children = {}',
+  '        self.is_end = False',
+  '',
+  'def addBoldTag(s, words):',
+  '    root = TrieNode()',
+  '    for word in words:          # Build trie',
+  '        node = root',
+  '        for ch in word:',
+  '            if ch not in node.children:',
+  '                node.children[ch] = TrieNode()',
+  '            node = node.children[ch]',
+  '        node.is_end = True',
+  '',
+  '    n = len(s)',
+  '    bold = [False] * n',
+  '    for i in range(n):          # Scan each start',
+  '        node = root',
+  '        for j in range(i, n):   # Walk trie',
+  '            if s[j] not in node.children:',
+  '                break',
+  '            node = node.children[s[j]]',
+  '            if node.is_end:     # Word found!',
+  '                for k in range(i, j+1):',
+  '                    bold[k] = True',
+  '',
+  '    res = []',
+  '    for i in range(n):',
+  '        if bold[i] and (i==0 or not bold[i-1]):',
+  '            res.append("<b>")',
+  '        res.append(s[i])',
+  '        if bold[i] and (i==n-1 or not bold[i+1]):',
+  '            res.append("</b>")',
+  '    return "".join(res)',
+];
+
+// Build full step data
+const steps = [];
+
+// Step 0: Init
+steps.push({
+  phase:'INIT', phaseClass:'phase-init', activeLine:6,
+  title:'Initialize Trie root',
+  text:'Create an empty Trie with just a root node. We\'ll insert all 3 dictionary words: "aaa", "aab", "bc".',
+  builtNodes:['root'], builtEdges:[], activeNodes:['root'], activeEdges:[], endNodes:[],
+  wordStates:{aaa:'',aab:'',bc:''},
+  charStates:Array(7).fill(''), boldArr:Array(7).fill(false), boldChanged:[],
+  vars:{phase:'Build',word:'—',i:'—',j:'—'}, changed:['phase'],
+  insertingWord:null, insertCharIdx:-1
+});
+
+// Steps 1-8: Build Trie (INSERT_STEPS)
+const buildStepDetails = [
+  // "aaa" char 0
+  { title:'Insert "aaa": char \'a\' (depth 1)', text:'Walk from root. No \'a\' child exists → create new node. Move to the new \'a\' node.', activeLine:11 },
+  { title:'Insert "aaa": char \'a\' (depth 2)', text:'From the first \'a\' node. No \'a\' child exists → create new node. Move to it.', activeLine:11 },
+  { title:'Insert "aaa": char \'a\' (depth 3) ★', text:'From the second \'a\' node. No \'a\' child exists → create new node. Mark is_end = True — "aaa" is now stored in the Trie!', activeLine:13 },
+  // "aab" char 0
+  { title:'Insert "aab": char \'a\' (depth 1)', text:'Walk from root. \'a\' child already exists from "aaa" → just follow the existing edge. Shared prefix!', activeLine:12 },
+  { title:'Insert "aab": char \'a\' (depth 2)', text:'From first \'a\'. Child \'a\' already exists → follow it. Still sharing the prefix "aa" with "aaa".', activeLine:12 },
+  { title:'Insert "aab": char \'b\' (depth 3) ★', text:'From second \'a\'. No \'b\' child → create new node. Mark is_end = True — "aab" stored! Note how "aaa" and "aab" share the "aa" prefix path.', activeLine:13 },
+  // "bc" char 0
+  { title:'Insert "bc": char \'b\' (depth 1)', text:'Walk from root. No \'b\' child → create new node. This creates a completely separate branch from the "a" branch.', activeLine:11 },
+  { title:'Insert "bc": char \'c\' (depth 2) ★', text:'From \'b\' node. No \'c\' child → create new node. Mark is_end = True — "bc" stored! Trie construction complete.', activeLine:13 },
+];
+
+let cumulativeNodes = ['root'];
+let cumulativeEdges = [];
+let cumulativeEnds = [];
+
+INSERT_STEPS.forEach((ins, idx) => {
+  const det = buildStepDetails[idx];
+  ins.newNodes.forEach(n => { if(!cumulativeNodes.includes(n)) cumulativeNodes.push(n); });
+  ins.newEdges.forEach(e => { if(!cumulativeEdges.includes(e)) cumulativeEdges.push(e); });
+  if(ins.markEnd) cumulativeEnds.push(ins.markEnd);
+
+  const wordStates = {aaa:'',aab:'',bc:''};
+  if(ins.word==='aaa') wordStates.aaa = 'inserting';
+  else if(ins.word==='aab') wordStates.aab = 'inserting';
+  else if(ins.word==='bc') wordStates.bc = 'inserting';
+  // Mark done words
+  if(idx >= 3) wordStates.aaa = 'done-word';
+  if(idx >= 6) wordStates.aab = 'done-word';
+
+  const lastNode = ins.nodeIds[ins.nodeIds.length-1];
+  const activeNodesArr = ins.existing ? [lastNode] : ins.newNodes.length ? ins.newNodes : [lastNode];
+
+  steps.push({
+    phase:'BUILD', phaseClass:'phase-build', activeLine: det.activeLine,
+    title: det.title, text: det.text,
+    builtNodes: cumulativeNodes.slice(), builtEdges: cumulativeEdges.slice(),
+    activeNodes: activeNodesArr,
+    activeEdges: ins.newEdges.length ? ins.newEdges : (ins.existing ? [ins.edgeIds[ins.edgeIds.length-1]] : []),
+    isInsertingEdge: ins.newEdges.length > 0,
+    endNodes: cumulativeEnds.slice(),
+    wordStates: {...wordStates},
+    charStates: Array(7).fill(''), boldArr: Array(7).fill(false), boldChanged:[],
+    vars: {phase:'Build',word:`"${ins.word}"`,i:'—',j:'—'}, changed:['word'],
+    insertingWord: ins.word, insertCharIdx: ins.charIdx
+  });
+});
+
+// ═══ SCAN PHASE STEPS ═══
+// For each i in 0..6, walk Trie from root
+const allBuiltNodes = cumulativeNodes.slice();
+const allBuiltEdges = cumulativeEdges.slice();
+const allEndNodes = cumulativeEnds.slice();
+let boldState = [false,false,false,false,false,false,false];
+
+// Helper: simulate trie walk from position i
+function simulateWalk(i) {
+  // s = "aaabbcc"
+  // Trie has: aaa, aab, bc
+  const trieStruct = {
+    'root': { children: {'a':'a1','b':'b1'} },
+    'a1': { children: {'a':'a2'} },
+    'a2': { children: {'a':'a3','b':'b2'} },
+    'a3': { children: {}, isEnd:true },
+    'b1': { children: {'c':'c1'} },
+    'b2': { children: {}, isEnd:true },
+    'c1': { children: {}, isEnd:true },
+  };
+  const events = [];
+  let nodeId = 'root';
+  for(let j = i; j < 7; j++){
+    const ch = S[j];
+    const node = trieStruct[nodeId];
+    if(!node.children[ch]) {
+      events.push({type:'break', j, nodeId, ch});
+      break;
+    }
+    const nextId = node.children[ch];
+    const nextNode = trieStruct[nextId];
+    const edgeId = nodeId + '-' + nextId;
+    events.push({type:'walk', j, nodeId: nextId, edgeId, ch, isEnd: !!nextNode.isEnd});
+    nodeId = nextId;
+  }
+  return events;
+}
+
+// Generate scan steps per starting position
+for(let i = 0; i < 7; i++){
+  const events = simulateWalk(i);
+
+  // Step: Start scanning from position i
+  const charStatesInit = Array(7).fill('');
+  charStatesInit[i] = 'scanning';
+  steps.push({
+    phase:'SCAN', phaseClass:'phase-scan', activeLine:17,
+    title:`Scan from position i=${i} (s[${i}]='${S[i]}')`,
+    text:`Start a new Trie walk from root, beginning at s[${i}]='${S[i]}'. We'll walk the Trie following characters s[${i}], s[${i}+1], ... until we hit a dead end or the string ends.`,
+    builtNodes:allBuiltNodes, builtEdges:allBuiltEdges, activeNodes:['root'], activeEdges:[],
+    isInsertingEdge:false, endNodes:allEndNodes,
+    wordStates:{aaa:'done-word',aab:'done-word',bc:'done-word'},
+    charStates:charStatesInit, boldArr:boldState.slice(), boldChanged:[],
+    vars:{phase:'Scan',word:'—',i:String(i),j:String(i)}, changed:['i','j'],
+    insertingWord:null, insertCharIdx:-1
+  });
+
+  for(const ev of events){
+    if(ev.type === 'walk'){
+      const charStates = Array(7).fill('');
+      for(let k=i; k<=ev.j; k++) charStates[k] = 'trie-walking';
+      charStates[ev.j] = ev.isEnd ? 'matched' : 'trie-walking';
+
+      let newBold = boldState.slice();
+      let boldChanged = [];
+      if(ev.isEnd){
+        for(let k=i; k<=ev.j; k++){
+          if(!newBold[k]) { newBold[k]=true; boldChanged.push(k); }
+        }
+      }
+
+      const walkEdges = [];
+      // trace edges from root to current node
+      const pathNodes = [];
+      const trieParent = {'a1':'root','b1':'root','a2':'a1','a3':'a2','b2':'a2','c1':'b1'};
+      let n = ev.nodeId;
+      while(n !== 'root'){ pathNodes.unshift(n); n = trieParent[n]; }
+      for(let pi=0; pi<pathNodes.length; pi++){
+        const parent = pi===0 ? 'root' : pathNodes[pi-1];
+        walkEdges.push(parent + '-' + pathNodes[pi]);
+      }
+
+      const title = ev.isEnd
+        ? `i=${i}, j=${ev.j}: s[${ev.j}]='${ev.ch}' → WORD FOUND! Mark bold[${i}..${ev.j}]`
+        : `i=${i}, j=${ev.j}: s[${ev.j}]='${ev.ch}' → Trie walk continues`;
+      const text = ev.isEnd
+        ? `Reached node '${TRIE_NODES.find(t=>t.id===ev.nodeId).label}' which has is_end=True. A dictionary word ends here! Mark bold[${i}] through bold[${ev.j}] as True.`
+        : `Followed edge '${ev.ch}' to node '${TRIE_NODES.find(t=>t.id===ev.nodeId).label}'. is_end=False, not a complete word yet. Keep walking.`;
+
+      if(ev.isEnd) boldState = newBold;
+
+      steps.push({
+        phase: ev.isEnd ? 'MARK' : 'SCAN', phaseClass: ev.isEnd ? 'phase-mark' : 'phase-scan',
+        activeLine: ev.isEnd ? 24 : 22,
+        title, text,
+        builtNodes:allBuiltNodes, builtEdges:allBuiltEdges,
+        activeNodes:[ev.nodeId], activeEdges:walkEdges, isInsertingEdge:false,
+        endNodes:allEndNodes,
+        wordStates:{aaa:'done-word',aab:'done-word',bc:'done-word'},
+        charStates, boldArr: ev.isEnd ? newBold.slice() : boldState.slice(), boldChanged,
+        vars:{phase: ev.isEnd?'Mark':'Scan',word:'—',i:String(i),j:String(ev.j)}, changed: ev.isEnd ? ['phase','j'] : ['j'],
+        insertingWord:null, insertCharIdx:-1
+      });
+    } else {
+      // break
+      const charStates = Array(7).fill('');
+      for(let k=i; k<ev.j; k++) charStates[k] = 'trie-walking';
+      charStates[ev.j] = 'scanning';
+
+      steps.push({
+        phase:'SCAN', phaseClass:'phase-scan', activeLine:21,
+        title:`i=${i}, j=${ev.j}: s[${ev.j}]='${ev.ch}' → Dead end! Break.`,
+        text:`Character '${ev.ch}' is not a child of the current Trie node. No more words can start at i=${i}. Break inner loop, move to next start position.`,
+        builtNodes:allBuiltNodes, builtEdges:allBuiltEdges,
+        activeNodes:[ev.nodeId], activeEdges:[], isInsertingEdge:false,
+        endNodes:allEndNodes,
+        wordStates:{aaa:'done-word',aab:'done-word',bc:'done-word'},
+        charStates, boldArr:boldState.slice(), boldChanged:[],
+        vars:{phase:'Scan',word:'—',i:String(i),j:String(ev.j)}, changed:['j'],
+        insertingWord:null, insertCharIdx:-1
+      });
+    }
+  }
+}
+
+// Final result step
+steps.push({
+  phase:'RESULT', phaseClass:'phase-result', activeLine:34,
+  title:'Build Result: "<b>aaabbc</b>c"',
+  text:'Scan bold array: indices 0-5 are True (one contiguous region), index 6 is False. Insert <b> before index 0, </b> after index 5. Result: "<b>aaabbc</b>c".',
+  builtNodes:allBuiltNodes, builtEdges:allBuiltEdges,
+  activeNodes:[], activeEdges:[], isInsertingEdge:false,
+  endNodes:allEndNodes,
+  wordStates:{aaa:'done-word',aab:'done-word',bc:'done-word'},
+  charStates:['bold-final','bold-final','bold-final','bold-final','bold-final','bold-final','done'],
+  boldArr:boldState.slice(), boldChanged:[],
+  vars:{phase:'Done',word:'—',i:'—',j:'—'}, changed:['phase'],
+  insertingWord:null, insertCharIdx:-1,
+  showResult:true
+});
+
+// ═══ RENDERING ═══
+let cur = 0;
+
+function getEdgeId(edge) { return edge.from + '-' + edge.to; }
+
+function renderTrie(step) {
+  const svg = document.getElementById('trieSvg');
+  let html = '';
+
+  // Draw edges
+  TRIE_EDGES.forEach(e => {
+    const eid = getEdgeId(e);
+    if(!step.builtEdges.includes(eid)) return;
+    const from = TRIE_NODES.find(n=>n.id===e.from);
+    const to = TRIE_NODES.find(n=>n.id===e.to);
+    const isActive = step.activeEdges.includes(eid);
+    const isInserting = isActive && step.isInsertingEdge;
+    const cls = isInserting ? 'inserting' : isActive ? 'matched' : '';
+    html += `<line class="trie-edge ${cls}" x1="${from.x}" y1="${from.y+18}" x2="${to.x}" y2="${to.y-18}"/>`;
+    const mx = (from.x+to.x)/2 + (to.x>from.x?-8:8);
+    const my = (from.y+to.y)/2;
+    html += `<text class="trie-edge-label ${cls}" x="${mx}" y="${my}">'${e.label}'</text>`;
+  });
+
+  // Draw nodes
+  TRIE_NODES.forEach(n => {
+    if(!step.builtNodes.includes(n.id)) return;
+    const isActive = step.activeNodes.includes(n.id);
+    const isEnd = step.endNodes.includes(n.id);
+    const isNew = isActive && step.phase==='BUILD';
+    let cls = n.id==='root' ? 'root' : '';
+    if(isEnd) cls += ' end-node';
+    if(isNew) cls += ' inserting';
+    else if(isActive && step.phase!=='BUILD') cls += ' active';
+    html += `<g class="trie-node ${cls}" transform="translate(${n.x},${n.y})">`;
+    html += `<circle r="18"/>`;
+    html += `<text>${n.label}</text>`;
+    html += `</g>`;
+    if(isEnd){
+      html += `<text class="end-marker" x="${n.x}" y="${n.y+32}">★ "${n.endWord}"</text>`;
+    }
+  });
+
+  svg.innerHTML = html;
+}
+
+function render(){
+  const s = steps[cur];
+
+  // Trie
+  renderTrie(s);
+
+  // Word chips
+  const wc = document.getElementById('wordChips');
+  wc.innerHTML = '';
+  WORDS.forEach(w => {
+    const st = s.wordStates[w] || '';
+    const chip = document.createElement('div');
+    chip.className = 'word-chip ' + st;
+    let h = '';
+    for(let i=0;i<w.length;i++){
+      const highlight = s.insertingWord===w && i===s.insertCharIdx;
+      h += `<span class="letter" style="${highlight?'color:var(--purple-mid);font-weight:800;text-decoration:underline;':''}">${w[i]}</span>`;
+    }
+    chip.innerHTML = h;
+    wc.appendChild(chip);
+  });
+
+  // String row
+  const sr = document.getElementById('stringRow');
+  sr.innerHTML = '';
+  for(let i=0;i<7;i++){
+    const cls = s.charStates[i] || '';
+    sr.innerHTML += `<div class="char-cell ${cls}">${S[i]}<span class="idx">${i}</span></div>`;
+  }
+
+  // Bold row
+  const br = document.getElementById('boldRow');
+  br.innerHTML = '';
+  for(let i=0;i<7;i++){
+    const on = s.boldArr[i];
+    const ch = s.boldChanged.includes(i);
+    br.innerHTML += `<div class="bold-cell ${on?'on':''} ${ch?'changed':''}">${on?'T':'F'}</div>`;
+  }
+
+  // Result
+  const rd = document.getElementById('resultDisplay');
+  if(s.showResult){
+    rd.style.display = 'block';
+    rd.innerHTML = 'Result: <strong>&lt;b&gt;aaabbc&lt;/b&gt;c</strong>';
+  } else {
+    rd.style.display = 'none';
+  }
+
+  // Var tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = '';
+  const varLabels = {phase:'Phase',word:'Word',i:'i',j:'j'};
+  Object.entries(varLabels).forEach(([k,label]) => {
+    const box = document.createElement('div');
+    box.className = 'var-box' + (s.changed.includes(k) ? ' changed' : '');
+    box.innerHTML = `<span class="var-name">${label}</span><span class="var-val">${s.vars[k]}</span>`;
+    vt.appendChild(box);
+  });
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = '';
+  CODE_LINES.forEach((line,i) => {
+    const d = document.createElement('div');
+    d.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+    d.textContent = line;
+    cp.appendChild(d);
+  });
+
+  // Info card
+  const ic = document.getElementById('infoCard');
+  ic.innerHTML = `
+    <div class="info-top">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-counter">Step ${cur + 1} / ${steps.length}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-text">${s.text}</div>
+  `;
+
+  // Progress dots
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = '';
+  steps.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+}
+
+function go(d){
+  const n = cur + d;
+  if(n >= 0 && n < steps.length){ cur = n; render(); }
+}
+function reset(){ cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+  if(e.key === 'r' || e.key === 'R') reset();
+});
+
+function toggleCard(header){
+  header.parentElement.classList.toggle('collapsed');
+}
+
+render();
+</script>
+</body>
+</html>
