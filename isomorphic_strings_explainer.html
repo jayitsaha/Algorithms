@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isomorphic Strings — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*───── Design Tokens ─────*/
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:860px;margin:0 auto;}
+
+/*───── Header ─────*/
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-top:4px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-easy{background:var(--green-bg);color:var(--green-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/*───── Cards ─────*/
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+.collapse-icon{margin-left:auto;font-size:16px;color:var(--text3);transition:transform .25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card.collapsed .section-body{display:none;}
+
+/*───── Concept Boxes ─────*/
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/*───── Algorithm Steps ─────*/
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/*───── Strategy ─────*/
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/*───── Code Panel (static) ─────*/
+.code-panel-static{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;margin:1rem 0;}
+.code-panel-static .cl{padding:1px 6px;border-radius:4px;white-space:pre;color:var(--text2);}
+.code-panel-static .comment{color:var(--text3);}
+
+/*───── Bijection Diagram ─────*/
+.bijection-diagram{display:flex;justify-content:center;align-items:center;gap:40px;margin:1.5rem 0;flex-wrap:wrap;}
+.map-col{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.map-col-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+.map-entry{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--bg2);border-radius:var(--radius);font-family:var(--mono);font-size:13px;border:1px solid var(--border);}
+.map-key{color:var(--blue-mid);font-weight:600;}
+.map-arrow{color:var(--text3);}
+.map-value{color:var(--green-mid);font-weight:600;}
+.arrow-col{font-size:24px;color:var(--text3);}
+
+/*───── Comparison Table ─────*/
+.compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.compare-table th,.compare-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.compare-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
+.compare-table tr.pick{background:var(--green-bg);}
+.compare-table .pick-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:10px;background:var(--green-mid);color:#fff;margin-left:6px;}
+
+/*───── Interactive Walkthrough ─────*/
+.viz-area{margin-top:1rem;}
+
+/* String Rows */
+.row-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;text-align:center;}
+.string-row{display:flex;gap:6px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+.scell{width:48px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);transition:all .3s;font-family:var(--mono);position:relative;}
+.scell .letter{font-size:18px;font-weight:600;}
+.scell .idx{font-size:9px;color:var(--text3);position:absolute;bottom:2px;}
+.scell.active{border-color:var(--purple-border);background:var(--purple-bg);transform:scale(1.1);}
+.scell.done{border-color:var(--green-border);background:var(--green-bg);}
+.scell.fail{border-color:var(--red-border);background:var(--red-bg);}
+.scell.s-cell{border-color:var(--blue-border);}
+.scell.t-cell{border-color:var(--green-border);}
+
+/* Map Panels */
+.maps-area{display:flex;gap:20px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap;}
+.map-panel{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;min-width:160px;flex:1;max-width:220px;}
+.map-panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;text-align:center;}
+.map-entries{display:flex;flex-direction:column;gap:4px;min-height:32px;}
+.me{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;transition:all .3s;background:var(--surface);border:1px solid transparent;}
+.me .mk{color:var(--blue-mid);font-weight:600;}
+.me .mv{color:var(--green-mid);font-weight:600;}
+.me .ma{color:var(--text3);font-size:11px;}
+.me.new-entry{border-color:var(--amber-border);background:var(--amber-bg);}
+.me.conflict{border-color:var(--red-border);background:var(--red-bg);}
+.me.check{border-color:var(--green-border);background:var(--green-bg);}
+
+/* Result Bar */
+.result-bar{text-align:center;padding:10px 20px;border-radius:var(--radius);margin:1rem 0;font-weight:600;font-size:14px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);transition:all .3s;}
+.result-bar.pass{background:var(--green-bg);color:var(--green-mid);border-color:var(--green-border);}
+.result-bar.fail{background:var(--red-bg);color:var(--red-mid);border-color:var(--red-border);}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* Code Panel (interactive) */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;}
+.info-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-check{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-add{background:var(--green-bg);color:var(--green-mid);}
+.phase-match{background:var(--green-bg);color:var(--green-mid);}
+.phase-fail{background:var(--red-bg);color:var(--red-mid);}
+.phase-done{background:var(--purple-bg);color:var(--purple-mid);}
+.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+.info-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.info-text{color:var(--text2);font-size:14px;line-height:1.6;}
+
+/* Progress Dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:14px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:2px solid;}
+.swatch-active{background:var(--purple-bg);border-color:var(--purple-border);}
+.swatch-done{background:var(--green-bg);border-color:var(--green-border);}
+.swatch-fail{background:var(--red-bg);border-color:var(--red-border);}
+.swatch-new{background:var(--amber-bg);border-color:var(--amber-border);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;}
+.related-problems{margin-top:1.5rem;}
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;}
+.related-problems li{margin-bottom:4px;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Isomorphic Strings</h1>
+  <div class="subtitle">LeetCode 205 — Check if two strings have the same character mapping structure</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Tables</span>
+    <span class="tag tag-pattern">Bijection Mapping</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(n) Space</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding ===== -->
+<div class="card" id="s1">
+  <div class="section-header" onclick="toggleCard('s1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Two strings <code>s</code> and <code>t</code> are <strong>isomorphic</strong> if we can replace each character in <code>s</code> with another character to get <code>t</code>, with consistent one-to-one mapping. This is a <strong>bijection</strong> — no two characters in <code>s</code> can map to the same character in <code>t</code>, and vice versa.</p>
+
+    <p style="margin-top:12px;">Walk through the examples:</p>
+    <div style="margin:12px 0;padding:12px;background:var(--bg2);border-radius:var(--radius);font-family:var(--mono);font-size:13px;line-height:2;">
+      s = "egg", t = "add"<br>
+      e → a ✓, g → d ✓, g → d ✓ (consistent!) → <span style="color:var(--green-mid);font-weight:600;">True</span><br><br>
+      s = "foo", t = "bar"<br>
+      f → b ✓, o → a ✓, o → r ✗ (conflict: o already maps to a!) → <span style="color:var(--red-mid);font-weight:600;">False</span><br><br>
+      s = "paper", t = "title"<br>
+      p → t ✓, a → i ✓, p → t ✓, e → l ✓, r → e ✓ → <span style="color:var(--green-mid);font-weight:600;">True</span>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A single map (s→t) is <strong>not enough</strong>. Consider s="ab" and t="aa": forward map would set a→a, b→a — both "succeed" even though two different chars map to the same target. We need a <strong>reverse map</strong> (t→s) to catch this.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card" id="s2">
+  <div class="section-header" onclick="toggleCard('s2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Map Bijection Check</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>We maintain <strong>two hash maps</strong> simultaneously — one mapping s→t, the other mapping t→s. At each index we pair the characters and check consistency in <em>both</em> directions.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text">If lengths differ, return <strong>False</strong> immediately.</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text">Create two empty maps: <code>s_to_t</code> and <code>t_to_s</code>.</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text">For each index <code>i</code>, take <code>cs = s[i]</code> and <code>ct = t[i]</code>.</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text">If <code>cs</code> is in <code>s_to_t</code> and its mapped value ≠ <code>ct</code>, return <strong>False</strong>.</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text">If <code>ct</code> is in <code>t_to_s</code> and its mapped value ≠ <code>cs</code>, return <strong>False</strong>.</span></div>
+      <div class="algo-step"><span class="step-num">6</span><span class="step-text">Otherwise, record <code>s_to_t[cs] = ct</code> and <code>t_to_s[ct] = cs</code>.</span></div>
+      <div class="algo-step"><span class="step-num">7</span><span class="step-text">If we finish without conflict, return <strong>True</strong>.</span></div>
+    </div>
+
+    <!-- Bijection diagram -->
+    <p style="margin-top:14px;font-weight:600;font-size:14px;">Bijection after processing <code>"egg" / "add"</code>:</p>
+    <div class="bijection-diagram">
+      <div class="map-col">
+        <div class="map-col-label">s → t</div>
+        <div class="map-entry"><span class="map-key">'e'</span><span class="map-arrow">→</span><span class="map-value">'a'</span></div>
+        <div class="map-entry"><span class="map-key">'g'</span><span class="map-arrow">→</span><span class="map-value">'d'</span></div>
+      </div>
+      <div class="arrow-col">⇄</div>
+      <div class="map-col">
+        <div class="map-col-label">t → s</div>
+        <div class="map-entry"><span class="map-key">'a'</span><span class="map-arrow">→</span><span class="map-value">'e'</span></div>
+        <div class="map-entry"><span class="map-key">'d'</span><span class="map-arrow">→</span><span class="map-value">'g'</span></div>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why one map fails</div>
+      <p><code>s="ab"</code>, <code>t="aa"</code>: a single forward map sets a→a, b→a. Both "succeed" because we never check if 'a' in t is <em>already claimed</em> by another character. The reverse map catches this: when 'b' tries to map to 'a', <code>t_to_s['a']</code> already equals 'a' ≠ 'b' → <strong>False</strong>.</p>
+    </div>
+
+    <table class="compare-table">
+      <tr><th>Approach</th><th>Time</th><th>Space</th><th>Catches All Violations?</th></tr>
+      <tr><td>Single Forward Map</td><td>O(n)</td><td>O(n)</td><td>❌ Misses two-to-one</td></tr>
+      <tr class="pick"><td>Two Hash Maps <span class="pick-badge">Interview Pick</span></td><td>O(n)</td><td>O(n)</td><td>✅ Full bijection</td></tr>
+      <tr><td>Zip + Index Comparison</td><td>O(n)</td><td>O(n)</td><td>✅ Pythonic one-liner</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card" id="s3">
+  <div class="section-header" onclick="toggleCard('s3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing the first <em>i</em> pairs, <code>s_to_t</code> and <code>t_to_s</code> together form a <strong>bijection</strong>: every mapped char from s maps to exactly one char in t, and every mapped char from t maps back to exactly one char in s. No two keys share a value in either direction.</p>
+    </div>
+
+    <h4 style="margin-top:14px;font-size:14px;">Why this guarantees correctness</h4>
+    <p>Isomorphism is exactly a bijection between character sets. Our two maps enforce this directly:</p>
+    <ul style="padding-left:1.5rem;margin-top:8px;color:var(--text2);">
+      <li><strong>Injectivity (one-to-one from s):</strong> The reverse map <code>t_to_s</code> rejects a char in t that is already mapped to a different char in s.</li>
+      <li><strong>Injectivity (one-to-one from t):</strong> The forward map <code>s_to_t</code> rejects a char in s that already maps to a different char in t.</li>
+      <li><strong>Consistency:</strong> Both maps must agree throughout — any conflict means not isomorphic.</li>
+    </ul>
+
+    <h4 style="margin-top:14px;font-size:14px;">Edge Cases</h4>
+    <ul style="padding-left:1.5rem;color:var(--text2);">
+      <li><strong>Different lengths:</strong> <code>s="abc"</code>, <code>t="ab"</code> → instant False.</li>
+      <li><strong>Empty strings:</strong> <code>s=""</code>, <code>t=""</code> → trivially True.</li>
+      <li><strong>Same string:</strong> <code>s="abc"</code>, <code>t="abc"</code> → True (identity mapping).</li>
+      <li><strong>All same char:</strong> <code>s="aaa"</code>, <code>t="bbb"</code> → True (one mapping a→b).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code ===== -->
+<div class="card" id="s4">
+  <div class="section-header" onclick="toggleCard('s4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p style="font-weight:600;margin-bottom:8px;">Solution — Two Hash Maps (Interview Pick)</p>
+    <div class="code-panel-static">
+      <div class="cl"><span class="comment"># Two maps for bijection check</span></div>
+      <div class="cl">def isIsomorphic(s: str, t: str) -> bool:</div>
+      <div class="cl">    if len(s) != len(t):</div>
+      <div class="cl">        return False</div>
+      <div class="cl">    s_to_t = {}</div>
+      <div class="cl">    t_to_s = {}</div>
+      <div class="cl">    for cs, ct in zip(s, t):</div>
+      <div class="cl">        <span class="comment"># Check forward: s char already mapped?</span></div>
+      <div class="cl">        if cs in s_to_t:</div>
+      <div class="cl">            if s_to_t[cs] != ct:</div>
+      <div class="cl">                return False</div>
+      <div class="cl">        <span class="comment"># Check reverse: t char already claimed?</span></div>
+      <div class="cl">        elif ct in t_to_s:</div>
+      <div class="cl">            return False</div>
+      <div class="cl">        else:</div>
+      <div class="cl">            <span class="comment"># Both new — establish mapping</span></div>
+      <div class="cl">            s_to_t[cs] = ct</div>
+      <div class="cl">            t_to_s[ct] = cs</div>
+      <div class="cl">    return True</div>
+    </div>
+
+    <p style="font-weight:600;margin-top:1.5rem;margin-bottom:8px;">Alternative — Index-Based One-Liner</p>
+    <div class="code-panel-static">
+      <div class="cl">def isIsomorphic(s: str, t: str) -> bool:</div>
+      <div class="cl">    <span class="comment"># Map each char to its first occurrence index</span></div>
+      <div class="cl">    return [s.index(c) for c in s] == [t.index(c) for c in t]</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why the index trick works</div>
+      <p>Two strings are isomorphic if and only if they have the same "pattern" of first-occurrence indices. For "egg" → [0, 1, 1] and "add" → [0, 1, 1]. For "foo" → [0, 1, 1] vs "bar" → [0, 1, 2] — different patterns!</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake</div>
+      <p>Using only <code>s_to_t</code> without <code>t_to_s</code>. This misses cases like s="ab", t="aa" where two different chars map to the same target.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card" id="s5">
+  <div class="section-header" onclick="toggleCard('s5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>Keywords: "one-to-one mapping", "replace each character", "no two characters may map to same". This signals <strong>bijection check</strong>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Failure Modes</div>
+        <p>A bijection can fail in two ways: (1) a char in s maps to two different chars in t, (2) two chars in s map to the same char in t. Show both cases with examples.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Two Maps Solution</div>
+        <p>Maintain both s→t and t→s maps. At each position, verify consistency in both directions before adding new mappings.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Walk Through Example</div>
+        <p>Use "foo"/"bar" to show failure: f→b ✓, o→a ✓, then o→r conflicts with existing o→a.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+        "This is a bijection problem — I need to verify that each character in s maps to exactly one character in t, and vice versa. A single map isn't enough because it doesn't catch when two different characters try to map to the same target. I'll use two hash maps: one for s→t and one for t→s. At each position, I check both maps for consistency before establishing new mappings. This runs in O(n) time and O(n) space."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card" id="s6">
+  <div class="section-header" onclick="toggleCard('s6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="viz-area">
+      <!-- String s Row -->
+      <div class="row-label">String s</div>
+      <div class="string-row" id="sRow"></div>
+
+      <!-- String t Row -->
+      <div class="row-label">String t</div>
+      <div class="string-row" id="tRow"></div>
+
+      <!-- Maps -->
+      <div class="maps-area">
+        <div class="map-panel">
+          <div class="map-panel-title">s → t</div>
+          <div class="map-entries" id="fwdMap"></div>
+        </div>
+        <div class="map-panel">
+          <div class="map-panel-title">t → s</div>
+          <div class="map-entries" id="revMap"></div>
+        </div>
+      </div>
+
+      <!-- Result Bar -->
+      <div class="result-bar" id="resultBar">—</div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker" id="varTracker"></div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel"></div>
+
+      <!-- Info Card -->
+      <div class="info-card" id="infoCard">
+        <div class="info-top">
+          <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+          <span class="step-counter" id="stepCounter">0 / 0</span>
+        </div>
+        <div class="info-title" id="infoTitle">—</div>
+        <div class="info-text" id="infoText">—</div>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="dots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn" onclick="reset()">Reset</button>
+        <button class="btn btn-primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch swatch-active"></div>Current</div>
+        <div class="legend-item"><div class="legend-swatch swatch-done"></div>Matched</div>
+        <div class="legend-item"><div class="legend-swatch swatch-new"></div>New Mapping</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card" id="s7">
+  <div class="section-header" onclick="toggleCard('s7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ A bijection requires checking <strong>both directions</strong> — s→t and t→s.</div>
+      <div class="takeaway">✓ Two hash maps ensure no character collision in either direction.</div>
+      <div class="takeaway">✓ Alternative: Compare first-occurrence index patterns.</div>
+      <div class="takeaway">✓ O(n) time, O(n) space where n = string length.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="padding-left:1.25rem;">
+        <li>Problem says "one-to-one", "bijection", "isomorphic", or "same pattern"</li>
+        <li>Two sequences must have matching structure</li>
+        <li>Each element maps to exactly one element, and vice versa</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Word Pattern</strong> (Easy) — Same two-map bijection, char-to-word instead of char-to-char</li>
+        <li><strong>Word Pattern II</strong> (Hard) — Backtracking bijection without fixed boundaries</li>
+        <li><strong>Group Anagrams</strong> (Medium) — Hash map grouping by pattern key</li>
+        <li><strong>Find and Replace Pattern</strong> (Medium) — Bijection to match words against pattern</li>
+        <li><strong>Group Shifted Strings</strong> (Medium) — Normalize shift pattern as key</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/*═══════════════════════════════════════════════
+  CONFIGURATION
+═══════════════════════════════════════════════*/
+const S = 'paper';
+const T = 'title';
+
+const CODE_LINES = [
+  'def isIsomorphic(s, t):',
+  '    if len(s) != len(t): return False',
+  '    s_to_t, t_to_s = {}, {}',
+  '    for cs, ct in zip(s, t):',
+  '        if cs in s_to_t:',
+  '            if s_to_t[cs] != ct:',
+  '                return False',
+  '        elif ct in t_to_s:',
+  '            return False',
+  '        else:',
+  '            s_to_t[cs] = ct',
+  '            t_to_s[ct] = cs',
+  '    return True',
+];
+
+/*═══════════════════════════════════════════════
+  BUILD STEPS
+═══════════════════════════════════════════════*/
+function buildSteps() {
+  const steps = [];
+  const stt = {}; // s_to_t
+  const tts = {}; // t_to_s
+
+  // Step 0: INIT
+  steps.push({
+    phase: 'INIT', phaseClass: 'phase-init',
+    activeLine: 0,
+    idx: -1,
+    title: 'Initialize',
+    text: `Strings s="${S}" and t="${T}" have equal lengths (${S.length}). Create two empty maps for bijection check.`,
+    sStates: Array(S.length).fill('normal'),
+    tStates: Array(T.length).fill('normal'),
+    fwd: {}, rev: {},
+    fwdHighlight: {}, revHighlight: {},
+    vars: { cs: '—', ct: '—', '|s→t|': 0, '|t→s|': 0 },
+    changed: [],
+    result: '—', resultClass: ''
+  });
+
+  // Process each pair
+  for (let i = 0; i < S.length; i++) {
+    const cs = S[i];
+    const ct = T[i];
+    const ss = Array(S.length).fill('normal');
+    const ts = Array(T.length).fill('normal');
+    // Mark previously done
+    for (let j = 0; j < i; j++) { ss[j] = 'done'; ts[j] = 'done'; }
+
+    // Step A: Read pair
+    ss[i] = 'active'; ts[i] = 'active';
+    const fwdSnap = {...stt};
+    const revSnap = {...tts};
+
+    steps.push({
+      phase: 'CHECK', phaseClass: 'phase-check',
+      activeLine: 3,
+      idx: i,
+      title: `Index ${i}: cs='${cs}', ct='${ct}'`,
+      text: `Read pair (${cs}, ${ct}). Check if existing mappings are consistent.`,
+      sStates: [...ss], tStates: [...ts],
+      fwd: {...fwdSnap}, rev: {...revSnap},
+      fwdHighlight: {}, revHighlight: {},
+      vars: { cs: `'${cs}'`, ct: `'${ct}'`, '|s→t|': Object.keys(fwdSnap).length, '|t→s|': Object.keys(revSnap).length },
+      changed: ['cs', 'ct'],
+      result: '—', resultClass: ''
+    });
+
+    if (cs in stt) {
+      // Already mapped — check consistency
+      const expected = stt[cs];
+      if (expected === ct) {
+        // MATCH
+        const fwdH = {}; fwdH[cs] = 'check';
+        const revH = {}; revH[ct] = 'check';
+        steps.push({
+          phase: 'MATCH', phaseClass: 'phase-match',
+          activeLine: 4,
+          idx: i,
+          title: `Index ${i}: Mapping consistent ✓`,
+          text: `s_to_t['${cs}'] = '${expected}' matches ct='${ct}'. Bijection holds!`,
+          sStates: [...ss].map((s,j)=> j<=i?'done':s),
+          tStates: [...ts].map((s,j)=> j<=i?'done':s),
+          fwd: {...fwdSnap}, rev: {...revSnap},
+          fwdHighlight: fwdH, revHighlight: revH,
+          vars: { cs: `'${cs}'`, ct: `'${ct}'`, '|s→t|': Object.keys(fwdSnap).length, '|t→s|': Object.keys(revSnap).length },
+          changed: [],
+          result: '—', resultClass: ''
+        });
+      }
+      // (no mismatch in our test case)
+    } else if (ct in tts) {
+      // ct already claimed by another char — CONFLICT
+      // (not triggered in "paper"/"title")
+    } else {
+      // Both new — add mapping
+      steps.push({
+        phase: 'CHECK', phaseClass: 'phase-check',
+        activeLine: 7,
+        idx: i,
+        title: `Index ${i}: New pair`,
+        text: `'${cs}' not in s_to_t and '${ct}' not in t_to_s. Both are new — establish mapping.`,
+        sStates: [...ss], tStates: [...ts],
+        fwd: {...fwdSnap}, rev: {...revSnap},
+        fwdHighlight: {}, revHighlight: {},
+        vars: { cs: `'${cs}'`, ct: `'${ct}'`, '|s→t|': Object.keys(fwdSnap).length, '|t→s|': Object.keys(revSnap).length },
+        changed: [],
+        result: '—', resultClass: ''
+      });
+
+      // Add to maps
+      stt[cs] = ct;
+      tts[ct] = cs;
+      const newFwd = {...stt};
+      const newRev = {...tts};
+      const fwdH2 = {}; fwdH2[cs] = 'new-entry';
+      const revH2 = {}; revH2[ct] = 'new-entry';
+
+      steps.push({
+        phase: 'ADD', phaseClass: 'phase-add',
+        activeLine: 10,
+        idx: i,
+        title: `Index ${i}: Map '${cs}' ↔ '${ct}'`,
+        text: `Added s_to_t['${cs}'] = '${ct}' and t_to_s['${ct}'] = '${cs}'. Maps now have ${Object.keys(newFwd).length} entry(ies) each.`,
+        sStates: [...ss].map((s,j)=> j<=i?'done':s),
+        tStates: [...ts].map((s,j)=> j<=i?'done':s),
+        fwd: newFwd, rev: newRev,
+        fwdHighlight: fwdH2, revHighlight: revH2,
+        vars: { cs: `'${cs}'`, ct: `'${ct}'`, '|s→t|': Object.keys(newFwd).length, '|t→s|': Object.keys(newRev).length },
+        changed: ['|s→t|', '|t→s|'],
+        result: '—', resultClass: ''
+      });
+    }
+  }
+
+  // Final step: DONE
+  steps.push({
+    phase: 'DONE', phaseClass: 'phase-done',
+    activeLine: 12,
+    idx: -1,
+    title: 'All pairs verified — return True',
+    text: `Every (cs, ct) pair is consistent in both directions. The mapping is a valid bijection: {${Object.entries(stt).map(([k,v])=>`'${k}'↔'${v}'`).join(', ')}}. Return True.`,
+    sStates: Array(S.length).fill('done'),
+    tStates: Array(T.length).fill('done'),
+    fwd: {...stt}, rev: {...tts},
+    fwdHighlight: {}, revHighlight: {},
+    vars: { cs: '—', ct: '—', '|s→t|': Object.keys(stt).length, '|t→s|': Object.keys(tts).length },
+    changed: [],
+    result: 'True ✓', resultClass: 'pass'
+  });
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+/*═══════════════════════════════════════════════
+  RENDER
+═══════════════════════════════════════════════*/
+function initUI() {
+  // String s row
+  const sRow = document.getElementById('sRow');
+  sRow.innerHTML = S.split('').map((ch,i)=>
+    `<div class="scell s-cell" id="sc${i}"><span class="letter">${ch}</span><span class="idx">${i}</span></div>`
+  ).join('');
+
+  // String t row
+  const tRow = document.getElementById('tRow');
+  tRow.innerHTML = T.split('').map((ch,i)=>
+    `<div class="scell t-cell" id="tc${i}"><span class="letter">${ch}</span><span class="idx">${i}</span></div>`
+  ).join('');
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = CODE_LINES.map((l,i)=>
+    `<div class="code-line" id="cl${i}">${escHtml(l)}</div>`
+  ).join('');
+
+  // Progress dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = STEPS.map((_,i)=>`<div class="dot" id="dot${i}" onclick="jumpTo(${i})"></div>`).join('');
+
+  render();
+}
+
+function render() {
+  const s = STEPS[cur];
+
+  // String cells
+  S.split('').forEach((_, i) => {
+    const el = document.getElementById(`sc${i}`);
+    el.className = 'scell s-cell ' + (s.sStates[i] || 'normal');
+  });
+  T.split('').forEach((_, i) => {
+    const el = document.getElementById(`tc${i}`);
+    el.className = 'scell t-cell ' + (s.tStates[i] || 'normal');
+  });
+
+  // Forward map
+  const fwdEl = document.getElementById('fwdMap');
+  fwdEl.innerHTML = Object.entries(s.fwd).map(([k,v]) => {
+    const cls = s.fwdHighlight[k] || '';
+    return `<div class="me ${cls}"><span class="mk">'${k}'</span><span class="ma">→</span><span class="mv">'${v}'</span></div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:12px;text-align:center;">(empty)</div>';
+
+  // Reverse map
+  const revEl = document.getElementById('revMap');
+  revEl.innerHTML = Object.entries(s.rev).map(([k,v]) => {
+    const cls = s.revHighlight[k] || '';
+    return `<div class="me ${cls}"><span class="mk">'${k}'</span><span class="ma">→</span><span class="mv">'${v}'</span></div>`;
+  }).join('') || '<div style="color:var(--text3);font-size:12px;text-align:center;">(empty)</div>';
+
+  // Result bar
+  const rb = document.getElementById('resultBar');
+  rb.textContent = s.result;
+  rb.className = 'result-bar ' + s.resultClass;
+
+  // Variable tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = Object.entries(s.vars).map(([name, val]) => {
+    const ch = s.changed.includes(name) ? 'changed' : '';
+    return `<div class="var-box ${ch}"><span class="var-name">${escHtml(name)}</span><span class="var-val">${escHtml(String(val))}</span></div>`;
+  }).join('');
+
+  // Code lines
+  CODE_LINES.forEach((_, i) => {
+    const el = document.getElementById(`cl${i}`);
+    el.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+  });
+
+  // Info card
+  document.getElementById('phaseBadge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('phaseBadge').textContent = s.phase;
+  document.getElementById('stepCounter').textContent = `${cur + 1} / ${STEPS.length}`;
+  document.getElementById('infoTitle').textContent = s.title;
+  document.getElementById('infoText').textContent = s.text;
+
+  // Dots
+  STEPS.forEach((_, i) => {
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+  });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/*═══════════════════════════════════════════════
+  NAVIGATION
+═══════════════════════════════════════════════*/
+function go(d) {
+  const n = cur + d;
+  if (n >= 0 && n < STEPS.length) { cur = n; render(); }
+}
+function jumpTo(i) { cur = i; render(); }
+function reset() { cur = 0; render(); }
+
+/*═══════════════════════════════════════════════
+  CARD COLLAPSE
+═══════════════════════════════════════════════*/
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/*═══════════════════════════════════════════════
+  KEYBOARD
+═══════════════════════════════════════════════*/
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+initUI();
+</script>
+</body>
+</html>

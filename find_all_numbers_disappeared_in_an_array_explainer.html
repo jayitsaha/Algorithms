@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find All Numbers Disappeared in an Array — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*───── Design Tokens ─────*/
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:860px;margin:0 auto;}
+
+/*───── Header ─────*/
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-top:4px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-easy{background:var(--green-bg);color:var(--green-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/*───── Cards ─────*/
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+.collapse-icon{margin-left:auto;font-size:16px;color:var(--text3);transition:transform .25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card.collapsed .section-body{display:none;}
+
+/*───── Concept Boxes ─────*/
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/*───── Algorithm Steps ─────*/
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/*───── Strategy ─────*/
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/*───── Code Panel (static) ─────*/
+.code-panel-static{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;margin:1rem 0;}
+.code-panel-static .cl{padding:1px 6px;border-radius:4px;white-space:pre;color:var(--text2);}
+.code-panel-static .comment{color:var(--text3);}
+
+/*───── Comparison Table ─────*/
+.compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.compare-table th,.compare-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.compare-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
+.compare-table tr.pick{background:var(--green-bg);}
+.compare-table .pick-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:10px;background:var(--green-mid);color:#fff;margin-left:6px;}
+
+/*───── Interactive Walkthrough ─────*/
+.viz-area{margin-top:1rem;}
+.row-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;text-align:center;}
+.array-row{display:flex;gap:6px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+.cell{width:52px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);transition:all .3s;font-family:var(--mono);position:relative;}
+.cell .val{font-size:18px;font-weight:600;}
+.cell .idx{font-size:9px;color:var(--text3);position:absolute;bottom:2px;}
+
+/* Cell states */
+.cell.active{border-color:var(--purple-border);background:var(--purple-bg);transform:scale(1.1);}
+.cell.marked{border-color:var(--green-border);background:var(--green-bg);}
+.cell.marking{border-color:var(--amber-border);background:var(--amber-bg);}
+.cell.negative{color:var(--red-mid);}
+.cell.missing{border-color:var(--red-border);background:var(--red-bg);}
+.cell.found{border-color:var(--cyan-border);background:var(--cyan-bg);}
+
+/* Pointer label */
+.pointer-area{display:flex;gap:6px;justify-content:center;margin-bottom:8px;min-height:24px;}
+.pointer{padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;transition:all .3s;}
+.pointer.i{background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border);}
+.pointer.target{background:var(--amber-bg);color:var(--amber-mid);border:1px solid var(--amber-border);}
+.pointer-placeholder{width:52px;}
+
+/* Result bar */
+.result-bar{text-align:center;padding:10px 20px;border-radius:var(--radius);margin:1rem 0;font-weight:600;font-size:14px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);transition:all .3s;}
+.result-bar.success{background:var(--green-bg);color:var(--green-mid);border-color:var(--green-border);}
+.result-bar.highlight{background:var(--cyan-bg);color:var(--cyan-mid);border-color:var(--cyan-border);}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* Code Panel (interactive) */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;}
+.info-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-mark{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-collect{background:var(--green-bg);color:var(--green-mid);}
+.phase-done{background:var(--purple-bg);color:var(--purple-mid);}
+.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+.info-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.info-text{color:var(--text2);font-size:14px;line-height:1.6;}
+
+/* Progress Dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:14px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:2px solid;}
+.swatch-active{background:var(--purple-bg);border-color:var(--purple-border);}
+.swatch-marking{background:var(--amber-bg);border-color:var(--amber-border);}
+.swatch-marked{background:var(--green-bg);border-color:var(--green-border);}
+.swatch-missing{background:var(--red-bg);border-color:var(--red-border);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;}
+.related-problems{margin-top:1.5rem;}
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;}
+.related-problems li{margin-bottom:4px;font-size:14px;color:var(--text2);}
+
+/* Mapping Diagram */
+.mapping-diagram{display:flex;flex-direction:column;gap:8px;margin:1rem 0;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.mapping-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;}
+.mapping-val{width:30px;text-align:center;font-weight:600;color:var(--blue-mid);}
+.mapping-arrow{color:var(--text3);}
+.mapping-idx{color:var(--green-mid);font-weight:600;}
+.mapping-note{color:var(--text3);font-size:12px;margin-left:auto;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Find All Numbers Disappeared in an Array</h1>
+  <div class="subtitle">LeetCode 448 — Use the array itself as a marker board</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Tables</span>
+    <span class="tag tag-pattern">Index Marking</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(1) Space*</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding ===== -->
+<div class="card" id="s1">
+  <div class="section-header" onclick="toggleCard('s1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Given an array <code>nums</code> of <strong>n</strong> integers where each <code>nums[i]</code> is in the range <strong>[1, n]</strong>, return all integers in <strong>[1, n]</strong> that do <em>not</em> appear in the array.</p>
+
+    <p style="margin-top:12px;">Let's walk through an example:</p>
+    <div style="margin:12px 0;padding:12px;background:var(--bg2);border-radius:var(--radius);font-family:var(--mono);font-size:13px;line-height:2;">
+      nums = [4, 3, 2, 7, 8, 2, 3, 1]<br>
+      n = 8, so we expect numbers 1 through 8<br>
+      Present: 1, 2, 2, 3, 3, 4, 7, 8<br>
+      Missing: <span style="color:var(--red-mid);font-weight:600;">5, 6</span>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Since all values are in range <strong>[1, n]</strong> and the array has exactly <strong>n</strong> slots, we can use the array indices as a "presence board". Each value <code>v</code> can mark index <code>v-1</code> to indicate "I exist!"</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Constraint That Enables the Trick</div>
+      <p>Values in <strong>[1, n]</strong> map perfectly to indices <strong>[0, n-1]</strong>. This 1:1 correspondence lets us use the array itself as a hash set with O(1) space.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card" id="s2">
+  <div class="section-header" onclick="toggleCard('s2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Index Marking</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Instead of using extra space for a hash set, we <strong>mark visited indices by negating</strong> the value at that position. After marking, any index with a positive value was never visited — its corresponding number is missing.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Marking Phase:</strong> For each value <code>v</code>, compute target index <code>idx = |v| - 1</code>. If <code>nums[idx]</code> is positive, negate it to mark "number <code>|v|</code> exists".</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>Collection Phase:</strong> Scan the array. Any index <code>i</code> where <code>nums[i] > 0</code> means number <code>i + 1</code> never appeared. Add it to the result.</span></div>
+    </div>
+
+    <p style="margin-top:14px;font-weight:600;font-size:14px;">Value-to-Index Mapping:</p>
+    <div class="mapping-diagram">
+      <div class="mapping-row"><span class="mapping-val">1</span><span class="mapping-arrow">→</span><span class="mapping-idx">index 0</span><span class="mapping-note">(1 - 1 = 0)</span></div>
+      <div class="mapping-row"><span class="mapping-val">2</span><span class="mapping-arrow">→</span><span class="mapping-idx">index 1</span><span class="mapping-note">(2 - 1 = 1)</span></div>
+      <div class="mapping-row"><span class="mapping-val">...</span><span class="mapping-arrow">→</span><span class="mapping-idx">...</span></div>
+      <div class="mapping-row"><span class="mapping-val">n</span><span class="mapping-arrow">→</span><span class="mapping-idx">index n-1</span><span class="mapping-note">(n - 1 = n-1)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Use Absolute Value?</div>
+      <p>When we encounter a value, the cell might already be negative (marked by a previous iteration). We use <code>|v|</code> to get the original value regardless of sign.</p>
+    </div>
+
+    <table class="compare-table">
+      <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      <tr><td>Hash Set</td><td>O(n)</td><td>O(n)</td><td>Simple but uses extra space</td></tr>
+      <tr class="pick"><td>Index Marking <span class="pick-badge">Interview Pick</span></td><td>O(n)</td><td>O(1)*</td><td>Modifies input, O(1) auxiliary</td></tr>
+      <tr><td>Cyclic Sort</td><td>O(n)</td><td>O(1)*</td><td>Alternative O(1) approach</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text3);margin-top:4px;">*Excluding output array</p>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card" id="s3">
+  <div class="section-header" onclick="toggleCard('s3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After the marking phase: <code>nums[i] < 0</code> if and only if the number <code>i + 1</code> exists somewhere in the original array.</p>
+    </div>
+
+    <h4 style="margin-top:14px;font-size:14px;">Why This Guarantees Correctness</h4>
+    <ul style="padding-left:1.5rem;margin-top:8px;color:var(--text2);">
+      <li><strong>Existence ⟹ Negative:</strong> If number <code>v</code> exists, we find it during iteration and mark index <code>v-1</code> negative.</li>
+      <li><strong>Negative ⟹ Existence:</strong> If index <code>i</code> is negative, some iteration must have found value <code>i+1</code> and marked it.</li>
+      <li><strong>Positive ⟹ Missing:</strong> If <code>nums[i] > 0</code> after marking, no value <code>i+1</code> was ever encountered — it's missing!</li>
+    </ul>
+
+    <h4 style="margin-top:14px;font-size:14px;">Edge Cases</h4>
+    <ul style="padding-left:1.5rem;color:var(--text2);">
+      <li><strong>Duplicates:</strong> Marking the same index twice is harmless — already negative stays negative.</li>
+      <li><strong>All same values:</strong> <code>[1,1,1]</code> → marks index 0 three times, indices 1,2 stay positive → missing: 2,3.</li>
+      <li><strong>Complete array:</strong> <code>[1,2,3]</code> → all indices marked → result is empty.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code ===== -->
+<div class="card" id="s4">
+  <div class="section-header" onclick="toggleCard('s4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p style="font-weight:600;margin-bottom:8px;">Solution — Index Marking (Interview Pick)</p>
+    <div class="code-panel-static">
+      <div class="cl"><span class="comment"># Two-pass index marking approach</span></div>
+      <div class="cl">def findDisappearedNumbers(nums):</div>
+      <div class="cl">    <span class="comment"># Phase 1: Mark indices corresponding to present numbers</span></div>
+      <div class="cl">    for num in nums:</div>
+      <div class="cl">        idx = abs(num) - 1          <span class="comment"># Map value to index</span></div>
+      <div class="cl">        if nums[idx] > 0:           <span class="comment"># Only negate if positive</span></div>
+      <div class="cl">            nums[idx] = -nums[idx]  <span class="comment"># Mark as "seen"</span></div>
+      <div class="cl">    </div>
+      <div class="cl">    <span class="comment"># Phase 2: Collect indices that were never marked</span></div>
+      <div class="cl">    result = []</div>
+      <div class="cl">    for i in range(len(nums)):</div>
+      <div class="cl">        if nums[i] > 0:             <span class="comment"># Still positive = never marked</span></div>
+      <div class="cl">            result.append(i + 1)    <span class="comment"># Convert index back to number</span></div>
+      <div class="cl">    return result</div>
+    </div>
+
+    <p style="font-weight:600;margin-top:1.5rem;margin-bottom:8px;">Alternative — Hash Set (Simpler but O(n) Space)</p>
+    <div class="code-panel-static">
+      <div class="cl">def findDisappearedNumbers(nums):</div>
+      <div class="cl">    present = set(nums)</div>
+      <div class="cl">    return [i for i in range(1, len(nums) + 1) if i not in present]</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake</div>
+      <p>Forgetting to use <code>abs(num)</code>. On second encounter of a value, the cell might already be negative, so <code>num - 1</code> would give a wrong (negative) index!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card" id="s5">
+  <div class="section-header" onclick="toggleCard('s5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Constraint</div>
+        <p>Values in <strong>[1, n]</strong> with array size <strong>n</strong> is a huge hint. This bijection between values and indices enables in-place tricks.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start with O(n) Space Solution</div>
+        <p>Mention the hash set approach first: "I could use a set to track present numbers, then find missing ones in O(n) time and space."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize to O(1) Space</div>
+        <p>"Since values map to indices, I can use the array itself as a marker. Negating values marks presence without losing information."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Gotcha</div>
+        <p>"I need absolute value because a cell might already be marked negative when I read it."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+        "The key observation is that values are bounded by [1, n], which maps perfectly to indices [0, n-1]. Instead of using extra space for a hash set, I can mark presence by negating values at corresponding indices. After one pass of marking, any index with a positive value indicates its number is missing. This gives O(n) time with O(1) auxiliary space."
+      </div>
+    </div>
+
+    <div class="concept-box insight" style="margin-top:1rem;">
+      <div class="concept-box-title">💡 Follow-Up Questions</div>
+      <ul style="padding-left:1.25rem;margin-top:4px;">
+        <li><strong>Find the duplicate:</strong> First Duplicate Number — same marking trick!</li>
+        <li><strong>Find ONE missing:</strong> Missing Number — XOR or math sum approach</li>
+        <li><strong>Restore array:</strong> "Can you restore the original values?" — Yes, just take absolute values</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card" id="s6">
+  <div class="section-header" onclick="toggleCard('s6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="viz-area">
+      <!-- Pointer Area -->
+      <div class="pointer-area" id="pointerArea"></div>
+
+      <!-- Array Row -->
+      <div class="row-label">Array (values/markers)</div>
+      <div class="array-row" id="arrayRow"></div>
+
+      <!-- Index Labels -->
+      <div class="row-label" style="margin-top:-12px;">Indices (= number - 1)</div>
+
+      <!-- Result Bar -->
+      <div class="result-bar" id="resultBar">Missing numbers: —</div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker" id="varTracker"></div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel"></div>
+
+      <!-- Info Card -->
+      <div class="info-card" id="infoCard">
+        <div class="info-top">
+          <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+          <span class="step-counter" id="stepCounter">0 / 0</span>
+        </div>
+        <div class="info-title" id="infoTitle">—</div>
+        <div class="info-text" id="infoText">—</div>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="dots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn" onclick="reset()">Reset</button>
+        <button class="btn btn-primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch swatch-active"></div>Current</div>
+        <div class="legend-item"><div class="legend-swatch swatch-marking"></div>Target Index</div>
+        <div class="legend-item"><div class="legend-swatch swatch-marked"></div>Marked (negative)</div>
+        <div class="legend-item"><div class="legend-swatch swatch-missing"></div>Missing Found</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card" id="s7">
+  <div class="section-header" onclick="toggleCard('s7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ Values in <strong>[1, n]</strong> can be used as indices into an array of size <strong>n</strong>.</div>
+      <div class="takeaway">✓ <strong>Negating</strong> marks presence without losing the original value.</div>
+      <div class="takeaway">✓ Always use <strong>abs()</strong> when reading a potentially-marked value.</div>
+      <div class="takeaway">✓ Positive values after marking reveal which numbers are missing.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="padding-left:1.25rem;">
+        <li>Values bounded by <strong>[1, n]</strong> or <strong>[0, n-1]</strong> with array size n</li>
+        <li>Need O(1) auxiliary space</li>
+        <li>Finding missing/duplicate numbers</li>
+        <li>Can modify the input array (or restore afterward)</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Missing Number</strong> (Easy) — XOR or sum formula for single missing</li>
+        <li><strong>Find All Duplicates in an Array</strong> (Medium) — Same marking trick for duplicates</li>
+        <li><strong>First Missing Positive</strong> (Hard) — Cyclic sort / index mapping</li>
+        <li><strong>Set Mismatch</strong> (Easy) — Find both duplicate and missing</li>
+        <li><strong>Couples Holding Hands</strong> (Hard) — Cyclic swap variant</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/*═══════════════════════════════════════════════
+  CONFIGURATION
+═══════════════════════════════════════════════*/
+const NUMS = [4, 3, 2, 7, 8, 2, 3, 1];
+
+const CODE_LINES = [
+  'def findDisappearedNumbers(nums):',
+  '    for num in nums:',
+  '        idx = abs(num) - 1',
+  '        if nums[idx] > 0:',
+  '            nums[idx] = -nums[idx]',
+  '    result = []',
+  '    for i in range(len(nums)):',
+  '        if nums[i] > 0:',
+  '            result.append(i + 1)',
+  '    return result'
+];
+
+/*═══════════════════════════════════════════════
+  BUILD STEPS
+═══════════════════════════════════════════════*/
+function buildSteps() {
+  const steps = [];
+  const arr = [...NUMS];
+  const n = arr.length;
+
+  // Step 0: INIT
+  steps.push({
+    phase: 'INIT', phaseClass: 'phase-init',
+    activeLine: 0,
+    arr: [...arr],
+    cellStates: Array(n).fill('normal'),
+    pointerIdx: -1, targetIdx: -1,
+    title: 'Initialize',
+    text: `Array has ${n} elements with values in [1, ${n}]. We'll mark indices to track which numbers exist.`,
+    vars: { num: '—', idx: '—', 'result': '[]' },
+    changed: [],
+    result: []
+  });
+
+  // Phase 1: Marking
+  for (let i = 0; i < n; i++) {
+    const num = arr[i];
+    const absNum = Math.abs(num);
+    const targetIdx = absNum - 1;
+    const states = Array(n).fill('normal');
+    
+    // Mark all previously marked cells
+    for (let j = 0; j < n; j++) {
+      if (arr[j] < 0) states[j] = 'marked';
+    }
+    states[i] = 'active';
+
+    // Step: Read value
+    steps.push({
+      phase: 'MARK', phaseClass: 'phase-mark',
+      activeLine: 2,
+      arr: [...arr],
+      cellStates: [...states],
+      pointerIdx: i, targetIdx: -1,
+      title: `Marking Phase: Read nums[${i}]`,
+      text: `Current value is ${num}. Absolute value = ${absNum}. Target index = ${absNum} - 1 = ${targetIdx}.`,
+      vars: { num: String(num), idx: String(targetIdx), 'result': '[]' },
+      changed: ['num', 'idx'],
+      result: []
+    });
+
+    // Step: Check and mark target
+    const targetStates = [...states];
+    targetStates[targetIdx] = 'marking';
+
+    const wasPositive = arr[targetIdx] > 0;
+    
+    if (wasPositive) {
+      steps.push({
+        phase: 'MARK', phaseClass: 'phase-mark',
+        activeLine: 4,
+        arr: [...arr],
+        cellStates: targetStates,
+        pointerIdx: i, targetIdx: targetIdx,
+        title: `Mark index ${targetIdx}`,
+        text: `nums[${targetIdx}] = ${arr[targetIdx]} is positive. Negate it to mark that number ${absNum} exists.`,
+        vars: { num: String(num), idx: String(targetIdx), 'result': '[]' },
+        changed: [],
+        result: []
+      });
+
+      // Perform the marking
+      arr[targetIdx] = -Math.abs(arr[targetIdx]);
+    } else {
+      steps.push({
+        phase: 'MARK', phaseClass: 'phase-mark',
+        activeLine: 3,
+        arr: [...arr],
+        cellStates: targetStates,
+        pointerIdx: i, targetIdx: targetIdx,
+        title: `Index ${targetIdx} already marked`,
+        text: `nums[${targetIdx}] = ${arr[targetIdx]} is already negative. Number ${absNum} was seen before (duplicate). Skip.`,
+        vars: { num: String(num), idx: String(targetIdx), 'result': '[]' },
+        changed: [],
+        result: []
+      });
+    }
+
+    // Show result after marking
+    const afterStates = Array(n).fill('normal');
+    for (let j = 0; j < n; j++) {
+      if (arr[j] < 0) afterStates[j] = 'marked';
+    }
+
+    steps.push({
+      phase: 'MARK', phaseClass: 'phase-mark',
+      activeLine: 1,
+      arr: [...arr],
+      cellStates: afterStates,
+      pointerIdx: i, targetIdx: -1,
+      title: `After marking iteration ${i + 1}`,
+      text: `Array state: [${arr.join(', ')}]. Negative values indicate their indices' numbers exist.`,
+      vars: { num: '—', idx: '—', 'result': '[]' },
+      changed: [],
+      result: []
+    });
+  }
+
+  // Phase 2: Collecting missing numbers
+  const finalArr = [...arr];
+  const result = [];
+
+  steps.push({
+    phase: 'COLLECT', phaseClass: 'phase-collect',
+    activeLine: 5,
+    arr: [...finalArr],
+    cellStates: finalArr.map(v => v < 0 ? 'marked' : 'normal'),
+    pointerIdx: -1, targetIdx: -1,
+    title: 'Collection Phase: Find missing numbers',
+    text: 'Now scan the array. Any index with a positive value means that number is missing.',
+    vars: { num: '—', idx: '—', 'result': '[]' },
+    changed: ['result'],
+    result: []
+  });
+
+  for (let i = 0; i < n; i++) {
+    const states = finalArr.map(v => v < 0 ? 'marked' : 'normal');
+    states[i] = finalArr[i] > 0 ? 'missing' : 'active';
+
+    if (finalArr[i] > 0) {
+      result.push(i + 1);
+      steps.push({
+        phase: 'COLLECT', phaseClass: 'phase-collect',
+        activeLine: 8,
+        arr: [...finalArr],
+        cellStates: states,
+        pointerIdx: i, targetIdx: -1,
+        title: `Index ${i}: nums[${i}] = ${finalArr[i]} > 0`,
+        text: `Positive value! Number ${i + 1} never appeared. Add ${i + 1} to result.`,
+        vars: { num: '—', idx: String(i), 'result': `[${result.join(', ')}]` },
+        changed: ['result'],
+        result: [...result]
+      });
+    } else {
+      steps.push({
+        phase: 'COLLECT', phaseClass: 'phase-collect',
+        activeLine: 7,
+        arr: [...finalArr],
+        cellStates: states,
+        pointerIdx: i, targetIdx: -1,
+        title: `Index ${i}: nums[${i}] = ${finalArr[i]} < 0`,
+        text: `Negative value means number ${i + 1} exists. Skip.`,
+        vars: { num: '—', idx: String(i), 'result': `[${result.join(', ')}]` },
+        changed: [],
+        result: [...result]
+      });
+    }
+  }
+
+  // Final step
+  steps.push({
+    phase: 'DONE', phaseClass: 'phase-done',
+    activeLine: 9,
+    arr: [...finalArr],
+    cellStates: finalArr.map((v, i) => result.includes(i + 1) ? 'missing' : 'marked'),
+    pointerIdx: -1, targetIdx: -1,
+    title: 'Complete!',
+    text: `Missing numbers: [${result.join(', ')}]. These indices had positive values, meaning their numbers never appeared.`,
+    vars: { num: '—', idx: '—', 'result': `[${result.join(', ')}]` },
+    changed: [],
+    result: [...result]
+  });
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+/*═══════════════════════════════════════════════
+  RENDER
+═══════════════════════════════════════════════*/
+function initUI() {
+  // Array row
+  const aRow = document.getElementById('arrayRow');
+  aRow.innerHTML = NUMS.map((_, i) =>
+    `<div class="cell" id="cell${i}"><span class="val" id="val${i}"></span><span class="idx">${i}</span></div>`
+  ).join('');
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = CODE_LINES.map((l, i) =>
+    `<div class="code-line" id="cl${i}">${escHtml(l)}</div>`
+  ).join('');
+
+  // Progress dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = STEPS.map((_, i) => `<div class="dot" id="dot${i}" onclick="jumpTo(${i})"></div>`).join('');
+
+  render();
+}
+
+function render() {
+  const s = STEPS[cur];
+
+  // Array cells
+  s.arr.forEach((v, i) => {
+    const cell = document.getElementById(`cell${i}`);
+    const valEl = document.getElementById(`val${i}`);
+    cell.className = 'cell ' + (s.cellStates[i] || 'normal');
+    valEl.textContent = v;
+    if (v < 0) cell.classList.add('negative');
+  });
+
+  // Pointer area
+  const pArea = document.getElementById('pointerArea');
+  let pointerHtml = '';
+  for (let i = 0; i < NUMS.length; i++) {
+    if (i === s.pointerIdx) {
+      pointerHtml += '<span class="pointer i">i</span>';
+    } else if (i === s.targetIdx) {
+      pointerHtml += '<span class="pointer target">idx</span>';
+    } else {
+      pointerHtml += '<span class="pointer-placeholder"></span>';
+    }
+  }
+  pArea.innerHTML = pointerHtml;
+
+  // Result bar
+  const rb = document.getElementById('resultBar');
+  if (s.result.length > 0) {
+    rb.textContent = `Missing numbers: [${s.result.join(', ')}]`;
+    rb.className = 'result-bar ' + (s.phase === 'DONE' ? 'success' : 'highlight');
+  } else {
+    rb.textContent = 'Missing numbers: —';
+    rb.className = 'result-bar';
+  }
+
+  // Variable tracker
+  const vt = document.getElementById('varTracker');
+  vt.innerHTML = Object.entries(s.vars).map(([name, val]) => {
+    const ch = s.changed.includes(name) ? 'changed' : '';
+    return `<div class="var-box ${ch}"><span class="var-name">${escHtml(name)}</span><span class="var-val">${escHtml(String(val))}</span></div>`;
+  }).join('');
+
+  // Code lines
+  CODE_LINES.forEach((_, i) => {
+    const el = document.getElementById(`cl${i}`);
+    el.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+  });
+
+  // Info card
+  document.getElementById('phaseBadge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('phaseBadge').textContent = s.phase;
+  document.getElementById('stepCounter').textContent = `${cur + 1} / ${STEPS.length}`;
+  document.getElementById('infoTitle').textContent = s.title;
+  document.getElementById('infoText').textContent = s.text;
+
+  // Dots
+  STEPS.forEach((_, i) => {
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+  });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/*═══════════════════════════════════════════════
+  NAVIGATION
+═══════════════════════════════════════════════*/
+function go(d) {
+  const n = cur + d;
+  if (n >= 0 && n < STEPS.length) { cur = n; render(); }
+}
+function jumpTo(i) { cur = i; render(); }
+function reset() { cur = 0; render(); }
+
+/*═══════════════════════════════════════════════
+  CARD COLLAPSE
+═══════════════════════════════════════════════*/
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/*═══════════════════════════════════════════════
+  KEYBOARD
+═══════════════════════════════════════════════*/
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+initUI();
+</script>
+</body>
+</html>

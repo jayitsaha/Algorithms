@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number of Good Pairs – Visual Explainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f5;        --bg2: #f0efe9;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+      --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+      --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+      --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+      --radius: 10px;      --radius-lg: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+        --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+        --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+        --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+        --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+        --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+        --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+        --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+        --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem 1rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    /* Header */
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text2); font-size: 0.95rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+    .tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+    .tag-easy { background: var(--green-bg); color: var(--green-mid); }
+    .tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+    .tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+    
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; cursor: pointer; user-select: none; }
+    .section-number { width: 28px; height: 28px; background: var(--blue-bg); color: var(--blue-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .section-title { font-size: 18px; font-weight: 700; color: var(--text); flex: 1; }
+    .collapse-icon { font-size: 14px; color: var(--text3); transition: transform 0.3s; }
+    .card.collapsed .collapse-icon { transform: rotate(-90deg); }
+    .card.collapsed .section-content { display: none; }
+    .section-content p { margin-bottom: 0.75rem; color: var(--text2); }
+    .section-content p:last-child { margin-bottom: 0; }
+    
+    /* Concept Boxes */
+    .concept-box { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+    .concept-box-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .concept-box.insight { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .concept-box.insight .concept-box-title { color: var(--green-mid); }
+    .concept-box.warning { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+    .concept-box.warning .concept-box-title { color: var(--amber-mid); }
+    .concept-box.key-concept { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+    .concept-box.key-concept .concept-box-title { color: var(--blue-mid); }
+    .concept-box p { color: var(--text); margin: 0; }
+    .concept-box ul { margin: 0.5rem 0 0 1.25rem; color: var(--text); }
+    .concept-box li { margin-bottom: 0.25rem; }
+    
+    /* Algorithm Steps */
+    .algorithm-steps { display: flex; flex-direction: column; gap: 12px; margin: 1rem 0; }
+    .algo-step { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: var(--bg2); border-radius: var(--radius); }
+    .step-num { width: 24px; height: 24px; background: var(--purple-bg); color: var(--purple-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+    .step-text { color: var(--text); line-height: 1.5; }
+    
+    /* Code Panel */
+    .code-panel { margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius); padding: 12px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    .code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+    .code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+    .code-comment { color: var(--text3); }
+    
+    /* Interview Strategy */
+    .strategy-steps { display: flex; flex-direction: column; gap: 16px; margin: 1rem 0; }
+    .strategy-step { padding: 16px; background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%); border-radius: var(--radius); border: 1px solid var(--purple-border); }
+    .step-label { font-weight: 700; font-size: 14px; color: var(--purple-mid); margin-bottom: 8px; }
+    .interview-script { margin-top: 1.5rem; padding: 16px; background: var(--bg2); border-radius: var(--radius); }
+    .script-content { font-family: var(--mono); font-size: 13px; line-height: 2; color: var(--text2); padding: 12px; background: var(--surface); border-radius: var(--radius); border-left: 3px solid var(--green-mid); }
+    
+    /* Visualization Area */
+    .viz-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin: 1rem 0; }
+    
+    /* Array Visualization */
+    .array-section { margin-bottom: 1.5rem; }
+    .array-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .array-wrapper { position: relative; min-height: 100px; }
+    .array-row { display: flex; justify-content: center; gap: 8px; margin-top: 30px; }
+    .cell { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius); font-family: var(--mono); font-size: 18px; font-weight: 600; border: 2px solid var(--border2); background: var(--surface); transition: all 0.3s; position: relative; }
+    .cell.current { border-color: var(--blue-mid); background: var(--blue-bg); color: var(--blue-text); }
+    .cell.paired { border-color: var(--green-mid); background: var(--green-bg); color: var(--green-text); }
+    .cell.highlight { border-color: var(--amber-mid); background: var(--amber-bg); color: var(--amber-text); }
+    .cell.done { border-color: var(--purple-mid); background: var(--purple-bg); color: var(--purple-text); }
+    .index-label { position: absolute; bottom: -20px; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    
+    /* Pointer Labels */
+    .pointer-labels { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; }
+    .pointer { position: absolute; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; white-space: nowrap; }
+    .pointer-i { background: var(--blue-bg); color: var(--blue-mid); border: 1px solid var(--blue-border); }
+    
+    /* Hash Map Visualization */
+    .hashmap-section { margin-top: 1.5rem; }
+    .hashmap-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
+    .hashmap-entry { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); transition: all 0.3s; }
+    .hashmap-entry.active { background: var(--cyan-bg); border-color: var(--cyan-border); }
+    .hashmap-entry.updated { background: var(--amber-bg); border-color: var(--amber-border); animation: pulse 0.5s; }
+    .hashmap-key { font-family: var(--mono); font-weight: 600; color: var(--purple-mid); }
+    .hashmap-arrow { color: var(--text3); }
+    .hashmap-value { font-family: var(--mono); font-weight: 700; color: var(--text); }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* Pairs Found Display */
+    .pairs-section { margin-top: 1.5rem; text-align: center; }
+    .pairs-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .pairs-display { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .pair-badge { padding: 6px 12px; background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 20px; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--green-mid); }
+    .pair-badge.new { animation: popIn 0.3s; }
+    
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Variable Tracker */
+    .var-tracker { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
+    .var-box { display: flex; align-items: center; gap: 8px; background: var(--bg2); border-radius: var(--radius); padding: 8px 14px; border: 1px solid transparent; transition: background 0.3s, border-color 0.3s; }
+    .var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+    .var-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+    .var-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); min-width: 20px; text-align: center; }
+    
+    /* Info Card */
+    .info-card { background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 1rem; }
+    .info-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem; }
+    .phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 10px; }
+    .phase-scan { background: var(--blue-bg); color: var(--blue-mid); }
+    .phase-count { background: var(--green-bg); color: var(--green-mid); }
+    .phase-complete { background: var(--purple-bg); color: var(--purple-mid); }
+    .step-counter { font-size: 12px; color: var(--text3); margin-left: auto; }
+    .info-title { font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
+    .info-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    
+    /* Progress Dots */
+    .progress-dots { display: flex; justify-content: center; gap: 6px; margin-top: 1.25rem; flex-wrap: wrap; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: background 0.3s, transform 0.3s; cursor: pointer; }
+    .dot.active { background: var(--blue-mid); transform: scale(1.3); }
+    .dot.visited { background: var(--green-mid); }
+    
+    /* Controls */
+    .controls { display: flex; justify-content: center; gap: 12px; margin-top: 1.5rem; }
+    .btn { padding: 10px 24px; border-radius: var(--radius); border: none; font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--blue-mid); color: white; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .kbd-hint { text-align: center; margin-top: 0.75rem; font-size: 12px; color: var(--text3); }
+    
+    /* Legend */
+    .legend { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+    .legend-current { background: var(--blue-bg); border-color: var(--blue-mid); }
+    .legend-paired { background: var(--green-bg); border-color: var(--green-mid); }
+    .legend-highlight { background: var(--amber-bg); border-color: var(--amber-mid); }
+    
+    /* Takeaways */
+    .takeaways { display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+    .takeaway { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; background: var(--green-bg); border-radius: var(--radius); color: var(--green-text); font-weight: 500; }
+    
+    /* Related Problems */
+    .related-problems { margin-top: 1rem; }
+    .related-problems h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+    .related-problems ul { margin-left: 1.25rem; color: var(--text2); }
+    .related-problems li { margin-bottom: 0.25rem; }
+    
+    /* Math Display */
+    .math-box { background: var(--cyan-bg); border: 2px solid var(--cyan-border); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; text-align: center; }
+    .math-formula { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--cyan-text); }
+    .math-explanation { font-size: 13px; color: var(--text2); margin-top: 0.5rem; }
+    
+    /* Comparison Table */
+    .comparison-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 13px; }
+    .comparison-table th, .comparison-table td { padding: 10px 12px; text-align: left; border: 1px solid var(--border); }
+    .comparison-table th { background: var(--bg2); font-weight: 600; color: var(--text); }
+    .comparison-table td { color: var(--text2); }
+    .comparison-table .highlight-row { background: var(--green-bg); }
+    .comparison-table .highlight-row td { color: var(--green-text); font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Number of Good Pairs</h1>
+      <p class="subtitle">LeetCode #1512 – Count matching value pairs in an array</p>
+      <div class="tags">
+        <span class="tag tag-easy">Easy</span>
+        <span class="tag tag-pattern">Hash Table</span>
+        <span class="tag tag-pattern">Count Pairs</span>
+        <span class="tag tag-complexity">O(n) Time</span>
+        <span class="tag tag-complexity">O(n) Space</span>
+      </div>
+    </header>
+    
+    <!-- Section 1: Understanding the Problem -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">1</span>
+        <span class="section-title">Understanding the Problem</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <p>Given an array of integers <code>nums</code>, we need to count "good pairs" — pairs of indices (i, j) where:</p>
+        <ul style="margin: 0.5rem 0 1rem 1.25rem; color: var(--text2);">
+          <li><code>nums[i] == nums[j]</code> (same value)</li>
+          <li><code>i &lt; j</code> (i comes before j)</li>
+        </ul>
+        
+        <p><strong>Example:</strong> For <code>nums = [1, 2, 3, 1, 1, 3]</code></p>
+        <p style="margin-left: 1rem;">
+          • Value <strong>1</strong> appears at indices 0, 3, 4 → pairs: (0,3), (0,4), (3,4) = 3 pairs<br>
+          • Value <strong>3</strong> appears at indices 2, 5 → pairs: (2,5) = 1 pair<br>
+          • Total: <strong>4 good pairs</strong>
+        </p>
+        
+        <div class="concept-box insight">
+          <div class="concept-box-title">💡 Key Insight</div>
+          <p>When we encounter a value that's appeared <strong>k times</strong> before, we can form <strong>k new pairs</strong> with those previous occurrences. We don't need the formula — just count as we go!</p>
+        </div>
+        
+        <div class="math-box">
+          <div class="math-formula">If a value appears c times → c × (c-1) / 2 pairs</div>
+          <div class="math-explanation">This is the combinations formula: choosing 2 items from c items (order doesn't matter)</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 2: The Algorithm -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">2</span>
+        <span class="section-title">The Algorithm: Running Count</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <p>Instead of counting all occurrences first and using a formula, we use a clever <strong>running count</strong> approach:</p>
+        
+        <div class="algorithm-steps">
+          <div class="algo-step">
+            <span class="step-num">1</span>
+            <span class="step-text">Initialize a hash map to track how many times we've seen each value</span>
+          </div>
+          <div class="algo-step">
+            <span class="step-num">2</span>
+            <span class="step-text">For each number in the array: add its current count to result (pairs with previous occurrences)</span>
+          </div>
+          <div class="algo-step">
+            <span class="step-num">3</span>
+            <span class="step-text">Then increment that number's count in the hash map</span>
+          </div>
+          <div class="algo-step">
+            <span class="step-num">4</span>
+            <span class="step-text">Return the total result</span>
+          </div>
+        </div>
+        
+        <div class="concept-box key-concept">
+          <div class="concept-box-title">🎯 Why "Add Count First, Then Increment"?</div>
+          <p>When we see a number, we want to pair it with all <em>previous</em> occurrences. So we add the count (how many times we've seen it before), then update the count for future numbers.</p>
+        </div>
+        
+        <p><strong>Trace through example [1, 2, 3, 1, 1, 3]:</strong></p>
+        <table class="comparison-table">
+          <tr><th>Index</th><th>Value</th><th>Count Before</th><th>Pairs Added</th><th>Count After</th><th>Total</th></tr>
+          <tr><td>0</td><td>1</td><td>0</td><td>+0</td><td>1</td><td>0</td></tr>
+          <tr><td>1</td><td>2</td><td>0</td><td>+0</td><td>1</td><td>0</td></tr>
+          <tr><td>2</td><td>3</td><td>0</td><td>+0</td><td>1</td><td>0</td></tr>
+          <tr class="highlight-row"><td>3</td><td>1</td><td>1</td><td>+1</td><td>2</td><td>1</td></tr>
+          <tr class="highlight-row"><td>4</td><td>1</td><td>2</td><td>+2</td><td>3</td><td>3</td></tr>
+          <tr class="highlight-row"><td>5</td><td>3</td><td>1</td><td>+1</td><td>2</td><td>4</td></tr>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Section 3: Why It Works -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">3</span>
+        <span class="section-title">Why It Works: The Invariant</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <div class="concept-box key-concept">
+          <div class="concept-box-title">🔐 The Invariant</div>
+          <p>At any point during iteration, <code>count[num]</code> represents exactly how many times we've seen <code>num</code> <strong>before</strong> the current position. This is the number of valid pairs we can form.</p>
+        </div>
+        
+        <p><strong>Why does adding counts give us the total pairs?</strong></p>
+        <p>Consider a value that appears at positions [p₁, p₂, p₃, p₄]:</p>
+        <ul style="margin: 0.5rem 0 1rem 1.25rem; color: var(--text2);">
+          <li>At p₁: count = 0 → add 0 pairs</li>
+          <li>At p₂: count = 1 → add 1 pair (with p₁)</li>
+          <li>At p₃: count = 2 → add 2 pairs (with p₁, p₂)</li>
+          <li>At p₄: count = 3 → add 3 pairs (with p₁, p₂, p₃)</li>
+        </ul>
+        <p>Total: 0 + 1 + 2 + 3 = <strong>6 pairs</strong></p>
+        <p>This equals <strong>4 × 3 / 2 = 6</strong> — the formula for choosing 2 from 4!</p>
+        
+        <div class="concept-box insight">
+          <div class="concept-box-title">💡 Connection to Math Formula</div>
+          <p>The sum 0 + 1 + 2 + ... + (n-1) equals n(n-1)/2. Our running sum naturally computes this without explicitly using the formula!</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 4: The Code -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">4</span>
+        <span class="section-title">The Code (Annotated)</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <div class="code-panel" id="static-code">
+          <div class="code-line"><span class="code-comment"># Count good pairs using running count approach</span></div>
+          <div class="code-line">def numIdenticalPairs(nums):</div>
+          <div class="code-line">    count = {}      <span class="code-comment"># Value → how many times seen</span></div>
+          <div class="code-line">    result = 0      <span class="code-comment"># Total good pairs</span></div>
+          <div class="code-line">    </div>
+          <div class="code-line">    for num in nums:</div>
+          <div class="code-line">        <span class="code-comment"># Add pairs with previous occurrences</span></div>
+          <div class="code-line">        result += count.get(num, 0)</div>
+          <div class="code-line">        <span class="code-comment"># Increment count for this value</span></div>
+          <div class="code-line">        count[num] = count.get(num, 0) + 1</div>
+          <div class="code-line">    </div>
+          <div class="code-line">    return result</div>
+        </div>
+        
+        <div class="concept-box warning">
+          <div class="concept-box-title">⚠️ Common Mistake</div>
+          <p>Don't increment the count <em>before</em> adding to result! We want pairs with <em>previous</em> occurrences, not including the current element.</p>
+        </div>
+        
+        <p style="margin-top: 1rem;"><strong>Complexity:</strong></p>
+        <ul style="margin: 0.5rem 0 0 1.25rem; color: var(--text2);">
+          <li><strong>Time: O(n)</strong> — Single pass through the array</li>
+          <li><strong>Space: O(n)</strong> — Hash map stores at most n distinct values</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Section 5: Interview Strategy -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">5</span>
+        <span class="section-title">🎤 Interview Strategy</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <div class="strategy-steps">
+          <div class="strategy-step">
+            <div class="step-label">Step 1: Recognize the Pattern</div>
+            <p>Keywords: "pairs", "count", "same value" → Think hash map to track occurrences. "i < j" tells us order matters but we're counting, not listing.</p>
+          </div>
+          <div class="strategy-step">
+            <div class="step-label">Step 2: Consider Brute Force First</div>
+            <p>O(n²) nested loops checking all pairs. Mention this to show you understand the problem, then optimize.</p>
+          </div>
+          <div class="strategy-step">
+            <div class="step-label">Step 3: The Optimization Insight</div>
+            <p>"Instead of checking all pairs, I can count as I go. Each new occurrence of a value can pair with all previous occurrences."</p>
+          </div>
+        </div>
+        
+        <div class="interview-script">
+          <h4>🗣️ What to Say to the Interviewer</h4>
+          <div class="script-content">
+"I'll use a hash map to count occurrences. When I see a value, I add its current count to my result — that's the number of pairs I can form with previous occurrences — then increment the count. This gives O(n) time and O(n) space."
+          </div>
+        </div>
+        
+        <div class="concept-box insight" style="margin-top: 1.5rem;">
+          <div class="concept-box-title">🎯 Follow-up Questions to Expect</div>
+          <ul>
+            <li><strong>Alternative approach?</strong> — Formula-based: count all frequencies, then sum c*(c-1)/2</li>
+            <li><strong>Space optimization?</strong> — If values are bounded (e.g., 1-100), use array instead of hash map</li>
+            <li><strong>Extension: k-tuples?</strong> — For triplets, track pairs count, not just single count</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 6: Interactive Walkthrough -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">6</span>
+        <span class="section-title">Interactive Walkthrough</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <div class="viz-container">
+          <!-- Array Visualization -->
+          <div class="array-section">
+            <div class="array-label">Input Array: nums</div>
+            <div class="array-wrapper">
+              <div class="pointer-labels" id="pointers"></div>
+              <div class="array-row" id="array"></div>
+            </div>
+          </div>
+          
+          <!-- Hash Map -->
+          <div class="hashmap-section">
+            <div class="array-label">Count Map</div>
+            <div class="hashmap-container" id="hashmap"></div>
+          </div>
+          
+          <!-- Pairs Found -->
+          <div class="pairs-section">
+            <div class="array-label">Good Pairs Found</div>
+            <div class="pairs-display" id="pairs"></div>
+          </div>
+          
+          <!-- Variable Tracker -->
+          <div class="var-tracker" id="vars"></div>
+          
+          <!-- Code Panel -->
+          <div class="code-panel" id="code"></div>
+          
+          <!-- Info Card -->
+          <div class="info-card">
+            <div class="info-header">
+              <span class="phase-badge" id="phase">START</span>
+              <span class="step-counter" id="step-counter">Step 0 / 0</span>
+            </div>
+            <div class="info-title" id="info-title">Ready to begin</div>
+            <div class="info-text" id="info-text">Click Next or use arrow keys to step through the algorithm.</div>
+          </div>
+          
+          <!-- Progress Dots -->
+          <div class="progress-dots" id="dots"></div>
+          
+          <!-- Controls -->
+          <div class="controls">
+            <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
+            <button class="btn btn-secondary" onclick="reset()">Reset</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+          </div>
+          <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+          
+          <!-- Legend -->
+          <div class="legend">
+            <div class="legend-item"><div class="legend-color legend-current"></div>Current</div>
+            <div class="legend-item"><div class="legend-color legend-paired"></div>Paired</div>
+            <div class="legend-item"><div class="legend-color legend-highlight"></div>Previous Match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 7: Summary -->
+    <div class="card">
+      <div class="section-header" onclick="toggleSection(this)">
+        <span class="section-number">7</span>
+        <span class="section-title">Summary & Key Takeaways</span>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="section-content">
+        <div class="takeaways">
+          <div class="takeaway">✓ "Count pairs" problems often use hash maps to track occurrences</div>
+          <div class="takeaway">✓ Running count: add count first, then increment</div>
+          <div class="takeaway">✓ Sum of 0+1+2+...+(n-1) = n(n-1)/2 naturally emerges</div>
+          <div class="takeaway">✓ One pass through array is enough — O(n) time</div>
+        </div>
+        
+        <div class="concept-box insight">
+          <div class="concept-box-title">🎯 When to Use This Pattern</div>
+          <ul>
+            <li>Counting pairs with some property (same value, sum to target)</li>
+            <li>Need O(n) time instead of O(n²) brute force</li>
+            <li>"How many pairs" rather than "list all pairs"</li>
+            <li>Each new element can pair with previous elements</li>
+          </ul>
+        </div>
+        
+        <div class="related-problems">
+          <h4>Related Problems</h4>
+          <ul>
+            <li><strong>Two Sum</strong> (Easy) — Find pair summing to target (hash map lookup)</li>
+            <li><strong>Contains Duplicate II</strong> (Easy) — Pairs within distance k (hash map with indices)</li>
+            <li><strong>Count Nice Pairs in Array</strong> (Medium) — Pairs where nums[i] + rev(nums[j]) = nums[j] + rev(nums[i])</li>
+            <li><strong>Count Equal and Divisible Pairs</strong> (Easy) — Additional divisibility constraint</li>
+            <li><strong>K-diff Pairs in an Array</strong> (Medium) — Pairs with difference k</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const nums = [1, 2, 3, 1, 1, 3];
+    const codeLines = [
+      'def numIdenticalPairs(nums):',
+      '    count = {}',
+      '    result = 0',
+      '    ',
+      '    for num in nums:',
+      '        result += count.get(num, 0)',
+      '        count[num] = count.get(num, 0) + 1',
+      '    ',
+      '    return result'
+    ];
+    
+    const steps = [
+      {
+        phase: 'START', phaseClass: 'phase-scan',
+        title: 'Initialize',
+        text: 'We start with an empty count map and result = 0. We\'ll scan through each number, counting pairs as we go.',
+        activeLine: 1,
+        vars: { result: 0 },
+        changed: [],
+        currentIdx: -1,
+        countMap: {},
+        pairs: [],
+        highlightIndices: []
+      },
+      {
+        phase: 'SCAN', phaseClass: 'phase-scan',
+        title: 'Process nums[0] = 1',
+        text: 'First occurrence of 1. Count is 0, so we add 0 pairs. Then we record that we\'ve seen 1 once.',
+        activeLine: 5,
+        vars: { result: 0, num: 1, 'count[1]': '0→1' },
+        changed: ['count[1]'],
+        currentIdx: 0,
+        countMap: { 1: 1 },
+        pairs: [],
+        highlightIndices: [],
+        activeMapKey: 1,
+        updatedMapKey: 1
+      },
+      {
+        phase: 'SCAN', phaseClass: 'phase-scan',
+        title: 'Process nums[1] = 2',
+        text: 'First occurrence of 2. Count is 0, so we add 0 pairs. Record that we\'ve seen 2 once.',
+        activeLine: 5,
+        vars: { result: 0, num: 2, 'count[2]': '0→1' },
+        changed: ['count[2]'],
+        currentIdx: 1,
+        countMap: { 1: 1, 2: 1 },
+        pairs: [],
+        highlightIndices: [],
+        activeMapKey: 2,
+        updatedMapKey: 2
+      },
+      {
+        phase: 'SCAN', phaseClass: 'phase-scan',
+        title: 'Process nums[2] = 3',
+        text: 'First occurrence of 3. Count is 0, so we add 0 pairs. Record that we\'ve seen 3 once.',
+        activeLine: 5,
+        vars: { result: 0, num: 3, 'count[3]': '0→1' },
+        changed: ['count[3]'],
+        currentIdx: 2,
+        countMap: { 1: 1, 2: 1, 3: 1 },
+        pairs: [],
+        highlightIndices: [],
+        activeMapKey: 3,
+        updatedMapKey: 3
+      },
+      {
+        phase: 'COUNT', phaseClass: 'phase-count',
+        title: 'Process nums[3] = 1 — Found a pair!',
+        text: '🎉 Second occurrence of 1! We\'ve seen 1 once before (at index 0), so we add 1 pair: (0,3). Then update count to 2.',
+        activeLine: 5,
+        vars: { result: 1, num: 1, 'count[1]': '1→2' },
+        changed: ['result', 'count[1]'],
+        currentIdx: 3,
+        countMap: { 1: 2, 2: 1, 3: 1 },
+        pairs: ['(0,3)'],
+        highlightIndices: [0],
+        activeMapKey: 1,
+        updatedMapKey: 1,
+        newPair: true
+      },
+      {
+        phase: 'COUNT', phaseClass: 'phase-count',
+        title: 'Process nums[4] = 1 — Two more pairs!',
+        text: '🎉 Third occurrence of 1! We\'ve seen 1 twice before (indices 0 and 3), so we add 2 pairs: (0,4) and (3,4). Result goes from 1 to 3.',
+        activeLine: 5,
+        vars: { result: 3, num: 1, 'count[1]': '2→3' },
+        changed: ['result', 'count[1]'],
+        currentIdx: 4,
+        countMap: { 1: 3, 2: 1, 3: 1 },
+        pairs: ['(0,3)', '(0,4)', '(3,4)'],
+        highlightIndices: [0, 3],
+        activeMapKey: 1,
+        updatedMapKey: 1,
+        newPair: true
+      },
+      {
+        phase: 'COUNT', phaseClass: 'phase-count',
+        title: 'Process nums[5] = 3 — One more pair!',
+        text: '🎉 Second occurrence of 3! We\'ve seen 3 once before (index 2), so we add 1 pair: (2,5). Result goes from 3 to 4.',
+        activeLine: 5,
+        vars: { result: 4, num: 3, 'count[3]': '1→2' },
+        changed: ['result', 'count[3]'],
+        currentIdx: 5,
+        countMap: { 1: 3, 2: 1, 3: 2 },
+        pairs: ['(0,3)', '(0,4)', '(3,4)', '(2,5)'],
+        highlightIndices: [2],
+        activeMapKey: 3,
+        updatedMapKey: 3,
+        newPair: true
+      },
+      {
+        phase: 'COMPLETE', phaseClass: 'phase-complete',
+        title: 'Done! Return 4',
+        text: 'We found 4 good pairs total: (0,3), (0,4), (3,4), (2,5). The running count approach gave us the answer in a single pass!',
+        activeLine: 8,
+        vars: { result: 4 },
+        changed: [],
+        currentIdx: -1,
+        countMap: { 1: 3, 2: 1, 3: 2 },
+        pairs: ['(0,3)', '(0,4)', '(3,4)', '(2,5)'],
+        highlightIndices: [],
+        allDone: true
+      }
+    ];
+    
+    let currentStep = 0;
+    
+    function render() {
+      const step = steps[currentStep];
+      
+      // Render array
+      const arrayEl = document.getElementById('array');
+      arrayEl.innerHTML = nums.map((num, i) => {
+        let cls = 'cell';
+        if (i === step.currentIdx) cls += ' current';
+        else if (step.highlightIndices.includes(i)) cls += ' highlight';
+        else if (step.allDone) cls += ' done';
+        return `<div class="${cls}">${num}<span class="index-label">${i}</span></div>`;
+      }).join('');
+      
+      // Render pointer
+      const pointersEl = document.getElementById('pointers');
+      if (step.currentIdx >= 0) {
+        const cellWidth = 48, gap = 8;
+        const totalWidth = nums.length * cellWidth + (nums.length - 1) * gap;
+        const startOffset = (arrayEl.offsetWidth - totalWidth) / 2;
+        const left = startOffset + step.currentIdx * (cellWidth + gap) + cellWidth / 2;
+        pointersEl.innerHTML = `<div class="pointer pointer-i" style="left: ${left}px; transform: translateX(-50%);">i=${step.currentIdx}</div>`;
+      } else {
+        pointersEl.innerHTML = '';
+      }
+      
+      // Render hash map
+      const hashmapEl = document.getElementById('hashmap');
+      const mapEntries = Object.entries(step.countMap);
+      if (mapEntries.length === 0) {
+        hashmapEl.innerHTML = '<span style="color: var(--text3); font-size: 13px;">Empty</span>';
+      } else {
+        hashmapEl.innerHTML = mapEntries.map(([key, val]) => {
+          let cls = 'hashmap-entry';
+          if (parseInt(key) === step.activeMapKey) cls += ' active';
+          if (parseInt(key) === step.updatedMapKey && step.changed.some(c => c.includes(`count[${key}]`))) cls += ' updated';
+          return `<div class="${cls}"><span class="hashmap-key">${key}</span><span class="hashmap-arrow">→</span><span class="hashmap-value">${val}</span></div>`;
+        }).join('');
+      }
+      
+      // Render pairs
+      const pairsEl = document.getElementById('pairs');
+      if (step.pairs.length === 0) {
+        pairsEl.innerHTML = '<span style="color: var(--text3); font-size: 13px;">None yet</span>';
+      } else {
+        pairsEl.innerHTML = step.pairs.map((pair, i) => {
+          const isNew = step.newPair && i >= step.pairs.length - (step.vars.result - (steps[currentStep - 1]?.vars.result || 0));
+          return `<div class="pair-badge${isNew ? ' new' : ''}">${pair}</div>`;
+        }).join('');
+      }
+      
+      // Render variables
+      const varsEl = document.getElementById('vars');
+      varsEl.innerHTML = Object.entries(step.vars).map(([name, val]) => {
+        const isChanged = step.changed.includes(name);
+        return `<div class="var-box${isChanged ? ' changed' : ''}"><span class="var-name">${name}</span><span class="var-val">${val}</span></div>`;
+      }).join('');
+      
+      // Render code
+      const codeEl = document.getElementById('code');
+      codeEl.innerHTML = codeLines.map((line, i) => {
+        const isActive = i === step.activeLine;
+        return `<div class="code-line${isActive ? ' active' : ''}">${line}</div>`;
+      }).join('');
+      
+      // Update info card
+      document.getElementById('phase').textContent = step.phase;
+      document.getElementById('phase').className = `phase-badge ${step.phaseClass}`;
+      document.getElementById('step-counter').textContent = `Step ${currentStep} / ${steps.length - 1}`;
+      document.getElementById('info-title').textContent = step.title;
+      document.getElementById('info-text').textContent = step.text;
+      
+      // Render dots
+      const dotsEl = document.getElementById('dots');
+      dotsEl.innerHTML = steps.map((_, i) => {
+        let cls = 'dot';
+        if (i === currentStep) cls += ' active';
+        else if (i < currentStep) cls += ' visited';
+        return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+      }).join('');
+      
+      // Update buttons
+      document.getElementById('prevBtn').disabled = currentStep === 0;
+      document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+    }
+    
+    function go(delta) {
+      const newStep = currentStep + delta;
+      if (newStep >= 0 && newStep < steps.length) {
+        currentStep = newStep;
+        render();
+      }
+    }
+    
+    function goTo(step) {
+      currentStep = step;
+      render();
+    }
+    
+    function reset() {
+      currentStep = 0;
+      render();
+    }
+    
+    function toggleSection(header) {
+      const card = header.closest('.card');
+      card.classList.toggle('collapsed');
+    }
+    
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'r' || e.key === 'R') reset();
+    });
+    
+    // Initial render
+    render();
+  </script>
+</body>
+</html>

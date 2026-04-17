@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maximum Number of Balloons — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*───── Design Tokens ─────*/
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:900px;margin:0 auto;}
+
+/*───── Header ─────*/
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-top:4px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-easy{background:var(--green-bg);color:var(--green-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/*───── Cards ─────*/
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+.collapse-icon{margin-left:auto;font-size:16px;color:var(--text3);transition:transform .25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card.collapsed .section-body{display:none;}
+
+/*───── Concept Boxes ─────*/
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/*───── Algorithm Steps ─────*/
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/*───── Strategy ─────*/
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/*───── Code Panel (static) ─────*/
+.code-panel-static{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;margin:1rem 0;}
+.code-panel-static .cl{padding:1px 6px;border-radius:4px;white-space:pre;color:var(--text2);}
+.code-panel-static .comment{color:var(--text3);}
+
+/*───── Balloon Word Display ─────*/
+.balloon-word{display:flex;justify-content:center;gap:6px;margin:1.5rem 0;}
+.balloon-char{width:48px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);border:3px solid var(--purple-border);background:var(--purple-bg);font-family:var(--mono);font-size:24px;font-weight:700;color:var(--purple-mid);}
+.balloon-char .req{font-size:10px;font-weight:600;color:var(--text3);margin-top:2px;}
+
+/*───── Comparison Table ─────*/
+.compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.compare-table th,.compare-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.compare-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
+.compare-table tr.pick{background:var(--green-bg);}
+.compare-table .pick-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:10px;background:var(--green-mid);color:#fff;margin-left:6px;}
+
+/*───── Ratio Diagram ─────*/
+.ratio-diagram{display:flex;flex-direction:column;gap:12px;margin:1.5rem 0;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.ratio-row{display:flex;align-items:center;gap:12px;}
+.ratio-char{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);border:2px solid var(--blue-border);background:var(--blue-bg);font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-mid);}
+.ratio-formula{flex:1;font-family:var(--mono);font-size:13px;color:var(--text2);}
+.ratio-result{font-family:var(--mono);font-size:16px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.ratio-result.min{background:var(--green-bg);color:var(--green-mid);border:2px solid var(--green-border);}
+.ratio-result.normal{background:var(--bg2);color:var(--text2);border:2px solid var(--border);}
+
+/*───── Interactive Walkthrough ─────*/
+.viz-area{margin-top:1rem;}
+
+/* String Row */
+.row-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;text-align:center;}
+.string-row{display:flex;gap:3px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+.cell{width:36px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--border);background:var(--surface);transition:all .3s;font-family:var(--mono);position:relative;}
+.cell .char{font-size:16px;font-weight:600;}
+.cell .idx{font-size:8px;color:var(--text3);position:absolute;bottom:1px;}
+.cell.counting{border-color:var(--blue-border);background:var(--blue-bg);}
+.cell.relevant{border-color:var(--green-border);background:var(--green-bg);}
+.cell.irrelevant{border-color:var(--red-border);background:var(--red-bg);opacity:0.5;}
+.cell.active{border-color:var(--purple-border);background:var(--purple-bg);transform:scale(1.1);}
+
+/* Pointer */
+.pointer-area{display:flex;justify-content:center;margin-bottom:8px;min-height:24px;position:relative;}
+.pointer{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border);transition:all .3s;position:absolute;}
+.pointer-arrow{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--blue-mid);}
+
+/* Frequency Map */
+.freq-map{background:var(--bg2);border-radius:var(--radius);padding:14px 18px;margin:1.25rem auto;max-width:600px;}
+.freq-map-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px;text-align:center;}
+.freq-entries{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:32px;}
+.freq-entry{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:6px;font-family:var(--mono);font-size:13px;transition:all .3s;background:var(--surface);border:2px solid transparent;}
+.freq-key{color:var(--blue-mid);font-weight:700;font-size:16px;}
+.freq-arrow{color:var(--text3);font-size:11px;}
+.freq-val{color:var(--green-mid);font-weight:700;font-size:16px;min-width:18px;text-align:center;}
+.freq-req{color:var(--text3);font-size:11px;margin-left:2px;}
+.freq-entry.highlight{border-color:var(--amber-border);background:var(--amber-bg);}
+.freq-entry.computing{border-color:var(--purple-border);background:var(--purple-bg);}
+.freq-entry.limiting{border-color:var(--green-border);background:var(--green-bg);}
+
+/* Result Bar */
+.result-bar{text-align:center;padding:14px 24px;border-radius:var(--radius);margin:1.25rem 0;font-weight:700;font-size:18px;background:var(--bg2);color:var(--text2);border:2px solid var(--border);transition:all .3s;}
+.result-bar.found{background:var(--green-bg);color:var(--green-mid);border-color:var(--green-border);}
+
+/* Ratio Display */
+.ratio-display{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:1.25rem 0;}
+.ratio-item{display:flex;flex-direction:column;align-items:center;padding:10px 14px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);min-width:70px;transition:all .3s;}
+.ratio-item.active{border-color:var(--purple-border);background:var(--purple-bg);}
+.ratio-item.min{border-color:var(--green-border);background:var(--green-bg);}
+.ratio-char{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-mid);}
+.ratio-value{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);margin-top:4px;}
+.ratio-calc{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* Code Panel (interactive) */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;}
+.info-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;}
+.phase-count{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-ratio{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-result{background:var(--green-bg);color:var(--green-mid);}
+.phase-done{background:var(--cyan-bg);color:var(--cyan-mid);}
+.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+.info-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.info-text{color:var(--text2);font-size:14px;line-height:1.6;}
+
+/* Progress Dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:14px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:2px solid;}
+.swatch-relevant{background:var(--green-bg);border-color:var(--green-border);}
+.swatch-irrelevant{background:var(--red-bg);border-color:var(--red-border);}
+.swatch-active{background:var(--purple-bg);border-color:var(--purple-border);}
+.swatch-limiting{background:var(--green-bg);border-color:var(--green-border);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;}
+.related-problems{margin-top:1.5rem;}
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;}
+.related-problems li{margin-bottom:4px;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Maximum Number of Balloons</h1>
+  <div class="subtitle">LeetCode #1189 · Form "balloon" as many times as possible</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Table</span>
+    <span class="tag tag-pattern">Frequency Count</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(1) Space</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Given a string <code>text</code>, we want to form the word <strong>"balloon"</strong> as many times as possible using the characters from <code>text</code>. Each character can only be used once.</p>
+    
+    <p style="margin-top:12px;"><strong>First, let's examine "balloon":</strong></p>
+    
+    <div class="balloon-word">
+      <div class="balloon-char">b<span class="req">×1</span></div>
+      <div class="balloon-char">a<span class="req">×1</span></div>
+      <div class="balloon-char">l<span class="req">×2</span></div>
+      <div class="balloon-char">o<span class="req">×2</span></div>
+      <div class="balloon-char">n<span class="req">×1</span></div>
+    </div>
+    
+    <p style="margin-top:12px;"><strong>Required characters:</strong> b(1), a(1), l(2), o(2), n(1)</p>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The answer is limited by the <strong>scarcest resource</strong>. If you have 100 'b's but only 2 'l's, you can only form 1 "balloon" (since 'l' appears twice in "balloon", 2÷2=1).</p>
+    </div>
+    
+    <p><strong>Example:</strong> For <code>text = "nlaebolko"</code>:<br>
+    Counts: b=1, a=1, l=2, o=2, n=1 → Can form <strong>1</strong> "balloon"</p>
+    
+    <p style="margin-top:8px;"><strong>Example:</strong> For <code>text = "loonbalxballpoon"</code>:<br>
+    Counts: b=2, a=2, l=6, o=4, n=2 → Min ratio: l=6÷2=3, o=4÷2=2, others=2 → Answer: <strong>2</strong></p>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Frequency Count + Min Ratio</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>This is a <strong>frequency counting</strong> problem with a twist: we need the <strong>minimum ratio</strong> across all required characters.</p>
+    
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Count frequencies:</strong> Scan through <code>text</code> and count occurrences of only b, a, l, o, n (ignore other characters).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Calculate ratios:</strong> For each required character, compute: <code>count[char] ÷ required[char]</code> (integer division).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Return minimum:</strong> The answer is the smallest ratio — the bottleneck character.</span>
+      </div>
+    </div>
+    
+    <p style="margin-top:16px;"><strong>Visual: Finding the limiting factor</strong></p>
+    
+    <div class="ratio-diagram">
+      <div class="ratio-row">
+        <div class="ratio-char">b</div>
+        <div class="ratio-formula">count=3, need=1 → 3÷1 =</div>
+        <div class="ratio-result normal">3</div>
+      </div>
+      <div class="ratio-row">
+        <div class="ratio-char">a</div>
+        <div class="ratio-formula">count=2, need=1 → 2÷1 =</div>
+        <div class="ratio-result normal">2</div>
+      </div>
+      <div class="ratio-row">
+        <div class="ratio-char">l</div>
+        <div class="ratio-formula">count=4, need=2 → 4÷2 =</div>
+        <div class="ratio-result min">2 ← MIN</div>
+      </div>
+      <div class="ratio-row">
+        <div class="ratio-char">o</div>
+        <div class="ratio-formula">count=5, need=2 → 5÷2 =</div>
+        <div class="ratio-result min">2 ← MIN</div>
+      </div>
+      <div class="ratio-row">
+        <div class="ratio-char">n</div>
+        <div class="ratio-formula">count=3, need=1 → 3÷1 =</div>
+        <div class="ratio-result normal">3</div>
+      </div>
+    </div>
+    
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Formula</div>
+      <p><code>answer = min(b÷1, a÷1, l÷2, o÷2, n÷1)</code></p>
+      <p style="margin-top:8px;">Think of it like a recipe: if you need 2 eggs per cake but only have 5 eggs, you can make at most 2 cakes (5÷2=2), regardless of how much flour you have.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>Each "balloon" consumes exactly b(1), a(1), l(2), o(2), n(1). We can form at most <code>count[c]/required[c]</code> instances limited by character c. The minimum across ALL characters is the true maximum.</p>
+    </div>
+    
+    <p><strong>Proof sketch:</strong></p>
+    <ul style="margin:12px 0 12px 1.5rem;">
+      <li><strong>Upper bound:</strong> We can't form more than min(ratios) because at least one character would run out.</li>
+      <li><strong>Achievability:</strong> We CAN form exactly min(ratios) because all characters have at least that many "servings".</li>
+    </ul>
+    
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Don't Forget!</div>
+      <p>'l' and 'o' appear <strong>twice</strong> in "balloon"! A common mistake is treating all characters equally. Make sure to divide by 2 for these.</p>
+    </div>
+    
+    <p><strong>Edge cases:</strong></p>
+    <ul style="margin:12px 0 12px 1.5rem;">
+      <li><strong>Missing character:</strong> If any of b,a,l,o,n has count=0 → answer is 0</li>
+      <li><strong>Empty string:</strong> No characters → answer is 0</li>
+      <li><strong>No relevant chars:</strong> e.g., "xyz" → answer is 0</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="code-panel-static">
+      <div class="cl"><span class="comment"># Frequency Count + Min Ratio — O(n) time, O(1) space</span></div>
+      <div class="cl">def maxNumberOfBalloons(text: str) -> int:</div>
+      <div class="cl">    <span class="comment"># Count only the characters we need</span></div>
+      <div class="cl">    count = {'b': 0, 'a': 0, 'l': 0, 'o': 0, 'n': 0}</div>
+      <div class="cl">    for c in text:</div>
+      <div class="cl">        if c in count:</div>
+      <div class="cl">            count[c] += 1</div>
+      <div class="cl">    </div>
+      <div class="cl">    <span class="comment"># Calculate minimum ratio (l and o need 2 each)</span></div>
+      <div class="cl">    return min(</div>
+      <div class="cl">        count['b'],</div>
+      <div class="cl">        count['a'],</div>
+      <div class="cl">        count['l'] // 2,  <span class="comment"># Need 2 l's per balloon</span></div>
+      <div class="cl">        count['o'] // 2,  <span class="comment"># Need 2 o's per balloon</span></div>
+      <div class="cl">        count['n']</div>
+      <div class="cl">    )</div>
+    </div>
+    
+    <p style="margin-top:16px;"><strong>Alternative using Counter:</strong></p>
+    <div class="code-panel-static">
+      <div class="cl">from collections import Counter</div>
+      <div class="cl"></div>
+      <div class="cl">def maxNumberOfBalloons(text: str) -> int:</div>
+      <div class="cl">    count = Counter(text)</div>
+      <div class="cl">    balloon = Counter("balloon")  <span class="comment"># {'b':1,'a':1,'l':2,'o':2,'n':1}</span></div>
+      <div class="cl">    return min(count[c] // balloon[c] for c in balloon)</div>
+    </div>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Space Complexity</div>
+      <p>We only store counts for 5 specific characters, so space is <strong>O(1)</strong> regardless of input size. Even if using Counter, at most 26 letters are stored.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Analyze the Target Word</div>
+        <p>"Let me first break down 'balloon': b(1), a(1), l(2), o(2), n(1). Notice l and o appear twice."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Pattern</div>
+        <p>"This is a resource allocation problem. Each 'balloon' consumes a fixed set of resources. The answer is limited by whichever resource runs out first."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Propose the Solution</div>
+        <p>"I'll count frequencies, then find the minimum ratio of (available / needed) for each character."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Edge Cases</div>
+        <p>"If any required character is missing, the answer is 0. Integer division handles the 'l' and 'o' doubling naturally."</p>
+      </div>
+    </div>
+    
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">"This is a frequency counting problem with a twist. I'll count the characters b, a, l, o, n in the input. Then the answer is the minimum of: count[b], count[a], count[l]÷2, count[o]÷2, count[n]. The division by 2 for 'l' and 'o' accounts for them appearing twice in 'balloon'. Time O(n), space O(1)."</div>
+    </div>
+    
+    <p style="margin-top:16px;"><strong>Follow-up they might ask:</strong></p>
+    <ul style="margin-left:1.5rem;margin-top:8px;">
+      <li>"What if the target word is given as input?" → Generalize with Counter("target")</li>
+      <li>"What if we have multiple target words?" → Count each separately, return total</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Step-by-Step Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="viz-area">
+      <!-- Pointer -->
+      <div class="pointer-area" id="pointer-area"></div>
+      
+      <!-- String Row -->
+      <div class="row-label">Input String: "loonbalxballpoon"</div>
+      <div class="string-row" id="string-row"></div>
+      
+      <!-- Frequency Map -->
+      <div class="freq-map">
+        <div class="freq-map-title">Character Counts (only b, a, l, o, n)</div>
+        <div class="freq-entries" id="freq-entries"></div>
+      </div>
+      
+      <!-- Ratio Display -->
+      <div class="row-label" style="margin-top:1rem;">Ratio: count ÷ required</div>
+      <div class="ratio-display" id="ratio-display"></div>
+      
+      <!-- Result Bar -->
+      <div class="result-bar" id="result-bar">Result: ?</div>
+      
+      <!-- Code Panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" data-line="0">def maxNumberOfBalloons(text: str) -> int:</div>
+        <div class="code-line" data-line="1">    count = {'b': 0, 'a': 0, 'l': 0, 'o': 0, 'n': 0}</div>
+        <div class="code-line" data-line="2">    for c in text:</div>
+        <div class="code-line" data-line="3">        if c in count:</div>
+        <div class="code-line" data-line="4">            count[c] += 1</div>
+        <div class="code-line" data-line="5">    return min(count['b'], count['a'],</div>
+        <div class="code-line" data-line="6">               count['l']//2, count['o']//2, count['n'])</div>
+      </div>
+      
+      <!-- Info Card -->
+      <div class="info-card">
+        <div class="info-top">
+          <span class="phase-badge" id="phase-badge">INIT</span>
+          <span class="step-counter" id="step-counter">Step 0 / 0</span>
+        </div>
+        <div class="info-title" id="info-title">Initialize</div>
+        <div class="info-text" id="info-text">Click Next to start the walkthrough.</div>
+      </div>
+      
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="progress-dots"></div>
+      
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" onclick="reset()">Reset</button>
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+      
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch swatch-relevant"></span>Relevant (b,a,l,o,n)</div>
+        <div class="legend-item"><span class="legend-swatch swatch-irrelevant"></span>Irrelevant (skip)</div>
+        <div class="legend-item"><span class="legend-swatch swatch-active"></span>Currently processing</div>
+        <div class="legend-item"><span class="legend-swatch swatch-limiting"></span>Limiting factor</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ Count only the characters you need (b, a, l, o, n)</div>
+      <div class="takeaway">✓ Remember 'l' and 'o' appear <strong>twice</strong> in "balloon" — divide their counts by 2</div>
+      <div class="takeaway">✓ The answer is the <strong>minimum ratio</strong> — the bottleneck resource</div>
+      <div class="takeaway">✓ Time O(n), Space O(1) — optimal solution</div>
+    </div>
+    
+    <table class="compare-table">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr class="pick">
+          <td>Frequency + Min Ratio <span class="pick-badge">Pick</span></td>
+          <td>O(n)</td>
+          <td>O(1)</td>
+          <td>Single pass count, constant space</td>
+        </tr>
+        <tr>
+          <td>Counter + Counter</td>
+          <td>O(n)</td>
+          <td>O(1)</td>
+          <td>More Pythonic, same complexity</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1.25rem;">
+        <li>"Form word X as many times as possible"</li>
+        <li>Resource allocation with fixed requirements</li>
+        <li>Finding the <strong>limiting factor</strong> among multiple constraints</li>
+      </ul>
+    </div>
+    
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Ransom Note</strong> (Easy) — Can we form string A from string B?</li>
+        <li><strong>Valid Anagram</strong> (Easy) — Compare two frequency maps</li>
+        <li><strong>First Unique Character</strong> (Easy) — Frequency count + find first</li>
+        <li><strong>Reorganize String</strong> (Medium) — Frequency-based placement</li>
+        <li><strong>Find All Anagrams</strong> (Medium) — Sliding window + frequency</li>
+        <li><strong>Minimum Window Substring</strong> (Hard) — Frequency matching with window</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- container -->
+
+<script>
+// Toggle collapsible cards
+function toggleCard(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// Input string
+const inputStr = "loonbalxballpoon";
+const chars = inputStr.split('');
+const relevantChars = new Set(['b', 'a', 'l', 'o', 'n']);
+const required = {b: 1, a: 1, l: 2, o: 2, n: 1};
+
+// Build steps programmatically
+function buildSteps() {
+  const steps = [];
+  const count = {b: 0, a: 0, l: 0, o: 0, n: 0};
+  
+  // Init step
+  steps.push({
+    phase: 'init', phaseClass: 'phase-done', pointerIdx: -1, activeLine: 1,
+    title: 'Initialize', text: 'Create count dictionary for b, a, l, o, n. All start at 0.',
+    count: {...count}, cellStates: {}, highlight: null, ratios: null, minRatio: null
+  });
+  
+  // Counting steps
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i];
+    const isRelevant = relevantChars.has(c);
+    const cellStates = {};
+    
+    // Mark all previous cells
+    for (let j = 0; j < i; j++) {
+      cellStates[j] = relevantChars.has(chars[j]) ? 'relevant' : 'irrelevant';
+    }
+    cellStates[i] = 'active';
+    
+    if (isRelevant) {
+      count[c]++;
+      steps.push({
+        phase: 'count', phaseClass: 'phase-count', pointerIdx: i, activeLine: 4,
+        title: `Count '${c}' at index ${i}`,
+        text: `Character '${c}' is in "balloon". Increment count['${c}'] to ${count[c]}.`,
+        count: {...count}, cellStates, highlight: c, ratios: null, minRatio: null
+      });
+    } else {
+      steps.push({
+        phase: 'count', phaseClass: 'phase-count', pointerIdx: i, activeLine: 3,
+        title: `Skip '${c}' at index ${i}`,
+        text: `Character '${c}' is NOT in "balloon". Skip it.`,
+        count: {...count}, cellStates, highlight: null, ratios: null, minRatio: null
+      });
+    }
+  }
+  
+  // Mark all cells as done
+  const finalCellStates = {};
+  for (let j = 0; j < chars.length; j++) {
+    finalCellStates[j] = relevantChars.has(chars[j]) ? 'relevant' : 'irrelevant';
+  }
+  
+  // Calculate ratios step
+  const ratios = {
+    b: Math.floor(count.b / required.b),
+    a: Math.floor(count.a / required.a),
+    l: Math.floor(count.l / required.l),
+    o: Math.floor(count.o / required.o),
+    n: Math.floor(count.n / required.n)
+  };
+  
+  steps.push({
+    phase: 'ratio', phaseClass: 'phase-ratio', pointerIdx: -1, activeLine: 5,
+    title: 'Counting Complete — Calculate Ratios',
+    text: `Final counts: b=${count.b}, a=${count.a}, l=${count.l}, o=${count.o}, n=${count.n}. Now divide each by its requirement.`,
+    count: {...count}, cellStates: finalCellStates, highlight: null, ratios: {...ratios}, minRatio: null
+  });
+  
+  // Find minimum
+  const minVal = Math.min(ratios.b, ratios.a, ratios.l, ratios.o, ratios.n);
+  const minChars = Object.keys(ratios).filter(c => ratios[c] === minVal);
+  
+  steps.push({
+    phase: 'result', phaseClass: 'phase-result', pointerIdx: -1, activeLine: 6,
+    title: `Result: ${minVal} balloons`,
+    text: `Ratios: b=${ratios.b}, a=${ratios.a}, l=${ratios.l}(÷2), o=${ratios.o}(÷2), n=${ratios.n}. Minimum is ${minVal} (limited by ${minChars.join(', ')}). We can form ${minVal} "balloon"(s).`,
+    count: {...count}, cellStates: finalCellStates, highlight: null, ratios: {...ratios}, minRatio: minVal, result: minVal
+  });
+  
+  return steps;
+}
+
+const steps = buildSteps();
+let currentStep = 0;
+
+function render() {
+  const step = steps[currentStep];
+  
+  // Render string row
+  const stringRow = document.getElementById('string-row');
+  stringRow.innerHTML = chars.map((c, i) => {
+    const state = step.cellStates[i] || '';
+    return `<div class="cell ${state}"><span class="char">${c}</span><span class="idx">${i}</span></div>`;
+  }).join('');
+  
+  // Render pointer
+  const pointerArea = document.getElementById('pointer-area');
+  if (step.pointerIdx >= 0) {
+    const offset = step.pointerIdx * 39;
+    const totalWidth = chars.length * 39 - 3;
+    const leftPos = `calc(50% - ${totalWidth/2}px + ${offset}px + 18px)`;
+    pointerArea.innerHTML = `<div class="pointer" style="left:${leftPos};transform:translateX(-50%);">i = ${step.pointerIdx}<span class="pointer-arrow">▼</span></div>`;
+  } else {
+    pointerArea.innerHTML = '';
+  }
+  
+  // Render frequency map
+  const freqEntries = document.getElementById('freq-entries');
+  const charOrder = ['b', 'a', 'l', 'o', 'n'];
+  freqEntries.innerHTML = charOrder.map(c => {
+    const val = step.count[c];
+    const req = required[c];
+    const hl = step.highlight === c ? 'highlight' : '';
+    return `<div class="freq-entry ${hl}"><span class="freq-key">${c}</span><span class="freq-arrow">→</span><span class="freq-val">${val}</span><span class="freq-req">/${req}</span></div>`;
+  }).join('');
+  
+  // Render ratio display
+  const ratioDisplay = document.getElementById('ratio-display');
+  if (step.ratios) {
+    ratioDisplay.innerHTML = charOrder.map(c => {
+      const ratio = step.ratios[c];
+      const isMin = step.minRatio !== null && ratio === step.minRatio;
+      const cls = isMin ? 'min' : '';
+      return `<div class="ratio-item ${cls}"><span class="ratio-char">${c}</span><span class="ratio-value">${ratio}</span><span class="ratio-calc">${step.count[c]}÷${required[c]}</span></div>`;
+    }).join('');
+  } else {
+    ratioDisplay.innerHTML = charOrder.map(c => {
+      return `<div class="ratio-item"><span class="ratio-char">${c}</span><span class="ratio-value">?</span><span class="ratio-calc">—</span></div>`;
+    }).join('');
+  }
+  
+  // Result bar
+  const resultBar = document.getElementById('result-bar');
+  if (step.result !== undefined) {
+    resultBar.className = 'result-bar found';
+    resultBar.textContent = `Result: ${step.result} balloon(s)`;
+  } else {
+    resultBar.className = 'result-bar';
+    resultBar.textContent = 'Result: ?';
+  }
+  
+  // Code highlighting
+  document.querySelectorAll('.code-line').forEach(line => {
+    line.classList.toggle('active', parseInt(line.dataset.line) === step.activeLine);
+  });
+  
+  // Info card
+  document.getElementById('phase-badge').className = `phase-badge ${step.phaseClass}`;
+  document.getElementById('phase-badge').textContent = step.phase.toUpperCase();
+  document.getElementById('step-counter').textContent = `Step ${currentStep + 1} / ${steps.length}`;
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-text').textContent = step.text;
+  
+  // Progress dots
+  const dotsHtml = steps.map((_, i) => {
+    const cls = i === currentStep ? 'active' : (i < currentStep ? 'visited' : '');
+    return `<div class="dot ${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+  document.getElementById('progress-dots').innerHTML = dotsHtml;
+}
+
+function go(delta) {
+  currentStep = Math.max(0, Math.min(steps.length - 1, currentStep + delta));
+  render();
+}
+
+function goTo(idx) {
+  currentStep = idx;
+  render();
+}
+
+function reset() {
+  currentStep = 0;
+  render();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>
