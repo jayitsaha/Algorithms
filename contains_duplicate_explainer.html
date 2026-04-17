@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contains Duplicate — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f9f8f5;        --bg2: #f0efe9;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+  --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius: 10px;      --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+    --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+  }
+}
+
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+.container { max-width: 720px; margin: 0 auto; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 2rem; }
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px; }
+.tag-easy { background: var(--green-bg); color: var(--green-mid); }
+.tag-pattern { background: var(--blue-bg); color: var(--blue-mid); }
+.tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+.section-header { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+.section-number { width: 28px; height: 28px; background: var(--blue-bg); color: var(--blue-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--text); flex: 1; }
+.toggle-icon { font-size: 14px; color: var(--text3); transition: transform 0.25s; }
+.card.collapsed .section-body { display: none; }
+.card.collapsed .toggle-icon { transform: rotate(-90deg); }
+.section-body { margin-top: 1rem; }
+.section-body p { font-size: 14px; line-height: 1.7; color: var(--text2); margin-bottom: 0.75rem; }
+.section-body p:last-child { margin-bottom: 0; }
+
+/* Concept boxes */
+.concept-box { border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0; }
+.concept-box-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+.concept-box.insight { background: var(--green-bg); border: 1px solid var(--green-border); }
+.concept-box.insight .concept-box-title { color: var(--green-mid); }
+.concept-box.warning { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+.concept-box.warning .concept-box-title { color: var(--amber-mid); }
+.concept-box.key-concept { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+.concept-box.key-concept .concept-box-title { color: var(--blue-mid); }
+.concept-box.danger { background: var(--red-bg); border: 1px solid var(--red-border); }
+.concept-box.danger .concept-box-title { color: var(--red-mid); }
+.concept-box p { font-size: 13px; line-height: 1.6; color: var(--text); margin: 0; }
+.concept-box ul { font-size: 13px; line-height: 1.8; color: var(--text); margin: 0.5rem 0 0 1.25rem; }
+
+/* Algorithm steps */
+.algorithm-steps { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
+.algo-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; background: var(--bg2); border-radius: var(--radius); }
+.step-num { width: 24px; height: 24px; background: var(--purple-bg); color: var(--purple-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.step-text { color: var(--text); line-height: 1.5; font-size: 13px; }
+.step-text strong { color: var(--text); }
+
+/* Comparison table */
+.compare-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 13px; }
+.compare-table th, .compare-table td { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }
+.compare-table th { background: var(--bg2); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+.compare-table .best { background: var(--green-bg); }
+
+/* Annotated code */
+.annotated-code { background: var(--bg2); border-radius: var(--radius); padding: 12px 16px; margin: 1rem 0; font-family: var(--mono); font-size: 12px; line-height: 2; overflow-x: auto; }
+.annotated-code .code-line { padding: 1px 6px; border-radius: 4px; white-space: pre; color: var(--text); }
+.annotated-code .code-comment { color: var(--text3); }
+
+/* Strategy */
+.strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+.strategy-step { padding: 14px; background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%); border-radius: var(--radius); border: 1px solid var(--purple-border); }
+.step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+.strategy-step p { font-size: 13px; line-height: 1.6; color: var(--text); margin: 0; }
+.interview-script { margin-top: 1.25rem; padding: 14px; background: var(--bg2); border-radius: var(--radius); }
+.interview-script h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.script-content { font-family: var(--mono); font-size: 12px; line-height: 1.8; color: var(--text2); padding: 10px; background: var(--surface); border-radius: var(--radius); border-left: 3px solid var(--green-mid); }
+
+/* Takeaways */
+.takeaways { display: flex; flex-direction: column; gap: 6px; margin: 0.75rem 0; }
+.takeaway { font-size: 13px; color: var(--text); line-height: 1.5; padding-left: 4px; }
+.related-problems { margin-top: 1rem; }
+.related-problems h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.related-problems ul { font-size: 13px; line-height: 1.8; color: var(--text2); margin-left: 1.25rem; }
+
+/* ========== Interactive Walkthrough ========== */
+.walkthrough-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1rem; }
+
+/* Array visualization */
+.ptr-labels { display: flex; justify-content: center; gap: 8px; margin-bottom: 6px; height: 22px; }
+.ptr-label { width: 58px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; border-radius: 4px; transition: opacity 0.25s; }
+.ptr-label.read { background: var(--green-bg); color: var(--green-mid); }
+.ptr-label.hidden { opacity: 0; }
+.array-row { display: flex; gap: 8px; justify-content: center; }
+.cell { width: 58px; height: 54px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 18px; font-weight: 600; border-radius: var(--radius); border: 2px solid var(--border2); background: var(--surface); color: var(--text); transition: all 0.3s; }
+.cell.active { border-color: var(--green-border); background: var(--green-bg); color: var(--green-mid); }
+.cell.found { border-color: var(--red-border); background: var(--red-bg); color: var(--red-mid); }
+.cell.done { border-color: var(--blue-border); background: var(--blue-bg); color: var(--blue-mid); }
+.cell.skip { opacity: 0.4; }
+.idx-row { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+.idx { width: 58px; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+/* Hash set sidebar */
+.hashset-panel { margin-top: 1.25rem; padding: 12px 16px; background: var(--bg2); border-radius: var(--radius); }
+.hashset-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 8px; }
+.hashset-items { display: flex; gap: 6px; flex-wrap: wrap; min-height: 32px; align-items: center; }
+.hashset-item { padding: 4px 12px; background: var(--surface); border: 2px solid var(--border2); border-radius: 8px; font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); transition: all 0.3s; }
+.hashset-item.new-item { border-color: var(--purple-border); background: var(--purple-bg); color: var(--purple-mid); }
+.hashset-item.dup-item { border-color: var(--red-border); background: var(--red-bg); color: var(--red-mid); }
+.hashset-empty { font-size: 12px; color: var(--text3); font-style: italic; }
+
+/* Result bar */
+.result-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1rem; padding: 8px 16px; border-radius: var(--radius); font-family: var(--mono); font-size: 14px; font-weight: 600; transition: all 0.3s; }
+.result-bar.found { background: var(--red-bg); color: var(--red-mid); border: 1px solid var(--red-border); }
+.result-bar.safe { background: var(--green-bg); color: var(--green-mid); border: 1px solid var(--green-border); }
+.result-bar.neutral { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+
+/* Variable tracker */
+.var-tracker { display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+.var-box { display: flex; align-items: center; gap: 8px; background: var(--bg2); border-radius: var(--radius); padding: 6px 12px; border: 1px solid transparent; transition: background 0.3s, border-color 0.3s; }
+.var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+.var-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+.var-val { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); min-width: 18px; text-align: center; }
+
+/* Code panel */
+.code-panel { margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius); padding: 10px 14px; font-family: var(--mono); font-size: 11px; line-height: 1.75; overflow-x: auto; }
+.code-line { padding: 1px 6px; border-radius: 4px; transition: background 0.25s; white-space: pre; color: var(--text2); }
+.code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+/* Info card */
+.info-card { margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.info-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.phase-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 12px; }
+.phase-init { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+.phase-scan { background: var(--green-bg); color: var(--green-mid); }
+.phase-add { background: var(--purple-bg); color: var(--purple-mid); }
+.phase-dup { background: var(--red-bg); color: var(--red-mid); }
+.phase-done { background: var(--green-bg); color: var(--green-mid); }
+.step-counter { font-size: 11px; color: var(--text3); font-weight: 600; }
+.info-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.info-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+/* Progress dots */
+.progress { display: flex; gap: 6px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.25s; cursor: pointer; }
+.dot.visited { background: var(--blue-border); }
+.dot.active { background: var(--blue-mid); transform: scale(1.35); }
+
+/* Controls */
+.controls { display: flex; gap: 10px; justify-content: center; margin-top: 1rem; }
+.controls button { padding: 8px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.2s; }
+.controls button:hover { background: var(--bg2); border-color: var(--border2); }
+.controls button:disabled { opacity: 0.3; cursor: default; }
+.kbd-hint { text-align: center; font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; padding: 10px; background: var(--bg2); border-radius: var(--radius); }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+.legend-swatch { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; }
+.sw-active { background: var(--green-bg); border-color: var(--green-border); }
+.sw-done { background: var(--blue-bg); border-color: var(--blue-border); }
+.sw-found { background: var(--red-bg); border-color: var(--red-border); }
+.sw-new { background: var(--purple-bg); border-color: var(--purple-border); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Contains Duplicate</h1>
+  <p class="subtitle">LeetCode 217 — Return true if any value appears at least twice</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Set</span>
+    <span class="tag tag-complexity">O(n) time</span>
+    <span class="tag tag-complexity">O(n) space</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding the Problem ===== -->
+<div class="card" id="s1">
+  <div class="section-header" onclick="toggleSection('s1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <p>Given an array of integers, determine if <strong>any value appears more than once</strong>. Return <code>true</code> if there's a duplicate, <code>false</code> if every element is unique.</p>
+    <p><strong>Example:</strong> <code>[1, 2, 3, 1]</code> → The value <code>1</code> appears at index 0 and index 3. That's a duplicate → return <code>true</code>.</p>
+    <p><strong>Counter-example:</strong> <code>[1, 2, 3, 4]</code> → All values are distinct → return <code>false</code>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We need a way to <strong>remember what we've already seen</strong>. A hash set provides O(1) lookup — for each element, we check "have I seen this before?" If yes, it's a duplicate. If no, add it to the set and move on.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card" id="s2">
+  <div class="section-header" onclick="toggleSection('s2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Hash Set Insert Check</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <p>The optimal approach uses a <strong>hash set</strong> as a "memory" of elements seen so far. We scan left to right, and for each element we ask one question: <em>"Is this already in the set?"</em></p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Create an <strong>empty hash set</strong> called <code>seen</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text">For each number <code>num</code> in the array:</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text">If <code>num</code> is <strong>already in <code>seen</code></strong> → return <code>true</code> (duplicate found!).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text">Otherwise, <strong>add <code>num</code> to <code>seen</code></strong> and continue.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text">If we finish the loop without returning → return <code>false</code> (all unique).</span>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (nested loops)</td><td>O(n²)</td><td>O(1)</td><td>Check all pairs</td></tr>
+        <tr><td>Sort + Adjacent Check</td><td>O(n log n)</td><td>O(1)*</td><td>Duplicates become neighbours</td></tr>
+        <tr class="best"><td><strong>Hash Set ✅</strong></td><td><strong>O(n)</strong></td><td><strong>O(n)</strong></td><td><strong>One pass, instant lookup</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card" id="s3">
+  <div class="section-header" onclick="toggleSection('s3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing <code>nums[0..i]</code>, the set <code>seen</code> contains exactly the <strong>distinct values</strong> from that subarray. If <code>nums[i+1]</code> is already in <code>seen</code>, it must be a duplicate.</p>
+    </div>
+
+    <p><strong>Correctness:</strong> A hash set has O(1) membership test. Every element is checked against all previously seen elements. If any element was seen before, we immediately detect it. If we finish without detection, every element was encountered exactly once.</p>
+
+    <p><strong>Early termination:</strong> We return as soon as the first duplicate is found — no need to scan the entire array. In the best case (duplicate at position 1), it's O(1).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Not Sort?</div>
+      <p>Sorting works — duplicates become adjacent — but it's O(n log n) time and modifies the input (or needs a copy). The hash set approach is <strong>O(n)</strong> and doesn't mutate the array, making it strictly better when extra space is acceptable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code (Annotated) ===== -->
+<div class="card" id="s4">
+  <div class="section-header" onclick="toggleSection('s4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="annotated-code">
+<div class="code-line"><span class="code-comment"># Hash Set Insert Check — Interview Pick</span></div>
+<div class="code-line">def containsDuplicate(nums):</div>
+<div class="code-line">    seen = set()             <span class="code-comment"># empty hash set for O(1) lookup</span></div>
+<div class="code-line">    for num in nums:         <span class="code-comment"># scan each element once</span></div>
+<div class="code-line">        if num in seen:      <span class="code-comment"># O(1) membership check</span></div>
+<div class="code-line">            return True      <span class="code-comment"># duplicate found!</span></div>
+<div class="code-line">        seen.add(num)        <span class="code-comment"># remember this value</span></div>
+<div class="code-line">    return False             <span class="code-comment"># all values were unique</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">📊 Complexity</div>
+      <p><strong>Time:</strong> O(n) — one pass through the array, with O(1) set operations per element.<br>
+      <strong>Space:</strong> O(n) — in the worst case (all unique), the set stores every element.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ One-Liner Shortcut</div>
+      <p><code>return len(nums) != len(set(nums))</code> — Works, but builds the <em>entire</em> set before comparing. The loop version above can short-circuit early on the first duplicate, which is faster in practice.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card" id="s5">
+  <div class="section-header" onclick="toggleSection('s5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Check if something exists" or "find duplicates" → <strong>hash set</strong>. Any time you need O(1) existence checks, a set is the tool.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Mention Alternatives</div>
+        <p>Briefly note brute force O(n²) and sorting O(n log n) to show awareness, then propose the hash set O(n) approach as optimal.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Handle Follow-ups</div>
+        <p>If asked "what if memory is limited?" → sorting is O(1) space. If asked "what about Contains Duplicate II?" → use a hash map tracking indices, or a sliding window set of size k.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll use a hash set to track seen values. For each element, I check if it's already in the set — if yes, return true. Otherwise add it. This gives O(n) time and O(n) space. I could also sort for O(1) space but that's O(n log n)."</div>
+    </div>
+
+    <div class="concept-box key-concept" style="margin-top: 1rem;">
+      <div class="concept-box-title">🔄 Follow-up Questions</div>
+      <ul>
+        <li><strong>Contains Duplicate II (219)</strong> — Duplicates within distance k → sliding window set</li>
+        <li><strong>Contains Duplicate III (220)</strong> — Values within t, indices within k → bucket sort or sorted container</li>
+        <li><strong>"O(1) space?"</strong> → Sort first, then check adjacent elements</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card" id="s6">
+  <div class="section-header" onclick="toggleSection('s6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="walkthrough-card">
+
+      <!-- Pointer labels -->
+      <div class="ptr-labels" id="ptr-labels"></div>
+      <!-- Array -->
+      <div class="array-row" id="array-row"></div>
+      <!-- Index labels -->
+      <div class="idx-row" id="idx-row"></div>
+
+      <!-- Hash set panel -->
+      <div class="hashset-panel">
+        <div class="hashset-title">Hash Set: seen</div>
+        <div class="hashset-items" id="hashset-items">
+          <span class="hashset-empty">∅ empty</span>
+        </div>
+      </div>
+
+      <!-- Result bar -->
+      <div id="result-bar"></div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker" id="var-tracker"></div>
+
+      <!-- Code panel -->
+      <div class="code-panel" id="code-panel"></div>
+
+      <!-- Info card -->
+      <div class="info-card" id="info-card"></div>
+
+      <!-- Progress dots -->
+      <div class="progress" id="progress"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button onclick="go(-1)" id="btn-prev">← Prev</button>
+        <button onclick="reset()" id="btn-reset">Reset</button>
+        <button onclick="go(1)" id="btn-next">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch sw-active"></span>Current element</div>
+        <div class="legend-item"><span class="legend-swatch sw-done"></span>Checked (unique)</div>
+        <div class="legend-item"><span class="legend-swatch sw-found"></span>Duplicate!</div>
+        <div class="legend-item"><span class="legend-swatch sw-new"></span>Added to set</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card" id="s7">
+  <div class="section-header" onclick="toggleSection('s7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ Hash set gives O(1) existence checks — the fundamental tool for duplicate detection</div>
+      <div class="takeaway">✓ Early termination on first match makes it fast in practice</div>
+      <div class="takeaway">✓ Trading O(n) space for O(n) time (vs O(n²) brute force) is almost always worth it</div>
+      <div class="takeaway">✓ Sort-based alternative gives O(1) space but O(n log n) time</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>"Check if X exists in collection" → hash set</li>
+        <li>"Find duplicates / unique elements" → hash set</li>
+        <li>"Count frequency of elements" → hash map (Counter)</li>
+        <li>Any problem where O(1) lookup is the key optimization</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Contains Duplicate II (219)</strong> — Sliding window + hash set</li>
+        <li><strong>Contains Duplicate III (220)</strong> — Bucket sort approach</li>
+        <li><strong>Two Sum (1)</strong> — Hash map for complement lookup</li>
+        <li><strong>Longest Consecutive Sequence (128)</strong> — Hash set for O(1) neighbour check</li>
+        <li><strong>Single Number (136)</strong> — XOR to find unique element</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const NUMS = [1, 2, 3, 1];
+const CODE = [
+  'def containsDuplicate(nums):',
+  '    seen = set()',
+  '    for num in nums:',
+  '        if num in seen:',
+  '            return True',
+  '        seen.add(num)',
+  '    return False',
+];
+
+function buildSteps() {
+  const steps = [];
+  const seen = new Set();
+
+  // Step 0: INIT
+  steps.push({
+    phase: 'INIT', phaseClass: 'phase-init',
+    title: 'Initialize Empty Set',
+    text: 'Create an empty hash set called <code>seen</code>. This will store every unique value we encounter as we scan left to right.',
+    activeLine: [0, 1],
+    activeIdx: -1,
+    cellStates: NUMS.map(() => ''),
+    seenSet: new Set(),
+    newItem: null, dupItem: null,
+    result: null, resultClass: 'neutral', resultText: 'Scanning...',
+    vars: { num: '—', '|seen|': 0 }, changed: ['|seen|'],
+  });
+
+  for (let i = 0; i < NUMS.length; i++) {
+    const num = NUMS[i];
+    const isDup = seen.has(num);
+
+    if (isDup) {
+      // Duplicate found — two steps: SCAN then DUP
+      const cellStates = NUMS.map((_, j) => j < i ? 'done' : j === i ? 'active' : '');
+      steps.push({
+        phase: 'SCAN', phaseClass: 'phase-scan',
+        title: `Check nums[${i}] = ${num}`,
+        text: `Is <code>${num}</code> in the set? Checking... <strong>YES! We already saw ${num}.</strong>`,
+        activeLine: [2, 3],
+        activeIdx: i,
+        cellStates: cellStates,
+        seenSet: new Set(seen),
+        newItem: null, dupItem: null,
+        result: null, resultClass: 'neutral', resultText: `Checking: is ${num} in seen?`,
+        vars: { num: num, '|seen|': seen.size }, changed: ['num'],
+      });
+
+      const cellStates2 = NUMS.map((_, j) => j < i ? 'done' : j === i ? 'found' : 'skip');
+      steps.push({
+        phase: 'DUP', phaseClass: 'phase-dup',
+        title: `🚨 Duplicate Found: ${num}!`,
+        text: `<code>${num}</code> was already in the set! Return <code>true</code> immediately — no need to check the rest.`,
+        activeLine: [3, 4],
+        activeIdx: i,
+        cellStates: cellStates2,
+        seenSet: new Set(seen),
+        newItem: null, dupItem: num,
+        result: true, resultClass: 'found', resultText: `return True — duplicate: ${num}`,
+        vars: { num: num, '|seen|': seen.size }, changed: [],
+      });
+      break;
+    } else {
+      // Unique — two steps: SCAN then ADD
+      const cellStates = NUMS.map((_, j) => j < i ? 'done' : j === i ? 'active' : '');
+      steps.push({
+        phase: 'SCAN', phaseClass: 'phase-scan',
+        title: `Check nums[${i}] = ${num}`,
+        text: `Is <code>${num}</code> in the set? <strong>No.</strong> This is a new value we haven't seen before.`,
+        activeLine: [2, 3],
+        activeIdx: i,
+        cellStates: cellStates,
+        seenSet: new Set(seen),
+        newItem: null, dupItem: null,
+        result: null, resultClass: 'neutral', resultText: `Checking: is ${num} in seen? No`,
+        vars: { num: num, '|seen|': seen.size }, changed: ['num'],
+      });
+
+      seen.add(num);
+      const cellStates2 = NUMS.map((_, j) => j <= i ? 'done' : '');
+      steps.push({
+        phase: 'ADD', phaseClass: 'phase-add',
+        title: `Add ${num} to Set`,
+        text: `Add <code>${num}</code> to <code>seen</code>. Set is now {${[...seen].join(', ')}} (size ${seen.size}).`,
+        activeLine: [5],
+        activeIdx: i,
+        cellStates: cellStates2,
+        seenSet: new Set(seen),
+        newItem: num, dupItem: null,
+        result: null, resultClass: 'neutral', resultText: `Added ${num} to seen`,
+        vars: { num: num, '|seen|': seen.size }, changed: ['|seen|'],
+      });
+    }
+  }
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+/* ===== Render ===== */
+function renderArray(s) {
+  // Pointer labels
+  const ptrs = document.getElementById('ptr-labels');
+  let pHtml = '';
+  for (let i = 0; i < NUMS.length; i++) {
+    if (i === s.activeIdx) pHtml += `<span class="ptr-label read">num</span>`;
+    else pHtml += `<span class="ptr-label hidden">.</span>`;
+  }
+  ptrs.innerHTML = pHtml;
+
+  // Cells
+  const arr = document.getElementById('array-row');
+  let aHtml = '';
+  for (let i = 0; i < NUMS.length; i++) {
+    const cls = s.cellStates[i] || '';
+    aHtml += `<div class="cell ${cls}">${NUMS[i]}</div>`;
+  }
+  arr.innerHTML = aHtml;
+
+  // Indices
+  const idx = document.getElementById('idx-row');
+  let iHtml = '';
+  for (let i = 0; i < NUMS.length; i++) iHtml += `<div class="idx">${i}</div>`;
+  idx.innerHTML = iHtml;
+}
+
+function renderHashSet(s) {
+  const el = document.getElementById('hashset-items');
+  if (s.seenSet.size === 0 && !s.dupItem) {
+    el.innerHTML = '<span class="hashset-empty">∅ empty</span>';
+    return;
+  }
+  let html = '';
+  for (const v of s.seenSet) {
+    let cls = '';
+    if (v === s.newItem) cls = 'new-item';
+    if (v === s.dupItem) cls = 'dup-item';
+    html += `<span class="hashset-item ${cls}">${v}</span>`;
+  }
+  if (s.dupItem && !s.seenSet.has(s.dupItem)) {
+    html += `<span class="hashset-item dup-item">${s.dupItem} ⚡</span>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderResult(s) {
+  const el = document.getElementById('result-bar');
+  if (!s.resultText) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="result-bar ${s.resultClass}">${s.resultText}</div>`;
+}
+
+function renderVars(s) {
+  const el = document.getElementById('var-tracker');
+  const changed = new Set(s.changed || []);
+  let html = '';
+  for (const [name, val] of Object.entries(s.vars)) {
+    html += `<div class="var-box${changed.has(name) ? ' changed' : ''}"><span class="var-name">${name}</span><span class="var-val">${val}</span></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderCode(s) {
+  const el = document.getElementById('code-panel');
+  const activeSet = new Set(s.activeLine || []);
+  let html = '';
+  for (let i = 0; i < CODE.length; i++) {
+    html += `<div class="code-line${activeSet.has(i) ? ' active' : ''}" id="cl-${i}">${CODE[i]}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderInfo(s) {
+  const el = document.getElementById('info-card');
+  el.innerHTML =
+    `<div class="info-top"><span class="phase-badge ${s.phaseClass}">${s.phase}</span><span class="step-counter">Step ${cur + 1} / ${STEPS.length}</span></div>` +
+    `<div class="info-title">${s.title}</div>` +
+    `<div class="info-text">${s.text}</div>`;
+}
+
+function renderDots() {
+  const el = document.getElementById('progress');
+  let html = '';
+  for (let i = 0; i < STEPS.length; i++) {
+    const cls = i === cur ? 'dot active' : i < cur ? 'dot visited' : 'dot';
+    html += `<span class="${cls}" onclick="goTo(${i})"></span>`;
+  }
+  el.innerHTML = html;
+}
+
+function render() {
+  const s = STEPS[cur];
+  renderArray(s);
+  renderHashSet(s);
+  renderResult(s);
+  renderVars(s);
+  renderCode(s);
+  renderInfo(s);
+  renderDots();
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(d) { const n = cur + d; if (n >= 0 && n < STEPS.length) { cur = n; render(); } }
+function goTo(i) { cur = i; render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+function toggleSection(id) { document.getElementById(id).classList.toggle('collapsed'); }
+
+render();
+</script>
+</body>
+</html>

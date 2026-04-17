@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design HashMap — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f9f8f5;        --bg2: #f0efe9;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.12);  --border2: rgba(0,0,0,0.22);
+  --text: #1a1a18;      --text2: #6b6b65;   --text3: #9c9a92;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius: 10px;      --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45;   --blue-border:#378ADD;  --blue-text:#B5D4F4;  --blue-mid:#85B7EB;
+    --green-bg:#172a0a;  --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05;  --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a;    --red-border:#E24B4A;   --red-text:#F7C1C1;   --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+    --cyan-bg:#004D54;   --cyan-border:#26C6DA;  --cyan-text:#B2EBF2;  --cyan-mid:#4DD0E1;
+  }
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header { text-align: center; margin-bottom: 2rem; }
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.header .subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.tag {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 3px 9px; border-radius: 20px;
+}
+.tag-easy    { background: var(--green-bg); color: var(--green-mid); }
+.tag-pattern { background: var(--blue-bg);  color: var(--blue-mid); }
+.tag-complexity { background: var(--purple-bg); color: var(--purple-mid); }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+.section-header {
+  display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;
+}
+.section-number {
+  width: 28px; height: 28px;
+  background: var(--blue-bg); color: var(--blue-mid);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.section-title { font-size: 18px; font-weight: 700; color: var(--text); flex: 1; }
+.toggle-icon {
+  font-size: 14px; color: var(--text3); transition: transform 0.25s;
+}
+.card.collapsed .section-body { display: none; }
+.card.collapsed .toggle-icon { transform: rotate(-90deg); }
+.section-body { margin-top: 1rem; }
+.section-body p { font-size: 14px; line-height: 1.7; color: var(--text2); margin-bottom: 0.75rem; }
+.section-body p:last-child { margin-bottom: 0; }
+
+/* Concept boxes */
+.concept-box {
+  border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0;
+}
+.concept-box-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 0.5rem;
+}
+.concept-box.insight { background: var(--green-bg); border: 1px solid var(--green-border); }
+.concept-box.insight .concept-box-title { color: var(--green-mid); }
+.concept-box.warning { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+.concept-box.warning .concept-box-title { color: var(--amber-mid); }
+.concept-box.key-concept { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+.concept-box.key-concept .concept-box-title { color: var(--blue-mid); }
+.concept-box.danger { background: var(--red-bg); border: 1px solid var(--red-border); }
+.concept-box.danger .concept-box-title { color: var(--red-mid); }
+.concept-box p { font-size: 13px; line-height: 1.6; color: var(--text); margin: 0; }
+.concept-box ul { font-size: 13px; line-height: 1.8; color: var(--text); margin: 0.5rem 0 0 1.25rem; }
+
+/* Algorithm steps */
+.algorithm-steps { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
+.algo-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 14px; background: var(--bg2); border-radius: var(--radius);
+}
+.step-num {
+  width: 24px; height: 24px;
+  background: var(--purple-bg); color: var(--purple-mid);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; flex-shrink: 0;
+}
+.step-text { color: var(--text); line-height: 1.5; font-size: 13px; }
+.step-text strong { color: var(--text); }
+
+/* Static diagram */
+.hash-diagram {
+  background: var(--bg2); border-radius: var(--radius); padding: 1.25rem;
+  margin: 1rem 0; font-family: var(--mono); font-size: 12px;
+}
+.hash-diagram-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text3); margin-bottom: 1rem; text-align: center;
+}
+.hash-demo-row {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  margin-bottom: 8px;
+}
+.hash-demo-key {
+  padding: 4px 10px; background: var(--purple-bg); color: var(--purple-mid);
+  border-radius: 6px; font-weight: 600; min-width: 50px; text-align: center;
+}
+.hash-demo-arrow { color: var(--text3); }
+.hash-demo-comp { color: var(--text2); }
+.hash-demo-bucket {
+  padding: 4px 10px; background: var(--blue-bg); color: var(--blue-mid);
+  border-radius: 6px; font-weight: 600; min-width: 25px; text-align: center;
+}
+.hash-demo-collision {
+  font-size: 11px; color: var(--amber-mid); font-weight: 600;
+}
+
+.bucket-diagram { margin: 1rem 0; }
+.bd-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-bottom: 1px solid var(--border);
+}
+.bd-row:last-child { border-bottom: none; }
+.bd-row.highlight { background: var(--blue-bg); border-radius: var(--radius); }
+.bd-idx {
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  color: var(--text2); min-width: 25px; text-align: center;
+}
+.bd-chain { display: flex; align-items: center; gap: 6px; }
+.bd-node {
+  padding: 4px 10px; background: var(--surface); border: 1.5px solid var(--border2);
+  border-radius: 6px; font-family: var(--mono); font-size: 11px; color: var(--text);
+}
+.bd-node.new-node { border-color: var(--purple-border); background: var(--purple-bg); color: var(--purple-text); }
+.bd-chain-arrow { color: var(--text3); font-size: 12px; }
+.bd-empty { color: var(--text3); font-style: italic; font-size: 11px; }
+
+/* Annotated code */
+.annotated-code {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 12px 16px; margin: 1rem 0; font-family: var(--mono);
+  font-size: 12px; line-height: 2; overflow-x: auto;
+}
+.annotated-code .code-line { padding: 1px 6px; border-radius: 4px; white-space: pre; color: var(--text); }
+.annotated-code .code-comment { color: var(--text3); }
+
+/* Strategy */
+.strategy-steps { display: flex; flex-direction: column; gap: 14px; margin: 1rem 0; }
+.strategy-step {
+  padding: 14px; background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+  border-radius: var(--radius); border: 1px solid var(--purple-border);
+}
+.step-label { font-weight: 700; font-size: 13px; color: var(--purple-mid); margin-bottom: 6px; }
+.strategy-step p { font-size: 13px; line-height: 1.6; color: var(--text); margin: 0; }
+.interview-script { margin-top: 1.25rem; padding: 14px; background: var(--bg2); border-radius: var(--radius); }
+.interview-script h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.script-content {
+  font-family: var(--mono); font-size: 12px; line-height: 1.8;
+  color: var(--text2); padding: 10px; background: var(--surface);
+  border-radius: var(--radius); border-left: 3px solid var(--green-mid);
+}
+
+/* Takeaways */
+.takeaways { display: flex; flex-direction: column; gap: 6px; margin: 0.75rem 0; }
+.takeaway { font-size: 13px; color: var(--text); line-height: 1.5; padding-left: 4px; }
+.related-problems { margin-top: 1rem; }
+.related-problems h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.related-problems ul { font-size: 13px; line-height: 1.8; color: var(--text2); margin-left: 1.25rem; }
+
+/* ========== Interactive Walkthrough ========== */
+.walkthrough-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1rem;
+}
+
+/* Hash bar */
+.hash-bar {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 1.5rem; padding: 10px 16px; background: var(--bg2);
+  border-radius: var(--radius); flex-wrap: wrap;
+}
+.hash-bar.hidden { visibility: hidden; }
+.hb-segment {
+  display: flex; align-items: center; gap: 6px;
+}
+.hb-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text3);
+}
+.hb-value {
+  font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text);
+  padding: 2px 8px; background: var(--surface); border-radius: 6px;
+}
+.hb-value.key-val { border: 2px solid var(--purple-border); color: var(--purple-mid); }
+.hb-value.bucket-val { border: 2px solid var(--blue-border); color: var(--blue-mid); }
+.hb-arrow { color: var(--text3); font-family: var(--mono); font-size: 14px; }
+.hb-formula { font-family: var(--mono); font-size: 13px; color: var(--text2); }
+.hb-collision {
+  font-size: 11px; font-weight: 700; color: var(--amber-mid);
+  background: var(--amber-bg); padding: 2px 8px; border-radius: 12px;
+}
+
+/* Bucket visualization */
+.bucket-viz { margin: 0; }
+.bucket-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: var(--radius);
+  transition: background 0.3s; min-height: 42px;
+  border-bottom: 1px solid var(--border);
+}
+.bucket-row:last-child { border-bottom: none; }
+.bucket-row.active { background: var(--blue-bg); }
+.bucket-label {
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  color: var(--text3); min-width: 72px;
+}
+.bucket-row.active .bucket-label { color: var(--blue-mid); }
+.bucket-arrow-sep {
+  font-family: var(--mono); color: var(--text3); font-size: 13px; flex-shrink: 0;
+}
+.chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chain-node {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 5px 10px; background: var(--surface); border: 2px solid var(--border2);
+  border-radius: 8px; font-family: var(--mono); font-size: 12px;
+  transition: all 0.3s; white-space: nowrap;
+}
+.chain-node .nk { font-weight: 600; color: var(--text); }
+.chain-node .ns { color: var(--text3); margin: 0 1px; }
+.chain-node .nv { color: var(--blue-mid); }
+.chain-node.scanning { border-color: var(--amber-border); background: var(--amber-bg); }
+.chain-node.scanning .nk { color: var(--amber-text); }
+.chain-node.scanning .nv { color: var(--amber-mid); }
+.chain-node.found { border-color: var(--green-border); background: var(--green-bg); }
+.chain-node.found .nk { color: var(--green-text); }
+.chain-node.found .nv { color: var(--green-mid); }
+.chain-node.new-node { border-color: var(--purple-border); background: var(--purple-bg); }
+.chain-node.new-node .nk { color: var(--purple-text); }
+.chain-node.new-node .nv { color: var(--purple-mid); }
+.chain-node.removing { border-color: var(--red-border); background: var(--red-bg); text-decoration: line-through; }
+.chain-node.removing .nk { color: var(--red-text); }
+.chain-node.removing .nv { color: var(--red-mid); }
+.chain-arrow { font-family: var(--mono); color: var(--text3); font-size: 12px; }
+.empty-marker { font-family: var(--mono); color: var(--text3); font-style: italic; font-size: 11px; }
+.bucket-dots {
+  font-family: var(--mono); font-size: 12px; color: var(--text3);
+  padding: 4px 12px; text-align: center;
+}
+
+/* Result display */
+.result-bar {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 1rem; padding: 8px 16px; border-radius: var(--radius);
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  transition: all 0.3s;
+}
+.result-bar.found { background: var(--green-bg); color: var(--green-mid); border: 1px solid var(--green-border); }
+.result-bar.miss { background: var(--red-bg); color: var(--red-mid); border: 1px solid var(--red-border); }
+.result-bar.write { background: var(--purple-bg); color: var(--purple-mid); border: 1px solid var(--purple-border); }
+.result-bar.neutral { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+
+/* Variable tracker */
+.var-tracker { display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
+.var-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 6px 12px; border: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.var-box.changed { border-color: var(--amber-border); background: var(--amber-bg); }
+.var-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); }
+.var-val { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); min-width: 18px; text-align: center; }
+
+/* Code panel */
+.code-panel {
+  margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+  padding: 10px 14px; font-family: var(--mono); font-size: 11px;
+  line-height: 1.75; overflow-x: auto; max-height: 320px; overflow-y: auto;
+}
+.code-line {
+  padding: 1px 6px; border-radius: 4px; transition: background 0.25s;
+  white-space: pre; color: var(--text2);
+}
+.code-line.active { background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+
+/* Info card */
+.info-card {
+  margin-top: 1.25rem; background: var(--bg2); border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.info-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.phase-badge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 3px 10px; border-radius: 12px;
+}
+.phase-init      { background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+.phase-insert    { background: var(--green-bg); color: var(--green-mid); }
+.phase-collision { background: var(--amber-bg); color: var(--amber-mid); }
+.phase-get       { background: var(--blue-bg); color: var(--blue-mid); }
+.phase-miss      { background: var(--red-bg); color: var(--red-mid); }
+.phase-update    { background: var(--purple-bg); color: var(--purple-mid); }
+.phase-remove    { background: var(--red-bg); color: var(--red-mid); }
+.phase-done      { background: var(--green-bg); color: var(--green-mid); }
+.step-counter { font-size: 11px; color: var(--text3); font-weight: 600; }
+.info-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.info-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+/* Progress dots */
+.progress {
+  display: flex; gap: 6px; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: all 0.25s; cursor: pointer;
+}
+.dot.visited { background: var(--blue-border); }
+.dot.active { background: var(--blue-mid); transform: scale(1.35); }
+
+/* Controls */
+.controls {
+  display: flex; gap: 10px; justify-content: center; margin-top: 1rem;
+}
+.controls button {
+  padding: 8px 20px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface);
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--text); cursor: pointer; transition: all 0.2s;
+}
+.controls button:hover { background: var(--bg2); border-color: var(--border2); }
+.controls button:disabled { opacity: 0.3; cursor: default; }
+.kbd-hint {
+  text-align: center; font-size: 11px; color: var(--text3); margin-top: 8px;
+}
+
+/* Legend */
+.legend {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  margin-top: 1rem; padding: 10px; background: var(--bg2); border-radius: var(--radius);
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+.legend-swatch {
+  width: 14px; height: 14px; border-radius: 4px; border: 2px solid;
+}
+.sw-scanning { background: var(--amber-bg); border-color: var(--amber-border); }
+.sw-found { background: var(--green-bg); border-color: var(--green-border); }
+.sw-new { background: var(--purple-bg); border-color: var(--purple-border); }
+.sw-removing { background: var(--red-bg); border-color: var(--red-border); }
+.sw-active { background: var(--blue-bg); border-color: var(--blue-border); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Design HashMap</h1>
+  <p class="subtitle">LeetCode 706 — Implement a hash map from scratch with put, get, and remove</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Table</span>
+    <span class="tag tag-pattern">Separate Chaining</span>
+    <span class="tag tag-complexity">O(n/k) per op</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding the Problem ===== -->
+<div class="card" id="s1">
+  <div class="section-header" onclick="toggleSection('s1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <p>Build the engine behind Python's <code>dict</code> — a data structure that stores key-value pairs and supports <strong>insert</strong>, <strong>lookup</strong>, and <strong>delete</strong> in near-constant time, all without using any built-in hash table library.</p>
+    <p>We need three operations: <code>put(key, value)</code> to insert or update, <code>get(key)</code> to retrieve a value (or -1 if absent), and <code>remove(key)</code> to delete an entry.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Use a <strong>hash function</strong> to convert any key into a fixed-range array index. When two different keys map to the same index (<strong>collision</strong>), store them in a chain at that bucket. This gives O(1) average-case access.</p>
+    </div>
+
+    <p><strong>Walkthrough of the example:</strong></p>
+    <p><code>put(1,1)</code> → store (1,1) in bucket 1. <code>put(2,2)</code> → store (2,2) in bucket 2. <code>get(1)</code> → hash to bucket 1, find key 1, return 1. <code>get(3)</code> → bucket 3 is empty → return -1. <code>put(2,1)</code> → bucket 2 already has key 2, update value to 1. <code>remove(2)</code> → bucket 2, find and remove key 2.</p>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card" id="s2">
+  <div class="section-header" onclick="toggleSection('s2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Separate Chaining</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <p>A hash table has two ingredients: a <strong>hash function</strong> that maps keys to bucket indices, and a <strong>collision resolution</strong> strategy. We use <em>separate chaining</em> — each bucket holds a list of all entries that hash to it.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Allocate an array of <strong>769 empty lists</strong> (buckets). Using a prime number minimises collision clustering.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Hash function:</strong> <code>h(key) = key % 769</code>. Maps any integer key to a bucket index 0–768.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>put:</strong> Compute bucket index → scan chain for existing key → update value if found, else append new pair.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>get:</strong> Compute bucket index → scan chain → return value if found, else -1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>remove:</strong> Compute bucket index → scan chain → delete pair if found.</span>
+      </div>
+    </div>
+
+    <!-- Static hash function diagram -->
+    <div class="hash-diagram">
+      <div class="hash-diagram-title">Hash Function Demo: key % 769</div>
+      <div class="hash-demo-row">
+        <span class="hash-demo-key">1</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-comp">1 % 769</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-bucket">1</span>
+      </div>
+      <div class="hash-demo-row">
+        <span class="hash-demo-key">770</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-comp">770 % 769</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-bucket">1</span>
+        <span class="hash-demo-collision">⚡ Collision!</span>
+      </div>
+      <div class="hash-demo-row">
+        <span class="hash-demo-key">2</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-comp">2 % 769</span>
+        <span class="hash-demo-arrow">→</span>
+        <span class="hash-demo-bucket">2</span>
+      </div>
+    </div>
+
+    <!-- Static bucket diagram -->
+    <div class="hash-diagram">
+      <div class="hash-diagram-title">Bucket Array After Inserting (1,val), (770,val), (2,val)</div>
+      <div class="bucket-diagram">
+        <div class="bd-row">
+          <span class="bd-idx">0</span>
+          <span class="bd-chain-arrow">→</span>
+          <span class="bd-empty">∅ empty</span>
+        </div>
+        <div class="bd-row highlight">
+          <span class="bd-idx">1</span>
+          <span class="bd-chain-arrow">→</span>
+          <div class="bd-chain">
+            <span class="bd-node">(1, v₁)</span>
+            <span class="bd-chain-arrow">→</span>
+            <span class="bd-node new-node">(770, v₂)</span>
+          </div>
+        </div>
+        <div class="bd-row">
+          <span class="bd-idx">2</span>
+          <span class="bd-chain-arrow">→</span>
+          <div class="bd-chain">
+            <span class="bd-node">(2, v₃)</span>
+          </div>
+        </div>
+        <div class="bd-row">
+          <span class="bd-idx">…</span>
+          <span class="bd-chain-arrow"></span>
+          <span class="bd-empty">768 more empty buckets</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card" id="s3">
+  <div class="section-header" onclick="toggleSection('s3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Guarantees</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>Every key <code>k</code> lives in exactly one bucket: <code>buckets[k % 769]</code>. Within that bucket, keys are unique — <code>put</code> either updates an existing entry or appends a new one.</p>
+    </div>
+
+    <p><strong>Correctness:</strong> The hash function is deterministic — the same key always maps to the same bucket. A linear scan of that bucket's chain guarantees we find, update, or confirm absence of any key.</p>
+
+    <p><strong>Performance:</strong> With 769 buckets and at most 10⁴ operations, the average chain length is 10000/769 ≈ 13. Each operation scans at most one chain, giving O(n/k) average time where n is entries and k is bucket count.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why 769? Why Prime?</div>
+      <p>A prime bucket count reduces <strong>clustering</strong>. If keys share a common factor with the bucket count (e.g., all even keys with 1000 buckets), many buckets stay empty while others overflow. A prime like 769 distributes keys more uniformly across buckets.</p>
+    </div>
+
+    <p><strong>Edge cases:</strong> get/remove on non-existent key → scan finds nothing, return -1 or no-op. put with key 0 → valid, hashes to bucket 0. Value 0 is valid (we use -1 as "not found" sentinel, not stored value).</p>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code (Annotated) ===== -->
+<div class="card" id="s4">
+  <div class="section-header" onclick="toggleSection('s4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="annotated-code">
+<div class="code-line"><span class="code-comment"># Separate Chaining — Interview Pick</span></div>
+<div class="code-line">class MyHashMap:</div>
+<div class="code-line">    def __init__(self):</div>
+<div class="code-line">        self.size = 769              <span class="code-comment"># prime bucket count</span></div>
+<div class="code-line">        self.buckets = [[] for _ in range(self.size)]  <span class="code-comment"># 769 empty chains</span></div>
+<div class="code-line"></div>
+<div class="code-line">    def _hash(self, key):        <span class="code-comment"># maps key → bucket index</span></div>
+<div class="code-line">        return key % self.size</div>
+<div class="code-line"></div>
+<div class="code-line">    def put(self, key, value):   <span class="code-comment"># insert or update</span></div>
+<div class="code-line">        h = self._hash(key)      <span class="code-comment"># find the bucket</span></div>
+<div class="code-line">        for i, (k, v) in enumerate(self.buckets[h]):  <span class="code-comment"># scan chain</span></div>
+<div class="code-line">            if k == key:             <span class="code-comment"># key exists?</span></div>
+<div class="code-line">                self.buckets[h][i] = (key, value)  <span class="code-comment"># update in place</span></div>
+<div class="code-line">                return</div>
+<div class="code-line">        self.buckets[h].append((key, value))  <span class="code-comment"># new → append to chain</span></div>
+<div class="code-line"></div>
+<div class="code-line">    def get(self, key):          <span class="code-comment"># lookup</span></div>
+<div class="code-line">        h = self._hash(key)</div>
+<div class="code-line">        for k, v in self.buckets[h]:  <span class="code-comment"># scan chain</span></div>
+<div class="code-line">            if k == key:             <span class="code-comment"># found!</span></div>
+<div class="code-line">                return v</div>
+<div class="code-line">        return -1                    <span class="code-comment"># not in this bucket</span></div>
+<div class="code-line"></div>
+<div class="code-line">    def remove(self, key):       <span class="code-comment"># delete</span></div>
+<div class="code-line">        h = self._hash(key)</div>
+<div class="code-line">        for i, (k, v) in enumerate(self.buckets[h]):  <span class="code-comment"># scan chain</span></div>
+<div class="code-line">            if k == key:             <span class="code-comment"># found!</span></div>
+<div class="code-line">                self.buckets[h].pop(i)  <span class="code-comment"># remove from list</span></div>
+<div class="code-line">                return</div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake</div>
+      <p><strong>Forgetting to return after update:</strong> In <code>put</code>, if the key already exists, you must <code>return</code> after updating. Otherwise the code falls through to <code>append</code> and creates a duplicate entry — get would return the first one, but remove would only delete one copy.</p>
+    </div>
+    <div class="concept-box insight">
+      <div class="concept-box-title">📊 Complexity</div>
+      <p><strong>Time:</strong> O(n/k) per operation on average, where n = number of stored keys and k = 769 buckets. With at most 10⁴ calls, average chain length ≈ 13.<br>
+      <strong>Space:</strong> O(k + n) = O(769 + n) for the bucket array plus all stored entries.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card" id="s5">
+  <div class="section-header" onclick="toggleSection('s5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Design X without built-in Y" → implement from primitives. This is a system design / data structure design problem. We need to choose a hash function and a collision strategy.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Discuss Trade-offs</div>
+        <p>Mention the <strong>Direct Address</strong> option (O(1) but O(10⁶) space). Then propose <strong>Separate Chaining</strong> — better space, still O(1) amortised. Mention <strong>Open Addressing</strong> exists but chaining is simpler to implement correctly.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Choose Bucket Count</div>
+        <p>Use a <strong>prime number</strong> near √(max_key) or a round number. 769 is a common choice. Explain briefly: "Prime reduces collision clustering from modular arithmetic."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Implement Cleanly</div>
+        <p>Separate the hash function into its own method. Keep put/get/remove symmetric — each starts with hash computation, then scans the chain. This makes the code easy to explain.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll use separate chaining with a prime-sized bucket array. Each bucket stores a list of key-value pairs. The hash function is key mod 769. For put, I hash the key, scan the chain to check for duplicates, and either update or append. Get and remove follow the same hash-then-scan pattern. Average time per operation is O(n/k) where k is the bucket count."</div>
+    </div>
+
+    <div class="concept-box key-concept" style="margin-top: 1rem;">
+      <div class="concept-box-title">🔄 Follow-up Questions</div>
+      <ul>
+        <li><strong>"What about resizing?"</strong> — When load factor exceeds threshold (e.g., 0.75), double bucket count and rehash all entries. Amortised O(1).</li>
+        <li><strong>"Open addressing vs chaining?"</strong> — Open addressing uses less memory (no pointers) but is harder to delete from; chaining is simpler and handles high load better.</li>
+        <li><strong>"Better hash function?"</strong> — Multiplicative hashing, universal hashing, or Python-style with perturbation.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card" id="s6">
+  <div class="section-header" onclick="toggleSection('s6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="walkthrough-card">
+
+      <!-- Hash computation bar -->
+      <div class="hash-bar" id="hash-bar"></div>
+
+      <!-- Bucket visualization -->
+      <div class="bucket-viz" id="bucket-viz"></div>
+
+      <!-- Result bar -->
+      <div id="result-bar"></div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker" id="var-tracker"></div>
+
+      <!-- Code panel -->
+      <div class="code-panel" id="code-panel"></div>
+
+      <!-- Info card -->
+      <div class="info-card" id="info-card"></div>
+
+      <!-- Progress dots -->
+      <div class="progress" id="progress"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button onclick="go(-1)" id="btn-prev">← Prev</button>
+        <button onclick="reset()" id="btn-reset">Reset</button>
+        <button onclick="go(1)" id="btn-next">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch sw-active"></span>Active bucket</div>
+        <div class="legend-item"><span class="legend-swatch sw-scanning"></span>Scanning</div>
+        <div class="legend-item"><span class="legend-swatch sw-found"></span>Found / Match</div>
+        <div class="legend-item"><span class="legend-swatch sw-new"></span>New entry</div>
+        <div class="legend-item"><span class="legend-swatch sw-removing"></span>Removing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card" id="s7">
+  <div class="section-header" onclick="toggleSection('s7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="toggle-icon">▾</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ A hash table = hash function + collision resolution</div>
+      <div class="takeaway">✓ Separate chaining stores collisions as lists per bucket</div>
+      <div class="takeaway">✓ Prime bucket count reduces clustering from modular arithmetic</div>
+      <div class="takeaway">✓ Each operation: hash → go to bucket → linear scan of chain</div>
+      <div class="takeaway">✓ Average O(n/k) per operation, O(1) amortised with good load factor</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul>
+        <li>"Design a data structure" with O(1) average insert/lookup/delete</li>
+        <li>Implement hash-based structure without built-in libraries</li>
+        <li>Need to understand hash table internals for follow-up questions (LRU Cache, etc.)</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Design HashSet (706)</strong> — Same structure, just keys without values</li>
+        <li><strong>LRU Cache (146)</strong> — Hash map + doubly-linked list for O(1) eviction</li>
+        <li><strong>Insert Delete GetRandom O(1) (380)</strong> — Array + hash map combo</li>
+        <li><strong>Two Sum (1)</strong> — Classic use of hash map for complement lookup</li>
+        <li><strong>Group Anagrams (49)</strong> — Hash map with sorted-string keys</li>
+        <li><strong>Longest Consecutive Sequence (128)</strong> — Hash set for O(1) membership test</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ===== Code Lines ===== */
+const CODE = [
+  'class MyHashMap:',
+  '    def __init__(self):',
+  '        self.size = 769',
+  '        self.buckets = [[] for _ in range(self.size)]',
+  '',
+  '    def _hash(self, key):',
+  '        return key % self.size',
+  '',
+  '    def put(self, key, value):',
+  '        h = self._hash(key)',
+  '        for i, (k, v) in enumerate(self.buckets[h]):',
+  '            if k == key:',
+  '                self.buckets[h][i] = (key, value)',
+  '                return',
+  '        self.buckets[h].append((key, value))',
+  '',
+  '    def get(self, key):',
+  '        h = self._hash(key)',
+  '        for k, v in self.buckets[h]:',
+  '            if k == key:',
+  '                return v',
+  '        return -1',
+  '',
+  '    def remove(self, key):',
+  '        h = self._hash(key)',
+  '        for i, (k, v) in enumerate(self.buckets[h]):',
+  '            if k == key:',
+  '                self.buckets[h].pop(i)',
+  '                return',
+];
+
+const SIZE = 769;
+const SHOW_BUCKETS = [0, 1, 2, 3];
+
+/* ===== Build Steps Dynamically ===== */
+function buildSteps() {
+  const state = {};
+  SHOW_BUCKETS.forEach(b => state[b] = []);
+  const steps = [];
+  const clone = s => {
+    const c = {};
+    for (const k in s) c[k] = s[k].map(p => [...p]);
+    return c;
+  };
+
+  // Step 0: INIT
+  steps.push({
+    phase: 'INIT', phaseClass: 'phase-init',
+    title: 'Initialize Empty HashMap',
+    text: 'Create an array of 769 empty buckets (lists). Each bucket will store (key, value) pairs that hash to its index. The prime size minimises clustering.',
+    activeLine: [1, 2, 3],
+    activeBucket: -1,
+    hashComp: null,
+    buckets: clone(state),
+    highlights: {},
+    result: null, resultClass: 'neutral', resultText: 'MyHashMap() → ready',
+    vars: { size: 769 }, changed: ['size'],
+  });
+
+  const OPS = [
+    { type: 'put', key: 1, val: 1 },
+    { type: 'put', key: 2, val: 2 },
+    { type: 'put', key: 770, val: 70 },
+    { type: 'get', key: 1 },
+    { type: 'get', key: 770 },
+    { type: 'get', key: 3 },
+    { type: 'put', key: 2, val: 1 },
+    { type: 'get', key: 2 },
+    { type: 'remove', key: 2 },
+    { type: 'get', key: 2 },
+    { type: 'remove', key: 1 },
+    { type: 'get', key: 770 },
+  ];
+
+  for (const op of OPS) {
+    const h = op.key % SIZE;
+    if (!state[h]) state[h] = [];
+    const bucket = state[h];
+
+    if (op.type === 'put') {
+      let found = -1;
+      for (let i = 0; i < bucket.length; i++) {
+        if (bucket[i][0] === op.key) { found = i; break; }
+      }
+      if (found >= 0) {
+        const oldVal = bucket[found][1];
+        bucket[found][1] = op.val;
+        steps.push({
+          phase: 'UPDATE', phaseClass: 'phase-update',
+          title: `put(${op.key}, ${op.val}) → Update in Bucket ${h}`,
+          text: `Hash: ${op.key} % ${SIZE} = ${h}. Scan bucket ${h}: found key ${op.key} (old value ${oldVal}). Update value to ${op.val}.`,
+          activeLine: [8, 9, 10, 11, 12],
+          activeBucket: h,
+          hashComp: { key: op.key, result: h },
+          buckets: clone(state),
+          highlights: { [h]: [{idx: found, cls: 'found'}] },
+          result: null, resultClass: 'write', resultText: `put(${op.key}, ${op.val}) → updated (was ${oldVal})`,
+          vars: { key: op.key, value: op.val, h: h }, changed: ['key', 'value', 'h'],
+        });
+      } else {
+        const isCollision = bucket.length > 0;
+        bucket.push([op.key, op.val]);
+        const newIdx = bucket.length - 1;
+        const hl = [];
+        for (let i = 0; i < newIdx; i++) hl.push({idx: i, cls: 'scanning'});
+        hl.push({idx: newIdx, cls: 'new-node'});
+        steps.push({
+          phase: isCollision ? 'COLLISION' : 'INSERT',
+          phaseClass: isCollision ? 'phase-collision' : 'phase-insert',
+          title: `put(${op.key}, ${op.val}) → ${isCollision ? '⚡ Collision! Chain in' : 'Add to'} Bucket ${h}`,
+          text: isCollision
+            ? `Hash: ${op.key} % ${SIZE} = ${h}. Bucket ${h} already has ${newIdx} entry(s)! Scan chain — no match. Append (${op.key}, ${op.val}) to end. This is separate chaining in action.`
+            : `Hash: ${op.key} % ${SIZE} = ${h}. Bucket ${h} is empty. Append (${op.key}, ${op.val}) as the first entry.`,
+          activeLine: isCollision ? [8, 9, 10, 14] : [8, 9, 14],
+          activeBucket: h,
+          hashComp: { key: op.key, result: h, collision: isCollision },
+          buckets: clone(state),
+          highlights: { [h]: hl },
+          result: null, resultClass: 'write',
+          resultText: `put(${op.key}, ${op.val}) → inserted${isCollision ? ' (collision!)' : ''}`,
+          vars: { key: op.key, value: op.val, h: h }, changed: ['key', 'value', 'h'],
+        });
+      }
+    } else if (op.type === 'get') {
+      let found = -1;
+      for (let i = 0; i < bucket.length; i++) {
+        if (bucket[i][0] === op.key) { found = i; break; }
+      }
+      if (found >= 0) {
+        const val = bucket[found][1];
+        const hl = [];
+        for (let i = 0; i < found; i++) hl.push({idx: i, cls: 'scanning'});
+        hl.push({idx: found, cls: 'found'});
+        steps.push({
+          phase: 'GET', phaseClass: 'phase-get',
+          title: `get(${op.key}) → ${val}`,
+          text: found > 0
+            ? `Hash: ${op.key} % ${SIZE} = ${h}. Scan bucket ${h}: skip ${found} node(s), then find key ${op.key}. Return value ${val}.`
+            : `Hash: ${op.key} % ${SIZE} = ${h}. First node in bucket ${h} matches key ${op.key}. Return value ${val}.`,
+          activeLine: [16, 17, 18, 19, 20],
+          activeBucket: h,
+          hashComp: { key: op.key, result: h },
+          buckets: clone(state),
+          highlights: { [h]: hl },
+          result: val, resultClass: 'found', resultText: `get(${op.key}) → ${val}`,
+          vars: { key: op.key, h: h, return: val }, changed: ['key', 'h', 'return'],
+        });
+      } else {
+        const hl = [];
+        for (let i = 0; i < bucket.length; i++) hl.push({idx: i, cls: 'scanning'});
+        steps.push({
+          phase: 'MISS', phaseClass: 'phase-miss',
+          title: `get(${op.key}) → -1 (Not Found)`,
+          text: bucket.length === 0
+            ? `Hash: ${op.key} % ${SIZE} = ${h}. Bucket ${h} is empty. Key ${op.key} not found — return -1.`
+            : `Hash: ${op.key} % ${SIZE} = ${h}. Scanned all ${bucket.length} node(s) in bucket ${h} — none match key ${op.key}. Return -1.`,
+          activeLine: [16, 17, 21],
+          activeBucket: h,
+          hashComp: { key: op.key, result: h },
+          buckets: clone(state),
+          highlights: { [h]: hl },
+          result: -1, resultClass: 'miss', resultText: `get(${op.key}) → -1 (not found)`,
+          vars: { key: op.key, h: h, return: -1 }, changed: ['key', 'h', 'return'],
+        });
+      }
+    } else if (op.type === 'remove') {
+      let found = -1;
+      for (let i = 0; i < bucket.length; i++) {
+        if (bucket[i][0] === op.key) { found = i; break; }
+      }
+      if (found >= 0) {
+        const removedVal = bucket[found][1];
+        // Snapshot BEFORE removal for the "removing" highlight
+        const beforeBuckets = clone(state);
+        const hl = [];
+        for (let i = 0; i < found; i++) hl.push({idx: i, cls: 'scanning'});
+        hl.push({idx: found, cls: 'removing'});
+        // Perform removal
+        bucket.splice(found, 1);
+        steps.push({
+          phase: 'REMOVE', phaseClass: 'phase-remove',
+          title: `remove(${op.key}) → Removed from Bucket ${h}`,
+          text: `Hash: ${op.key} % ${SIZE} = ${h}. Scan bucket ${h}: found key ${op.key} (value ${removedVal}). Remove it.${bucket.length > 0 ? ' Remaining: ' + bucket.map(([k,v]) => '(' + k + ',' + v + ')').join(' → ') + '.' : ' Bucket is now empty.'}`,
+          activeLine: [23, 24, 25, 26, 27],
+          activeBucket: h,
+          hashComp: { key: op.key, result: h },
+          buckets: beforeBuckets,
+          highlights: { [h]: hl },
+          result: null, resultClass: 'write', resultText: `remove(${op.key}) → removed (${op.key}:${removedVal})`,
+          vars: { key: op.key, h: h }, changed: ['key', 'h'],
+        });
+      }
+    }
+  }
+
+  // DONE step
+  steps.push({
+    phase: 'DONE', phaseClass: 'phase-done',
+    title: 'All Operations Complete!',
+    text: 'The HashMap correctly handled insertions, collisions (chaining), lookups, updates, and removals. Each operation followed the same pattern: hash the key → go to bucket → scan the chain.',
+    activeLine: [],
+    activeBucket: -1,
+    hashComp: null,
+    buckets: clone(state),
+    highlights: {},
+    result: null, resultClass: 'neutral', resultText: '✓ All operations complete',
+    vars: {}, changed: [],
+  });
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+/* ===== Render Functions ===== */
+function renderHashBar(s) {
+  const el = document.getElementById('hash-bar');
+  if (!s.hashComp) {
+    el.className = 'hash-bar hidden';
+    el.innerHTML = '&nbsp;';
+    return;
+  }
+  el.className = 'hash-bar';
+  const hc = s.hashComp;
+  el.innerHTML =
+    `<div class="hb-segment"><span class="hb-label">Key</span><span class="hb-value key-val">${hc.key}</span></div>` +
+    `<span class="hb-arrow">→</span>` +
+    `<span class="hb-formula">${hc.key} % ${SIZE}</span>` +
+    `<span class="hb-arrow">→</span>` +
+    `<div class="hb-segment"><span class="hb-label">Bucket</span><span class="hb-value bucket-val">${hc.result}</span></div>` +
+    (hc.collision ? `<span class="hb-collision">⚡ Collision!</span>` : '');
+}
+
+function renderBuckets(s) {
+  const el = document.getElementById('bucket-viz');
+  let html = '';
+  for (const bi of SHOW_BUCKETS) {
+    const isActive = bi === s.activeBucket;
+    const chain = s.buckets[bi] || [];
+    const hlMap = {};
+    if (s.highlights[bi]) {
+      for (const h of s.highlights[bi]) hlMap[h.idx] = h.cls;
+    }
+    html += `<div class="bucket-row${isActive ? ' active' : ''}">`;
+    html += `<span class="bucket-label">Bucket ${bi}</span>`;
+    html += `<span class="bucket-arrow-sep">→</span>`;
+    if (chain.length === 0) {
+      html += `<span class="empty-marker">∅ empty</span>`;
+    } else {
+      html += '<div class="chain">';
+      for (let ni = 0; ni < chain.length; ni++) {
+        if (ni > 0) html += '<span class="chain-arrow">→</span>';
+        const cls = hlMap[ni] || '';
+        html += `<div class="chain-node ${cls}"><span class="nk">${chain[ni][0]}</span><span class="ns">:</span><span class="nv">${chain[ni][1]}</span></div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '<div class="bucket-dots">⋯ (buckets 4–768 empty)</div>';
+  el.innerHTML = html;
+}
+
+function renderResult(s) {
+  const el = document.getElementById('result-bar');
+  if (!s.resultText) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="result-bar ${s.resultClass}">${s.resultText}</div>`;
+}
+
+function renderVars(s) {
+  const el = document.getElementById('var-tracker');
+  if (!s.vars || Object.keys(s.vars).length === 0) { el.innerHTML = ''; return; }
+  const changed = new Set(s.changed || []);
+  let html = '';
+  for (const [name, val] of Object.entries(s.vars)) {
+    html += `<div class="var-box${changed.has(name) ? ' changed' : ''}">` +
+      `<span class="var-name">${name}</span>` +
+      `<span class="var-val">${val}</span></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderCode(s) {
+  const el = document.getElementById('code-panel');
+  const activeSet = new Set(s.activeLine || []);
+  let html = '';
+  let firstActive = -1;
+  for (let i = 0; i < CODE.length; i++) {
+    const isActive = activeSet.has(i);
+    if (isActive && firstActive < 0) firstActive = i;
+    html += `<div class="code-line${isActive ? ' active' : ''}" id="cl-${i}">${CODE[i] || ' '}</div>`;
+  }
+  el.innerHTML = html;
+  if (firstActive >= 0) {
+    const target = document.getElementById('cl-' + firstActive);
+    if (target) target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+function renderInfo(s) {
+  const el = document.getElementById('info-card');
+  el.innerHTML =
+    `<div class="info-top">` +
+    `<span class="phase-badge ${s.phaseClass}">${s.phase}</span>` +
+    `<span class="step-counter">Step ${cur + 1} / ${STEPS.length}</span>` +
+    `</div>` +
+    `<div class="info-title">${s.title}</div>` +
+    `<div class="info-text">${s.text}</div>`;
+}
+
+function renderDots() {
+  const el = document.getElementById('progress');
+  let html = '';
+  for (let i = 0; i < STEPS.length; i++) {
+    const cls = i === cur ? 'dot active' : i < cur ? 'dot visited' : 'dot';
+    html += `<span class="${cls}" onclick="goTo(${i})"></span>`;
+  }
+  el.innerHTML = html;
+}
+
+function render() {
+  const s = STEPS[cur];
+  renderHashBar(s);
+  renderBuckets(s);
+  renderResult(s);
+  renderVars(s);
+  renderCode(s);
+  renderInfo(s);
+  renderDots();
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+}
+
+function go(d) {
+  const n = cur + d;
+  if (n < 0 || n >= STEPS.length) return;
+  cur = n;
+  render();
+}
+function goTo(i) { cur = i; render(); }
+function reset() { cur = 0; render(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+/* Collapsible sections */
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/* Init */
+render();
+</script>
+</body>
+</html>

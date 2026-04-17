@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Justification — Bug Comparison & Fixed Walkthrough</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:960px;margin:0 auto;}
+h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;}
+.subtitle{font-size:14px;color:var(--text2);text-align:center;margin-bottom:1.5rem;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:1.5rem;justify-content:center;}
+.tab{padding:10px 24px;border-radius:var(--radius) var(--radius) 0 0;font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--border);border-bottom:none;background:var(--bg2);color:var(--text2);transition:all 0.2s;}
+.tab.active{background:var(--surface);color:var(--text);border-color:var(--border2);}
+.tab-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:1.5rem;}
+.tab-panel.active{display:block;}
+
+/* SHARED */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem;}
+.pool-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px;}
+
+/* WORD POOL */
+.word-pool{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:1rem;}
+.word-chip{padding:5px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--surface);color:var(--text);transition:all 0.3s;}
+.word-chip.current{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-mid);}
+.word-chip.packed{border-color:var(--green-border);background:var(--green-bg);color:var(--green-mid);}
+.word-chip.flushed{border-color:var(--border);background:var(--bg2);color:var(--text3);opacity:0.5;}
+.word-chip.bug{border-color:var(--red-border);background:var(--red-bg);color:var(--red-mid);}
+.word-chip.lost{border-color:var(--red-border);background:var(--red-bg);color:var(--red-mid);text-decoration:line-through;}
+
+/* SIDE BY SIDE */
+.side-by-side{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:1rem 0;}
+@media(max-width:700px){.side-by-side{grid-template-columns:1fr;}}
+.side-panel{border-radius:var(--radius);padding:1rem;border:2px solid var(--border);}
+.side-panel.buggy{border-color:var(--red-border);background:color-mix(in srgb, var(--red-bg) 40%, var(--surface));}
+.side-panel.fixed{border-color:var(--green-border);background:color-mix(in srgb, var(--green-bg) 40%, var(--surface));}
+.side-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.side-panel.buggy .side-label{color:var(--red-mid);}
+.side-panel.fixed .side-label{color:var(--green-mid);}
+.side-label .icon{font-size:14px;}
+
+/* STATE DISPLAY */
+.state-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0;}
+.state-item{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:4px;background:var(--bg2);border:1px solid var(--border);}
+.state-item.highlight{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);}
+.state-item.error{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid);}
+.state-item.good{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);}
+
+/* OUTPUT LINES */
+.output-lines{margin:8px 0;}
+.output-line{font-family:var(--mono);font-size:12px;padding:4px 8px;border-radius:4px;margin:3px 0;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.output-line .ruler{letter-spacing:1px;color:var(--text3);}
+.output-line.new{background:var(--green-bg);border-color:var(--green-border);}
+.output-line.wrong{background:var(--red-bg);border-color:var(--red-border);}
+
+/* LINE BUILDER */
+.line-builder{display:flex;gap:1px;margin:8px 0;justify-content:center;}
+.lb-cell{width:28px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;border-radius:3px;border:1px solid var(--border);background:var(--bg2);color:var(--text);transition:all 0.25s;}
+.lb-cell.char{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text);}
+.lb-cell.space{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid);}
+.lb-cell.extra{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);}
+.lb-cell.pad{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid);}
+.lb-cell.empty{background:var(--bg2);border-color:var(--border);color:var(--text3);}
+
+/* BUG CALLOUT */
+.bug-callout{padding:10px 14px;border-radius:var(--radius);margin:8px 0;font-size:13px;line-height:1.6;}
+.bug-callout.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red-text);}
+.bug-callout.success{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green-text);}
+.bug-callout.info{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue-text);}
+.bug-callout strong{font-weight:700;}
+
+/* CODE HIGHLIGHT */
+.code-snip{font-family:var(--mono);font-size:11px;padding:8px 12px;background:var(--bg2);border-radius:6px;margin:6px 0;overflow-x:auto;white-space:pre;line-height:1.7;color:var(--text2);}
+.code-snip .hl{background:var(--amber-bg);color:var(--amber-text);padding:1px 4px;border-radius:3px;font-weight:600;}
+.code-snip .err{background:var(--red-bg);color:var(--red-text);padding:1px 4px;border-radius:3px;font-weight:600;}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;padding:3px 10px;border-radius:20px;}
+.phase-pack{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-flush{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-bug{background:var(--red-bg);color:var(--red-mid);}
+.phase-last{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-done{background:var(--green-bg);color:var(--green-mid);}
+.phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* PROGRESS / CONTROLS */
+.progress-dots{display:flex;gap:5px;justify-content:center;margin:1.25rem 0 0.75rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all 0.25s;cursor:pointer;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+.dot.bug-dot{background:var(--red-mid);}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:0.75rem;}
+.btn{padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:#fff;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* CANDIDATE BAR */
+.cand-bar{display:flex;gap:4px;align-items:center;min-height:32px;flex-wrap:wrap;}
+.cand-word{font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 8px;border-radius:4px;background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue-mid);}
+.cand-plus{color:var(--text3);font-size:11px;}
+.cand-space{color:var(--green-mid);font-size:10px;font-weight:700;}
+.count-display{font-family:var(--mono);font-size:12px;color:var(--text2);padding:4px 10px;background:var(--bg2);border-radius:4px;margin-left:auto;}
+
+/* CODE PANELS */
+.code-panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0.75rem 0 1rem;}
+@media(max-width:700px){.code-panels{grid-template-columns:1fr;}}
+.code-panel{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.code-panel-header{padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.code-panel.buggy .code-panel-header{background:var(--red-bg);color:var(--red-mid);border-bottom:1px solid var(--red-border);}
+.code-panel.fixed .code-panel-header{background:var(--green-bg);color:var(--green-mid);border-bottom:1px solid var(--green-border);}
+.code-panel-body{padding:4px 0;max-height:340px;overflow-y:auto;}
+.code-line{display:flex;align-items:flex-start;padding:1px 8px 1px 0;font-family:var(--mono);font-size:11px;line-height:1.65;transition:background 0.2s;border-left:3px solid transparent;}
+.code-line .ln{width:24px;text-align:right;padding-right:8px;color:var(--text3);user-select:none;flex-shrink:0;}
+.code-line .lc{white-space:pre;}
+.code-line.hl-red{background:var(--red-bg);border-left-color:var(--red-mid);}
+.code-line.hl-red .lc{color:var(--red-text);font-weight:600;}
+.code-line.hl-red .ln{color:var(--red-mid);}
+.code-line.hl-green{background:var(--green-bg);border-left-color:var(--green-mid);}
+.code-line.hl-green .lc{color:var(--green-text);font-weight:600;}
+.code-line.hl-green .ln{color:var(--green-mid);}
+.code-line.hl-blue{background:var(--blue-bg);border-left-color:var(--blue-mid);}
+.code-line.hl-blue .lc{color:var(--blue-text);font-weight:600;}
+.code-line.hl-blue .ln{color:var(--blue-mid);}
+.code-line.err-subtle{border-left-color:var(--red-border);}
+.code-line.err-subtle .ln{color:var(--red-mid);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>68. Text Justification — Debug & Fix</h1>
+<div class="subtitle">Side-by-side bug comparison + fixed code walkthrough</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">🐛 Bug Comparison</div>
+  <div class="tab" onclick="switchTab(1)">✅ Fixed Walkthrough</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TAB 1: BUG COMPARISON -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panel0">
+  <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+    <strong>Example:</strong> words = ["This", "is", "an", "example", "of", "text", "justification."], maxWidth = 16
+  </p>
+
+  <!-- Code Panels -->
+  <div class="pool-label">Full Code — Active Lines Highlighted Per Step</div>
+  <div class="code-panels">
+    <div class="code-panel buggy">
+      <div class="code-panel-header">🐛 Your Code (Buggy)</div>
+      <div class="code-panel-body" id="bugCodeBuggy"></div>
+    </div>
+    <div class="code-panel fixed">
+      <div class="code-panel-header">✅ Fixed Code</div>
+      <div class="code-panel-body" id="bugCodeFixed"></div>
+    </div>
+  </div>
+
+  <!-- Word pool -->
+  <div class="pool-label">Words</div>
+  <div class="word-pool" id="bugWordPool"></div>
+
+  <!-- Side by side -->
+  <div class="side-by-side" id="bugSideBySide"></div>
+
+  <!-- Info card -->
+  <div class="info-card" id="bugInfoCard"></div>
+
+  <!-- Progress -->
+  <div class="progress-dots" id="bugDots"></div>
+  <div class="controls">
+    <button class="btn" onclick="bugGo(-1)">← Prev</button>
+    <button class="btn" onclick="bugReset()">Reset</button>
+    <button class="btn btn-primary" onclick="bugGo(1)">Next →</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate (when this tab is active)</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TAB 2: FIXED WALKTHROUGH -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel1">
+  <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+    <strong>Example:</strong> words = ["This", "is", "an", "example", "of", "text", "justification."], maxWidth = 16
+  </p>
+
+  <!-- Code Panel -->
+  <div class="pool-label">Fixed Code — Active Lines Highlighted Per Step</div>
+  <div class="code-panels" style="grid-template-columns:1fr;">
+    <div class="code-panel fixed">
+      <div class="code-panel-header">✅ Fixed Code</div>
+      <div class="code-panel-body" id="fixCodePanel"></div>
+    </div>
+  </div>
+
+  <!-- Word pool -->
+  <div class="pool-label">Words</div>
+  <div class="word-pool" id="fixWordPool"></div>
+
+  <!-- Candidate bar -->
+  <div class="pool-label">Current Line Candidates</div>
+  <div class="card" style="padding:0.75rem;">
+    <div class="cand-bar" id="fixCandBar"></div>
+  </div>
+
+  <!-- Line builder -->
+  <div class="pool-label">Line Builder (maxWidth = 16)</div>
+  <div class="line-builder" id="fixLineBuilder"></div>
+
+  <!-- Output lines -->
+  <div class="pool-label" style="margin-top:1rem;">Output Lines</div>
+  <div class="output-lines" id="fixOutput"></div>
+
+  <!-- Info card -->
+  <div class="info-card" id="fixInfoCard"></div>
+
+  <!-- Progress -->
+  <div class="progress-dots" id="fixDots"></div>
+  <div class="controls">
+    <button class="btn" onclick="fixGo(-1)">← Prev</button>
+    <button class="btn" onclick="fixReset()">Reset</button>
+    <button class="btn btn-primary" onclick="fixGo(1)">Next →</button>
+  </div>
+  <div class="kbd-hint">Use ← → arrow keys to navigate (when this tab is active)</div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const WORDS = ["This","is","an","example","of","text","justification."];
+const MW = 16;
+let activeTab = 0;
+
+// ═══ CODE DATA ═══
+const BUGGY_CODE_LINES = [
+  'count = 0',
+  'candidates = []',
+  'result = []',
+  'for i, word in enumerate(words):',
+  '    if i == 0:',
+  '        count = len(word)',
+  '        if maxWidth - count - len(word) > 0:',
+  '            candidates.append(word)',
+  '    elif i == len(words) - 1:',
+  '        result.append(distribute_with_spaces(...))',
+  '        candidates = []',
+  '    else:',
+  '        if maxWidth - count - len(word) > 0:',
+  '            candidates.append(word)',
+  '            count += len(word)',
+  '        else:',
+  '            result.append(distribute_with_spaces(...))',
+  '            candidates = [word]',
+  '            count = len(word)',
+  'return result',
+];
+
+const FIXED_CODE_LINES = [
+  'count = 0',
+  'candidates = []',
+  'result = []',
+  'for word in words:',
+  '    spaces_needed = 1 if candidates else 0',
+  '    if count + spaces_needed + len(word) <= maxWidth:',
+  '        candidates.append(word)',
+  '        count += spaces_needed + len(word)',
+  '    else:',
+  '        result.append(distribute_with_spaces(...))',
+  '        candidates = [word]',
+  '        count = len(word)',
+  '# Last line: left-justify',
+  'if candidates:',
+  '    line = " ".join(candidates)',
+  '    line += " " * (maxWidth - len(line))',
+  '    result.append(line)',
+  'return result',
+];
+
+const BUGGY_ERR = [7, 9, 13, 15]; // lines with actual bugs
+
+// Highlight lines per step — bug comparison tab, buggy code
+const BUGGY_HL = [
+  [1,2,3],             // 0: init
+  [4,5,6,7,8],         // 1: i=0
+  [4,12,13,14,15],     // 2: i=1
+  [4,12,13,14,15],     // 3: i=2
+  [4,12,13,14,15],     // 4: i=3 (over-packs!)
+  [4,12,16,17,18,19],  // 5: i=4 (finally flush)
+  [4,12,13,14,15],     // 6: i=5
+  [4,9,10,11],         // 7: i=6 (elif: loses word)
+  [20],                // 8: return
+];
+
+// Highlight lines per step — bug comparison tab, fixed code
+const FIXED_HL_BUG = [
+  [1,2,3],               // 0: init
+  [4,5,6,7,8],           // 1: i=0
+  [4,5,6,7,8],           // 2: i=1
+  [4,5,6,7,8],           // 3: i=2
+  [4,5,6,9,10,11,12],    // 4: i=3 (flush!)
+  [4,5,6,7,8],           // 5: i=4
+  [4,5,6,7,8],           // 6: i=5
+  [4,5,6,9,10,11,12],    // 7: i=6 (flush!)
+  [13,14,15,16,17,18],   // 8: last line
+];
+
+// Highlight lines per step — fixed walkthrough tab
+const FIX_HL = [
+  [1,2,3],               // 0: init
+  [4,5,6,7,8],           // 1: i=0
+  [4,5,6,7,8],           // 2: i=1
+  [4,5,6,7,8],           // 3: i=2
+  [4,5,6,9,10,11,12],    // 4: flush
+  [4,5,6,7,8],           // 5: i=4
+  [4,5,6,7,8],           // 6: i=5
+  [4,5,6,9,10,11,12],    // 7: flush
+  [13,14,15,16,17],      // 8: last line
+  [18],                  // 9: return
+];
+
+function renderCodePanel(id, lines, hlLines, hlClass, errLines){
+  const el = document.getElementById(id);
+  if(!el) return;
+  let html = '';
+  lines.forEach((ln,i)=>{
+    const num = i+1;
+    const isHL = hlLines.includes(num);
+    const isErr = errLines && errLines.includes(num) && !isHL;
+    const cls = isHL ? hlClass : (isErr ? 'err-subtle' : '');
+    html += '<div class="code-line '+cls+'"><span class="ln">'+num+'</span><span class="lc">'+escCode(ln)+'</span></div>';
+  });
+  el.innerHTML = html;
+  const first = el.querySelector('.'+hlClass);
+  if(first) first.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function escCode(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function switchTab(idx){
+  activeTab = idx;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+// ════════════════════════════════════════════════════
+// BUG COMPARISON STEPS
+// ════════════════════════════════════════════════════
+const bugSteps = [
+  // Step 0: Init
+  {
+    phase:'INIT', phaseClass:'phase-init',
+    title:'Setup — Both versions start',
+    text:'words = ["This", "is", "an", "example", "of", "text", "justification."], maxWidth = 16. Let\'s trace both your buggy code and the fixed code side by side.',
+    wordStates: WORDS.map(()=>''),
+    currentWord: -1,
+    buggy: {
+      label: 'Your Code',
+      candidates: [], count: 0, output: [],
+      code: 'count = 0\ncandidates = []',
+      note: null
+    },
+    fixed: {
+      label: 'Fixed Code',
+      candidates: [], count: 0, output: [],
+      code: '<span class="hl">L1</span> count = 0\n<span class="hl">L2</span> candidates = []\n<span class="hl">L3</span> result = []',
+      note: null
+    }
+  },
+  // Step 1: i=0, word="This"
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=0: word="This" — 🐛 Bug #1: First word not added!',
+    text:'Your code enters the i==0 branch. It sets count=4, then checks: maxWidth - count - len(word) = 16 - 4 - 4 = 8 > 0 → True, so it DOES add "This". BUT this check is wrong — it subtracts len(word) TWICE (once in count, once explicitly). It works here by coincidence because 8 > 0.',
+    wordStates: ['current','','','','','',''],
+    currentWord: 0,
+    buggy: {
+      candidates: ['This'], count: 4, output: [],
+      code: '<span class="err">count = len(word)  # count = 4</span>\nif maxWidth - count - len(word) > 0:  # 16-4-4=8 > 0 ✓\n    candidates.append(word)  # adds "This"',
+      note: {type:'info', text:'Works by coincidence. If len(word) > maxWidth/2, this check would fail and the first word would be SKIPPED.'}
+    },
+    fixed: {
+      candidates: ['This'], count: 4, output: [],
+      code: '<span class="hl">L5</span> spaces_needed = 1 if candidates else 0  →  <span class="hl">0</span>\n<span class="hl">L6</span> if 0 + 0 + 4 ≤ 16:  →  <span class="hl">True ✓</span>\n<span class="hl">L7</span>     candidates.append("This")\n<span class="hl">L8</span>     count += 0 + 4  →  count = <span class="hl">4</span>',
+      note: {type:'success', text:'No special i==0 branch. Same logic for every word — spaces_needed is 0 when candidates is empty.'}
+    }
+  },
+  // Step 2: i=1, word="is"
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=1: word="is" — 🐛 Bug #2: No space in count!',
+    text:'Your code enters the else branch. Check: maxWidth - count - len(word) = 16 - 4 - 2 = 10 > 0 → adds "is", sets count = 4+2 = 6. BUT this ignores that we need at least 1 space between "This" and "is". Real occupied space is 4+1+2 = 7, not 6.',
+    wordStates: ['packed','current','','','','',''],
+    currentWord: 1,
+    buggy: {
+      candidates: ['This','is'], count: 6, output: [],
+      code: 'if maxWidth - count - len(word) > 0:  # 16-4-2=10 > 0 ✓\n    candidates.append(word)\n    <span class="err">count += len(word)  # 4+2=6 (WRONG! should be 7)</span>',
+      note: {type:'error', text:'count=6 but real space used = "This" + " " + "is" = 7 chars. Off by 1 per word added.'}
+    },
+    fixed: {
+      candidates: ['This','is'], count: 7, output: [],
+      code: '<span class="hl">L5</span> spaces_needed = 1 if candidates else 0  →  <span class="hl">1</span>\n<span class="hl">L6</span> if 4 + 1 + 2 ≤ 16:  →  <span class="hl">7 ≤ 16 ✓</span>\n<span class="hl">L7</span>     candidates.append("is")\n<span class="hl">L8</span>     count += 1 + 2  →  count = <span class="hl">7</span>',
+      note: {type:'success', text:'count=7 correctly includes the mandatory space. L8 adds spaces_needed + len(word).'}
+    }
+  },
+  // Step 3: i=2, word="an"
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=2: word="an" — Bug compounds: count further off',
+    text:'Buggy: 16-6-2=8 > 0 → adds. count=8. Fixed: 7+1+2=10 ≤ 16 → adds. count=10. The gap between buggy count (8) and real count (10) grows — 2 missing spaces now.',
+    wordStates: ['packed','packed','current','','','',''],
+    currentWord: 2,
+    buggy: {
+      candidates: ['This','is','an'], count: 8, output: [],
+      code: 'maxWidth - count - len(word) = 16-6-2 = 8 > 0 ✓\ncount = 6+2 = <span class="err">8 (real: 10)</span>',
+      note: {type:'error', text:'count=8 vs real=10. Missing 2 spaces (one before "is", one before "an").'}
+    },
+    fixed: {
+      candidates: ['This','is','an'], count: 10, output: [],
+      code: '<span class="hl">L5</span> spaces_needed = 1\n<span class="hl">L6</span> if 7 + 1 + 2 ≤ 16:  →  <span class="hl">10 ≤ 16 ✓</span>\n<span class="hl">L7</span>     candidates.append("an")\n<span class="hl">L8</span>     count += 1 + 2  →  count = <span class="hl">10</span>',
+      note: {type:'success', text:'count=10 is correct: 4+1+2+1+2 = "This is an"'}
+    }
+  },
+  // Step 4: i=3, word="example" — THE KEY DIVERGENCE
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=3: word="example" — 🐛 Bug #3: Over-packing!',
+    text:'Buggy: 16-8-7=1 > 0 → ADDS "example"! count=15. But real usage = "This"(4)+" "(1)+"is"(2)+" "(1)+"an"(2)+" "(1)+"example"(7) = 18 chars. That\'s 18 > 16! The buggy code packs too many words because it never counts spaces.',
+    wordStates: ['packed','packed','packed','current','','',''],
+    currentWord: 3,
+    buggy: {
+      candidates: ['This','is','an','example'], count: 15, output: [],
+      code: 'maxWidth - count - len(word) = 16-8-7 = <span class="err">1 > 0 ✓  WRONG!</span>\ncandidates = ["This","is","an","example"]  ← OVER-PACKED!\ncount = 8+7 = 15',
+      note: {type:'error', text:'💥 CRITICAL: 4 words need 3 spaces minimum = 4+2+2+7+3 = 18 chars. Exceeds maxWidth! This line can\'t be justified in 16 chars.'}
+    },
+    fixed: {
+      candidates: ['This','is','an'], count: 10, output: ['"This····is····an"'],
+      code: '<span class="hl">L5</span> spaces_needed = 1\n<span class="hl">L6</span> if 10 + 1 + 7 ≤ 16:  →  18 > 16 ✗\n<span class="hl">L9</span>     else:  ← enters flush branch\n<span class="hl">L10</span>    result.append(distribute_with_spaces(...))\n       → "This····is····an"\n<span class="hl">L11</span>    candidates = ["example"]\n<span class="hl">L12</span>    count = len("example")  →  count = <span class="hl">7</span>',
+      note: {type:'success', text:'L6 correctly rejects. L10 flushes line 1. L11-12 start fresh with "example".'}
+    },
+    fixedAfter: { candidates: ['example'], count: 7 }
+  },
+  // Step 5: i=4, word="of"
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=4: word="of" — Buggy is still on line 1...',
+    text:'Buggy: 16-15-2 = -1, NOT > 0. Finally flushes! But candidates = ["This","is","an","example"] — 4 words that need 18 chars. distribute_with_spaces gets total_spaces = 16-15 = 1. One space for THREE gaps? That produces a 16-char string only by accident (no proper justification).',
+    wordStates: ['flushed','flushed','flushed','flushed','current','',''],
+    currentWord: 4,
+    buggy: {
+      candidates: ['of'], count: 2,
+      output: ['"This is an example"  ← WRONG (1 total space for 3 gaps!)'],
+      code: 'maxWidth - count - len(word) = 16-15-2 = -1, NOT > 0\n→ FLUSH: total_spaces = 16-15 = <span class="err">1 space for 3 gaps!</span>\n  Each gap gets 0 or 1 space — way too cramped\n→ NEW LINE: candidates=["of"], count=2',
+      note: {type:'error', text:'The flushed line has 15 chars of words + 1 space = 16. But it looks like "This is an example" with 0-width gaps. Completely wrong justification!'}
+    },
+    fixed: {
+      candidates: ['example','of'], count: 10, output: ['"This····is····an"'],
+      code: '<span class="hl">L5</span> spaces_needed = 1\n<span class="hl">L6</span> if 7 + 1 + 2 ≤ 16:  →  <span class="hl">10 ≤ 16 ✓</span>\n<span class="hl">L7</span>     candidates.append("of")\n<span class="hl">L8</span>     count += 1 + 2  →  count = <span class="hl">10</span>',
+      note: {type:'success', text:'Correctly building line 2: "example" + "of" fits via L6 check.'}
+    }
+  },
+  // Step 6: i=5, word="text"
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=5: word="text" — Buggy count still off',
+    text:'Buggy: 16-2-4=10 > 0 → adds. count=6. Fixed: 10+1+4=15 ≤ 16 → adds. count=15.',
+    wordStates: ['flushed','flushed','flushed','flushed','packed','current',''],
+    currentWord: 5,
+    buggy: {
+      candidates: ['of','text'], count: 6,
+      output: ['"This is an example"  ← WRONG'],
+      code: '16-2-4 = 10 > 0 ✓\ncandidates = ["of","text"], <span class="err">count = 6 (real: 7)</span>',
+      note: {type:'error', text:'count=6 but "of text" is 7 chars. Still missing spaces.'}
+    },
+    fixed: {
+      candidates: ['example','of','text'], count: 15, output: ['"This····is····an"'],
+      code: '<span class="hl">L5</span> spaces_needed = 1\n<span class="hl">L6</span> if 10 + 1 + 4 ≤ 16:  →  <span class="hl">15 ≤ 16 ✓</span>\n<span class="hl">L7</span>     candidates.append("text")\n<span class="hl">L8</span>     count += 1 + 4  →  count = <span class="hl">15</span>',
+      note: {type:'success', text:'count=15 is correct: 7+1+2+1+4 = "example of text"'}
+    }
+  },
+  // Step 7: i=6, word="justification." — LAST WORD
+  {
+    phase:'BUG', phaseClass:'phase-bug',
+    title:'i=6: "justification." — 🐛 Bug #4: Last word lost!',
+    text:'Buggy code enters elif i == len(words)-1 branch. It flushes PREVIOUS candidates ["of","text"] but NEVER adds "justification." to any line! The last word is completely lost. Also, no last-line left-justification.',
+    wordStates: ['flushed','flushed','flushed','flushed','flushed','flushed','lost'],
+    currentWord: 6,
+    buggy: {
+      candidates: [], count: 0,
+      output: ['"This is an example"  ← WRONG', '"of text"  ← no padding to 16!'],
+      code: 'elif i == len(words) - 1:\n    <span class="err">→ flushes ["of","text"] but NEVER adds "justification."!</span>\n    → "justification." is LOST forever',
+      note: {type:'error', text:'💥 FATAL: The last word never enters any candidates list. The elif branch flushes previous candidates and returns — "justification." disappears.'}
+    },
+    fixed: {
+      candidates: ['example','of','text'], count: 15,
+      output: ['"This····is····an"', '"example··of·text"'],
+      code: '<span class="hl">L5</span> spaces_needed = 1\n<span class="hl">L6</span> if 15 + 1 + 14 ≤ 16:  →  30 > 16 ✗\n<span class="hl">L9</span>     else:  ← enters flush branch\n<span class="hl">L10</span>    result.append(distribute_with_spaces(...))\n       → "example··of·text"\n<span class="hl">L11</span>    candidates = ["justification."]\n<span class="hl">L12</span>    count = 14',
+      note: {type:'success', text:'L6 rejects (30 > 16). L10 flushes line 2. L11-12 start line 3 with "justification."'}
+    },
+    fixedAfter: { candidates: ['justification.'], count: 14 }
+  },
+  // Step 8: Final result comparison
+  {
+    phase:'DONE', phaseClass:'phase-done',
+    title:'Final Result Comparison',
+    text:'The buggy code produces 2 wrong lines and loses the last word entirely. The fixed code produces all 3 lines with correct justification.',
+    wordStates: WORDS.map(()=>'flushed'),
+    currentWord: -1,
+    buggy: {
+      candidates: [], count: 0,
+      output: ['"This is an example"  ← squished, wrong spacing', '"of text"  ← not padded to 16 chars', '⚠️ "justification." — MISSING!'],
+      code: 'return result  # Only 2 lines, wrong spacing, lost word',
+      note: {type:'error', text:'3 bugs: (1) no space accounting → over-packing, (2) last word lost, (3) no last-line left-justification.'}
+    },
+    fixed: {
+      candidates: [], count: 0,
+      output: ['"This····is····an"  ✓', '"example··of·text"  ✓', '"justification.··"  ✓ (left-justified + padded)'],
+      code: '<span class="hl">L13</span> # Last line: left-justify\n<span class="hl">L14</span> if candidates:  →  ["justification."]\n<span class="hl">L15</span>     line = " ".join(candidates)  →  "justification."\n<span class="hl">L16</span>     line += " " * (16 - 14)  →  "justification.  "\n<span class="hl">L17</span>     result.append(line)\n<span class="hl">L18</span> return result  # 3 correct lines!',
+      note: {type:'success', text:'L13-17 handle the last line — left-justified + padded. No word is ever lost.'}
+    }
+  }
+];
+
+let bugCur = 0;
+
+function renderBug(){
+  const s = bugSteps[bugCur];
+
+  // Word pool
+  const wp = document.getElementById('bugWordPool');
+  wp.innerHTML = '';
+  WORDS.forEach((w,i) => {
+    const cls = i === s.currentWord ? 'current' : (s.wordStates[i] || '');
+    wp.innerHTML += `<div class="word-chip ${cls}">${w}</div>`;
+  });
+
+  // Side by side
+  const sbs = document.getElementById('bugSideBySide');
+  sbs.innerHTML = '';
+
+  [s.buggy, s.fixed].forEach((side, idx) => {
+    const cls = idx === 0 ? 'buggy' : 'fixed';
+    const icon = idx === 0 ? '🐛' : '✅';
+    const label = idx === 0 ? 'Your Code' : 'Fixed Code';
+    let html = `<div class="side-panel ${cls}">`;
+    html += `<div class="side-label"><span class="icon">${icon}</span> ${label}</div>`;
+
+    // State
+    html += `<div style="font-size:11px;color:var(--text3);margin-bottom:4px;">candidates=[${(side.candidates||[]).map(c=>'"'+c+'"').join(', ')}] count=${side.count}</div>`;
+
+    // Code snippet
+    html += `<div class="code-snip">${side.code}</div>`;
+
+    // Note
+    if(side.note){
+      html += `<div class="bug-callout ${side.note.type}">${side.note.text}</div>`;
+    }
+
+    // Output lines
+    if(side.output && side.output.length > 0){
+      html += `<div style="margin-top:8px;"><div class="pool-label">Output so far</div>`;
+      side.output.forEach(o => {
+        const isBad = o.includes('WRONG') || o.includes('MISSING');
+        html += `<div class="output-line ${isBad ? 'wrong' : ''}">${o}</div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+    sbs.innerHTML += html;
+  });
+
+  // Info card
+  const ic = document.getElementById('bugInfoCard');
+  ic.innerHTML = `
+    <div class="info-top">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-counter">Step ${bugCur+1} / ${bugSteps.length}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-text">${s.text}</div>
+  `;
+
+  // Code panels
+  renderCodePanel('bugCodeBuggy', BUGGY_CODE_LINES, BUGGY_HL[bugCur], 'hl-red', BUGGY_ERR);
+  renderCodePanel('bugCodeFixed', FIXED_CODE_LINES, FIXED_HL_BUG[bugCur], 'hl-green', null);
+
+  // Dots
+  const dots = document.getElementById('bugDots');
+  dots.innerHTML = '';
+  bugSteps.forEach((_,i) => {
+    const d = document.createElement('div');
+    const isBug = bugSteps[i].phase === 'BUG';
+    d.className = 'dot' + (i === bugCur ? ' active' : i < bugCur ? (isBug ? ' bug-dot' : ' visited') : '');
+    d.onclick = () => { bugCur = i; renderBug(); };
+    dots.appendChild(d);
+  });
+}
+
+function bugGo(d){ const n = bugCur+d; if(n>=0 && n<bugSteps.length){ bugCur=n; renderBug(); } }
+function bugReset(){ bugCur=0; renderBug(); }
+
+// ════════════════════════════════════════════════════
+// FIXED CODE WALKTHROUGH
+// ════════════════════════════════════════════════════
+const fixSteps = [
+  {
+    phase:'INIT', phaseClass:'phase-init',
+    title:'Initialize',
+    text:'candidates = [], count = 0. We\'ll process each word: check if it fits on the current line (accounting for spaces), pack or flush.',
+    wordStates: WORDS.map(()=>''), currentWord:-1,
+    candidates:[], count:0, output:[], lineBuilder:null,
+    check:null
+  },
+  // i=0: "This"
+  {
+    phase:'PACK', phaseClass:'phase-pack',
+    title:'i=0: "This" (len=4) — Pack',
+    text:'First word: spaces_needed = 0 (candidates is empty). Check: 0 + 0 + 4 = 4 ≤ 16 ✓. Fits! Add to candidates.',
+    wordStates:['current','','','','','',''], currentWord:0,
+    candidates:['This'], count:4, output:[], lineBuilder:null,
+    check:'0 + 0 + 4 = 4 ≤ 16 ✓'
+  },
+  // i=1: "is"
+  {
+    phase:'PACK', phaseClass:'phase-pack',
+    title:'i=1: "is" (len=2) — Pack',
+    text:'spaces_needed = 1 (candidates not empty). Check: 4 + 1 + 2 = 7 ≤ 16 ✓. Fits!',
+    wordStates:['packed','current','','','','',''], currentWord:1,
+    candidates:['This','is'], count:7, output:[], lineBuilder:null,
+    check:'4 + 1 + 2 = 7 ≤ 16 ✓'
+  },
+  // i=2: "an"
+  {
+    phase:'PACK', phaseClass:'phase-pack',
+    title:'i=2: "an" (len=2) — Pack',
+    text:'Check: 7 + 1 + 2 = 10 ≤ 16 ✓. Fits!',
+    wordStates:['packed','packed','current','','','',''], currentWord:2,
+    candidates:['This','is','an'], count:10, output:[], lineBuilder:null,
+    check:'7 + 1 + 2 = 10 ≤ 16 ✓'
+  },
+  // i=3: "example" — FLUSH
+  {
+    phase:'FLUSH', phaseClass:'phase-flush',
+    title:'i=3: "example" (len=7) — Doesn\'t fit! Flush line 1.',
+    text:'Check: 10 + 1 + 7 = 18 > 16 ✗. Doesn\'t fit! Flush current candidates: ["This","is","an"]. char_count = 4+2+2 = 8. total_spaces = 16-8 = 8. Gaps = 2. base=4, extra=0. Line: "This····is····an"',
+    wordStates:['flushed','flushed','flushed','current','','',''], currentWord:3,
+    candidates:['example'], count:7,
+    output:['This    is    an'],
+    lineBuilder: buildLine(['This','is','an'], 16, false),
+    check:'10 + 1 + 7 = 18 > 16 ✗ → FLUSH'
+  },
+  // i=4: "of"
+  {
+    phase:'PACK', phaseClass:'phase-pack',
+    title:'i=4: "of" (len=2) — Pack',
+    text:'Check: 7 + 1 + 2 = 10 ≤ 16 ✓. Fits!',
+    wordStates:['flushed','flushed','flushed','packed','current','',''], currentWord:4,
+    candidates:['example','of'], count:10,
+    output:['This    is    an'],
+    lineBuilder:null,
+    check:'7 + 1 + 2 = 10 ≤ 16 ✓'
+  },
+  // i=5: "text"
+  {
+    phase:'PACK', phaseClass:'phase-pack',
+    title:'i=5: "text" (len=4) — Pack',
+    text:'Check: 10 + 1 + 4 = 15 ≤ 16 ✓. Fits!',
+    wordStates:['flushed','flushed','flushed','packed','packed','current',''], currentWord:5,
+    candidates:['example','of','text'], count:15,
+    output:['This    is    an'],
+    lineBuilder:null,
+    check:'10 + 1 + 4 = 15 ≤ 16 ✓'
+  },
+  // i=6: "justification." — FLUSH
+  {
+    phase:'FLUSH', phaseClass:'phase-flush',
+    title:'i=6: "justification." (len=14) — Flush line 2!',
+    text:'Check: 15 + 1 + 14 = 30 > 16 ✗. Flush ["example","of","text"]. char_count = 7+2+4 = 13. total_spaces = 16-13 = 3. Gaps = 2. base=1, extra=1. First gap gets 2, second gets 1. Line: "example··of·text"',
+    wordStates:['flushed','flushed','flushed','flushed','flushed','flushed','current'], currentWord:6,
+    candidates:['justification.'], count:14,
+    output:['This    is    an','example  of text'],
+    lineBuilder: buildLine(['example','of','text'], 16, false),
+    check:'15 + 1 + 14 = 30 > 16 ✗ → FLUSH'
+  },
+  // After loop: last line
+  {
+    phase:'LAST', phaseClass:'phase-last',
+    title:'After loop — Last line (left-justified)',
+    text:'candidates = ["justification."] still has words. Last line rule: join with single spaces, pad with trailing spaces to maxWidth. "justification." is 14 chars + 2 trailing spaces = 16.',
+    wordStates:['flushed','flushed','flushed','flushed','flushed','flushed','flushed'], currentWord:-1,
+    candidates:[], count:0,
+    output:['This    is    an','example  of text','justification.  '],
+    lineBuilder: buildLine(['justification.'], 16, true),
+    check:'Left-justify + pad to 16'
+  },
+  // Done
+  {
+    phase:'DONE', phaseClass:'phase-done',
+    title:'Done! All 3 lines correct.',
+    text:'Line 1: "This····is····an" (8 spaces evenly across 2 gaps = 4 each). Line 2: "example··of·text" (3 spaces across 2 gaps: 2+1). Line 3: "justification.··" (last line, left-justified, trailing spaces).',
+    wordStates:['flushed','flushed','flushed','flushed','flushed','flushed','flushed'], currentWord:-1,
+    candidates:[], count:0,
+    output:['This    is    an','example  of text','justification.  '],
+    lineBuilder:null,
+    check:null
+  }
+];
+
+function buildLine(words, maxW, isLast){
+  const cells = [];
+  if(isLast){
+    // Left justify
+    let pos = 0;
+    words.forEach((w,wi) => {
+      if(wi > 0){ cells.push({ch:'·',type:'space'}); pos++; }
+      for(const c of w){ cells.push({ch:c,type:'char'}); pos++; }
+    });
+    while(pos < maxW){ cells.push({ch:'·',type:'pad'}); pos++; }
+  } else {
+    const charCount = words.reduce((a,w)=>a+w.length,0);
+    const totalSpaces = maxW - charCount;
+    const gaps = words.length - 1;
+    if(gaps === 0){
+      for(const c of words[0]) cells.push({ch:c,type:'char'});
+      for(let p=0;p<totalSpaces;p++) cells.push({ch:'·',type:'pad'});
+    } else {
+      const base = Math.floor(totalSpaces / gaps);
+      const extra = totalSpaces % gaps;
+      words.forEach((w,wi) => {
+        if(wi > 0){
+          const g = base + (wi-1 < extra ? 1 : 0);
+          for(let s=0;s<g;s++){
+            cells.push({ch:'·', type: wi-1 < extra && s >= base ? 'extra' : 'space'});
+          }
+        }
+        for(const c of w) cells.push({ch:c,type:'char'});
+      });
+    }
+  }
+  return cells;
+}
+
+let fixCur = 0;
+
+function renderFix(){
+  const s = fixSteps[fixCur];
+
+  // Word pool
+  const wp = document.getElementById('fixWordPool');
+  wp.innerHTML = '';
+  WORDS.forEach((w,i) => {
+    const cls = i === s.currentWord ? 'current' : (s.wordStates[i] || '');
+    wp.innerHTML += `<div class="word-chip ${cls}">${w}</div>`;
+  });
+
+  // Candidate bar
+  const cb = document.getElementById('fixCandBar');
+  cb.innerHTML = '';
+  if(s.candidates.length === 0){
+    cb.innerHTML = '<span style="font-size:12px;color:var(--text3);">empty</span>';
+  } else {
+    s.candidates.forEach((w,i) => {
+      if(i > 0) cb.innerHTML += '<span class="cand-space">+SP+</span>';
+      cb.innerHTML += `<span class="cand-word">${w}</span>`;
+    });
+    cb.innerHTML += `<span class="count-display">count = ${s.count}</span>`;
+  }
+
+  // Fit check display
+  if(s.check){
+    cb.parentElement.insertAdjacentHTML('beforeend',
+      `<div style="margin-top:6px;font-family:var(--mono);font-size:12px;color:${s.check.includes('✗')?'var(--red-mid)':s.check.includes('✓')?'var(--green-mid)':'var(--text2)'};">${s.check}</div>`);
+  }
+  // Remove previous check displays (avoid stacking)
+  const parent = cb.parentElement;
+  const checks = parent.querySelectorAll('div[style*="margin-top:6px"]');
+  if(checks.length > 1) for(let i=0;i<checks.length-1;i++) checks[i].remove();
+
+  // Line builder
+  const lb = document.getElementById('fixLineBuilder');
+  lb.innerHTML = '';
+  if(s.lineBuilder){
+    s.lineBuilder.forEach(cell => {
+      lb.innerHTML += `<div class="lb-cell ${cell.type}">${cell.ch}</div>`;
+    });
+  } else {
+    for(let i=0;i<16;i++) lb.innerHTML += `<div class="lb-cell empty">·</div>`;
+  }
+
+  // Output lines
+  const ol = document.getElementById('fixOutput');
+  ol.innerHTML = '';
+  if(s.output.length === 0){
+    ol.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px;">No lines yet</div>';
+  } else {
+    s.output.forEach((line,i) => {
+      const isNew = i === s.output.length - 1 && (s.phase === 'FLUSH' || s.phase === 'LAST');
+      ol.innerHTML += `<div class="output-line ${isNew?'new':''}"><strong>Line ${i+1}:</strong> <span style="font-family:var(--mono);">"${line}"</span> <span style="color:var(--text3);font-size:11px;">(${line.length} chars)</span></div>`;
+    });
+  }
+
+  // Info card
+  const ic = document.getElementById('fixInfoCard');
+  ic.innerHTML = `
+    <div class="info-top">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-counter">Step ${fixCur+1} / ${fixSteps.length}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-text">${s.text}</div>
+  `;
+
+  // Code panel
+  renderCodePanel('fixCodePanel', FIXED_CODE_LINES, FIX_HL[fixCur], 'hl-green', null);
+
+  // Dots
+  const dots = document.getElementById('fixDots');
+  dots.innerHTML = '';
+  fixSteps.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === fixCur ? ' active' : i < fixCur ? ' visited' : '');
+    d.onclick = () => { fixCur = i; renderFix(); };
+    dots.appendChild(d);
+  });
+}
+
+function fixGo(d){ const n = fixCur+d; if(n>=0 && n<fixSteps.length){ fixCur=n; renderFix(); } }
+function fixReset(){ fixCur=0; renderFix(); }
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight'){ activeTab===0 ? bugGo(1) : fixGo(1); }
+  if(e.key === 'ArrowLeft'){ activeTab===0 ? bugGo(-1) : fixGo(-1); }
+  if(e.key === 'r' || e.key === 'R'){ activeTab===0 ? bugReset() : fixReset(); }
+});
+
+renderBug();
+renderFix();
+</script>
+</body>
+</html>

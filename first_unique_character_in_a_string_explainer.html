@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Unique Character in a String — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*───── Design Tokens ─────*/
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:900px;margin:0 auto;}
+
+/*───── Header ─────*/
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-top:4px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-easy{background:var(--green-bg);color:var(--green-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/*───── Cards ─────*/
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+.collapse-icon{margin-left:auto;font-size:16px;color:var(--text3);transition:transform .25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card.collapsed .section-body{display:none;}
+
+/*───── Concept Boxes ─────*/
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/*───── Algorithm Steps ─────*/
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/*───── Strategy ─────*/
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/*───── Code Panel (static) ─────*/
+.code-panel-static{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;margin:1rem 0;}
+.code-panel-static .cl{padding:1px 6px;border-radius:4px;white-space:pre;color:var(--text2);}
+.code-panel-static .comment{color:var(--text3);}
+
+/*───── Comparison Diagram ─────*/
+.compare-diagram{display:flex;justify-content:center;gap:30px;margin:1.5rem 0;flex-wrap:wrap;}
+.compare-panel{background:var(--bg2);border-radius:var(--radius);padding:16px;min-width:200px;text-align:center;}
+.compare-panel-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:12px;}
+.compare-panel.pass{border:2px solid var(--green-border);}
+.compare-panel.fail{border:2px solid var(--red-border);}
+.compare-complexity{font-family:var(--mono);font-size:18px;font-weight:700;margin-top:8px;}
+.compare-complexity.good{color:var(--green-mid);}
+.compare-complexity.bad{color:var(--red-mid);}
+
+/*───── Comparison Table ─────*/
+.compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.compare-table th,.compare-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.compare-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
+.compare-table tr.pick{background:var(--green-bg);}
+.compare-table .pick-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:10px;background:var(--green-mid);color:#fff;margin-left:6px;}
+
+/*───── Interactive Walkthrough ─────*/
+.viz-area{margin-top:1rem;}
+
+/* String Row */
+.row-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;text-align:center;}
+.string-row{display:flex;gap:4px;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+.cell{width:44px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);transition:all .3s;font-family:var(--mono);position:relative;}
+.cell .char{font-size:18px;font-weight:600;}
+.cell .idx{font-size:9px;color:var(--text3);position:absolute;bottom:2px;}
+.cell.counting{border-color:var(--blue-border);background:var(--blue-bg);}
+.cell.scanning{border-color:var(--amber-border);background:var(--amber-bg);}
+.cell.found{border-color:var(--green-border);background:var(--green-bg);transform:scale(1.1);}
+.cell.checked{border-color:var(--purple-border);background:var(--purple-bg);}
+.cell.duplicate{border-color:var(--red-border);background:var(--red-bg);}
+
+/* Pointer */
+.pointer-area{display:flex;justify-content:center;margin-bottom:8px;min-height:24px;}
+.pointer{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border);transition:all .3s;position:relative;}
+.pointer.pass2{background:var(--amber-bg);color:var(--amber-mid);border-color:var(--amber-border);}
+.pointer-arrow{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--blue-mid);}
+
+/* Frequency Map */
+.freq-map{background:var(--bg2);border-radius:var(--radius);padding:14px 18px;margin:1.25rem auto;max-width:500px;}
+.freq-map-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px;text-align:center;}
+.freq-entries{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:32px;}
+.freq-entry{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;transition:all .3s;background:var(--surface);border:1px solid transparent;}
+.freq-key{color:var(--blue-mid);font-weight:600;}
+.freq-arrow{color:var(--text3);font-size:11px;}
+.freq-val{color:var(--green-mid);font-weight:600;min-width:14px;text-align:center;}
+.freq-entry.new{border-color:var(--amber-border);background:var(--amber-bg);}
+.freq-entry.increment{border-color:var(--cyan-border);background:var(--cyan-bg);}
+.freq-entry.check{border-color:var(--purple-border);background:var(--purple-bg);}
+.freq-entry.unique{border-color:var(--green-border);background:var(--green-bg);}
+.freq-entry.duplicate{border-color:var(--red-border);background:var(--red-bg);}
+
+/* Result Bar */
+.result-bar{text-align:center;padding:12px 24px;border-radius:var(--radius);margin:1.25rem 0;font-weight:600;font-size:15px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);transition:all .3s;}
+.result-bar.found{background:var(--green-bg);color:var(--green-mid);border-color:var(--green-border);}
+.result-bar.notfound{background:var(--red-bg);color:var(--red-mid);border-color:var(--red-border);}
+
+/* Code Panel (interactive) */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;}
+.info-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;}
+.phase-count{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-scan{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-found{background:var(--green-bg);color:var(--green-mid);}
+.phase-skip{background:var(--red-bg);color:var(--red-mid);}
+.phase-done{background:var(--purple-bg);color:var(--purple-mid);}
+.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+.info-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.info-text{color:var(--text2);font-size:14px;line-height:1.6;}
+
+/* Progress Dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:14px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:2px solid;}
+.swatch-counting{background:var(--blue-bg);border-color:var(--blue-border);}
+.swatch-scanning{background:var(--amber-bg);border-color:var(--amber-border);}
+.swatch-found{background:var(--green-bg);border-color:var(--green-border);}
+.swatch-duplicate{background:var(--red-bg);border-color:var(--red-border);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;}
+.related-problems{margin-top:1.5rem;}
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;}
+.related-problems li{margin-bottom:4px;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>First Unique Character in a String</h1>
+  <div class="subtitle">LeetCode #387 · Find the first non-repeating character</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Hash Table</span>
+    <span class="tag tag-pattern">Frequency Count</span>
+    <span class="tag tag-complexity">O(n) Time</span>
+    <span class="tag tag-complexity">O(1) Space</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Given a string <code>s</code>, find the <strong>first character</strong> that appears exactly once and return its index. If no such character exists, return <code>-1</code>.</p>
+    
+    <p style="margin-top:12px;"><strong>Example:</strong> For <code>s = "leetcode"</code>, the answer is <code>0</code> because <code>'l'</code> is the first character that appears only once.</p>
+    
+    <p style="margin-top:12px;"><strong>Example:</strong> For <code>s = "loveleetcode"</code>, the answer is <code>2</code> because <code>'v'</code> is the first unique character (at index 2).</p>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We need to know <strong>two things</strong> for each character: (1) how many times it appears, and (2) where it first appears. A hash map gives us both — count as the value, and we can find position by a second scan.</p>
+    </div>
+    
+    <p><strong>Why can't we solve it in one pass?</strong> When we see a character for the first time, we don't yet know if it will repeat later. We must see the entire string before we can confirm any character is unique.</p>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Pass Frequency Count</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>This is a classic <strong>two-pass</strong> algorithm using a hash map to count character frequencies.</p>
+    
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Pass 1 — Count:</strong> Scan the string and build a frequency map. For each character, increment its count in the map.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Pass 2 — Find:</strong> Scan the string again (in order). For each character, check if its count in the map is 1. Return the index of the first such character.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>No unique found:</strong> If we complete Pass 2 without finding count=1, return -1.</span>
+      </div>
+    </div>
+    
+    <div class="compare-diagram">
+      <div class="compare-panel">
+        <div class="compare-panel-title">Pass 1: Counting</div>
+        <div style="font-size:24px;margin:8px 0;">📊</div>
+        <p style="font-size:13px;color:var(--text2);">Build frequency map</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px;">{"l":1, "e":3, "t":1, ...}</p>
+      </div>
+      <div style="display:flex;align-items:center;font-size:24px;color:var(--text3);">→</div>
+      <div class="compare-panel">
+        <div class="compare-panel-title">Pass 2: Scanning</div>
+        <div style="font-size:24px;margin:8px 0;">🔍</div>
+        <p style="font-size:13px;color:var(--text2);">Find first with count=1</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px;">Check l(1)✓ → Return 0</p>
+      </div>
+    </div>
+    
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Two Passes?</div>
+      <p>We can't determine uniqueness until we've seen the entire string. The first pass collects all the information, the second pass uses it to find the answer while preserving the original order.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After Pass 1, <code>count[c]</code> holds the <strong>exact</strong> number of times character <code>c</code> appears in the string. In Pass 2, we iterate in original order, so the first character with <code>count[c] == 1</code> is guaranteed to be the answer.</p>
+    </div>
+    
+    <p><strong>Correctness Proof:</strong></p>
+    <ul style="margin:12px 0 12px 1.5rem;">
+      <li><strong>Completeness:</strong> Every character is counted exactly once per occurrence in Pass 1.</li>
+      <li><strong>Order preservation:</strong> Pass 2 iterates left-to-right, so we find the <em>first</em> unique character by index.</li>
+      <li><strong>No false positives:</strong> If count[c] == 1, the character appeared exactly once.</li>
+    </ul>
+    
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Edge Cases</div>
+      <ul style="margin-left:1.25rem;">
+        <li><strong>Empty string:</strong> No characters → return -1</li>
+        <li><strong>All duplicates:</strong> Every char appears ≥2 times → return -1</li>
+        <li><strong>Single character:</strong> Always unique → return 0</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="code-panel-static">
+      <div class="cl"><span class="comment"># Two-Pass Frequency Count — O(n) time, O(1) space (26 letters max)</span></div>
+      <div class="cl">def firstUniqChar(s: str) -> int:</div>
+      <div class="cl">    <span class="comment"># Pass 1: Build frequency map</span></div>
+      <div class="cl">    count = {}</div>
+      <div class="cl">    for c in s:</div>
+      <div class="cl">        count[c] = count.get(c, 0) + 1  <span class="comment"># Increment count</span></div>
+      <div class="cl">    </div>
+      <div class="cl">    <span class="comment"># Pass 2: Find first character with count == 1</span></div>
+      <div class="cl">    for i, c in enumerate(s):</div>
+      <div class="cl">        if count[c] == 1:</div>
+      <div class="cl">            return i  <span class="comment"># Found first unique</span></div>
+      <div class="cl">    </div>
+      <div class="cl">    return -1  <span class="comment"># No unique character found</span></div>
+    </div>
+    
+    <p style="margin-top:12px;"><strong>Using Counter (Pythonic):</strong></p>
+    <div class="code-panel-static">
+      <div class="cl">from collections import Counter</div>
+      <div class="cl"></div>
+      <div class="cl">def firstUniqChar(s: str) -> int:</div>
+      <div class="cl">    count = Counter(s)  <span class="comment"># Built-in frequency counter</span></div>
+      <div class="cl">    for i, c in enumerate(s):</div>
+      <div class="cl">        if count[c] == 1:</div>
+      <div class="cl">            return i</div>
+      <div class="cl">    return -1</div>
+    </div>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Space Complexity Note</div>
+      <p>The hash map stores at most 26 entries (lowercase English letters), so space is <strong>O(1)</strong> — constant regardless of input size. This is often described as O(k) where k=26.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>Keywords: "first", "unique", "non-repeating", "count" → This signals <strong>frequency counting</strong> with a hash map.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Ask Clarifying Questions</div>
+        <p>"Are all characters lowercase letters?" (affects space complexity) "Can the string be empty?" (edge case)</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Explain the Two-Pass Approach</div>
+        <p>Explain why one pass isn't enough: "We can't confirm uniqueness until we've processed the entire string."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State Complexity Upfront</div>
+        <p>"This approach is O(n) time with two passes, and O(1) space since we have at most 26 characters."</p>
+      </div>
+    </div>
+    
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">"I'll use a frequency counting approach. First, I'll count how many times each character appears. Then I'll scan the string again and return the index of the first character with count 1. This gives O(n) time since we make two passes, and O(1) space since we store at most 26 letters."</div>
+    </div>
+    
+    <p style="margin-top:16px;"><strong>Follow-up questions they might ask:</strong></p>
+    <ul style="margin-left:1.5rem;margin-top:8px;">
+      <li>"Can you do it in one pass?" — Yes, with an ordered structure (LinkedHashMap in Java, or track indices)</li>
+      <li>"What if the string contains unicode?" — Space becomes O(k) where k = unique characters</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Step-by-Step Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="viz-area">
+      <!-- Pointer -->
+      <div class="pointer-area" id="pointer-area">
+        <div class="pointer" id="pointer">i = 0<span class="pointer-arrow">▼</span></div>
+      </div>
+      
+      <!-- String Row -->
+      <div class="row-label">Input String</div>
+      <div class="string-row" id="string-row"></div>
+      
+      <!-- Frequency Map -->
+      <div class="freq-map">
+        <div class="freq-map-title">Frequency Map (count)</div>
+        <div class="freq-entries" id="freq-entries"></div>
+      </div>
+      
+      <!-- Result Bar -->
+      <div class="result-bar" id="result-bar">Result: ?</div>
+      
+      <!-- Code Panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" data-line="0">def firstUniqChar(s: str) -> int:</div>
+        <div class="code-line" data-line="1">    count = {}</div>
+        <div class="code-line" data-line="2">    for c in s:  # Pass 1: Count frequencies</div>
+        <div class="code-line" data-line="3">        count[c] = count.get(c, 0) + 1</div>
+        <div class="code-line" data-line="4">    for i, c in enumerate(s):  # Pass 2: Find first unique</div>
+        <div class="code-line" data-line="5">        if count[c] == 1:</div>
+        <div class="code-line" data-line="6">            return i</div>
+        <div class="code-line" data-line="7">    return -1</div>
+      </div>
+      
+      <!-- Info Card -->
+      <div class="info-card">
+        <div class="info-top">
+          <span class="phase-badge" id="phase-badge">INIT</span>
+          <span class="step-counter" id="step-counter">Step 0 / 0</span>
+        </div>
+        <div class="info-title" id="info-title">Initialize</div>
+        <div class="info-text" id="info-text">Click Next to start the walkthrough.</div>
+      </div>
+      
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="progress-dots"></div>
+      
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" onclick="reset()">Reset</button>
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+      
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch swatch-counting"></span>Counting</div>
+        <div class="legend-item"><span class="legend-swatch swatch-scanning"></span>Scanning</div>
+        <div class="legend-item"><span class="legend-swatch swatch-found"></span>Found (unique)</div>
+        <div class="legend-item"><span class="legend-swatch swatch-duplicate"></span>Duplicate (skip)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card">
+  <div class="section-header" onclick="toggleCard(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ Use a <strong>hash map</strong> to count character frequencies in O(n) time</div>
+      <div class="takeaway">✓ <strong>Two passes</strong> are needed: one to count, one to find</div>
+      <div class="takeaway">✓ Space is O(1) for fixed alphabet (26 lowercase letters)</div>
+      <div class="takeaway">✓ The second pass preserves original order to find the <em>first</em> unique</div>
+    </div>
+    
+    <table class="compare-table">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr class="pick">
+          <td>Two-Pass Hash Map <span class="pick-badge">Pick</span></td>
+          <td>O(n)</td>
+          <td>O(1)</td>
+          <td>Simple, efficient</td>
+        </tr>
+        <tr>
+          <td>Brute Force</td>
+          <td>O(n²)</td>
+          <td>O(1)</td>
+          <td>Check each char vs all others</td>
+        </tr>
+        <tr>
+          <td>IndexOf + LastIndexOf</td>
+          <td>O(n²)</td>
+          <td>O(1)</td>
+          <td>Built-in method approach</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1.25rem;">
+        <li>Finding elements by <strong>frequency</strong> (most common, least common, unique)</li>
+        <li>Checking for <strong>duplicates</strong> or character availability</li>
+        <li>Any problem asking about <strong>count occurrences</strong></li>
+      </ul>
+    </div>
+    
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Valid Anagram</strong> (Easy) — Compare two frequency maps</li>
+        <li><strong>Ransom Note</strong> (Easy) — Frequency subtraction</li>
+        <li><strong>Find All Anagrams in a String</strong> (Medium) — Sliding window + frequency</li>
+        <li><strong>Sort Characters By Frequency</strong> (Medium) — Bucket sort by count</li>
+        <li><strong>Maximum Number of Balloons</strong> (Easy) — Min ratio of frequencies</li>
+        <li><strong>Contains Duplicate</strong> (Easy) — Hash set for uniqueness</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- container -->
+
+<script>
+// Toggle collapsible cards
+function toggleCard(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// Input string
+const inputStr = "loveleetcode";
+const chars = inputStr.split('');
+
+// Step definitions
+const steps = [
+  // Init
+  { phase: 'init', phaseClass: 'phase-done', pointerIdx: -1, pass: 0, activeLine: 1, title: 'Initialize', text: 'Create an empty frequency map. We\'ll use this to count how many times each character appears.', freqMap: {}, highlight: {}, cellStates: {} },
+  
+  // Pass 1: Counting (12 chars in "loveleetcode")
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 0, pass: 1, activeLine: 3, title: "Pass 1: Count 'l'", text: "First character is 'l'. It's new, set count['l'] = 1.", freqMap: {l:1}, highlight: {l:'new'}, cellStates: {0:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 1, pass: 1, activeLine: 3, title: "Pass 1: Count 'o'", text: "Character 'o' is new. Set count['o'] = 1.", freqMap: {l:1,o:1}, highlight: {o:'new'}, cellStates: {0:'checked',1:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 2, pass: 1, activeLine: 3, title: "Pass 1: Count 'v'", text: "Character 'v' is new. Set count['v'] = 1.", freqMap: {l:1,o:1,v:1}, highlight: {v:'new'}, cellStates: {0:'checked',1:'checked',2:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 3, pass: 1, activeLine: 3, title: "Pass 1: Count 'e'", text: "Character 'e' is new. Set count['e'] = 1.", freqMap: {l:1,o:1,v:1,e:1}, highlight: {e:'new'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 4, pass: 1, activeLine: 3, title: "Pass 1: Count 'l' again", text: "Character 'l' already exists. Increment: count['l'] = 2.", freqMap: {l:2,o:1,v:1,e:1}, highlight: {l:'increment'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 5, pass: 1, activeLine: 3, title: "Pass 1: Count 'e' again", text: "Character 'e' already exists. Increment: count['e'] = 2.", freqMap: {l:2,o:1,v:1,e:2}, highlight: {e:'increment'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 6, pass: 1, activeLine: 3, title: "Pass 1: Count 'e' again", text: "Third 'e'. Increment: count['e'] = 3.", freqMap: {l:2,o:1,v:1,e:3}, highlight: {e:'increment'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 7, pass: 1, activeLine: 3, title: "Pass 1: Count 't'", text: "Character 't' is new. Set count['t'] = 1.", freqMap: {l:2,o:1,v:1,e:3,t:1}, highlight: {t:'new'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'checked',7:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 8, pass: 1, activeLine: 3, title: "Pass 1: Count 'c'", text: "Character 'c' is new. Set count['c'] = 1.", freqMap: {l:2,o:1,v:1,e:3,t:1,c:1}, highlight: {c:'new'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'checked',7:'checked',8:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 9, pass: 1, activeLine: 3, title: "Pass 1: Count 'o' again", text: "Character 'o' already exists. Increment: count['o'] = 2.", freqMap: {l:2,o:2,v:1,e:3,t:1,c:1}, highlight: {o:'increment'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'checked',7:'checked',8:'checked',9:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 10, pass: 1, activeLine: 3, title: "Pass 1: Count 'd'", text: "Character 'd' is new. Set count['d'] = 1.", freqMap: {l:2,o:2,v:1,e:3,t:1,c:1,d:1}, highlight: {d:'new'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'checked',7:'checked',8:'checked',9:'checked',10:'counting'} },
+  { phase: 'count', phaseClass: 'phase-count', pointerIdx: 11, pass: 1, activeLine: 3, title: "Pass 1: Count 'e' (fourth)", text: "Fourth 'e'. Increment: count['e'] = 4.", freqMap: {l:2,o:2,v:1,e:4,t:1,c:1,d:1}, highlight: {e:'increment'}, cellStates: {0:'checked',1:'checked',2:'checked',3:'checked',4:'checked',5:'checked',6:'checked',7:'checked',8:'checked',9:'checked',10:'checked',11:'counting'} },
+  
+  // Transition to Pass 2
+  { phase: 'scan', phaseClass: 'phase-scan', pointerIdx: -1, pass: 2, activeLine: 4, title: "Pass 1 Complete!", text: "Frequency map built. Now scan left-to-right to find first character with count = 1.", freqMap: {l:2,o:2,v:1,e:4,t:1,c:1,d:1}, highlight: {}, cellStates: {} },
+  
+  // Pass 2: Scanning
+  { phase: 'scan', phaseClass: 'phase-skip', pointerIdx: 0, pass: 2, activeLine: 5, title: "Pass 2: Check 'l' (i=0)", text: "count['l'] = 2 ≠ 1. Not unique — skip.", freqMap: {l:2,o:2,v:1,e:4,t:1,c:1,d:1}, highlight: {l:'duplicate'}, cellStates: {0:'duplicate'} },
+  { phase: 'scan', phaseClass: 'phase-skip', pointerIdx: 1, pass: 2, activeLine: 5, title: "Pass 2: Check 'o' (i=1)", text: "count['o'] = 2 ≠ 1. Not unique — skip.", freqMap: {l:2,o:2,v:1,e:4,t:1,c:1,d:1}, highlight: {o:'duplicate'}, cellStates: {0:'duplicate',1:'duplicate'} },
+  { phase: 'scan', phaseClass: 'phase-found', pointerIdx: 2, pass: 2, activeLine: 6, title: "Pass 2: Check 'v' (i=2) ✓", text: "count['v'] = 1! 🎉 This is the first unique character. Return index 2.", freqMap: {l:2,o:2,v:1,e:4,t:1,c:1,d:1}, highlight: {v:'unique'}, cellStates: {0:'duplicate',1:'duplicate',2:'found'}, result: 2 },
+];
+
+let currentStep = 0;
+
+function render() {
+  const step = steps[currentStep];
+  
+  // Render string row
+  const stringRow = document.getElementById('string-row');
+  stringRow.innerHTML = chars.map((c, i) => {
+    const state = step.cellStates[i] || '';
+    return `<div class="cell ${state}"><span class="char">${c}</span><span class="idx">${i}</span></div>`;
+  }).join('');
+  
+  // Render pointer
+  const pointerArea = document.getElementById('pointer-area');
+  if (step.pointerIdx >= 0) {
+    const passLabel = step.pass === 1 ? 'c' : 'i';
+    const passClass = step.pass === 2 ? 'pass2' : '';
+    // Calculate offset (44px cell + 4px gap)
+    const offset = step.pointerIdx * 48;
+    const totalWidth = chars.length * 48 - 4;
+    const leftPos = `calc(50% - ${totalWidth/2}px + ${offset}px + 22px)`;
+    pointerArea.innerHTML = `<div class="pointer ${passClass}" style="position:absolute;left:${leftPos};transform:translateX(-50%);">${passLabel} = ${step.pointerIdx}<span class="pointer-arrow">▼</span></div>`;
+    pointerArea.style.position = 'relative';
+  } else {
+    pointerArea.innerHTML = '';
+  }
+  
+  // Render frequency map
+  const freqEntries = document.getElementById('freq-entries');
+  const entries = Object.entries(step.freqMap);
+  if (entries.length === 0) {
+    freqEntries.innerHTML = '<span style="color:var(--text3);font-size:12px;">Empty</span>';
+  } else {
+    freqEntries.innerHTML = entries.map(([k, v]) => {
+      const hl = step.highlight[k] || '';
+      return `<div class="freq-entry ${hl}"><span class="freq-key">'${k}'</span><span class="freq-arrow">→</span><span class="freq-val">${v}</span></div>`;
+    }).join('');
+  }
+  
+  // Result bar
+  const resultBar = document.getElementById('result-bar');
+  if (step.result !== undefined) {
+    resultBar.className = 'result-bar found';
+    resultBar.textContent = `Result: ${step.result} (character '${chars[step.result]}')`;
+  } else {
+    resultBar.className = 'result-bar';
+    resultBar.textContent = 'Result: ?';
+  }
+  
+  // Code highlighting
+  document.querySelectorAll('.code-line').forEach(line => {
+    line.classList.toggle('active', parseInt(line.dataset.line) === step.activeLine);
+  });
+  
+  // Info card
+  document.getElementById('phase-badge').className = `phase-badge ${step.phaseClass}`;
+  document.getElementById('phase-badge').textContent = step.phase.toUpperCase();
+  document.getElementById('step-counter').textContent = `Step ${currentStep + 1} / ${steps.length}`;
+  document.getElementById('info-title').textContent = step.title;
+  document.getElementById('info-text').textContent = step.text;
+  
+  // Progress dots
+  const dotsHtml = steps.map((_, i) => {
+    const cls = i === currentStep ? 'active' : (i < currentStep ? 'visited' : '');
+    return `<div class="dot ${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+  document.getElementById('progress-dots').innerHTML = dotsHtml;
+}
+
+function go(delta) {
+  currentStep = Math.max(0, Math.min(steps.length - 1, currentStep + delta));
+  render();
+}
+
+function goTo(idx) {
+  currentStep = idx;
+  render();
+}
+
+function reset() {
+  currentStep = 0;
+  render();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>

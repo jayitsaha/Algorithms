@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the Word — Frequency Uniqueness + Adaptive End Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5;--bg2:#f0efe9;--surface:#ffffff;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;
+  --green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;
+  --amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;
+  --red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:940px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.header .subtitle{font-size:14px;color:var(--text2);margin-bottom:8px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.tag-hard{background:var(--red-bg);color:var(--red-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.card.collapsed .card-body{display:none;}
+.card-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.card-header:hover{opacity:0.85;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+.collapse-icon{font-size:18px;color:var(--text3);transition:transform 0.25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card-body{margin-top:1rem;}
+.card-body p{margin-bottom:0.75rem;font-size:14px;color:var(--text2);line-height:1.7;}
+.card-body strong{color:var(--text);}
+.card-body ul{margin:0.5rem 0 0.75rem 1.25rem;font-size:14px;color:var(--text2);}
+.card-body li{margin-bottom:0.35rem;}
+.card-body code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:2px 6px;border-radius:4px;}
+
+/* CONCEPT BOXES */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+.concept-box p{margin-bottom:0.5rem;font-size:14px;line-height:1.6;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/* ALGO STEPS */
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;font-size:14px;}
+
+/* STRATEGY */
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.interview-script h4{font-size:14px;margin-bottom:8px;}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/* ANNOTATED CODE */
+.annotated-code{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;margin:1rem 0;}
+.annotated-code .line{white-space:pre;color:var(--text2);}
+.annotated-code .comment{color:var(--green-mid);font-style:italic;}
+.annotated-code .keyword{color:var(--purple-mid);}
+
+/* FREQUENCY TABLE */
+.freq-table-wrap{overflow-x:auto;margin:1rem 0;}
+.freq-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
+.freq-table th,.freq-table td{padding:6px 8px;text-align:center;border:1px solid var(--border);}
+.freq-table th{background:var(--bg2);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);}
+.freq-table td.pos-header{background:var(--blue-bg);color:var(--blue-mid);font-weight:700;}
+.freq-table td.word-cell{text-align:left;font-weight:600;color:var(--text);background:var(--surface);}
+.freq-table td.score-cell{font-weight:700;}
+.freq-table td.hot{background:var(--amber-bg);color:var(--amber-mid);}
+.freq-table td.cold{background:var(--blue-bg);color:var(--blue-mid);}
+.freq-table tr.most-unique{background:var(--green-bg);}
+.freq-table tr.most-unique td.word-cell{color:var(--green-mid);}
+.freq-table tr.most-common{background:var(--amber-bg);}
+.freq-table tr.most-common td.word-cell{color:var(--amber-mid);}
+
+/* WORD POOL */
+.pool-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px;}
+.word-pool{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;justify-content:center;}
+.word-chip{display:flex;gap:2px;border-radius:var(--radius);padding:6px 8px;border:2px solid var(--border);background:var(--surface);transition:all 0.3s;flex-direction:column;align-items:center;}
+.word-letters{display:flex;gap:2px;}
+.word-chip .letter{width:26px;height:30px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;border-radius:4px;background:var(--bg2);color:var(--text);transition:all 0.3s;}
+.word-chip.candidate{border-color:var(--blue-border);background:var(--blue-bg);}
+.word-chip.candidate .letter{background:var(--surface);}
+.word-chip.guessing{border-color:var(--purple-border);background:var(--purple-bg);transform:scale(1.05);}
+.word-chip.guessing .letter{background:var(--surface);color:var(--purple-mid);}
+.word-chip.eliminated{border-color:var(--border);background:var(--bg2);opacity:0.35;}
+.word-chip.eliminated .letter{background:transparent;color:var(--text3);text-decoration:line-through;}
+.word-chip.survived{border-color:var(--green-border);background:var(--green-bg);}
+.word-chip.survived .letter{background:var(--surface);color:var(--green-mid);}
+.word-chip.found{border-color:var(--amber-border);background:var(--amber-bg);transform:scale(1.08);}
+.word-chip.found .letter{background:var(--surface);color:var(--amber-mid);font-weight:700;}
+.word-chip.most-unique{border-color:var(--cyan-border);background:var(--cyan-bg);}
+.word-chip.most-unique .letter{background:var(--surface);color:var(--cyan-mid);}
+.word-chip.most-common{border-color:var(--amber-border);background:var(--amber-bg);}
+.word-chip.most-common .letter{background:var(--surface);color:var(--amber-mid);}
+.word-score{font-size:10px;font-weight:700;font-family:var(--mono);margin-top:4px;color:var(--text3);}
+.word-chip.most-unique .word-score{color:var(--cyan-mid);}
+.word-chip.most-common .word-score{color:var(--amber-mid);}
+
+/* COMPARISON PANEL */
+.comparison-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:1rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius);}
+.comp-row{display:flex;gap:4px;align-items:center;}
+.comp-row-label{width:60px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);text-align:right;margin-right:8px;}
+.comp-cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:600;border-radius:6px;border:2px solid transparent;transition:all 0.3s;}
+.comp-cell.match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);}
+.comp-cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text);}
+.match-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;font-family:var(--mono);margin-top:6px;}
+.match-badge.positive{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border);}
+.match-badge.zero{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border);}
+
+/* FILTER PANEL */
+.filter-panel{margin:1rem 0;}
+.filter-row{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:var(--radius);margin-bottom:6px;border:1px solid var(--border);transition:all 0.3s;}
+.filter-row.kept{background:var(--green-bg);border-color:var(--green-border);}
+.filter-row.removed{background:var(--red-bg);border-color:var(--red-border);opacity:0.7;}
+.filter-word{font-family:var(--mono);font-size:13px;font-weight:600;min-width:80px;}
+.filter-match{font-family:var(--mono);font-size:13px;color:var(--text2);}
+.filter-verdict{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-left:auto;}
+.filter-row.kept .filter-verdict{color:var(--green-mid);}
+.filter-row.removed .filter-verdict{color:var(--red-mid);}
+
+/* GUESS HISTORY */
+.guess-history{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.guess-entry{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;background:var(--bg2);border-radius:var(--radius);border:2px solid var(--border);min-width:100px;transition:all 0.3s;}
+.guess-entry.active{border-color:var(--purple-border);background:var(--purple-bg);}
+.guess-entry.done{border-color:var(--green-border);background:var(--green-bg);}
+.guess-entry.success{border-color:var(--amber-border);background:var(--amber-bg);}
+.guess-round{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.guess-word{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
+.guess-result{font-family:var(--mono);font-size:12px;color:var(--text2);}
+
+/* END POINTER */
+.end-pointer{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:var(--radius);margin:1rem 0;justify-content:center;}
+.end-pointer .label{font-size:12px;font-weight:700;color:var(--purple-mid);text-transform:uppercase;letter-spacing:0.5px;}
+.end-pointer .value{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--purple-text);}
+.end-pointer .meaning{font-size:12px;color:var(--purple-mid);}
+
+/* VAR TRACKER */
+.var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background 0.3s,border-color 0.3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* CODE PANEL */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+.info-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;padding:3px 10px;border-radius:20px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-score{background:var(--cyan-bg);color:var(--cyan-mid);}
+.phase-sort{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-guess{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-filter{background:var(--red-bg);color:var(--red-mid);}
+.phase-adapt{background:var(--purple-bg);color:var(--purple-mid);}
+.phase-done{background:var(--green-bg);color:var(--green-mid);}
+.step-counter{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.info-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.info-text{font-size:13px;color:var(--text2);line-height:1.7;}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin:1.25rem 0 0.75rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all 0.25s;cursor:pointer;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:0.75rem;}
+.btn{padding:8px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:var(--bg2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.btn-primary:hover{background:var(--blue-border);color:#fff;}
+.kbd-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:8px;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:1rem;padding:10px;background:var(--bg2);border-radius:var(--radius);}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:1px solid var(--border);}
+
+/* TAKEAWAYS */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--text2);}
+.takeaway strong{color:var(--text);}
+.takeaway::before{content:"✓";color:var(--green-mid);font-weight:700;}
+.related-problems{margin:1rem 0;}
+.related-problems h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{margin-left:1.25rem;font-size:14px;color:var(--text2);}
+.related-problems li{margin-bottom:4px;}
+
+/* SORTED BAR */
+.sorted-bar{display:flex;gap:4px;align-items:flex-end;margin:1rem 0;justify-content:center;}
+.bar-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-rect{width:36px;border-radius:4px 4px 0 0;transition:all 0.3s;min-height:8px;}
+.bar-label{font-family:var(--mono);font-size:9px;color:var(--text3);max-width:36px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-val{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text2);}
+
+/* SORTED ORDER */
+.sorted-list{display:flex;flex-wrap:wrap;gap:6px;margin:0.75rem 0;justify-content:center;}
+.sorted-item{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);}
+.sorted-item.low{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-mid);}
+.sorted-item.high{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);}
+.sorted-item .si-score{font-size:10px;color:var(--text3);}
+
+/* ADAPT INDICATOR */
+.adapt-panel{display:flex;gap:16px;align-items:center;justify-content:center;margin:1rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius);}
+.adapt-side{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 16px;border-radius:var(--radius);border:2px solid transparent;}
+.adapt-side.active-side{border-color:var(--purple-border);background:var(--purple-bg);}
+.adapt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);}
+.adapt-val{font-family:var(--mono);font-size:14px;font-weight:700;}
+.adapt-arrow{font-size:24px;color:var(--text3);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>843. Guess the Word</h1>
+  <div class="subtitle">Solution 4 — Frequency Uniqueness + Adaptive End</div>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Frequency Scoring</span>
+    <span class="tag tag-pattern">Adaptive Heuristic</span>
+    <span class="tag tag-complexity">O(n·L) sort</span>
+    <span class="tag tag-complexity">O(n·L) space</span>
+  </div>
+</div>
+
+<!-- SECTION 1: UNDERSTANDING THE APPROACH -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding This Approach</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Unlike Minimax (which picks the word minimising worst-case bucket), this solution uses <strong>positional character frequency</strong> to score each word, then <strong>adaptively</strong> picks from either end of the sorted list depending on zero-match feedback.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Core Idea</div>
+      <p><strong>place_counts[str(i) + char]</strong> = how many words have character <code>char</code> at position <code>i</code>. A word's <strong>uniqueness score</strong> = sum of its per-position frequencies. High score → common letters at common positions. Low score → rare/unique letter+position combos.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Adaptive Trick</div>
+      <p>The code alternates which <strong>end</strong> of the sorted word list it picks from:</p>
+      <ul>
+        <li><code>end = -1</code> → pick the <strong>most common</strong> word (highest score, end of sorted list)</li>
+        <li><code>end = 0</code> → pick the <strong>most unique</strong> word (lowest score, start of sorted list)</li>
+      </ul>
+      <p>After getting <strong>0 matches</strong>: if we were picking unique (<code>end=0</code>), switch to common (<code>end=-1</code>). The idea: a unique word that scores 0 matches tells us little — switch strategy.</p>
+      <p>After getting <strong>1-5 matches</strong>: if we were picking common (<code>end=-1</code>), switch to unique (<code>end=0</code>). The idea: partial matches from a common word are weak signals — a unique word gives sharper signal.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why This Works (& Its Limitations)</div>
+      <p>This heuristic doesn't guarantee optimal worst-case like Minimax, but it's <strong>simple to code</strong> and <strong>good enough in practice</strong>. The sort is O(n·L) vs Minimax's O(n²·L) per round. However, the adaptive end-switching is a heuristic — it can get unlucky on adversarial inputs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: HOW FREQUENCY SCORING WORKS -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">How Frequency Scoring Works</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>For every word at every position, we count how many other words share that same (position, character) pair. A word's score is the sum of these counts across all 6 positions.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Build place_counts:</strong> For each word, for each position <code>i</code>, increment <code>place_counts[str(i) + char]</code>. The key <code>"0a"</code> means "character 'a' at position 0".</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>Score each word:</strong> <code>word_uniqueness(w)</code> = sum of <code>place_counts[str(i)+c]</code> for each position. High score = many words share these characters. Low score = unique.</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text"><strong>Sort by score:</strong> <code>words.sort(key=word_uniqueness)</code>. Index 0 = most unique. Index -1 = most common.</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text"><strong>Guess loop:</strong> Pick <code>words[end]</code>. If matches=6 → done. If matches=0 → aggressive filter (remove any word sharing ANY position). If matches=1-5 → normal filter. Adapt <code>end</code> based on result.</span></div>
+    </div>
+
+    <p>Let's see how <code>place_counts</code> is built for a small example:</p>
+    <div id="freqTableContainer"></div>
+  </div>
+</div>
+
+<!-- SECTION 3: THE ADAPTIVE END STRATEGY -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">The Adaptive End Strategy</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>This is the most creative part of the solution. Instead of always picking the same "best" word, the code <strong>switches strategy based on feedback</strong>:</p>
+
+    <div class="adapt-panel">
+      <div class="adapt-side">
+        <div class="adapt-label">end = -1</div>
+        <div class="adapt-val" style="color:var(--amber-mid);">Most Common</div>
+        <p style="font-size:12px;color:var(--text2);margin:0;">High overlap with many words</p>
+      </div>
+      <div class="adapt-arrow">⟷</div>
+      <div class="adapt-side">
+        <div class="adapt-label">end = 0</div>
+        <div class="adapt-val" style="color:var(--cyan-mid);">Most Unique</div>
+        <p style="font-size:12px;color:var(--text2);margin:0;">Rare letters = sharp signal</p>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Decision Logic</div>
+      <p><strong>Start:</strong> <code>end = -1</code> (pick most common first)</p>
+      <p><strong>Got 0 matches?</strong> → Eliminate words sharing ANY letter-position with guess. If currently <code>end=0</code>, flip to <code>end=-1</code>. (A unique word with 0 matches is a wasted guess — switch to common.)</p>
+      <p><strong>Got 1-5 matches?</strong> → Keep only words matching exactly that count. If currently <code>end=-1</code>, flip to <code>end=0</code>. (Partial match from common word is noisy — switch to unique for sharper signal.)</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Important Subtle Detail: word_is_possible</div>
+      <p>The <code>word_is_possible</code> function returns <code>False</code> if <code>guess_word == word</code> (we already guessed it — don't keep it). Otherwise returns <code>True</code> only if the number of exact position matches equals the returned match count. This is the core filtering invariant: the secret word must match the guess by exactly that many positions.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: ANNOTATED CODE -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="annotated-code">
+<div class="line"><span class="keyword">class</span> Solution:</div>
+<div class="line">    <span class="keyword">def</span> findSecretWord(self, words, master):</div>
+<div class="line">        <span class="comment"># Step 1: Count (position, char) frequencies across all words</span></div>
+<div class="line">        place_counts = collections.defaultdict(int)</div>
+<div class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> words:</div>
+<div class="line">            <span class="keyword">for</span> i, char <span class="keyword">in</span> enumerate(word):</div>
+<div class="line">                place_counts[str(i) + char] += 1  <span class="comment"># key="0a" means char 'a' at pos 0</span></div>
+<div class="line"></div>
+<div class="line">        <span class="comment"># Step 2: Scoring function — sum of position-frequencies</span></div>
+<div class="line">        <span class="keyword">def</span> word_uniqueness(word):</div>
+<div class="line">            score = 0</div>
+<div class="line">            <span class="keyword">for</span> i, char <span class="keyword">in</span> enumerate(word):</div>
+<div class="line">                score += place_counts[str(i) + char]</div>
+<div class="line">            <span class="keyword">return</span> score  <span class="comment"># high = common, low = unique</span></div>
+<div class="line"></div>
+<div class="line">        <span class="comment"># Step 3: Sort — index 0 = most unique, index -1 = most common</span></div>
+<div class="line">        words.sort(key=word_uniqueness)</div>
+<div class="line"></div>
+<div class="line">        <span class="comment"># Step 4: Filtering helper</span></div>
+<div class="line">        <span class="keyword">def</span> word_is_possible(guess_word, word, matches):</div>
+<div class="line">            <span class="keyword">if</span> guess_word == word:  <span class="comment"># already guessed — skip</span></div>
+<div class="line">                <span class="keyword">return</span> False</div>
+<div class="line">            match_count = sum(a == b <span class="keyword">for</span> a, b <span class="keyword">in</span> zip(guess_word, word))</div>
+<div class="line">            <span class="keyword">return</span> match_count == matches  <span class="comment"># keep only if matches agree</span></div>
+<div class="line"></div>
+<div class="line">        <span class="comment"># Step 5: Adaptive guess loop</span></div>
+<div class="line">        end = -1  <span class="comment"># start by picking most common</span></div>
+<div class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(30):  <span class="comment"># at most 30 iterations (safety net)</span></div>
+<div class="line">            guess_word = words[end]  <span class="comment"># pick from sorted end</span></div>
+<div class="line">            matches = master.guess(guess_word)</div>
+<div class="line">            <span class="keyword">if</span> matches == 6:  <span class="comment"># found!</span></div>
+<div class="line">                <span class="keyword">break</span></div>
+<div class="line">            <span class="keyword">elif</span> matches == 0:  <span class="comment"># zero matches — aggressive filter</span></div>
+<div class="line">                words = [w <span class="keyword">for</span> w <span class="keyword">in</span> words</div>
+<div class="line">                         <span class="keyword">if not</span> any(a==b <span class="keyword">for</span> a,b <span class="keyword">in</span> zip(guess_word, w))]</div>
+<div class="line">                <span class="keyword">if</span> end == 0: end = -1  <span class="comment"># swap: unique→common</span></div>
+<div class="line">            <span class="keyword">else</span>:  <span class="comment"># 1-5 matches — normal filter</span></div>
+<div class="line">                words = [w <span class="keyword">for</span> w <span class="keyword">in</span> words</div>
+<div class="line">                         <span class="keyword">if</span> word_is_possible(guess_word, w, matches)]</div>
+<div class="line">                <span class="keyword">if</span> end == -1: end = 0  <span class="comment"># swap: common→unique</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: INTERVIEW STRATEGY -->
+<div class="card collapsed">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Problem Type</div>
+        <p style="font-size:14px;color:var(--text2);">Interactive/oracle problem — we can't see the answer, only get match counts. Signal: <code>Master.guess()</code> returns a number, limited guesses.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Baseline First</div>
+        <p style="font-size:14px;color:var(--text2);">Start with "random pick + filter". Then improve: "What if we pick words that give the most information?" This motivates frequency scoring.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Explain Frequency Scoring</div>
+        <p style="font-size:14px;color:var(--text2);">"I'll count how common each (position, character) pair is. Words with rare combos are more distinguishing. Words with common combos overlap with many candidates."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Mention the Adaptive Twist</div>
+        <p style="font-size:14px;color:var(--text2);">"After 0 matches, a unique guess was uninformative — I'll switch to common. After partial matches, a common guess was noisy — I'll switch to unique." This shows you're thinking about information theory.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">"I'll score each word by positional character frequency — high-frequency words share letters with many candidates, low-frequency words are unique. I sort by score, then adaptively pick from either end: if a guess returns 0 matches, I switch to picking common words (they overlap more, so 0-match eliminates more). If I get partial matches, I switch to unique words for sharper signal."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Comparison with Minimax</div>
+      <p><strong>Minimax (S1):</strong> O(n²) per round, optimal worst-case, harder to code live. <strong>Frequency (S4):</strong> O(n·L) sort, heuristic but simple to code. In a 45-min interview, this is faster to implement and explain. Mention Minimax as a follow-up for bonus points.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: INTERACTIVE WALKTHROUGH -->
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Example: words = ["acckzz","ccbazz","eiowzz","abcczz","aackzz","ccakzz"], secret = "ccakzz"</p>
+
+    <!-- Guess History -->
+    <div class="pool-label">Guess History</div>
+    <div class="guess-history" id="guessHistory"></div>
+
+    <!-- Word pool -->
+    <div class="pool-label">Candidate Words <span id="candCount" style="color:var(--text2);font-weight:400;">(6)</span></div>
+    <div class="word-pool" id="wordPool"></div>
+
+    <!-- Sorted order -->
+    <div class="pool-label">Sorted Order (by uniqueness score) — <span id="sortLabel" style="font-weight:400;color:var(--text2);">pick from highlighted end</span></div>
+    <div class="sorted-list" id="sortedList"></div>
+
+    <!-- End pointer -->
+    <div class="end-pointer" id="endPointer">
+      <span class="label">end =</span>
+      <span class="value" id="endVal">-1</span>
+      <span class="meaning" id="endMeaning">→ picking most common</span>
+    </div>
+
+    <!-- Comparison panel -->
+    <div id="comparisonArea"></div>
+
+    <!-- Filter panel -->
+    <div id="filterArea"></div>
+
+    <!-- Var tracker -->
+    <div class="var-tracker" id="varTracker"></div>
+
+    <!-- Code panel -->
+    <div class="code-panel" id="codePanel"></div>
+
+    <!-- Info card -->
+    <div class="info-card" id="infoCard"></div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progressDots"></div>
+    <div class="controls">
+      <button class="btn" onclick="go(-1)">← Prev</button>
+      <button class="btn" onclick="reset()">Reset</button>
+      <button class="btn btn-primary" onclick="go(1)">Next →</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-bg);border-color:var(--blue-border);"></div>Candidate</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan-bg);border-color:var(--cyan-border);"></div>Most Unique</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-bg);border-color:var(--amber-border);"></div>Most Common / Guessing</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--purple-bg);border-color:var(--purple-border);"></div>Selected Guess</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--red-bg);border-color:var(--red-border);"></div>Eliminated</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green-bg);border-color:var(--green-border);"></div>Survived / Found</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: SUMMARY -->
+<div class="card collapsed">
+  <div class="card-header" onclick="toggleCard(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="takeaways">
+      <div class="takeaway"><strong>Positional frequency</strong> captures how "common" a word is — shared (position, char) pairs mean high overlap</div>
+      <div class="takeaway"><strong>Sorting once</strong> gives O(1) access to both most unique and most common words</div>
+      <div class="takeaway"><strong>Adaptive end-switching</strong> adjusts strategy based on feedback: 0-match → try common, partial → try unique</div>
+      <div class="takeaway"><strong>Zero-match filter</strong> is aggressive: if ANY position matches, eliminate that word</div>
+      <div class="takeaway"><strong>Partial-match filter</strong> is exact: keep only words with exactly that number of position matches</div>
+      <div class="takeaway"><strong>word_is_possible</strong> also excludes the guess itself, preventing re-guessing</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Approach</div>
+      <p>When you need a <strong>quick-to-code heuristic</strong> for an interactive problem. Frequency scoring is a common technique in word games (Wordle solvers use it too!). The adaptive switching is a neat trick to mention in interviews for extra credit.</p>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Bulls and Cows (299)</strong> — Same match-counting logic</li>
+        <li><strong>Wordle Solver</strong> — Same frequency-based word selection</li>
+        <li><strong>Mastermind</strong> — Classic information-theory game</li>
+        <li><strong>Find in Mountain Array (1095)</strong> — Interactive, limited queries</li>
+        <li><strong>First Bad Version (278)</strong> — Binary search on oracle</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+function toggleCard(header){
+  header.closest('.card').classList.toggle('collapsed');
+}
+
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const WORDS = ["acckzz","ccbazz","eiowzz","abcczz","aackzz","ccakzz"];
+const SECRET = "ccakzz";
+
+// Compute place_counts
+function computePlaceCounts(words){
+  const pc = {};
+  for(const w of words){
+    for(let i=0;i<w.length;i++){
+      const key = i + w[i];
+      pc[key] = (pc[key]||0) + 1;
+    }
+  }
+  return pc;
+}
+
+function wordScore(word, pc){
+  let s=0;
+  for(let i=0;i<word.length;i++) s += (pc[i+word[i]]||0);
+  return s;
+}
+
+function matchCount(a,b){
+  let c=0;
+  for(let i=0;i<a.length;i++) if(a[i]===b[i]) c++;
+  return c;
+}
+
+// Build frequency table for section 2
+function buildFreqTable(){
+  const pc = computePlaceCounts(WORDS);
+  const container = document.getElementById('freqTableContainer');
+  let html = '<div class="freq-table-wrap"><table class="freq-table"><thead><tr><th>Word</th>';
+  for(let i=0;i<6;i++) html += `<th>Pos ${i}</th>`;
+  html += '<th>Score</th></tr></thead><tbody>';
+
+  const scored = WORDS.map(w=>({w, score:wordScore(w,pc)}));
+  scored.sort((a,b)=>a.score-b.score);
+
+  scored.forEach((item,idx) => {
+    const w = item.w;
+    const isUnique = idx === 0;
+    const isCommon = idx === scored.length-1;
+    const rowCls = isUnique ? 'most-unique' : isCommon ? 'most-common' : '';
+    html += `<tr class="${rowCls}"><td class="word-cell">${w}</td>`;
+    for(let i=0;i<6;i++){
+      const key = i + w[i];
+      const val = pc[key]||0;
+      const cls = val >= 4 ? 'hot' : val <= 2 ? 'cold' : '';
+      html += `<td class="${cls}">${w[i]}→${val}</td>`;
+    }
+    const sCls = isUnique ? 'cold' : isCommon ? 'hot' : '';
+    html += `<td class="score-cell ${sCls}">${item.score}</td></tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  html += '<p style="font-size:12px;color:var(--text3);margin-top:6px;">🟦 Cold (≤2) = rare combos. 🟧 Hot (≥4) = common combos. Green row = most unique, Amber row = most common.</p>';
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// CODE LINES
+// ═══════════════════════════════════════════
+const CODE = [
+  'place_counts = defaultdict(int)',            // 0
+  'for word in words:',                         // 1
+  '    for i, char in enumerate(word):',        // 2
+  '        place_counts[str(i)+char] += 1',     // 3
+  '',                                           // 4
+  'words.sort(key=word_uniqueness)',             // 5
+  '',                                           // 6
+  'end = -1',                                   // 7
+  'for i in range(30):',                        // 8
+  '    guess_word = words[end]',                // 9
+  '    matches = master.guess(guess_word)',      // 10
+  '    if matches == 6: break',                 // 11
+  '    elif matches == 0:',                     // 12
+  '        words = [no shared positions]',      // 13
+  '        if end == 0: end = -1',              // 14
+  '    else:',                                  // 15
+  '        words = [word_is_possible(...)]',    // 16
+  '        if end == -1: end = 0',              // 17
+];
+
+// ═══════════════════════════════════════════
+// STEPS
+// ═══════════════════════════════════════════
+const steps = [];
+
+(function buildSteps(){
+  let candidates = [...WORDS];
+  let end = -1;
+
+  // Compute initial scores
+  const pc0 = computePlaceCounts(candidates);
+  const initialScored = candidates.map(w=>({w, score:wordScore(w,pc0)}));
+  initialScored.sort((a,b)=>a.score-b.score);
+  const sortedWords0 = initialScored.map(x=>x.w);
+  const scores0 = {};
+  initialScored.forEach(x=>scores0[x.w]=x.score);
+
+  // Step 0: Init
+  steps.push({
+    phase:'INIT', phaseClass:'phase-init',
+    title:'Build place_counts & Sort',
+    text:`Count positional character frequencies across all 6 words, compute each word's uniqueness score, and sort ascending. The word at index 0 is most unique; index -1 is most common. Start with end=-1 (pick most common).`,
+    codeHL:[0,1,2,3,5,7],
+    candidates: candidates.map(w=>({w, state:'candidate', score:scores0[w]})),
+    sorted: initialScored.map(x=>({w:x.w,score:x.score})),
+    end: -1,
+    guesses:[],
+    comparison:null,
+    filter:null,
+    vars:{pool:candidates.length, end:-1, round:'-'}
+  });
+
+  // Step 1: Score display — show sorted order with scores
+  steps.push({
+    phase:'SCORE', phaseClass:'phase-score',
+    title:'Sorted by Uniqueness Score',
+    text:`Scores computed: ${initialScored.map(x=>`${x.w}=${x.score}`).join(', ')}. Lowest score (${sortedWords0[0]}=${initialScored[0].score}) is most unique. Highest (${sortedWords0[5]}=${initialScored[5].score}) is most common. end=-1 → we pick "${sortedWords0[5]}" (most common) first.`,
+    codeHL:[5],
+    candidates: candidates.map(w=>{
+      const isUnique = w===sortedWords0[0];
+      const isCommon = w===sortedWords0[5];
+      return {w, state: isCommon?'most-common': isUnique?'most-unique':'candidate', score:scores0[w]};
+    }),
+    sorted: initialScored.map(x=>({w:x.w,score:x.score})),
+    end: -1,
+    guesses:[],
+    comparison:null,
+    filter:null,
+    vars:{pool:candidates.length, end:-1, round:'-'}
+  });
+
+  // Now simulate guesses
+  let sortedWords = [...sortedWords0];
+  let scores = {...scores0};
+  let guessHistory = [];
+  let round = 0;
+
+  function doRound(){
+    round++;
+    const guessWord = sortedWords[end === -1 ? sortedWords.length-1 : 0];
+    const matches = matchCount(guessWord, SECRET);
+    guessHistory = [...guessHistory, {word:guessWord, matches, round}];
+
+    // Step: Guess
+    steps.push({
+      phase:'GUESS', phaseClass:'phase-guess',
+      title:`Round ${round}: Guess "${guessWord}" (end=${end})`,
+      text:`Pick words[${end}] = "${guessWord}" from the ${end===-1?'most common':'most unique'} end. Call master.guess("${guessWord}") → returns ${matches} match${matches!==1?'es':''}.${matches===6?' Found the secret!':''}`,
+      codeHL:[8,9,10, matches===6?11:(matches===0?12:15)],
+      candidates: candidates.map(w=>{
+        if(w===guessWord) return {w, state:'guessing', score:scores[w]};
+        return {w, state:'candidate', score:scores[w]};
+      }),
+      sorted: sortedWords.map(sw=>({w:sw,score:scores[sw]})),
+      end,
+      guesses: guessHistory.map((g,i)=>({...g, status: i===guessHistory.length-1?'active':'done'})),
+      comparison: {guess:guessWord, secret:SECRET, matches},
+      filter:null,
+      vars:{pool:candidates.length, end, round}
+    });
+
+    if(matches === 6){
+      // Done
+      steps.push({
+        phase:'DONE', phaseClass:'phase-done',
+        title:`Found! Secret = "${SECRET}"`,
+        text:`master.guess("${guessWord}") returned 6 — all positions match! Solved in ${round} guess${round!==1?'es':''}.`,
+        codeHL:[11],
+        candidates: candidates.map(w=>({w, state: w===guessWord?'found':'eliminated', score:scores[w]})),
+        sorted: sortedWords.map(sw=>({w:sw,score:scores[sw]})),
+        end,
+        guesses: guessHistory.map(g=>({...g, status: g.word===guessWord?'success':'done'})),
+        comparison:{guess:guessWord, secret:SECRET, matches:6},
+        filter:null,
+        vars:{pool:1, end, round}
+      });
+      return false;
+    }
+
+    // Filter
+    let newCandidates;
+    let filterRows = [];
+    let newEnd = end;
+
+    if(matches === 0){
+      newCandidates = [];
+      for(const w of candidates){
+        if(w === guessWord){
+          filterRows.push({w, match:'(guess)', kept:false});
+          continue;
+        }
+        const anyShared = [...guessWord].some((c,i)=>w[i]===c);
+        if(anyShared){
+          filterRows.push({w, match:'shares position', kept:false});
+        } else {
+          filterRows.push({w, match:'no overlap', kept:true});
+          newCandidates.push(w);
+        }
+      }
+      if(end === 0) newEnd = -1;
+    } else {
+      newCandidates = [];
+      for(const w of candidates){
+        if(w === guessWord){
+          filterRows.push({w, match:'(guess)', kept:false});
+          continue;
+        }
+        const mc = matchCount(guessWord, w);
+        if(mc === matches){
+          filterRows.push({w, match:`${mc} matches ✓`, kept:true});
+          newCandidates.push(w);
+        } else {
+          filterRows.push({w, match:`${mc} ≠ ${matches}`, kept:false});
+        }
+      }
+      if(end === -1) newEnd = 0;
+    }
+
+    // Step: Filter
+    const oldEnd = end;
+    steps.push({
+      phase:'FILTER', phaseClass:'phase-filter',
+      title:`Filter: ${matches===0?'Remove words sharing ANY position':'Keep words with exactly '+matches+' match'+(matches!==1?'es':'')}`,
+      text:`${candidates.length} → ${newCandidates.length} candidates. ${matches===0?'Zero matches means the secret shares NO letter-position with "'+guessWord+'" — aggressively remove any word that does.':'Keep only words that match "'+guessWord+'" in exactly '+matches+' position'+(matches!==1?'s':'')+'.'} ${oldEnd!==newEnd?`Adaptive: end flips from ${oldEnd} to ${newEnd} (${newEnd===-1?'common':'unique'}).`:'end stays at '+end+'.'}`,
+      codeHL: matches===0?[13,14]:[16,17],
+      candidates: candidates.map(w=>{
+        const fr = filterRows.find(f=>f.w===w);
+        return {w, state: fr&&fr.kept?'survived':'eliminated', score:scores[w]};
+      }),
+      sorted: sortedWords.map(sw=>({w:sw,score:scores[sw]})),
+      end: newEnd,
+      guesses: guessHistory.map(g=>({...g, status:'done'})),
+      comparison:null,
+      filter: filterRows,
+      vars:{pool:newCandidates.length, end:newEnd, round}
+    });
+
+    candidates = newCandidates;
+    end = newEnd;
+
+    // Re-sort remaining
+    const pc = computePlaceCounts(candidates);
+    const newScored = candidates.map(w=>({w, score:wordScore(w,pc)}));
+    newScored.sort((a,b)=>a.score-b.score);
+    sortedWords = newScored.map(x=>x.w);
+    scores = {};
+    newScored.forEach(x=>scores[x.w]=x.score);
+
+    if(candidates.length > 1){
+      steps.push({
+        phase:'SORT', phaseClass:'phase-sort',
+        title:`Re-sort ${candidates.length} remaining candidates`,
+        text:`Recompute frequencies for remaining ${candidates.length} words and re-sort. New order: ${newScored.map(x=>`${x.w}(${x.score})`).join(' → ')}. end=${end} → pick "${sortedWords[end===-1?sortedWords.length-1:0]}".`,
+        codeHL:[5],
+        candidates: candidates.map(w=>{
+          const isU = w===sortedWords[0];
+          const isC = w===sortedWords[sortedWords.length-1];
+          return {w, state: isC?'most-common':isU?'most-unique':'candidate', score:scores[w]};
+        }),
+        sorted: newScored.map(x=>({w:x.w,score:x.score})),
+        end,
+        guesses: guessHistory.map(g=>({...g, status:'done'})),
+        comparison:null,
+        filter:null,
+        vars:{pool:candidates.length, end, round}
+      });
+    }
+
+    return true;
+  }
+
+  let maxRounds = 10;
+  while(maxRounds-- > 0){
+    if(!doRound()) break;
+    if(candidates.length <= 1){
+      // One left — guess it
+      if(candidates.length === 1 && candidates[0] !== SECRET) break;
+      if(!doRound()) break;
+      break;
+    }
+  }
+})();
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+let cur = 0;
+
+function render(){
+  const s = steps[cur];
+
+  // Guess history
+  const gh = document.getElementById('guessHistory');
+  if(s.guesses.length === 0){
+    gh.innerHTML = '<div style="font-size:12px;color:var(--text3);">No guesses yet</div>';
+  } else {
+    gh.innerHTML = s.guesses.map(g=>`
+      <div class="guess-entry ${g.status}">
+        <span class="guess-round">Round ${g.round}</span>
+        <span class="guess-word">${g.word}</span>
+        <span class="guess-result">matches: ${g.matches}</span>
+      </div>
+    `).join('');
+  }
+
+  // Word pool
+  const wp = document.getElementById('wordPool');
+  document.getElementById('candCount').textContent = `(${s.candidates.filter(c=>!['eliminated'].includes(c.state)).length})`;
+  wp.innerHTML = s.candidates.map(c=>`
+    <div class="word-chip ${c.state}">
+      <div class="word-letters">${[...c.w].map(ch=>`<span class="letter">${ch}</span>`).join('')}</div>
+      ${c.score !== undefined ? `<div class="word-score">${c.score}</div>` : ''}
+    </div>
+  `).join('');
+
+  // Sorted list
+  const sl = document.getElementById('sortedList');
+  sl.innerHTML = s.sorted.map((item,i)=>{
+    const isPickEnd = (s.end === -1 && i === s.sorted.length-1) || (s.end === 0 && i === 0);
+    const isLow = i === 0;
+    const isHigh = i === s.sorted.length-1;
+    const cls = isPickEnd ? (s.end===-1?'high':'low') : (isLow?'low':isHigh?'high':'');
+    return `<div class="sorted-item ${cls}">${item.w} <span class="si-score">${item.score}</span>${isPickEnd?' ◄':''}</div>`;
+  }).join('');
+
+  // End pointer
+  document.getElementById('endVal').textContent = s.end;
+  document.getElementById('endMeaning').textContent = s.end === -1 ? '→ picking most common' : '→ picking most unique';
+
+  // Comparison
+  const ca = document.getElementById('comparisonArea');
+  if(s.comparison){
+    const {guess,secret,matches} = s.comparison;
+    let compHTML = '<div class="comparison-panel">';
+    compHTML += '<div class="comp-row"><span class="comp-row-label">Guess</span>';
+    for(const c of guess) compHTML += `<div class="comp-cell">${c}</div>`;
+    compHTML += '</div>';
+    compHTML += '<div class="comp-row"><span class="comp-row-label">Secret</span>';
+    for(let i=0;i<secret.length;i++){
+      const m = guess[i]===secret[i];
+      compHTML += `<div class="comp-cell ${m?'match':'mismatch'}">${secret[i]}</div>`;
+    }
+    compHTML += '</div>';
+    compHTML += `<div class="match-badge ${matches>0?'positive':'zero'}">${matches} match${matches!==1?'es':''}</div>`;
+    compHTML += '</div>';
+    ca.innerHTML = compHTML;
+  } else {
+    ca.innerHTML = '';
+  }
+
+  // Filter
+  const fa = document.getElementById('filterArea');
+  if(s.filter){
+    let fHTML = '<div class="filter-panel"><div class="pool-label">Filter Results</div>';
+    for(const fr of s.filter){
+      fHTML += `<div class="filter-row ${fr.kept?'kept':'removed'}">
+        <span class="filter-word">${fr.w}</span>
+        <span class="filter-match">${fr.match}</span>
+        <span class="filter-verdict">${fr.kept?'KEEP':'REMOVE'}</span>
+      </div>`;
+    }
+    fHTML += '</div>';
+    fa.innerHTML = fHTML;
+  } else {
+    fa.innerHTML = '';
+  }
+
+  // Var tracker
+  const vt = document.getElementById('varTracker');
+  const prevVars = cur > 0 ? steps[cur-1].vars : null;
+  vt.innerHTML = Object.entries(s.vars).map(([k,v])=>{
+    const changed = prevVars && prevVars[k] !== v;
+    return `<div class="var-box ${changed?'changed':''}"><span class="var-name">${k}</span><span class="var-val">${v}</span></div>`;
+  }).join('');
+
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = CODE.map((line,i)=>{
+    const active = s.codeHL.includes(i);
+    return `<div class="code-line ${active?'active':''}">${line||' '}</div>`;
+  }).join('');
+
+  // Info card
+  document.getElementById('infoCard').innerHTML = `
+    <div class="info-top">
+      <span class="phase-badge ${s.phaseClass}">${s.phase}</span>
+      <span class="step-counter">Step ${cur+1} / ${steps.length}</span>
+    </div>
+    <div class="info-title">${s.title}</div>
+    <div class="info-text">${s.text}</div>
+  `;
+
+  // Progress dots
+  const pd = document.getElementById('progressDots');
+  pd.innerHTML = '';
+  steps.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===cur?' active':i<cur?' visited':'');
+    d.onclick = ()=>{ cur=i; render(); };
+    pd.appendChild(d);
+  });
+}
+
+function go(d){ const n=cur+d; if(n>=0&&n<steps.length){cur=n;render();} }
+function reset(){cur=0;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') go(1);
+  if(e.key==='ArrowLeft') go(-1);
+  if(e.key==='r'||e.key==='R') reset();
+});
+
+buildFreqTable();
+render();
+</script>
+</body>
+</html>
