@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encode and Decode TinyURL — Interactive Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*───── Design Tokens ─────*/
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB;  --blue-border:#85B7EB;  --blue-text:#042C53;  --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB;   --red-border:#F09595;   --red-text:#501313;   --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA;  --cyan-border:#4DD0E1;  --cyan-text:#006064;  --cyan-mid:#00ACC1;
+  --pink-bg:#FCE4EC;  --pink-border:#F48FB1;  --pink-text:#880E4F;  --pink-mid:#E91E63;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+  --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+  --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+  --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+  --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+  --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+  --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+  --pink-bg:#4A1942;--pink-border:#E84393;--pink-text:#F8BBD9;--pink-mid:#F48FB1;
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+.container{max-width:900px;margin:0 auto;}
+
+/*───── Header ─────*/
+.header{text-align:center;margin-bottom:2rem;}
+.header h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.header .subtitle{color:var(--text2);font-size:14px;margin-top:4px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+
+/*───── Cards ─────*/
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.section-title{font-size:18px;font-weight:700;color:var(--text);}
+.collapse-icon{margin-left:auto;font-size:16px;color:var(--text3);transition:transform .25s;}
+.card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.card.collapsed .section-body{display:none;}
+
+/*───── Concept Boxes ─────*/
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+.concept-box.insight .concept-box-title{color:var(--green-mid);}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.concept-box.warning .concept-box-title{color:var(--amber-mid);}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border);}
+.concept-box.danger .concept-box-title{color:var(--red-mid);}
+
+/*───── Algorithm Steps ─────*/
+.algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+.step-text{color:var(--text);line-height:1.5;}
+
+/*───── Strategy ─────*/
+.strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+.strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+.interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+
+/*───── Code Panel (static) ─────*/
+.code-panel-static{background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;margin:1rem 0;}
+.code-panel-static .cl{padding:1px 6px;border-radius:4px;white-space:pre;color:var(--text2);}
+.code-panel-static .comment{color:var(--text3);}
+
+/*───── Comparison Table ─────*/
+.compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
+.compare-table th,.compare-table td{padding:10px 14px;text-align:left;border:1px solid var(--border);}
+.compare-table th{background:var(--bg2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);}
+.compare-table tr.pick{background:var(--green-bg);}
+.compare-table .pick-badge{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:10px;background:var(--green-mid);color:#fff;margin-left:6px;}
+
+/*───── Architecture Diagram ─────*/
+.arch-diagram{display:flex;flex-direction:column;gap:20px;margin:1.5rem 0;align-items:center;}
+.arch-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;}
+.arch-box{padding:12px 20px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:13px;text-align:center;min-width:120px;}
+.arch-box.user{border-color:var(--blue-border);background:var(--blue-bg);}
+.arch-box.service{border-color:var(--purple-border);background:var(--purple-bg);}
+.arch-box.storage{border-color:var(--green-border);background:var(--green-bg);}
+.arch-arrow{font-size:20px;color:var(--text3);}
+.arch-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-top:4px;}
+
+/*───── Interactive Walkthrough ─────*/
+.viz-area{margin-top:1rem;}
+
+/* URL Display */
+.url-display{margin:1rem 0;}
+.url-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px;}
+.url-box{padding:12px 16px;background:var(--bg2);border-radius:var(--radius);font-family:var(--mono);font-size:13px;word-break:break-all;border:2px solid transparent;transition:all .3s;}
+.url-box.long{border-color:var(--blue-border);background:var(--blue-bg);}
+.url-box.short{border-color:var(--green-border);background:var(--green-bg);}
+.url-box.active{border-color:var(--purple-border);background:var(--purple-bg);}
+
+/* Transform Arrow */
+.transform-panel{display:flex;align-items:center;justify-content:center;gap:20px;margin:1.5rem 0;flex-wrap:wrap;}
+.transform-input,.transform-output{flex:1;min-width:200px;max-width:350px;}
+.transform-arrow-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.transform-arrow{font-size:28px;color:var(--purple-mid);}
+.transform-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;}
+
+/* Hash Map Panel */
+.hashmap-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:1.5rem 0;}
+.hashmap-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:12px;text-align:center;}
+.maps-container{display:flex;gap:16px;flex-wrap:wrap;}
+.map-section{flex:1;min-width:200px;}
+.map-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;text-align:center;}
+.map-entries{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
+.map-entry{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-radius:var(--radius);border:1px solid transparent;transition:all .3s;font-size:12px;}
+.map-entry.new{border-color:var(--amber-border);background:var(--amber-bg);}
+.map-entry.active{border-color:var(--purple-border);background:var(--purple-bg);}
+.map-key{font-family:var(--mono);color:var(--blue-mid);font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.map-arrow{color:var(--text3);font-size:12px;}
+.map-value{font-family:var(--mono);color:var(--green-mid);font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Counter Display */
+.counter-display{display:flex;align-items:center;justify-content:center;gap:12px;margin:1rem 0;padding:12px;background:var(--bg2);border-radius:var(--radius);}
+.counter-label{font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text3);}
+.counter-value{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--purple-mid);}
+
+/* Base62 Conversion */
+.base62-panel{margin:1rem 0;padding:16px;background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);}
+.base62-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--cyan-mid);margin-bottom:8px;}
+.base62-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;}
+.base62-box{padding:8px 14px;background:var(--surface);border-radius:var(--radius);font-family:var(--mono);font-size:14px;font-weight:600;}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:20px;text-align:center;}
+
+/* Code Panel (interactive) */
+.code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.25rem;}
+.info-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:20px;}
+.phase-init{background:var(--blue-bg);color:var(--blue-mid);}
+.phase-encode{background:var(--amber-bg);color:var(--amber-mid);}
+.phase-decode{background:var(--green-bg);color:var(--green-mid);}
+.phase-done{background:var(--purple-bg);color:var(--purple-mid);}
+.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+.info-title{font-weight:700;font-size:15px;margin-bottom:4px;}
+.info-text{color:var(--text2);font-size:14px;line-height:1.6;}
+
+/* Progress Dots */
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--purple-mid);transform:scale(1.3);}
+.dot.visited{background:var(--green-mid);}
+
+/* Controls */
+.controls{display:flex;gap:10px;justify-content:center;margin-top:1rem;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--bg2);border-color:var(--border2);}
+.btn-primary{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-border);}
+.kbd-hint{text-align:center;margin-top:8px;font-size:11px;color:var(--text3);}
+
+/* Legend */
+.legend{display:flex;gap:14px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-swatch{width:14px;height:14px;border-radius:4px;border:2px solid;}
+.swatch-active{background:var(--purple-bg);border-color:var(--purple-border);}
+.swatch-new{background:var(--amber-bg);border-color:var(--amber-border);}
+.swatch-long{background:var(--blue-bg);border-color:var(--blue-border);}
+.swatch-short{background:var(--green-bg);border-color:var(--green-border);}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+.takeaway{padding:8px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;}
+.related-problems{margin-top:1.5rem;}
+.related-problems h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.related-problems ul{padding-left:1.5rem;}
+.related-problems li{margin-bottom:4px;font-size:14px;color:var(--text2);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>Encode and Decode TinyURL</h1>
+  <div class="subtitle">LeetCode 535 — Design a URL shortening service</div>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Hash Tables</span>
+    <span class="tag tag-pattern">System Design</span>
+    <span class="tag tag-complexity">O(1) Encode/Decode</span>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: Understanding ===== -->
+<div class="card" id="s1">
+  <div class="section-header" onclick="toggleCard('s1')">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>Design a URL shortening service like TinyURL. Given a long URL, generate a short URL. Given a short URL, return the original long URL.</p>
+
+    <div style="margin:12px 0;padding:12px;background:var(--bg2);border-radius:var(--radius);font-family:var(--mono);font-size:13px;line-height:2;">
+      Long URL: https://leetcode.com/problems/design-tinyurl<br>
+      ↓ encode()<br>
+      Short URL: http://tinyurl.com/abc123<br>
+      ↓ decode()<br>
+      Long URL: https://leetcode.com/problems/design-tinyurl
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is fundamentally a <strong>bijection problem</strong> — each long URL maps to exactly one short code, and each short code maps back to exactly one long URL. We need two hash maps (or one bidirectional mapping).</p>
+    </div>
+
+    <p style="margin-top:12px;"><strong>Core Requirements:</strong></p>
+    <ul style="padding-left:1.5rem;margin-top:8px;color:var(--text2);">
+      <li><code>encode(longUrl)</code> → returns a unique short URL</li>
+      <li><code>decode(shortUrl)</code> → returns the original long URL</li>
+      <li>Same long URL should return same short URL (idempotent)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: The Algorithm ===== -->
+<div class="card" id="s2">
+  <div class="section-header" onclick="toggleCard('s2')">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Counter-Based Encoding</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p>The simplest approach: use an <strong>auto-incrementing counter</strong> to generate unique short codes. Convert the counter to a short string using Base62.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text">Maintain a counter starting at 0 and two hash maps</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>encode:</strong> If URL already encoded, return existing short URL</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text">Otherwise, convert counter to Base62 string as code</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text">Store: long→short and short→long mappings</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text">Increment counter, return short URL</span></div>
+      <div class="algo-step"><span class="step-num">6</span><span class="step-text"><strong>decode:</strong> Lookup short code in hash map, return long URL</span></div>
+    </div>
+
+    <!-- Architecture Diagram -->
+    <div class="arch-diagram">
+      <div class="arch-row">
+        <div class="arch-box user">
+          <div>Long URL</div>
+          <div class="arch-label">Input</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box service">
+          <div>Codec</div>
+          <div class="arch-label">Encode/Decode</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box storage">
+          <div>Short URL</div>
+          <div class="arch-label">Output</div>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box storage" style="min-width:200px;">
+          <div>Hash Maps</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">long→short, short→long</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Base62 Explanation -->
+    <div class="base62-panel">
+      <div class="base62-title">Base62 Encoding</div>
+      <p style="font-size:13px;margin-bottom:8px;">Characters: <code>0-9</code> (10) + <code>a-z</code> (26) + <code>A-Z</code> (26) = 62 chars</p>
+      <div class="base62-row">
+        <div class="base62-box">0 → "0"</div>
+        <div class="base62-box">10 → "a"</div>
+        <div class="base62-box">36 → "A"</div>
+        <div class="base62-box">62 → "10"</div>
+        <div class="base62-box">238328 → "1000"</div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:8px;">With 6 characters: 62⁶ = 56 billion unique codes!</p>
+    </div>
+
+    <table class="compare-table">
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+      <tr class="pick"><td>Counter + Base62 <span class="pick-badge">Simple</span></td><td>Simple, predictable, no collisions</td><td>Sequential (guessable)</td></tr>
+      <tr><td>Random String</td><td>Not guessable</td><td>Need collision handling</td></tr>
+      <tr><td>Hash of URL</td><td>Deterministic</td><td>Collisions possible, long codes</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: Why It Works ===== -->
+<div class="card" id="s3">
+  <div class="section-header" onclick="toggleCard('s3')">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p><strong>Every counter value maps to a unique Base62 string.</strong> Since the counter only increases, no two URLs ever get the same code. The hash maps maintain perfect bidirectional mapping.</p>
+    </div>
+
+    <h4 style="margin-top:14px;font-size:14px;">Why Bijection is Maintained</h4>
+    <ul style="padding-left:1.5rem;margin-top:8px;color:var(--text2);">
+      <li><strong>Unique forward:</strong> Each long URL gets exactly one short code (checked before assigning)</li>
+      <li><strong>Unique reverse:</strong> Each counter value is used only once, so each short code maps to one URL</li>
+      <li><strong>Idempotent:</strong> Re-encoding same URL returns same short code (lookup first)</li>
+    </ul>
+
+    <h4 style="margin-top:14px;font-size:14px;">Edge Cases</h4>
+    <ul style="padding-left:1.5rem;color:var(--text2);">
+      <li><strong>Empty URL:</strong> Works — gets code "0"</li>
+      <li><strong>Same URL twice:</strong> Returns same short code (idempotent)</li>
+      <li><strong>Very long URL:</strong> Short code length unaffected</li>
+      <li><strong>Counter overflow:</strong> At 56B+ URLs with 6 chars — extend to 7 chars</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Real-World Considerations</div>
+      <p>Sequential IDs are <strong>guessable</strong> — attackers can enumerate URLs. Production systems use random codes with collision detection, or encode user ID + timestamp.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4: The Code ===== -->
+<div class="card" id="s4">
+  <div class="section-header" onclick="toggleCard('s4')">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <p style="font-weight:600;margin-bottom:8px;">Solution 1 — Counter-Based (Interview Pick)</p>
+    <div class="code-panel-static">
+      <div class="cl">class Codec:</div>
+      <div class="cl">    BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</div>
+      <div class="cl">    PREFIX = "http://tinyurl.com/"</div>
+      <div class="cl">    </div>
+      <div class="cl">    def __init__(self):</div>
+      <div class="cl">        self.counter = 0</div>
+      <div class="cl">        self.long_to_short = {}  <span class="comment"># Long URL → short code</span></div>
+      <div class="cl">        self.short_to_long = {}  <span class="comment"># Short code → long URL</span></div>
+      <div class="cl">    </div>
+      <div class="cl">    def _to_base62(self, num: int) -> str:</div>
+      <div class="cl">        if num == 0: return "0"</div>
+      <div class="cl">        result = []</div>
+      <div class="cl">        while num:</div>
+      <div class="cl">            result.append(self.BASE[num % 62])</div>
+      <div class="cl">            num //= 62</div>
+      <div class="cl">        return "".join(reversed(result))</div>
+      <div class="cl">    </div>
+      <div class="cl">    def encode(self, longUrl: str) -> str:</div>
+      <div class="cl">        if longUrl in self.long_to_short:  <span class="comment"># Already encoded</span></div>
+      <div class="cl">            return self.PREFIX + self.long_to_short[longUrl]</div>
+      <div class="cl">        code = self._to_base62(self.counter)</div>
+      <div class="cl">        self.long_to_short[longUrl] = code</div>
+      <div class="cl">        self.short_to_long[code] = longUrl</div>
+      <div class="cl">        self.counter += 1</div>
+      <div class="cl">        return self.PREFIX + code</div>
+      <div class="cl">    </div>
+      <div class="cl">    def decode(self, shortUrl: str) -> str:</div>
+      <div class="cl">        code = shortUrl[len(self.PREFIX):]  <span class="comment"># Extract code</span></div>
+      <div class="cl">        return self.short_to_long[code]</div>
+    </div>
+
+    <p style="font-weight:600;margin-top:1.5rem;margin-bottom:8px;">Solution 2 — Random String (Production-Style)</p>
+    <div class="code-panel-static">
+      <div class="cl">import random</div>
+      <div class="cl">import string</div>
+      <div class="cl"></div>
+      <div class="cl">class Codec:</div>
+      <div class="cl">    CHARS = string.ascii_letters + string.digits</div>
+      <div class="cl">    CODE_LEN = 6</div>
+      <div class="cl">    PREFIX = "http://tinyurl.com/"</div>
+      <div class="cl">    </div>
+      <div class="cl">    def __init__(self):</div>
+      <div class="cl">        self.long_to_short = {}</div>
+      <div class="cl">        self.short_to_long = {}</div>
+      <div class="cl">    </div>
+      <div class="cl">    def encode(self, longUrl: str) -> str:</div>
+      <div class="cl">        if longUrl in self.long_to_short:</div>
+      <div class="cl">            return self.PREFIX + self.long_to_short[longUrl]</div>
+      <div class="cl">        while True:  <span class="comment"># Generate until no collision</span></div>
+      <div class="cl">            code = "".join(random.choices(self.CHARS, k=self.CODE_LEN))</div>
+      <div class="cl">            if code not in self.short_to_long:</div>
+      <div class="cl">                break</div>
+      <div class="cl">        self.long_to_short[longUrl] = code</div>
+      <div class="cl">        self.short_to_long[code] = longUrl</div>
+      <div class="cl">        return self.PREFIX + code</div>
+      <div class="cl">    </div>
+      <div class="cl">    def decode(self, shortUrl: str) -> str:</div>
+      <div class="cl">        code = shortUrl[len(self.PREFIX):]</div>
+      <div class="cl">        return self.short_to_long[code]</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Which to Use in Interview?</div>
+      <p><strong>Counter-based</strong> for LeetCode (simple, no imports). Mention random approach for follow-up discussion on production systems.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5: Interview Strategy ===== -->
+<div class="card" id="s5">
+  <div class="section-header" onclick="toggleCard('s5')">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>"Encode/decode" = bijection. Need forward and reverse mapping. Think hash maps immediately.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Choose a Code Generation Strategy</div>
+        <p>Options: counter, random, hash. Counter is simplest for interview — explain trade-offs.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Handle Idempotency</div>
+        <p>Same input should give same output. Check if URL already encoded before generating new code.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Discuss Follow-ups</div>
+        <p>Scalability, collision handling, expiration, analytics. Shows system design thinking.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:8px;">🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+        "This is a bijection problem — I need to map long URLs to unique short codes and back. I'll use two hash maps: one for encode lookup, one for decode lookup. For code generation, I'll start with a simple counter converted to Base62 — this gives short codes and guarantees uniqueness. I'll check if a URL is already encoded to ensure idempotency. For production, I'd discuss random codes with collision detection to prevent enumeration attacks."
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Follow-up Questions</div>
+      <ul style="padding-left:1rem;">
+        <li><strong>Scalability:</strong> Distributed counter? Sharding by hash?</li>
+        <li><strong>Persistence:</strong> How to store mappings durably?</li>
+        <li><strong>Expiration:</strong> TTL for short URLs?</li>
+        <li><strong>Analytics:</strong> Track click counts?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 6: Interactive Walkthrough ===== -->
+<div class="card" id="s6">
+  <div class="section-header" onclick="toggleCard('s6')">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="viz-area">
+      <!-- Counter Display -->
+      <div class="counter-display">
+        <span class="counter-label">Counter:</span>
+        <span class="counter-value" id="counterValue">0</span>
+      </div>
+
+      <!-- Transform Panel -->
+      <div class="transform-panel">
+        <div class="transform-input">
+          <div class="url-label">Long URL</div>
+          <div class="url-box long" id="longUrlBox">—</div>
+        </div>
+        <div class="transform-arrow-box">
+          <div class="transform-arrow" id="transformArrow">⇄</div>
+          <div class="transform-label" id="transformLabel">—</div>
+        </div>
+        <div class="transform-output">
+          <div class="url-label">Short URL</div>
+          <div class="url-box short" id="shortUrlBox">—</div>
+        </div>
+      </div>
+
+      <!-- Hash Maps -->
+      <div class="hashmap-panel">
+        <div class="hashmap-title">Storage: Two Hash Maps</div>
+        <div class="maps-container">
+          <div class="map-section">
+            <div class="map-section-title">long_to_short</div>
+            <div class="map-entries" id="longToShortMap">
+              <div style="color:var(--text3);font-size:12px;text-align:center;">(empty)</div>
+            </div>
+          </div>
+          <div class="map-section">
+            <div class="map-section-title">short_to_long</div>
+            <div class="map-entries" id="shortToLongMap">
+              <div style="color:var(--text3);font-size:12px;text-align:center;">(empty)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel"></div>
+
+      <!-- Info Card -->
+      <div class="info-card" id="infoCard">
+        <div class="info-top">
+          <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+          <span class="step-counter" id="stepCounter">0 / 0</span>
+        </div>
+        <div class="info-title" id="infoTitle">—</div>
+        <div class="info-text" id="infoText">—</div>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="dots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" onclick="go(-1)">← Prev</button>
+        <button class="btn" onclick="reset()">Reset</button>
+        <button class="btn btn-primary" onclick="go(1)">Next →</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch swatch-long"></div>Long URL</div>
+        <div class="legend-item"><div class="legend-swatch swatch-short"></div>Short URL</div>
+        <div class="legend-item"><div class="legend-swatch swatch-new"></div>New Entry</div>
+        <div class="legend-item"><div class="legend-swatch swatch-active"></div>Active</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: Summary ===== -->
+<div class="card" id="s7">
+  <div class="section-header" onclick="toggleCard('s7')">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="takeaways">
+      <div class="takeaway">✓ URL shortening is a <strong>bijection</strong> — use two hash maps</div>
+      <div class="takeaway">✓ Counter + Base62 is simplest, but codes are guessable</div>
+      <div class="takeaway">✓ Random codes need collision detection but are secure</div>
+      <div class="takeaway">✓ Check for existing encoding to ensure <strong>idempotency</strong></div>
+      <div class="takeaway">✓ Time: O(1) for both encode and decode</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="padding-left:1.25rem;">
+        <li>"Encode/decode" or "serialize/deserialize" problems</li>
+        <li>Any bijection between two domains</li>
+        <li>ID generation systems</li>
+        <li>Caching with computed keys</li>
+      </ul>
+    </div>
+
+    <div class="related-problems">
+      <h4>Related Problems</h4>
+      <ul>
+        <li><strong>Design HashMap</strong> (Easy) — Implement hash table from scratch</li>
+        <li><strong>LRU Cache</strong> (Medium) — Hash map + doubly linked list</li>
+        <li><strong>Serialize and Deserialize Binary Tree</strong> (Hard) — Encode/decode tree</li>
+        <li><strong>Encode and Decode Strings</strong> (Medium) — Length-prefixed encoding</li>
+        <li><strong>Design Twitter</strong> (Medium) — System design with hash maps</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/*═══════════════════════════════════════════════
+  CONFIGURATION
+═══════════════════════════════════════════════*/
+const URLS = [
+  "https://leetcode.com/problems/design-tinyurl",
+  "https://google.com",
+  "https://leetcode.com/problems/design-tinyurl"  // Repeat to show idempotency
+];
+const PREFIX = "http://tinyurl.com/";
+const BASE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function toBase62(num) {
+  if (num === 0) return "0";
+  let result = [];
+  while (num > 0) {
+    result.push(BASE[num % 62]);
+    num = Math.floor(num / 62);
+  }
+  return result.reverse().join('');
+}
+
+const CODE_LINES = [
+  'def encode(self, longUrl):',
+  '    if longUrl in self.long_to_short:',
+  '        return PREFIX + self.long_to_short[longUrl]',
+  '    code = self._to_base62(self.counter)',
+  '    self.long_to_short[longUrl] = code',
+  '    self.short_to_long[code] = longUrl',
+  '    self.counter += 1',
+  '    return PREFIX + code',
+  '',
+  'def decode(self, shortUrl):',
+  '    code = shortUrl[len(PREFIX):]',
+  '    return self.short_to_long[code]'
+];
+
+/*═══════════════════════════════════════════════
+  BUILD STEPS
+═══════════════════════════════════════════════*/
+function buildSteps() {
+  const steps = [];
+  let counter = 0;
+  const longToShort = {};
+  const shortToLong = {};
+
+  // Step 0: INIT
+  steps.push({
+    phase: 'INIT', phaseClass: 'phase-init',
+    activeLine: -1,
+    counter: 0,
+    longUrl: '—',
+    shortUrl: '—',
+    transformDir: '⇄',
+    transformLabel: '—',
+    title: 'Initialize Codec',
+    text: 'Create empty hash maps for long→short and short→long mappings. Counter starts at 0.',
+    longToShort: {},
+    shortToLong: {},
+    newLongKey: null,
+    newShortKey: null,
+    activeKey: null
+  });
+
+  // Process encode operations
+  for (let i = 0; i < URLS.length; i++) {
+    const url = URLS[i];
+    const alreadyEncoded = url in longToShort;
+
+    if (alreadyEncoded) {
+      // Already encoded - return existing
+      const existingCode = longToShort[url];
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 1,
+        counter: counter,
+        longUrl: url,
+        shortUrl: '—',
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Encode URL #${i + 1}: Check if exists`,
+        text: `"${url.substring(0, 30)}..." is already in long_to_short!`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: null,
+        newShortKey: null,
+        activeKey: url
+      });
+
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 2,
+        counter: counter,
+        longUrl: url,
+        shortUrl: PREFIX + existingCode,
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Return existing short URL`,
+        text: `Found existing code "${existingCode}". Return "${PREFIX}${existingCode}" — idempotent!`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: null,
+        newShortKey: null,
+        activeKey: url
+      });
+    } else {
+      // New encoding
+      const code = toBase62(counter);
+
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 1,
+        counter: counter,
+        longUrl: url,
+        shortUrl: '—',
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Encode URL #${i + 1}: Check if exists`,
+        text: `"${url.substring(0, 30)}..." is NOT in long_to_short. Need to create new code.`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: null,
+        newShortKey: null,
+        activeKey: null
+      });
+
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 3,
+        counter: counter,
+        longUrl: url,
+        shortUrl: '—',
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Generate code from counter`,
+        text: `Counter = ${counter} → Base62 = "${code}"`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: null,
+        newShortKey: null,
+        activeKey: null
+      });
+
+      // Store mappings
+      longToShort[url] = code;
+      shortToLong[code] = url;
+
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 5,
+        counter: counter,
+        longUrl: url,
+        shortUrl: PREFIX + code,
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Store mappings`,
+        text: `Add to both maps: long_to_short["${url.substring(0, 20)}..."] = "${code}", short_to_long["${code}"] = URL`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: url,
+        newShortKey: code,
+        activeKey: null
+      });
+
+      counter++;
+
+      steps.push({
+        phase: 'ENCODE', phaseClass: 'phase-encode',
+        activeLine: 7,
+        counter: counter,
+        longUrl: url,
+        shortUrl: PREFIX + code,
+        transformDir: '→',
+        transformLabel: 'encode()',
+        title: `Increment counter, return`,
+        text: `Counter now ${counter}. Return "${PREFIX}${code}"`,
+        longToShort: {...longToShort},
+        shortToLong: {...shortToLong},
+        newLongKey: null,
+        newShortKey: null,
+        activeKey: null
+      });
+    }
+  }
+
+  // Decode operations
+  const codesToDecode = Object.keys(shortToLong);
+  for (const code of codesToDecode) {
+    const shortUrl = PREFIX + code;
+    const longUrl = shortToLong[code];
+
+    steps.push({
+      phase: 'DECODE', phaseClass: 'phase-decode',
+      activeLine: 10,
+      counter: counter,
+      longUrl: '—',
+      shortUrl: shortUrl,
+      transformDir: '←',
+      transformLabel: 'decode()',
+      title: `Decode "${code}"`,
+      text: `Extract code "${code}" from short URL.`,
+      longToShort: {...longToShort},
+      shortToLong: {...shortToLong},
+      newLongKey: null,
+      newShortKey: null,
+      activeKey: code
+    });
+
+    steps.push({
+      phase: 'DECODE', phaseClass: 'phase-decode',
+      activeLine: 11,
+      counter: counter,
+      longUrl: longUrl,
+      shortUrl: shortUrl,
+      transformDir: '←',
+      transformLabel: 'decode()',
+      title: `Lookup and return`,
+      text: `short_to_long["${code}"] = "${longUrl.substring(0, 35)}..."`,
+      longToShort: {...longToShort},
+      shortToLong: {...shortToLong},
+      newLongKey: null,
+      newShortKey: null,
+      activeKey: code
+    });
+  }
+
+  // Done
+  steps.push({
+    phase: 'DONE', phaseClass: 'phase-done',
+    activeLine: -1,
+    counter: counter,
+    longUrl: '—',
+    shortUrl: '—',
+    transformDir: '⇄',
+    transformLabel: '—',
+    title: `All operations complete`,
+    text: `Encoded ${Object.keys(longToShort).length} unique URLs. Demonstrated encode, idempotency, and decode.`,
+    longToShort: {...longToShort},
+    shortToLong: {...shortToLong},
+    newLongKey: null,
+    newShortKey: null,
+    activeKey: null
+  });
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+/*═══════════════════════════════════════════════
+  RENDER
+═══════════════════════════════════════════════*/
+function initUI() {
+  // Code panel
+  const cp = document.getElementById('codePanel');
+  cp.innerHTML = CODE_LINES.map((l, i) =>
+    `<div class="code-line" id="cl${i}">${escHtml(l)}</div>`
+  ).join('');
+
+  // Progress dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = STEPS.map((_, i) => `<div class="dot" id="dot${i}" onclick="jumpTo(${i})"></div>`).join('');
+
+  render();
+}
+
+function render() {
+  const st = STEPS[cur];
+
+  // Counter
+  document.getElementById('counterValue').textContent = st.counter;
+
+  // URL boxes
+  const longBox = document.getElementById('longUrlBox');
+  const shortBox = document.getElementById('shortUrlBox');
+  longBox.textContent = st.longUrl === '—' ? '—' : (st.longUrl.length > 45 ? st.longUrl.substring(0, 45) + '...' : st.longUrl);
+  shortBox.textContent = st.shortUrl;
+  longBox.className = 'url-box ' + (st.phase === 'ENCODE' ? 'long' : (st.phase === 'DECODE' ? 'active' : ''));
+  shortBox.className = 'url-box ' + (st.phase === 'DECODE' ? 'short' : (st.phase === 'ENCODE' && st.shortUrl !== '—' ? 'short' : ''));
+
+  // Transform arrow
+  document.getElementById('transformArrow').textContent = st.transformDir;
+  document.getElementById('transformLabel').textContent = st.transformLabel;
+
+  // Hash maps
+  renderMap('longToShortMap', st.longToShort, st.newLongKey, st.activeKey, true);
+  renderMap('shortToLongMap', st.shortToLong, st.newShortKey, st.activeKey, false);
+
+  // Code lines
+  CODE_LINES.forEach((_, i) => {
+    const el = document.getElementById(`cl${i}`);
+    el.className = 'code-line' + (i === st.activeLine ? ' active' : '');
+  });
+
+  // Info card
+  document.getElementById('phaseBadge').className = 'phase-badge ' + st.phaseClass;
+  document.getElementById('phaseBadge').textContent = st.phase;
+  document.getElementById('stepCounter').textContent = `${cur + 1} / ${STEPS.length}`;
+  document.getElementById('infoTitle').textContent = st.title;
+  document.getElementById('infoText').textContent = st.text;
+
+  // Dots
+  STEPS.forEach((_, i) => {
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+  });
+}
+
+function renderMap(containerId, map, newKey, activeKey, isLongToShort) {
+  const el = document.getElementById(containerId);
+  const keys = Object.keys(map);
+  if (keys.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;">(empty)</div>';
+    return;
+  }
+  el.innerHTML = keys.map(k => {
+    const v = map[k];
+    let cls = '';
+    if (k === newKey) cls = 'new';
+    else if (k === activeKey || v === activeKey) cls = 'active';
+    const displayKey = k.length > 15 ? k.substring(0, 15) + '...' : k;
+    const displayVal = v.length > 15 ? v.substring(0, 15) + '...' : v;
+    return `<div class="map-entry ${cls}">
+      <span class="map-key" title="${escHtml(k)}">${escHtml(displayKey)}</span>
+      <span class="map-arrow">→</span>
+      <span class="map-value" title="${escHtml(v)}">${escHtml(displayVal)}</span>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(t) {
+  return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/*═══════════════════════════════════════════════
+  NAVIGATION
+═══════════════════════════════════════════════*/
+function go(d) {
+  const n = cur + d;
+  if (n >= 0 && n < STEPS.length) { cur = n; render(); }
+}
+function jumpTo(i) { cur = i; render(); }
+function reset() { cur = 0; render(); }
+
+/*═══════════════════════════════════════════════
+  CARD COLLAPSE
+═══════════════════════════════════════════════*/
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/*═══════════════════════════════════════════════
+  KEYBOARD
+═══════════════════════════════════════════════*/
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+initUI();
+</script>
+</body>
+</html>
