@@ -1,80 +1,884 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Range Sum Query - Immutable — LC #303</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#303 · Range Sum Query - Immutable</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Prefix Sum Table Diagram ── */
+.prefix-diagram{overflow-x:auto;margin:1rem 0}
+.prefix-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:0 auto}
+.prefix-table th,.prefix-table td{padding:8px 16px;text-align:center;border:1.5px solid var(--border2)}
+.prefix-table thead th{background:var(--bg2);font-weight:700;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+.prefix-table .row-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);background:var(--bg2);text-align:left;padding-left:12px}
+.prefix-table .orig{background:var(--surface);color:var(--text)}
+.prefix-table .psum{background:var(--blue-bg);color:var(--blue-text);font-weight:600}
+
+/* ── Formula Box ── */
+.formula-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;text-align:center}
+.formula-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:8px}
+.formula-body{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);line-height:1.8}
+.formula-note{font-size:12px;color:var(--text2);margin-top:6px}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.array-row-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+.cells-row{display:flex;gap:4px;justify-content:center;flex-wrap:nowrap}
+.cell{
+  width:52px;height:52px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.processing{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.in-range{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.pbuilt{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.boundary{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.cell.result-cell{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+
+.idx-row{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.idx-slot{width:52px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+.ptr-row{display:flex;gap:4px;justify-content:center;min-height:26px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:52px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 5px;line-height:1.4;white-space:nowrap}
+.ptr-blue{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-amber{background:var(--amber-bg);color:var(--amber-mid)}
+.ptr-green{background:var(--green-bg);color:var(--green-mid)}
+
+.array-section{margin-bottom:1rem}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-query{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-proc{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-pfx{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-range{background:var(--green-bg);border-color:var(--green-border)}
+.sw-bnd{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Range Sum Query - Immutable</h1>
-<div class="subtitle">LeetCode #303 &mdash; Basic Prefix Sum Query</div>
-<div class="tags"><span class="tag tag-easy">🟢 Easy</span><span class="tag tag-pattern">Array Manipulation</span><span class="tag tag-pattern">Basic Prefix Sum Query</span><span class="tag tag-cx">O(n) init, O(1) query Time &middot; O(n) Space</span></div>
-</div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>NumArray class with init(nums) and sumRange(left,right) returning sum of nums[left..right]. Multiple queries on same array.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Precompute prefix[i] = sum of nums[0..i-1]. Then sumRange(l,r) = prefix[r+1] - prefix[l] in O(1). Preprocessing is O(n) but each query is O(1).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Prefix Sum Array</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Prefix Sum Array</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Build prefix[0..n]: prefix[0]=0, prefix[i]=prefix[i-1]+nums[i-1]</span></div><div class="step"><span class="snum">2</span><span class="stxt">sumRange(l,r) = prefix[r+1] - prefix[l]</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="box bk"><div class="boxt">&#128274; Invariant</div><p>prefix[i] = sum of nums[0..i-1]. prefix[r+1]-prefix[l] = sum(nums[l..r]).</p></div><p>prefix[r+1]-prefix[l] = (sum of first r+1 elements) - (sum of first l elements) = sum of elements l through r.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(n) init, O(1) query</strong> | Space: <strong>O(n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">class NumArray:
-    def __init__(self, nums: list[int]):
-        self.prefix = [0] * (len(nums) + 1)
-        for i, num in enumerate(nums):
-            self.prefix[i+1] = self.prefix[i] + num
+<div class="page-wrapper">
 
-    def sumRange(self, left: int, right: int) -> int:
-        return self.prefix[right+1] - self.prefix[left]</pre><div class="box bw"><div class="boxt">&#9888; Common Mistake</div><p>Off-by-one: sumRange(l,r) = prefix[r+1]-prefix[l], NOT prefix[r]-prefix[l-1] (which breaks at l=0).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Index carefully: prefix has n+1 elements, prefix[0]=0</span></div><div class="step"><span class="snum">2</span><span class="stxt">Build once in __init__, answer each query in O(1)</span></div><div class="step"><span class="snum">3</span><span class="stxt">Foundation: 2D prefix sum for matrix queries</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Prefix Sum Array</td><td>O(n) init, O(1) query</td><td>O(n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Range Sum Query 2D</span><span class="pd dm">Medium</span> — Extend to 2D matrix</li><li><span class="pn">Running Sum of 1d Array</span><span class="pd de">Easy</span> — Same concept, return all prefixes</li><li><span class="pn">Subarray Sum Equals K</span><span class="pd dm">Medium</span> — Prefix + hash map</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Basic Prefix Sum Query</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-bl", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", ""]}], "vars": {"prefix": [0]}, "title": "Build prefix sum array", "desc": "prefix[0]=0. prefix[i]=prefix[i-1]+nums[i-1].", "phase": "init", "pl": "Init"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "0", "0", "0", "0"], "cls": ["c-pu", "c-pu", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"i": 0, "prefix": [0, 1]}, "title": "prefix[1] = 0+1 = 1", "desc": "Running sum up to index 0.", "phase": "step", "pl": "Build"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-gr", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "3", "0", "0", "0"], "cls": ["c-pu", "c-pu", "c-pu", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"i": 1, "prefix": [0, 1, 3]}, "title": "prefix[2] = 1+2 = 3", "desc": "Running sum up to index 1.", "phase": "step", "pl": "Build"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-gr", "c-gr", "c-bl", "c-bl"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "3", "6", "0", "0"], "cls": ["c-pu", "c-pu", "c-pu", "c-pu", "c-bl", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"i": 2, "prefix": [0, 1, 3, 6]}, "title": "prefix[3] = 3+3 = 6", "desc": "Running sum up to index 2.", "phase": "step", "pl": "Build"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-gr", "c-gr", "c-gr", "c-bl"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "3", "6", "10", "0"], "cls": ["c-pu", "c-pu", "c-pu", "c-pu", "c-pu", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"i": 3, "prefix": [0, 1, 3, 6, 10]}, "title": "prefix[4] = 6+4 = 10", "desc": "Running sum up to index 3.", "phase": "step", "pl": "Build"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-gr", "c-gr", "c-gr", "c-gr"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "3", "6", "10", "15"], "cls": ["c-pu", "c-pu", "c-pu", "c-pu", "c-pu", "c-pu"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"i": 4, "prefix": [0, 1, 3, 6, 10, 15]}, "title": "prefix[5] = 10+5 = 15", "desc": "Running sum up to index 4.", "phase": "step", "pl": "Build"}, {"rows": [{"lbl": "nums:", "cells": ["1", "2", "3", "4", "5"], "cls": ["c-gr", "c-gr", "c-gr", "c-gr", "c-gr"], "ptrs": ["", "", "", "", ""]}, {"lbl": "prefix:", "cells": ["0", "1", "3", "6", "10", "15"], "cls": ["c-pu", "c-pu", "c-pu", "c-pu", "c-pu", "c-pu"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"prefix": [0, 1, 3, 6, 10, 15]}, "title": "\u2705 Prefix array built", "desc": "Range sum(l,r) = prefix[r+1]-prefix[l] in O(1).", "phase": "done", "pl": "\u2705 Done"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--green)"></div>input array</div><div class="li"><div class="ld" style="background:var(--purple)"></div>prefix sum array</div></div></div></div>
+<header>
+  <div class="problem-number">LeetCode #303</div>
+  <h1>Range Sum Query - Immutable</h1>
+  <p class="subtitle">Given an integer array nums, handle multiple sumRange(left, right) queries returning the sum of elements between indices left and right (inclusive).</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Prefix Sum</span>
+    <span class="tag tag-pattern">Array</span>
+    <span class="tag tag-complexity">Time: O(1) query</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We have a <strong>fixed array</strong> (immutable — it never changes after initialization) and we will be asked to answer many <strong>range sum queries</strong>: "what is the sum of elements from index <code>left</code> to index <code>right</code>?"</p>
+
+    <p style="margin-top:0.75rem">The keyword is <em>multiple queries</em>. If there were just one query, summing up elements between left and right takes O(n) time — fine. But with <strong>thousands of queries</strong>, doing O(n) work per query becomes O(n × Q) total, which is unacceptably slow for large inputs.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Pay a one-time O(n) preprocessing cost to build a <strong>prefix sum array</strong>. Then every query is answered in <strong>O(1)</strong> with a single subtraction: <code>prefix[right+1] − prefix[left]</code>. The array never changes (immutable), so this precomputed data stays valid forever.</p>
+    </div>
+
+    <div class="prefix-diagram">
+      <table class="prefix-table">
+        <thead>
+          <tr>
+            <th class="row-label">Index i</th>
+            <th>0</th><th>1</th><th>2</th><th>3</th><th>4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">nums[i]</td>
+            <td class="orig">-2</td><td class="orig">0</td><td class="orig">3</td><td class="orig">-5</td><td class="orig">2</td>
+          </tr>
+          <tr>
+            <td class="row-label">prefix[i+1]</td>
+            <td class="psum">-2</td><td class="psum">-2</td><td class="psum">1</td><td class="psum">-4</td><td class="psum">-2</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:6px">prefix[0]=0 (sentinel) · prefix[i+1] = prefix[i] + nums[i]</p>
+    </div>
+
+    <p><strong>Concrete queries on nums = [-2, 0, 3, -5, 2]:</strong></p>
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">✓ sumRange(0, 2) = 1</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          prefix[3] − prefix[0]<br>
+          = 1 − 0 = <strong>1</strong><br>
+          (−2 + 0 + 3 = 1 ✓)
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ sumRange(2, 4) = 0</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          prefix[5] − prefix[2]<br>
+          = −2 − (−2) = <strong>0</strong><br>
+          (3 + −5 + 2 = 0 ✓)
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases to consider:</strong> single-element query where left == right (formula still works: prefix[left+1] − prefix[left] = nums[left]), negative numbers (subtraction handles them automatically), and the full-array query (left=0, right=n-1).</p>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Prefix Sum (Cumulative Running Total)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The idea is to precompute a <strong>running total</strong> of all elements up to each position. This cumulative array — the <em>prefix sum array</em> — encodes all possible left-endpoint sums, letting us cancel them out at query time.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build prefix array (constructor, once):</strong> Allocate <code>prefix[0..n]</code> with <code>prefix[0] = 0</code> as a sentinel. Then for each index i: <code>prefix[i+1] = prefix[i] + nums[i]</code>. After this loop, <code>prefix[k]</code> stores the sum of nums[0] through nums[k-1].</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Answer each query in O(1):</strong> For <code>sumRange(left, right)</code>, return <code>prefix[right+1] − prefix[left]</code>. This equals sum(0..right) minus sum(0..left-1), leaving exactly nums[left..right]. One subtraction, no loop.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Why size n+1 with sentinel?</strong> The sentinel <code>prefix[0] = 0</code> handles left=0 uniformly. Without it, we would need an if-branch: "if left==0, return prefix[right+1], else return prefix[right+1] − prefix[left]". The sentinel eliminates this special case cleanly.</span>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-title">📐 The Core Formula</div>
+      <div class="formula-body">sumRange(L, R) = prefix[R+1] − prefix[L]</div>
+      <div class="formula-note">where prefix[k] = nums[0] + nums[1] + … + nums[k−1], and prefix[0] = 0</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why This Works: Cancellation of Shared Prefix</div>
+      <p>Both prefix[R+1] and prefix[L] share the sum of nums[0..L-1]. Subtracting cancels that shared portion, leaving only nums[L..R]. It is the same technique as computing averages from a running total — a pattern that appears everywhere in statistics, signal processing, and database query optimization.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After construction, <code>prefix[k]</code> stores the sum of <strong>exactly the first k elements</strong> (indices 0 through k-1). Equivalently: prefix[k] = nums[0] + nums[1] + … + nums[k-1], for all k from 0 to n. This invariant is established during construction and never violated (the array is immutable).</p>
+    </div>
+
+    <p><strong>Algebraic proof of the query formula:</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">prefix[R+1] − prefix[L]</span></div>
+<div class="ann-line"><span class="acode">= (nums[0]+…+nums[R]) − (nums[0]+…+nums[L-1])</span></div>
+<div class="ann-line"><span class="acode">= nums[L] + nums[L+1] + … + nums[R]     </span><span class="aann">← shared prefix cancels out</span></div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>The sentinel prefix[0] = 0</strong> is a deliberate base case. When L=0, the formula becomes prefix[R+1] − prefix[0] = prefix[R+1] − 0, which is just prefix[R+1] — correct. Without the sentinel you would need to handle L=0 separately, making the code messier.</p>
+
+    <p style="margin-top:0.75rem"><strong>Negative numbers:</strong> The invariant holds regardless of sign. prefix stores the actual sum (which can be negative), and subtraction of two potentially negative numbers still gives the correct difference. No special handling needed.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Off-by-one Is the #1 Trap Here</div>
+      <p>Two common mistakes: (1) <strong>Wrong formula</strong> — writing <code>prefix[right] − prefix[left]</code> instead of <code>prefix[right+1] − prefix[left]</code> will exclude nums[right] from the sum. (2) <strong>Wrong array size</strong> — using a size-n prefix array (without the +1) and then indexing prefix[right+1] will go out of bounds for right = n-1. Always use size n+1 and the formula <code>prefix[right+1] − prefix[left]</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Prefix Sum (Interview Pick ★)</strong> — O(n) init, O(1) query, O(n) space</p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class NumArray:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, nums: list[int]):</span></div>
+<div class="ann-line"><span class="acode">        n = len(nums)                              </span><span class="aann">← number of elements</span></div>
+<div class="ann-line"><span class="acode">        self.prefix = [0] * (n + 1)               </span><span class="aann">← size n+1; prefix[0]=0 is the sentinel</span></div>
+<div class="ann-line"><span class="acode">        for i in range(n):                         </span><span class="aann">← build cumulative sums, left to right</span></div>
+<div class="ann-line"><span class="acode">            self.prefix[i+1] = self.prefix[i] + nums[i]  </span><span class="aann">← running total</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    def sumRange(self, left: int, right: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">        return self.prefix[right+1] - self.prefix[left]  </span><span class="aann">← O(1): one subtraction</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why prefix[right+1] and not prefix[right]?</div>
+      <p>prefix[k] = sum of indices 0..k-1 (the first k elements). So prefix[right+1] = sum of indices 0..right, which <em>includes</em> nums[right]. Using prefix[right] would give sum of 0..right-1, incorrectly excluding the rightmost element. The +1 is load-bearing.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (O(1) init, O(n) per query)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class NumArray:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, nums):                      </span></div>
+<div class="ann-line"><span class="acode">        self.nums = nums           </span><span class="aann">← just store the array, no preprocessing</span></div>
+<div class="ann-line"><span class="acode">    def sumRange(self, left, right):</span></div>
+<div class="ann-line"><span class="acode">        return sum(self.nums[left:right+1])  </span><span class="aann">← O(n) per query — too slow for many calls</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Comparison</div>
+      <p>
+        <strong>Brute Force:</strong> Init O(1) · Query O(n) · Total for Q queries: O(nQ)<br>
+        <strong>Prefix Sum:</strong> Init O(n) · Query O(1) · Total for Q queries: O(n + Q)<br>
+        With n=10,000 and Q=10,000: brute force = 10<sup>8</sup> ops; prefix sum = 20,000 ops — a 5,000x speedup.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Spot the "Multiple Queries" Signal</div>
+        <p style="font-size:14px;color:var(--text)">The problem says "handle multiple queries." That is the trigger for prefix sum thinking. Brute-force per query is O(n) and fine for one query, but with Q queries you get O(nQ). Ask: "How many queries are expected?" — this confirms you need preprocessing and shows you think about real-world scale.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: State the Trade-Off Explicitly</div>
+        <p style="font-size:14px;color:var(--text)">"I can trade O(n) space and O(n) one-time preprocessing to make every subsequent query O(1). Since the array is immutable, the prefix sum is computed once and remains valid forever — there's no invalidation problem." Mentioning immutability shows you understand why this approach is safe here.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the Formula Live</div>
+        <p style="font-size:14px;color:var(--text)">Do not just recall the formula — derive it on the whiteboard. "I want sum(L..R). If I know sum(0..R) and sum(0..L-1), I subtract them and the shared prefix cancels. So I store prefix[k] = sum of first k elements. Then sumRange(L,R) = prefix[R+1] − prefix[L]." Derivation is more impressive than memorization.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Call Out the Sentinel Choice</div>
+        <p style="font-size:14px;color:var(--text)">"I'll use a size-(n+1) array with prefix[0]=0. This means the formula works uniformly even when L=0, avoiding a special-case branch." This is a small but telling sign of attention to clean API design and edge-case awareness.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The problem mentions multiple queries on an immutable array — classic prefix sum setup.<br>
+I'll precompute a prefix array where prefix[k] = sum of nums[0..k-1].<br>
+Then sumRange(L, R) = prefix[R+1] - prefix[L]. That's O(1) per query after O(n) init.<br>
+I'll use size n+1 with prefix[0]=0 as a sentinel — handles L=0 without special cases.<br>
+Space is O(n) for the prefix array, which is acceptable since input itself is O(n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if the array is mutable (update queries too)?"</strong> → Range Sum Query - Mutable (#307): use Binary Indexed Tree (Fenwick) for O(log n) update + O(log n) query.</li>
+        <li><strong>"What about 2D range sum?"</strong> → Range Sum Query 2D - Immutable (#304): 2D prefix sum, answered with a 4-corner formula.</li>
+        <li><strong>"Find a subarray summing to exactly k?"</strong> → Subarray Sum Equals K (#560): prefix sum + hash map counts in O(n).</li>
+        <li><strong>"Count subarrays with sum divisible by k?"</strong> → #974: prefix sum modulo k + hash map.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: nums = [-2, 0, 3, -5, 2]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Original array -->
+      <div class="array-section">
+        <div class="array-row-label">nums (original, immutable)</div>
+        <div class="ptr-row" id="nums-ptrs"></div>
+        <div class="cells-row" id="nums-cells"></div>
+        <div class="idx-row" id="nums-idx"></div>
+      </div>
+
+      <!-- Prefix array -->
+      <div class="array-section" style="margin-top:1.25rem">
+        <div class="array-row-label">prefix (size n+1 = 6, built once)</div>
+        <div class="ptr-row" id="pfx-ptrs"></div>
+        <div class="cells-row" id="pfx-cells"></div>
+        <div class="idx-row" id="pfx-idx"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-cur">
+          <span class="var-name">nums[i]</span>
+          <span class="var-val" id="vv-cur">—</span>
+        </div>
+        <div class="var-box" id="vb-pfx">
+          <span class="var-name">prefix[i+1]</span>
+          <span class="var-val" id="vv-pfx">—</span>
+        </div>
+        <div class="var-box" id="vb-query">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-query">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">class NumArray:</div>
+      <div class="code-line" id="cl-1">    def __init__(self, nums):</div>
+      <div class="code-line" id="cl-2">        self.prefix = [0] * (len(nums) + 1)</div>
+      <div class="code-line" id="cl-3">        for i in range(len(nums)):</div>
+      <div class="code-line" id="cl-4">            self.prefix[i+1] = self.prefix[i] + nums[i]</div>
+      <div class="code-line" id="cl-5">    def sumRange(self, left, right):</div>
+      <div class="code-line" id="cl-6">        return self.prefix[right+1] - self.prefix[left]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 9</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-proc"></div> Currently processing (i)</div>
+      <div class="legend-item"><div class="legend-swatch sw-pfx"></div> Prefix value (built)</div>
+      <div class="legend-item"><div class="legend-swatch sw-range"></div> In query range</div>
+      <div class="legend-item"><div class="legend-swatch sw-bnd"></div> Query boundary (L or R+1)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Done / not in range</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Prefix sum = precomputed running totals — pay O(n) once, answer each query in O(1)</div>
+      <div class="takeaway">Core formula: sumRange(L, R) = prefix[R+1] − prefix[L]</div>
+      <div class="takeaway">Use a size n+1 array with prefix[0]=0 sentinel — avoids special-case for L=0</div>
+      <div class="takeaway">Only works directly on immutable arrays; mutable arrays need Fenwick Tree or Segment Tree</div>
+      <div class="takeaway">The prefix sum pattern generalizes to 2D, XOR, products, modular arithmetic, and difference arrays</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Init</th><th>Query</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-bad">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Fine for one query; terrible for many</td>
+        </tr>
+        <tr>
+          <td><strong>Prefix Sum ✓</strong></td>
+          <td>O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>O(n)</td>
+          <td>Optimal for immutable array + many queries</td>
+        </tr>
+        <tr>
+          <td>Segment Tree</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(log n)</td>
+          <td>O(n)</td>
+          <td>Overkill here; needed when array is mutable</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Prefix Sum Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Sum of elements in a range?" → Prefix sum</li>
+        <li>"Multiple queries on fixed data?" → Preprocess with prefix sum</li>
+        <li>"Count subarrays with target sum?" → Prefix sum + hash map</li>
+        <li>"Range updates, single-point queries?" → Difference array (inverse of prefix sum)</li>
+        <li>"Running statistics (running average, running XOR)?" → Prefix variant</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Prefix Sum pattern)</div>
+      <div class="related-item"><strong>Range Sum Query 2D - Immutable</strong><span class="related-diff diff-med">Medium</span> — Same idea in 2D; formula uses 4-corner prefix values (#304)</div>
+      <div class="related-item"><strong>Range Sum Query - Mutable</strong><span class="related-diff diff-med">Medium</span> — Array can change → Binary Indexed Tree for O(log n) update + query (#307)</div>
+      <div class="related-item"><strong>Subarray Sum Equals K</strong><span class="related-diff diff-med">Medium</span> — Prefix sum + hash map: count subarrays with exactly sum K in O(n) (#560)</div>
+      <div class="related-item"><strong>Find Pivot Index</strong><span class="related-diff diff-easy">Easy</span> — Find index where left prefix sum equals right suffix sum (#724)</div>
+      <div class="related-item"><strong>Product of Array Except Self</strong><span class="related-diff diff-med">Medium</span> — Prefix/suffix products instead of sums, no division allowed (#238)</div>
+      <div class="related-item"><strong>Contiguous Array</strong><span class="related-diff diff-med">Medium</span> — Prefix sum with 0→-1 mapping to find longest equal 0/1 subarray (#525)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 1.3 (Array → Prefix Sum Pattern)<br>
+      Sub-Pattern: <strong>Basic Prefix Sum Query</strong> · Source: Guide Section 1.3</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+const NUMS   = [-2, 0, 3, -5, 2];
+const PREFIX = [0, -2, -2, 1, -4, -2]; // prefix[0..5]
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    buildIdx:-1, pfxBuilt:1, queryL:-1, queryR:-1,
+    activeLine:2, changedVars:['pfx'],
+    i:'—', cur:'—', pfxVal:'0', queryResult:'—',
+    title:'Allocate prefix array (size n+1 = 6)',
+    text:'nums = [-2, 0, 3, -5, 2] has n=5 elements. We allocate self.prefix of size 6, initialized to all zeros. prefix[0] = 0 is the sentinel — it represents "sum of zero elements" and prevents off-by-one errors when left=0.'
+  },
+  {
+    id:1, phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build',
+    buildIdx:0, pfxBuilt:2, queryL:-1, queryR:-1,
+    activeLine:4, changedVars:['i','cur','pfx'],
+    i:'0', cur:'-2', pfxVal:'-2', queryResult:'—',
+    title:'i=0  →  prefix[1] = prefix[0] + nums[0]',
+    text:'prefix[1] = 0 + (−2) = −2. prefix[1] now holds "sum of nums[0..0] = −2". The running total after the first element is −2.'
+  },
+  {
+    id:2, phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build',
+    buildIdx:1, pfxBuilt:3, queryL:-1, queryR:-1,
+    activeLine:4, changedVars:['i','cur','pfx'],
+    i:'1', cur:'0', pfxVal:'-2', queryResult:'—',
+    title:'i=1  →  prefix[2] = prefix[1] + nums[1]',
+    text:'prefix[2] = −2 + 0 = −2. Adding 0 does not change the running total. prefix[2] = sum of nums[0..1] = −2+0 = −2.'
+  },
+  {
+    id:3, phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build',
+    buildIdx:2, pfxBuilt:4, queryL:-1, queryR:-1,
+    activeLine:4, changedVars:['i','cur','pfx'],
+    i:'2', cur:'3', pfxVal:'1', queryResult:'—',
+    title:'i=2  →  prefix[3] = prefix[2] + nums[2]',
+    text:'prefix[3] = −2 + 3 = 1. The positive 3 pushes the running total above zero. prefix[3] = sum of nums[0..2] = −2+0+3 = 1.'
+  },
+  {
+    id:4, phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build',
+    buildIdx:3, pfxBuilt:5, queryL:-1, queryR:-1,
+    activeLine:4, changedVars:['i','cur','pfx'],
+    i:'3', cur:'-5', pfxVal:'-4', queryResult:'—',
+    title:'i=3  →  prefix[4] = prefix[3] + nums[3]',
+    text:'prefix[4] = 1 + (−5) = −4. The large negative drags the total down. prefix[4] = sum of nums[0..3] = −2+0+3+(−5) = −4.'
+  },
+  {
+    id:5, phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build',
+    buildIdx:4, pfxBuilt:6, queryL:-1, queryR:-1,
+    activeLine:4, changedVars:['i','cur','pfx'],
+    i:'4', cur:'2', pfxVal:'-2', queryResult:'—',
+    title:'i=4  →  prefix[5] = prefix[4] + nums[4]',
+    text:'prefix[5] = −4 + 2 = −2. Prefix array is complete: [0, −2, −2, 1, −4, −2]. Construction took O(n) = 5 steps — done once. Every future query will cost exactly O(1).'
+  },
+  {
+    id:6, phase:'query', phaseLabel:'QUERY 1', phaseClass:'phase-query',
+    buildIdx:-1, pfxBuilt:6, queryL:0, queryR:2,
+    activeLine:6, changedVars:['query'],
+    i:'—', cur:'—', pfxVal:'—', queryResult:'1',
+    title:'sumRange(0, 2)  →  prefix[3] − prefix[0] = 1',
+    text:'Query: sum of nums[0..2]. Formula: prefix[right+1] − prefix[left] = prefix[3] − prefix[0] = 1 − 0 = 1. Green cells = query range. Amber cells = the two prefix lookups used. Verify: −2+0+3 = 1 ✓. One subtraction, no loop.'
+  },
+  {
+    id:7, phase:'query', phaseLabel:'QUERY 2', phaseClass:'phase-query',
+    buildIdx:-1, pfxBuilt:6, queryL:2, queryR:4,
+    activeLine:6, changedVars:['query'],
+    i:'—', cur:'—', pfxVal:'—', queryResult:'0',
+    title:'sumRange(2, 4)  →  prefix[5] − prefix[2] = 0',
+    text:'Query: sum of nums[2..4]. Formula: prefix[5] − prefix[2] = −2 − (−2) = 0. Subtracting two negatives that cancel! Verify: 3+(−5)+2 = 0 ✓. The same precomputed prefix array answers a completely different range — no recomputation.'
+  },
+  {
+    id:8, phase:'query', phaseLabel:'QUERY 3', phaseClass:'phase-query',
+    buildIdx:-1, pfxBuilt:6, queryL:1, queryR:3,
+    activeLine:6, changedVars:['query'],
+    i:'—', cur:'—', pfxVal:'—', queryResult:'-2',
+    title:'sumRange(1, 3)  →  prefix[4] − prefix[1] = −2',
+    text:'Query: sum of nums[1..3]. Formula: prefix[4] − prefix[1] = −4 − (−2) = −2. Verify: 0+3+(−5) = −2 ✓. Three queries answered with three subtractions. With 10,000 queries each saved O(n) work, the speedup is enormous.'
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  const numsPtrs  = document.getElementById('nums-ptrs');
+  const numsCells = document.getElementById('nums-cells');
+  const numsIdx   = document.getElementById('nums-idx');
+  NUMS.forEach(function(v, i) {
+    var ps = document.createElement('div'); ps.className='ptr-slot'; ps.id='np-'+i;
+    numsPtrs.appendChild(ps);
+    var c = document.createElement('div'); c.className='cell normal'; c.id='nc-'+i;
+    c.textContent = v;
+    numsCells.appendChild(c);
+    var ix = document.createElement('div'); ix.className='idx-slot'; ix.textContent=i;
+    numsIdx.appendChild(ix);
+  });
+
+  var pfxPtrs  = document.getElementById('pfx-ptrs');
+  var pfxCells = document.getElementById('pfx-cells');
+  var pfxIdx   = document.getElementById('pfx-idx');
+  PREFIX.forEach(function(v, i) {
+    var ps = document.createElement('div'); ps.className='ptr-slot'; ps.id='pp-'+i;
+    pfxPtrs.appendChild(ps);
+    var c = document.createElement('div'); c.className='cell normal'; c.id='pc-'+i;
+    c.textContent = (i === 0) ? '0' : '?';
+    pfxCells.appendChild(c);
+    var ix = document.createElement('div'); ix.className='idx-slot'; ix.textContent=i;
+    pfxIdx.appendChild(ix);
+  });
+
+  var pd = document.getElementById('progress-dots');
+  steps.forEach(function(_, i) {
+    var d = document.createElement('div'); d.className='dot'; d.id='dot-'+i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  });
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function render() {
+  var step = steps[current];
+
+  // nums cells
+  NUMS.forEach(function(v, i) {
+    var cell = document.getElementById('nc-'+i);
+    var ptr  = document.getElementById('np-'+i);
+    ptr.innerHTML = '';
+    cell.className = 'cell';
+    if (step.phase === 'build') {
+      if (i === step.buildIdx) {
+        cell.classList.add('processing');
+        var lbl = document.createElement('span');
+        lbl.className = 'ptr-lbl ptr-blue'; lbl.textContent = 'i';
+        ptr.appendChild(lbl);
+      } else if (i < step.buildIdx) {
+        cell.classList.add('done');
+      } else {
+        cell.classList.add('normal');
+      }
+    } else if (step.phase === 'query') {
+      if (i >= step.queryL && i <= step.queryR) {
+        cell.classList.add('in-range');
+      } else {
+        cell.classList.add('done');
+      }
+    } else {
+      cell.classList.add('normal');
+    }
+  });
+
+  // prefix cells
+  var numBuilt = step.pfxBuilt; // how many prefix cells are filled (index 0..numBuilt-1)
+  PREFIX.forEach(function(v, i) {
+    var cell = document.getElementById('pc-'+i);
+    var ptr  = document.getElementById('pp-'+i);
+    ptr.innerHTML = '';
+    cell.className = 'cell';
+    if (i >= numBuilt) {
+      cell.textContent = '?';
+      cell.classList.add('normal');
+    } else {
+      cell.textContent = v;
+      if (step.phase === 'query') {
+        var bL = step.queryL;
+        var bR = step.queryR + 1;
+        if (i === bL) {
+          cell.classList.add('boundary');
+          var lbl = document.createElement('span');
+          lbl.className = 'ptr-lbl ptr-amber'; lbl.textContent = 'L';
+          ptr.appendChild(lbl);
+        } else if (i === bR) {
+          cell.classList.add('boundary');
+          var lbl2 = document.createElement('span');
+          lbl2.className = 'ptr-lbl ptr-amber'; lbl2.textContent = 'R+1';
+          ptr.appendChild(lbl2);
+        } else {
+          cell.classList.add('done');
+        }
+      } else if (step.phase === 'build' && i === numBuilt - 1 && i > 0) {
+        cell.classList.add('processing');
+      } else {
+        cell.classList.add('pbuilt');
+      }
+    }
+  });
+
+  // Code panel
+  for (var li = 0; li <= 6; li++) {
+    var cl = document.getElementById('cl-'+li);
+    if (cl) cl.classList.toggle('active', li === step.activeLine);
+  }
+
+  // Info card
+  var badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step '+(current+1)+' / '+steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  var changed = step.changedVars || [];
+  document.getElementById('vv-i').textContent = step.i;
+  document.getElementById('vv-cur').textContent = step.cur;
+  document.getElementById('vv-pfx').textContent = step.pfxVal;
+  document.getElementById('vv-query').textContent = step.queryResult;
+  document.getElementById('vb-i').classList.toggle('changed', changed.indexOf('i') >= 0);
+  document.getElementById('vb-cur').classList.toggle('changed', changed.indexOf('cur') >= 0);
+  document.getElementById('vb-pfx').classList.toggle('changed', changed.indexOf('pfx') >= 0);
+  document.getElementById('vb-query').classList.toggle('changed', changed.indexOf('query') >= 0);
+
+  // Progress dots
+  steps.forEach(function(_, i) {
+    var dot = document.getElementById('dot-'+i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  var content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

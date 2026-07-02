@@ -1,87 +1,909 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>String Compression — LC #443</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#443 · String Compression</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Pointer diagram ── */
+.diagram-box{background:var(--bg2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin:1rem 0;overflow-x:auto}
+.diagram-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:12px}
+.ptr-badge{display:inline-block;font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;margin-bottom:3px;white-space:nowrap}
+.ptr-badge.ptr-read{background:var(--green-bg);color:var(--green-mid)}
+.ptr-badge.ptr-write{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-badge.ptr-anchor{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Viz cells ── */
+.cell-d{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:600;border:2px solid var(--border2);background:var(--surface);color:var(--text);flex-shrink:0;transition:background 0.3s,border-color 0.3s,color 0.3s}
+.cell-d.read-active{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell-d.write-active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell-d.anchor-active{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell-d.written{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.cell-d.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell-d.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell-d.empty{border-style:dashed;border-color:var(--border);color:var(--text3);background:transparent;font-size:13px}
+.idx-slot-d{width:44px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-write{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-read{background:var(--green-bg);border-color:var(--green-border)}
+.sw-write{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-anchor{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-written{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>String Compression</h1>
-<div class="subtitle">LeetCode #443 &mdash; Read-Write Two Pointers</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Array Manipulation</span><span class="tag tag-pattern">Read-Write Two Pointers</span><span class="tag tag-cx">O(n) Time &middot; O(1) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #443</div>
+  <h1>String Compression</h1>
+  <p class="subtitle">Compress an array of characters in-place using run-length encoding. Return the new length. Must use only constant extra space.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Two Pointers</span>
+    <span class="tag tag-pattern">Read-Write Pointers</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You are given an array of characters (e.g., <code>['a','a','b','b','c','c','c']</code>). Compress it <strong>in-place</strong> using run-length encoding: replace each run of consecutive identical characters with the character followed by the count (only if count &gt; 1). Return the new length of the array.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The tricky constraint is <strong>O(1) extra space in-place</strong>. You cannot build a new string — you must overwrite the original array. Because compression always makes the output shorter or equal in length, a write pointer that lags behind a read pointer guarantees we never overwrite characters we still need to read.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Example 1: Compresses nicely</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          Input:  ['a','a','b','b','c','c','c']<br>
+          Output: ['a','2','b','2','c','3']<br>
+          Return: 6
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Example 2: Count=1 — no digit written</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          Input:  ['a']<br>
+          Output: ['a']<br>
+          Return: 1  (count=1 means skip the digit)
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Important subtlety:</strong> If a run is longer than 9, the count is multi-digit. For a run of 12, you write <code>'1'</code> then <code>'2'</code> — each digit as a separate character element in the array. This is what makes the write pointer logic slightly non-trivial.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases:</strong> Single character (count=1, write just the char), runs of length &gt; 9 (must write each digit separately), array of all-same characters, alternating characters (no compression possible), array of length 1.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>Compress array of chars in-place. Groups of k same chars → char + count digits (skip count if k=1). Return new length.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Read pointer groups consecutive same chars; write pointer writes compressed result in-place. Compressed length ≤ original, so write never overtakes read.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Read-Write Two Pointers (In-Place)</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Read-Write Two Pointers (In-Place)</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">read=write=0</span></div><div class="step"><span class="snum">2</span><span class="stxt">While read < n: count consecutive chars starting at read</span></div><div class="step"><span class="snum">3</span><span class="stxt">Write char at write, write++</span></div><div class="step"><span class="snum">4</span><span class="stxt">If count>1: write each digit of count</span></div><div class="step"><span class="snum">5</span><span class="stxt">Advance read past the whole group</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="box bk"><div class="boxt">&#128274; Invariant</div><p>Everything at indices [0..write-1] is the correct compressed prefix. write ≤ read always (compressed ≤ original).</p></div><p>A group of k chars compresses to 1+⌈log₁₀(k)⌉ chars, which is ≤ k for k≥2. Group of 1 compresses to 1. So write never overtakes read.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(n)</strong> | Space: <strong>O(1)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def compress(chars: list[str]) -> int:
-    write = read = 0
-    while read < len(chars):
-        char = chars[read]
-        count = 0
-        while read < len(chars) and chars[read] == char:
-            read += 1
-            count += 1
-        chars[write] = char
-        write += 1
-        if count > 1:
-            for digit in str(count):   # handles multi-digit counts
-                chars[write] = digit
-                write += 1
-    return write</pre><div class="box bw"><div class="boxt">&#9888; Common Mistake</div><p>Writing count even when count==1. Must check count>1 before writing digits. Return write, not len(chars).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">write ≤ read always — safe to modify in-place</span></div><div class="step"><span class="snum">2</span><span class="stxt">str(count) handles multi-digit (e.g., 100 → '1','0','0')</span></div><div class="step"><span class="snum">3</span><span class="stxt">Return write (new length), not the modified array</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Read-Write Two Pointers (In-Place)</td><td>O(n)</td><td>O(1)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Count and Say</span><span class="pd dm">Medium</span> — Generate run-length description</li><li><span class="pn">Decode String</span><span class="pd dm">Medium</span> — Reverse — decompress</li><li><span class="pn">Run-Length Encoding</span><span class="pd de">Easy</span> — Same concept</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Read-Write Two Pointers</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [{"lbl": "chars:", "cells": ["a", "a", "b", "c", "c", "c"], "cls": ["c-bl", "c-bl", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"write": 0, "read": 0}, "title": "Init: write=0, read=0", "desc": "read scans groups; write records compressed chars in-place.", "phase": "init", "pl": "Init"}, {"rows": [{"lbl": "chars:", "cells": ["a", "a", "b", "c", "c", "c"], "cls": ["c-or", "c-or", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["W", "", "", "", "", ""]}], "vars": {"write": 0, "read": 2, "char": "a", "count": 2}, "title": "Group 'a' \u00d7 2 found", "desc": "Write 'a' at position 0.", "phase": "step", "pl": "Group"}, {"rows": [{"lbl": "chars:", "cells": ["a", "2", "b", "c", "c", "c"], "cls": ["c-bl", "c-bl", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "W", "", "", "", ""]}], "vars": {"write": 2, "read": 2, "digit": "2"}, "title": "Write digit '2'", "desc": "Count=2 > 1, write each digit.", "phase": "step", "pl": "Digit"}, {"rows": [{"lbl": "chars:", "cells": ["a", "2", "b", "c", "c", "c"], "cls": ["c-bl", "c-bl", "c-or", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "W", "", "", ""]}], "vars": {"write": 2, "read": 3, "char": "b", "count": 1}, "title": "Group 'b' \u00d7 1 found", "desc": "Write 'b' at position 2.", "phase": "step", "pl": "Group"}, {"rows": [{"lbl": "chars:", "cells": ["a", "2", "b", "c", "c", "c"], "cls": ["c-bl", "c-bl", "c-bl", "c-or", "c-or", "c-or"], "ptrs": ["", "", "", "W", "", ""]}], "vars": {"write": 3, "read": 6, "char": "c", "count": 3}, "title": "Group 'c' \u00d7 3 found", "desc": "Write 'c' at position 3.", "phase": "step", "pl": "Group"}, {"rows": [{"lbl": "chars:", "cells": ["a", "2", "b", "c", "3", "c"], "cls": ["c-bl", "c-bl", "c-bl", "c-bl", "c-bl", "c-bl"], "ptrs": ["", "", "", "", "W", ""]}], "vars": {"write": 5, "read": 6, "digit": "3"}, "title": "Write digit '3'", "desc": "Count=3 > 1, write each digit.", "phase": "step", "pl": "Digit"}, {"rows": [{"lbl": "chars:", "cells": ["a", "2", "b", "c", "3", "c"], "cls": ["c-gr", "c-gr", "c-gr", "c-gr", "c-gr", "c-bl"], "ptrs": ["", "", "", "", "", ""]}], "vars": {"write": 5, "result": "a2bc3"}, "title": "Done! Return 5", "desc": "Compressed: a2bc3, length=5.", "phase": "done", "pl": "\u2705 Done"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--orange)"></div>current group being read</div><div class="li"><div class="ld" style="background:var(--green)"></div>compressed result written</div><div class="li"><div class="ld" style="background:var(--blue)"></div>unprocessed</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Read-Write Two Pointers</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain <strong>three positions</strong> in the array simultaneously. Think of it like a cassette editor: a <em>read head</em> scanning forward, a <em>write head</em> writing compressed output behind it, and a <em>run-start anchor</em> marking where the current group of identical characters began.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>write = 0</code> (next position to write output), <code>i = 0</code> (read pointer). We will advance <code>i</code> through the array to scan each character.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Find a run:</strong> At position <code>i</code>, record <code>group_start = i</code>. Move <code>i</code> forward while <code>chars[i]</code> stays the same. When we stop, the run length is <code>count = i - group_start</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Write the character:</strong> <code>chars[write] = chars[group_start]</code>, then <code>write += 1</code>. This records the character that ran.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Write the count (if &gt; 1):</strong> Convert <code>count</code> to a string. For each digit character, write it to <code>chars[write]</code> and increment <code>write</code>. Skip this step entirely if count is 1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Repeat:</strong> <code>group_start = i</code> is set automatically at the top of the outer loop. Continue until <code>i</code> reaches the end. Return <code>write</code> as the new length.</span>
+      </div>
+    </div>
+
+    <div class="diagram-box">
+      <div class="diagram-label">Pointer state diagram — after processing the 'aa' run</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:70px;font-size:11px;color:var(--text3);font-weight:600;font-family:var(--mono)">pointers:</span>
+          <span style="width:44px;text-align:center"><span class="ptr-badge ptr-write">write=2</span></span>
+          <span style="width:44px;text-align:center"></span>
+          <span style="width:44px;text-align:center"><span class="ptr-badge ptr-read">i=2</span></span>
+          <span style="width:44px"></span><span style="width:44px"></span><span style="width:44px"></span><span style="width:44px"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:70px;font-size:11px;color:var(--text3);font-weight:600;font-family:var(--mono)">chars[]:</span>
+          <div class="cell-d written" style="flex-shrink:0">a</div>
+          <div class="cell-d written" style="flex-shrink:0">2</div>
+          <div class="cell-d read-active" style="flex-shrink:0">b</div>
+          <div class="cell-d normal" style="flex-shrink:0">b</div>
+          <div class="cell-d normal" style="flex-shrink:0">c</div>
+          <div class="cell-d normal" style="flex-shrink:0">c</div>
+          <div class="cell-d normal" style="flex-shrink:0">c</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:70px"></span>
+          <div class="idx-slot-d">0</div>
+          <div class="idx-slot-d">1</div>
+          <div class="idx-slot-d">2</div>
+          <div class="idx-slot-d">3</div>
+          <div class="idx-slot-d">4</div>
+          <div class="idx-slot-d">5</div>
+          <div class="idx-slot-d">6</div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--text2);margin-top:10px">'a' and '2' are written at indices 0–1 (cyan). Read pointer is at index 2 (green), starting the next run. Write pointer is also at 2 — they briefly coincide here, which is fine. They will diverge as 'bb' and 'ccc' compress further.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Write Never Overtakes Read</div>
+      <p>Each run of <em>k</em> characters produces at most <code>1 + len(str(k))</code> output characters. For k=1 that is 1 character (not 2). For k=2..9 it is 2 characters (not &gt;2). For k=100 it is 4 characters (c, 1, 0, 0) for 100 reads. In all cases output size ≤ input size, so write ≤ read always holds.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At the start of each outer loop iteration, <code>chars[0..write-1]</code> contains the <strong>correctly compressed prefix</strong> of all runs processed so far, and <code>chars[i..n-1]</code> contains the <strong>unprocessed suffix</strong>. The write pointer always satisfies <code>write ≤ i</code>.</p>
+    </div>
+
+    <p><strong>Proof that write ≤ i always holds:</strong> A run of <em>k</em> characters starting at index <em>a</em> occupies positions <em>a</em> to <em>a+k-1</em> in the input. Compressing it produces <em>1 + (k&gt;1 ? len(str(k)) : 0)</em> characters. For k=1: 1 ≤ 1. For k&ge;2: 1+len(str(k)) ≤ k (since 1+1=2≤2, 1+1=2≤9, 1+2=3≤99, etc.). So write advances by at most as many positions as read for every run. By induction: write ≤ i at every step.</p>
+
+    <p style="margin-top:0.75rem"><strong>What about count = 1?</strong> We write only the character, not the digit '1'. This is intentional per the problem spec, and it also ensures that single-character arrays are handled correctly: input ['a'] → output ['a'] with length 1.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Multi-Digit Count Trap</div>
+      <p>For a run of 100 characters, the count "100" is <em>three separate characters</em>: '1', '0', '0'. You must iterate over <code>str(count)</code> and write each digit individually. A common mistake is trying to write the integer directly — but array elements must be single characters.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Why the inner while-loop approach works cleanly:</strong> <code>while i &lt; n and chars[i] == chars[group_start]: i += 1</code> — when this exits, every character from <code>group_start</code> to <code>i-1</code> is identical. The count is <code>i - group_start</code>. This naturally handles runs of any length without any special cases.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Read-Write Two Pointers (Optimal: O(n) time, O(1) space) — Interview Pick</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def compress(chars):                              </span><span class="aann">← chars is the original array, modified in-place</span></div>
+<div class="ann-line"><span class="acode">    write = 0                                    </span><span class="aann">← Next position to write compressed output</span></div>
+<div class="ann-line"><span class="acode">    i = 0                                        </span><span class="aann">← Read pointer that scans left to right</span></div>
+<div class="ann-line"><span class="acode">    n = len(chars)                               </span><span class="aann">← Cache original length (doesn't change)</span></div>
+<div class="ann-line"><span class="acode">    while i &lt; n:                                 </span><span class="aann">← Process every character in the array</span></div>
+<div class="ann-line"><span class="acode">        group_start = i                          </span><span class="aann">← Anchor: remember where this run began</span></div>
+<div class="ann-line"><span class="acode">        while i &lt; n and chars[i] == chars[group_start]:</span><span class="aann">← Advance until run ends</span></div>
+<div class="ann-line"><span class="acode">            i += 1                               </span><span class="aann">← Skip past identical chars in this run</span></div>
+<div class="ann-line"><span class="acode">        chars[write] = chars[group_start]        </span><span class="aann">← Always write the character</span></div>
+<div class="ann-line"><span class="acode">        write += 1                               </span><span class="aann">← Advance write pointer past the character</span></div>
+<div class="ann-line"><span class="acode">        count = i - group_start                  </span><span class="aann">← How many times did this char repeat?</span></div>
+<div class="ann-line"><span class="acode">        if count &gt; 1:                            </span><span class="aann">← Only write count for runs of 2 or more</span></div>
+<div class="ann-line"><span class="acode">            for digit in str(count):             </span><span class="aann">← Each digit is a separate character element</span></div>
+<div class="ann-line"><span class="acode">                chars[write] = digit             </span><span class="aann">← Write '1','2',... one at a time</span></div>
+<div class="ann-line"><span class="acode">                write += 1                       </span><span class="aann">← Advance past the digit</span></div>
+<div class="ann-line"><span class="acode">    return write                                 </span><span class="aann">← New length of the compressed array</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting to always write the character</div>
+      <p>Some beginners write the character only when count &gt; 1, skipping it for single-char runs. That is wrong. You <strong>always</strong> write the character at <code>chars[write]</code>. Only the count digit is conditional on count &gt; 1.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force with extra space (O(n) time, O(n) space)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def compress_brute(chars):                       </span><span class="aann">← Uses extra space — NOT acceptable per constraints</span></div>
+<div class="ann-line"><span class="acode">    result = []                                  </span><span class="aann">← Extra O(n) list — fails the O(1) requirement</span></div>
+<div class="ann-line"><span class="acode">    i = 0                                        </span></div>
+<div class="ann-line"><span class="acode">    while i &lt; len(chars):                        </span></div>
+<div class="ann-line"><span class="acode">        ch, count = chars[i], 0                 </span></div>
+<div class="ann-line"><span class="acode">        while i &lt; len(chars) and chars[i] == ch: </span></div>
+<div class="ann-line"><span class="acode">            i += 1; count += 1                   </span></div>
+<div class="ann-line"><span class="acode">        result.append(ch)                        </span></div>
+<div class="ann-line"><span class="acode">        if count &gt; 1: result.extend(str(count))  </span></div>
+<div class="ann-line"><span class="acode">    chars[:len(result)] = result                 </span><span class="aann">← Copy back — still O(n) space was used</span></div>
+<div class="ann-line"><span class="acode">    return len(result)                           </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Read-Write Two Pointers (Optimal):</strong> Time O(n) — each character read exactly once; digits written in O(log k) per run but sum to O(n) total. Space O(1) — only 3 integer variables.<br>
+        <strong>Brute Force:</strong> Time O(n), Space O(n) — conceptually simpler but violates the in-place constraint.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the O(1) Space Signal</div>
+        <p style="font-size:14px;color:var(--text)">"In-place modification with constant extra space" is the classic signal for a read-write two-pointer approach. One pointer reads (the natural scan), another writes compressed output. This works because run-length compression can only shrink or maintain length — so the write pointer never overtakes the read pointer.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Name the Three Roles Before Coding</div>
+        <p style="font-size:14px;color:var(--text)">Identify: (1) <strong>read pointer i</strong> — scanning right through the array, (2) <strong>group_start anchor</strong> — remembering where the current run began so you can compute its length as <code>i - group_start</code>, (3) <strong>write pointer</strong> — where compressed output lands. Naming these before writing code signals clear thinking.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Handle Multi-Digit Count Proactively</div>
+        <p style="font-size:14px;color:var(--text)">Bring up the multi-digit count before the interviewer asks: "For a run of 12, the count '12' becomes two characters '1' and '2'. So I iterate over <code>str(count)</code> and write each digit character individually." This shows careful attention to edge cases.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Prove the Safety Invariant</div>
+        <p style="font-size:14px;color:var(--text)">The interviewer will ask: "How do you know the write pointer doesn't overwrite unread data?" Answer: "A run of k characters produces at most 1 + len(str(k)) output characters, which is always ≤ k. So write advances by at most as much as read for every run — they can never cross."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key constraint is O(1) space. Since compression can't increase length, I'll use read and write pointers.<br>
+I scan with i to find runs — when chars[i] differs from chars[group_start], the run has ended.<br>
+I write the character, then if count &gt; 1, I write each digit of the count as a separate character.<br>
+The tricky part is multi-digit counts: '12' becomes chars[write]='1', chars[write+1]='2'.<br>
+The write pointer is always ≤ read pointer, so in-place modification is safe.<br>
+Return write, which is the new length."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Decompress the encoded array?"</strong> → Reverse: read char + count, expand (needs O(n) space) (#1313)</li>
+        <li><strong>"Count and Say?"</strong> → Same run-length encoding idea applied iteratively (#38)</li>
+        <li><strong>"Encode and Decode Strings?"</strong> → Custom delimiter-based encoding (#271)</li>
+        <li><strong>"What if compressed is longer? Keep original?"</strong> → Track write at start, compare to original length at end</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: ['a','a','b','b','c','c','c']</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area" style="background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto">
+      <!-- Pointer label row -->
+      <div style="display:flex;align-items:flex-end;gap:4px;min-height:32px;margin-bottom:4px">
+        <div style="width:16px;flex-shrink:0"></div>
+        <div id="ptr-row" style="display:flex;gap:4px;align-items:flex-end"></div>
+      </div>
+      <!-- Array cells row -->
+      <div style="display:flex;align-items:center;gap:4px">
+        <div style="width:16px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);writing-mode:vertical-rl;transform:rotate(180deg)">chars</div>
+        <div id="cells-row" style="display:flex;gap:4px"></div>
+      </div>
+      <!-- Index row -->
+      <div style="display:flex;gap:4px;margin-top:4px;margin-left:20px">
+        <div id="idx-row" style="display:flex;gap:4px"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-write">
+          <span class="var-name">write</span>
+          <span class="var-val" id="vv-write">0</span>
+        </div>
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i (read)</span>
+          <span class="var-val" id="vv-i">0</span>
+        </div>
+        <div class="var-box" id="vb-anchor">
+          <span class="var-name">anchor</span>
+          <span class="var-val" id="vv-anchor">—</span>
+        </div>
+        <div class="var-box" id="vb-count">
+          <span class="var-name">count</span>
+          <span class="var-val" id="vv-count">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def compress(chars):</div>
+      <div class="code-line" id="cl-1">    write = 0</div>
+      <div class="code-line" id="cl-2">    i = 0</div>
+      <div class="code-line" id="cl-3">    n = len(chars)</div>
+      <div class="code-line" id="cl-4">    while i &lt; n:</div>
+      <div class="code-line" id="cl-5">        group_start = i</div>
+      <div class="code-line" id="cl-6">        while i &lt; n and chars[i] == chars[group_start]:</div>
+      <div class="code-line" id="cl-7">            i += 1</div>
+      <div class="code-line" id="cl-8">        chars[write] = chars[group_start]</div>
+      <div class="code-line" id="cl-9">        write += 1</div>
+      <div class="code-line" id="cl-10">        count = i - group_start</div>
+      <div class="code-line" id="cl-11">        if count &gt; 1:</div>
+      <div class="code-line" id="cl-12">            for digit in str(count):</div>
+      <div class="code-line" id="cl-13">                chars[write] = digit</div>
+      <div class="code-line" id="cl-14">                write += 1</div>
+      <div class="code-line" id="cl-15">    return write</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-read"></div> Read pointer (i)</div>
+      <div class="legend-item"><div class="legend-swatch sw-write"></div> Write pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-anchor"></div> Group anchor</div>
+      <div class="legend-item"><div class="legend-swatch sw-written"></div> Written (compressed)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Scanned / past</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Read-Write two pointers is the standard pattern for in-place array transformation with O(1) space</div>
+      <div class="takeaway">Write pointer always ≤ read pointer — proven because compression never expands a run</div>
+      <div class="takeaway">Anchor pointer records where each run started; count = i - group_start after the inner loop</div>
+      <div class="takeaway">Skip writing the count when count = 1 per problem spec; single chars stand alone</div>
+      <div class="takeaway">Multi-digit counts like "12" are written character-by-character: '1' then '2'</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>In-place?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (new array)</td>
+          <td>O(n)</td>
+          <td class="mark-bad">O(n)</td>
+          <td class="mark-bad">No</td>
+        </tr>
+        <tr>
+          <td><strong>Read-Write Two Pointers ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-good">Yes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Read-Write Two Pointers</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Modify array in-place with O(1) extra space"</li>
+        <li>"Output is shorter than or equal to input" (compression, deduplication, filtering)</li>
+        <li>One pointer scans all elements, another writes only the "kept" or "encoded" ones</li>
+        <li>Related: Remove Duplicates, Move Zeroes, Remove Element — all share the same two-pointer skeleton</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Read-Write Two Pointers)</div>
+      <div class="related-item"><strong>Remove Duplicates from Sorted Array</strong><span class="related-diff diff-easy">Easy</span> — write advances only when chars differ; identical skeleton (#26)</div>
+      <div class="related-item"><strong>Move Zeroes</strong><span class="related-diff diff-easy">Easy</span> — write advances only on non-zero elements; same pointer setup (#283)</div>
+      <div class="related-item"><strong>Remove Element</strong><span class="related-diff diff-easy">Easy</span> — skip elements equal to val; write skips them (#27)</div>
+      <div class="related-item"><strong>Count and Say</strong><span class="related-diff diff-med">Medium</span> — run-length encoding applied iteratively to produce next term (#38)</div>
+      <div class="related-item"><strong>Decompress Run-Length Encoded List</strong><span class="related-diff diff-easy">Easy</span> — reverse of this problem: expand each (freq, val) pair (#1313)</div>
+      <div class="related-item"><strong>Remove Duplicates from Sorted Array II</strong><span class="related-diff diff-med">Medium</span> — allow at most 2 copies; write pointer carries a look-back condition (#80)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 1.2 (Array Manipulation → Two Pointers)<br>
+      Sub-Pattern: <strong>Read-Write Two Pointers</strong> (same-direction, fast/slow write variant) · Source: Guide Section 1.2</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+const INIT_CHARS = ['a','a','b','b','c','c','c'];
+const N = INIT_CHARS.length;
+
+const steps = [
+  {
+    chars: ['a','a','b','b','c','c','c'],
+    write: 0, iPtr: 0, anchor: -1, count: null,
+    activeLine: 1,
+    phase: 'init', phaseLabel: 'INIT', phaseClass: 'phase-init',
+    cellStates: ['normal','normal','normal','normal','normal','normal','normal'],
+    title: 'Initialize pointers',
+    text: "Input: chars = ['a','a','b','b','c','c','c']. Set write=0 (next output slot) and i=0 (read pointer). n=7. We will scan the array left-to-right, finding runs of identical characters and writing the compressed form in-place.",
+    changedVars: []
+  },
+  {
+    chars: ['a','a','b','b','c','c','c'],
+    write: 0, iPtr: 0, anchor: 0, count: null,
+    activeLine: 5,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['anchor-active','normal','normal','normal','normal','normal','normal'],
+    title: "group_start = 0 — anchor the 'a' run",
+    text: "Outer while: i=0 < n=7. Set group_start=0. We anchor here to remember where this run of 'a' characters begins. Now enter the inner while loop to find how far the run of 'a's extends.",
+    changedVars: ['anchor']
+  },
+  {
+    chars: ['a','a','b','b','c','c','c'],
+    write: 0, iPtr: 1, anchor: 0, count: null,
+    activeLine: 6,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['done','read-active','normal','normal','normal','normal','normal'],
+    title: "Inner loop: i=1, chars[1]='a' == chars[0]='a' → advance i",
+    text: "Inner while check: i=1 < 7 and chars[1]='a' equals chars[group_start=0]='a'. Condition is true — increment i to 2. The run of 'a' is still continuing.",
+    changedVars: ['i']
+  },
+  {
+    chars: ['a','a','b','b','c','c','c'],
+    write: 0, iPtr: 2, anchor: 0, count: null,
+    activeLine: 6,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['done','done','read-active','normal','normal','normal','normal'],
+    title: "Inner loop: i=2, chars[2]='b' ≠ chars[0]='a' → stop",
+    text: "Inner while check: i=2 < 7 but chars[2]='b' does NOT equal chars[0]='a'. Condition is false — inner loop exits. The 'a' run spanned indices 0..1. count = i - group_start = 2 - 0 = 2.",
+    changedVars: ['i']
+  },
+  {
+    chars: ['a','2','b','b','c','c','c'],
+    write: 2, iPtr: 2, anchor: 0, count: 2,
+    activeLine: 8,
+    phase: 'write', phaseLabel: 'WRITE', phaseClass: 'phase-write',
+    cellStates: ['written','written','read-active','normal','normal','normal','normal'],
+    title: "Write 'a' at chars[0], then write '2' at chars[1]",
+    text: "Write the character: chars[0] = chars[group_start=0] = 'a'. Advance write to 1. count = 2 - 0 = 2. Since count > 1, write the digit: chars[1] = '2'. Advance write to 2. The 'aa' run is fully compressed to ['a','2'] at indices 0–1.",
+    changedVars: ['write', 'count']
+  },
+  {
+    chars: ['a','2','b','b','c','c','c'],
+    write: 2, iPtr: 2, anchor: 2, count: null,
+    activeLine: 5,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['written','written','anchor-active','normal','normal','normal','normal'],
+    title: "group_start = 2 — anchor the 'b' run",
+    text: "Outer while: i=2 < 7. Set group_start=2. We anchor at the first 'b'. Notice: write pointer (2) equals i (2) at this moment — they have momentarily caught up. This is safe. They will diverge as we process the 'bb' run.",
+    changedVars: ['anchor']
+  },
+  {
+    chars: ['a','2','b','b','c','c','c'],
+    write: 2, iPtr: 3, anchor: 2, count: null,
+    activeLine: 6,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['written','written','done','read-active','normal','normal','normal'],
+    title: "Inner loop: i=3, chars[3]='b' == chars[2]='b' → advance i",
+    text: "Inner while: i=3 < 7 and chars[3]='b' equals chars[2]='b'. True — i advances to 4. The 'b' run continues.",
+    changedVars: ['i']
+  },
+  {
+    chars: ['a','2','b','2','c','c','c'],
+    write: 4, iPtr: 4, anchor: 2, count: 2,
+    activeLine: 8,
+    phase: 'write', phaseLabel: 'WRITE', phaseClass: 'phase-write',
+    cellStates: ['written','written','written','written','read-active','normal','normal'],
+    title: "Write 'b' at chars[2], then '2' at chars[3] — 'bb' compressed",
+    text: "i=4: chars[4]='c' ≠ chars[2]='b' → inner loop exits. count = 4 - 2 = 2. Write 'b' at position 2 (write→3), then digit '2' at position 3 (write→4). The 'bb' run is compressed to ['b','2'] at indices 2–3.",
+    changedVars: ['write', 'count']
+  },
+  {
+    chars: ['a','2','b','2','c','c','c'],
+    write: 4, iPtr: 4, anchor: 4, count: null,
+    activeLine: 5,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['written','written','written','written','anchor-active','normal','normal'],
+    title: "group_start = 4 — anchor the 'c' run",
+    text: "Outer while: i=4 < 7. group_start=4. We anchor at the first 'c'. Write pointer equals i again — they touch at the start of each new run. Now enter inner loop to count the 'c' run.",
+    changedVars: ['anchor']
+  },
+  {
+    chars: ['a','2','b','2','c','c','c'],
+    write: 4, iPtr: 7, anchor: 4, count: 3,
+    activeLine: 6,
+    phase: 'scan', phaseLabel: 'SCAN', phaseClass: 'phase-scan',
+    cellStates: ['written','written','written','written','done','done','done'],
+    title: "Inner loop: all three 'c's scanned — i advances 4→5→6→7",
+    text: "Inner while runs three times. chars[4]='c', chars[5]='c', chars[6]='c' all equal chars[4]='c'. i increments to 5, 6, 7. At i=7: i < n=7 is false → loop exits. count = 7 - 4 = 3.",
+    changedVars: ['i', 'count']
+  },
+  {
+    chars: ['a','2','b','2','c','3','·','·'],
+    write: 6, iPtr: 7, anchor: 4, count: 3,
+    activeLine: 8,
+    phase: 'write', phaseLabel: 'WRITE', phaseClass: 'phase-write',
+    cellStates: ['written','written','written','written','written','written','empty','empty'],
+    title: "Write 'c' at chars[4], then '3' at chars[5] — 'ccc' compressed",
+    text: "count = 3 > 1. Write 'c' at position 4 (write→5), then digit '3' at position 5 (write→6). The 'ccc' run is compressed to ['c','3'] at indices 4–5. All 7 characters in the original array have now been read.",
+    changedVars: ['write']
+  },
+  {
+    chars: ['a','2','b','2','c','3','·','·'],
+    write: 6, iPtr: 7, anchor: 4, count: 3,
+    activeLine: 4,
+    phase: 'scan', phaseLabel: 'CHECK', phaseClass: 'phase-scan',
+    cellStates: ['written','written','written','written','written','written','empty','empty'],
+    title: "Outer while check: i=7 < n=7? NO — exit loop",
+    text: "Back at the outer while: i=7 is NOT less than n=7. The outer loop exits. Indices 6 and beyond in chars[] contain old stale data past the new length — they are ignored. We return write=6.",
+    changedVars: []
+  },
+  {
+    chars: ['a','2','b','2','c','3','·','·'],
+    write: 6, iPtr: 7, anchor: 4, count: 3,
+    activeLine: 15,
+    phase: 'result', phaseLabel: 'RETURN 6', phaseClass: 'phase-result',
+    cellStates: ['written','written','written','written','written','written','empty','empty'],
+    title: "Return 6 — compression complete!",
+    text: "return write = 6. The first 6 elements of chars[] are ['a','2','b','2','c','3'] — the correctly run-length encoded form. Original length: 7. Compressed length: 6. Time O(n), Space O(1).",
+    changedVars: ['write']
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  const ptrRow = document.getElementById('ptr-row');
+  const cellsRow = document.getElementById('cells-row');
+  const idxRow = document.getElementById('idx-row');
+
+  for (let i = 0; i < N; i++) {
+    // Pointer slot column
+    const ps = document.createElement('div');
+    ps.style.cssText = 'width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:28px;justify-content:flex-end';
+    ps.id = 'ps-' + i;
+    ptrRow.appendChild(ps);
+
+    // Cell
+    const c = document.createElement('div');
+    c.className = 'cell-d normal';
+    c.id = 'cell-' + i;
+    c.textContent = INIT_CHARS[i];
+    cellsRow.appendChild(c);
+
+    // Index label
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot-d';
+    ix.textContent = i;
+    idxRow.appendChild(ix);
+  }
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function render() {
+  const step = steps[current];
+
+  // Update cells
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('cell-' + i);
+    const ps = document.getElementById('ps-' + i);
+    ps.innerHTML = '';
+
+    const st = (step.cellStates && step.cellStates[i]) ? step.cellStates[i] : 'normal';
+    cell.className = 'cell-d ' + st;
+
+    const ch = step.chars[i];
+    if (ch === null || ch === undefined || ch === '·') {
+      cell.className = 'cell-d empty';
+      cell.textContent = '·';
+    } else {
+      cell.textContent = ch;
+    }
+
+    // Draw pointer badges above cells
+    var labels = [];
+    var wi = step.write;
+    var ri = step.iPtr;
+    var ai = step.anchor;
+
+    if (i === wi && i === ri && ri < N) {
+      labels.push({text:'w=i', cls:'ptr-write'});
+    } else {
+      if (i === wi) labels.push({text:'write', cls:'ptr-write'});
+      if (i === ri && ri < N) labels.push({text:'i', cls:'ptr-read'});
+    }
+    if (i === ai && ai >= 0 && i !== wi && i !== ri) labels.push({text:'anc', cls:'ptr-anchor'});
+
+    labels.forEach(function(lbl) {
+      var span = document.createElement('span');
+      span.className = 'ptr-badge ' + lbl.cls;
+      span.style.cssText = 'width:auto;font-size:10px;padding:2px 5px;';
+      span.textContent = lbl.text;
+      ps.appendChild(span);
+    });
+  }
+
+  // Code panel active line
+  for (let i = 0; i <= 15; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  document.getElementById('vv-write').textContent = step.write;
+  document.getElementById('vv-i').textContent = (step.iPtr >= N) ? 'end' : step.iPtr;
+  document.getElementById('vv-anchor').textContent = (step.anchor >= 0) ? step.anchor : '—';
+  document.getElementById('vv-count').textContent = (step.count !== null) ? step.count : '—';
+
+  var ch = step.changedVars || [];
+  document.getElementById('vb-write').classList.toggle('changed', ch.indexOf('write') >= 0);
+  document.getElementById('vb-i').classList.toggle('changed', ch.indexOf('i') >= 0);
+  document.getElementById('vb-anchor').classList.toggle('changed', ch.indexOf('anchor') >= 0);
+  document.getElementById('vb-count').classList.toggle('changed', ch.indexOf('count') >= 0);
+
+  // Progress dots
+  for (let i = 0; i < steps.length; i++) {
+    var dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  }
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  var next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  var content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

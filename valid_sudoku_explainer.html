@@ -1,85 +1,1018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Valid Sudoku — LC #36</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#36 · Valid Sudoku</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Interactive Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-check{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-skip{background:var(--bg2);color:var(--text3);border:1px solid var(--border2)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-s{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+.sw-chg{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* Sudoku Grid */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 36px);
+  gap: 2px;
+  margin: 0 auto;
+  width: fit-content;
+}
+.sudoku-cell {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  border: 1px solid var(--border2);
+  background: var(--surface); color: var(--text);
+  transition: background 0.3s, border-color 0.3s;
+}
+.sudoku-cell.active { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue-text); font-weight: 700; }
+.sudoku-cell.done { background: var(--bg2); color: var(--text3); }
+.sudoku-cell.skip { background: var(--surface); color: var(--text3); }
+.sudoku-cell.box-border-r { border-right: 2.5px solid var(--text3); }
+.sudoku-cell.box-border-b { border-bottom: 2.5px solid var(--text3); }
+.sudoku-cell.dot-cell { color: var(--text3); font-size: 11px; }
+
+/* Sets Display */
+.sets-panel { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem; }
+.set-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; min-width: 90px; }
+.set-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.set-vals { font-family: var(--mono); font-size: 12px; color: var(--text); min-height: 20px; }
+.set-box.updated { border-color: var(--amber-border); background: var(--amber-bg); }
+.set-box.updated .set-label { color: var(--amber-mid); }
+
+/* Box Index Diagram */
+.box-diagram {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  gap: 4px;
+  margin: 1rem auto;
+  width: fit-content;
+}
+.box-diagram-cell {
+  height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--border2);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--blue-mid);
+}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Valid Sudoku</h1>
-<div class="subtitle">LeetCode #36 &mdash; Hash Sets for Row/Col/Box</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Matrix</span><span class="tag tag-pattern">Hash Sets for Row/Col/Box</span><span class="tag tag-cx">O(1) Time &middot; O(1) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #36</div>
+  <h1>Valid Sudoku</h1>
+  <p class="subtitle">Determine if a 9&times;9 Sudoku board is valid. Only the filled cells need to be validated.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Matrix / Grid</span>
+    <span class="tag tag-pattern">Hash Sets</span>
+    <span class="tag tag-complexity">Time: O(1)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <p>We have a partially-filled 9&times;9 grid. For every filled number, verify it does not conflict with any other filled number in its <strong>row</strong>, its <strong>column</strong>, and its <strong>3&times;3 box</strong>. We do <em>not</em> need to check whether the board is solvable &mdash; only that existing numbers don&rsquo;t violate the three uniqueness rules.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">&#128161; Key Insight</div>
+      <p>We need to track what&rsquo;s seen in <strong>3 independent dimensions simultaneously</strong>: row, column, and 3&times;3 box. Any digit appearing twice in the same dimension is invalid. Empty cells (<code>'.'</code>) have no constraint &mdash; skip them entirely.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">&#10003; Valid partial board (rows 0&ndash;2 shown)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2.0">
+          Row 0: 5 3 . . 7 . . . .<br>
+          Row 1: 6 . . 1 9 5 . . .<br>
+          Row 2: . 9 8 . . . . 6 .<br>
+          <strong>No digit repeats in any row, col, or box &rarr; Valid</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">&#10007; Invalid board (duplicate in row 0)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2.0">
+          Row 0: 5 3 . . 7 . . . 5<br>
+          Row 1: 6 . . 1 9 5 . . .<br>
+          Row 2: . 9 8 . . . . 6 .<br>
+          <strong>'5' appears twice in row 0 &rarr; Invalid</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> An all-<code>'.'</code> board is valid (no filled cells to conflict). A board with a single filled cell is valid. A duplicate in <em>any one</em> of the 27 units (rows, columns, or boxes) is enough to return False immediately.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>Determine if a 9×9 sudoku board is valid. Filled cells must not repeat in same row, column, or 3×3 box.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Validate each row, column, and 3×3 box has no duplicate digits 1-9. Use sets. For each cell: check if digit already in its row set, col set, or box set. Box index = (r//3)*3 + c//3.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Hash Set Validation</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Hash Set Validation</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">rows=[set() for _ in range(9)], cols=[set()], boxes=[set()]</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each (r,c) with board[r][c] != '.':</span></div><div class="step"><span class="snum">3</span><span class="stxt">  digit = board[r][c]; box=(r//3)*3+(c//3)</span></div><div class="step"><span class="snum">4</span><span class="stxt">  If digit in rows[r] or cols[c] or boxes[box]: invalid</span></div><div class="step"><span class="snum">5</span><span class="stxt">  Add to all three sets</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="box bk"><div class="boxt">&#128274; Invariant</div><p>Each set contains digits seen in that row/col/box. No duplicates.</p></div><p>O(81) = O(1) — board is always 9×9. Validation in single pass.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(1)</strong> | Space: <strong>O(1)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def isValidSudoku(board: list[list[str]]) -> bool:
-    rows = [set() for _ in range(9)]
-    cols = [set() for _ in range(9)]
-    boxes = [set() for _ in range(9)]
-    for r in range(9):
-        for c in range(9):
-            if board[r][c] == '.': continue
-            d = board[r][c]
-            box = (r//3)*3 + (c//3)
-            if d in rows[r] or d in cols[c] or d in boxes[box]:
-                return False
-            rows[r].add(d); cols[c].add(d); boxes[box].add(d)
-    return True</pre><div class="box bw"><div class="boxt">&#9888; Common Mistake</div><p>[('Sudoku Solver', 'Hard', 'Backtracking to fill board'), ('N-Queens', 'Hard', 'Constraint validation in grid')]</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Walk through the Hash Set Validation approach, state complexity, demonstrate on an example.</p></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Hash Set Validation</td><td>O(1)</td><td>O(1)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">b</span><span class="pd dh">o</span> — x</li><li><span class="pn">O</span><span class="pd dh">n</span> — l</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Hash Sets for Row/Col/Box</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Valid Sudoku"}, "title": "Hash Set Validation", "desc": "See annotated code for step-by-step.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>array/structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Single Pass with Hash Sets</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <p>We scan every cell exactly once. For each filled cell we check and update three sets &mdash; one per row, one per column, one per box. A duplicate detection in any set triggers an immediate <code>False</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Create 27 sets:</strong> <code>rows[0..8]</code>, <code>cols[0..8]</code>, <code>boxes[0..8]</code> &mdash; one set per &ldquo;unit&rdquo;. Each set tracks which values have appeared in that unit so far.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Scan every cell (r, c):</strong> Outer loop <code>r</code> in 0&ndash;8, inner loop <code>c</code> in 0&ndash;8. This visits all 81 cells in row-major (left-to-right, top-to-bottom) order.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Skip empty cells:</strong> If <code>board[r][c] == '.'</code>, execute <code>continue</code>. Empty cells have no constraints &mdash; do not add them to any set.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Compute box_idx:</strong> <code>box_idx = (r // 3) * 3 + (c // 3)</code>. This maps the cell&rsquo;s row-group (0/1/2) and column-group (0/1/2) to a unique box number 0&ndash;8.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Check for duplicates:</strong> If <code>val</code> is already in <code>rows[r]</code>, <code>cols[c]</code>, or <code>boxes[box_idx]</code> &rarr; return False immediately (fail-fast). Each set lookup is O(1).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text"><strong>Register the value:</strong> Add <code>val</code> to <code>rows[r]</code>, <code>cols[c]</code>, and <code>boxes[box_idx]</code>. Future cells in the same units will detect this value as a conflict.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">7</span>
+        <span class="step-text"><strong>Return True:</strong> If we process all 81 cells without finding a conflict, the board is valid.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem;font-weight:600">The 9 box indices &mdash; box_idx = (r//3)*3 + (c//3):</p>
+    <div class="box-diagram" style="margin-top:0.75rem">
+      <div class="box-diagram-cell">0</div>
+      <div class="box-diagram-cell">1</div>
+      <div class="box-diagram-cell">2</div>
+      <div class="box-diagram-cell">3</div>
+      <div class="box-diagram-cell">4</div>
+      <div class="box-diagram-cell">5</div>
+      <div class="box-diagram-cell">6</div>
+      <div class="box-diagram-cell">7</div>
+      <div class="box-diagram-cell">8</div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:4px">Top-left box = 0, top-center = 1, &hellip;, bottom-right = 8</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">&#128273; The Box Index Formula</div>
+      <p><code>box_idx = (r // 3) * 3 + (c // 3)</code> &mdash; integer-divide row by 3 to get row-group (0, 1, or 2); integer-divide col by 3 to get col-group (0, 1, or 2). Multiply row-group by 3, add col-group &rarr; unique index 0&ndash;8. This is the &ldquo;aha moment&rdquo; of this problem. Example: cell (4,7) &rarr; (4//3)*3+(7//3) = 1*3+2 = 5 (middle-right box).</p>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">&#128272; The Invariant</div>
+      <p>After processing cell (r, c), <code>rows[r]</code> contains exactly the distinct values seen so far in row r; <code>cols[c]</code> contains exactly the distinct values seen so far in column c; <code>boxes[box_idx]</code> contains exactly the distinct values seen so far in that 3&times;3 box. If we try to add a value already in any of these sets, we have found a constraint violation.</p>
+    </div>
+
+    <p><strong>Why sets work here:</strong> A set&rsquo;s <code>in</code> operator is O(1) average. Adding a value we already have signals a duplicate. Since digits 1&ndash;9 are at most 9 values per unit, each set has at most 9 elements &mdash; truly O(1) space per set.</p>
+
+    <p style="margin-top:0.75rem"><strong>Box formula derivation:</strong> Rows 0&ndash;2 &rarr; <code>r//3 = 0</code>; rows 3&ndash;5 &rarr; <code>r//3 = 1</code>; rows 6&ndash;8 &rarr; <code>r//3 = 2</code>. Cols similarly produce 0, 1, or 2. Multiplying row-group by 3 and adding col-group yields values 0*3+0=0 through 2*3+2=8. Each (row-group, col-group) pair is unique, so the formula produces a unique box index for each of the nine 3&times;3 sub-grids.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why a single pass suffices:</strong> We scan left-to-right, top-to-bottom. The constraint requires that no two filled cells in the same unit share the same value. We check the <em>current</em> cell against all <em>previously seen</em> cells in its units. Since we process every cell exactly once, any duplicate pair will be caught when we reach the second occurrence.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">&#9888;&#65039; Why O(1) time and space?</div>
+      <p>The board is always 9&times;9 = 81 cells, fixed. The sets hold at most 9 values each (digits 1&ndash;9). We never scale with input size. Despite having loops, the iterations are bounded by a constant (81). We have 27 sets of at most 9 elements each = 243 total stored values max &mdash; all O(1).</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 &mdash; Single Pass Hash Sets (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isValidSudoku(board):                              </span></div>
+<div class="ann-line"><span class="acode">    rows  = [set() for _ in range(9)]                 </span><span class="aann">&#8592; 9 independent sets, one per row</span></div>
+<div class="ann-line"><span class="acode">    cols  = [set() for _ in range(9)]                 </span><span class="aann">&#8592; 9 sets, one per column</span></div>
+<div class="ann-line"><span class="acode">    boxes = [set() for _ in range(9)]                 </span><span class="aann">&#8592; 9 sets, one per 3&times;3 sub-box</span></div>
+<div class="ann-line"><span class="acode">    for r in range(9):                                </span><span class="aann">&#8592; outer: iterate all 9 rows</span></div>
+<div class="ann-line"><span class="acode">        for c in range(9):                            </span><span class="aann">&#8592; inner: iterate all 9 cols</span></div>
+<div class="ann-line"><span class="acode">            val = board[r][c]                         </span><span class="aann">&#8592; read current cell value</span></div>
+<div class="ann-line"><span class="acode">            if val == '.':                            </span><span class="aann">&#8592; empty cell has no constraints</span></div>
+<div class="ann-line"><span class="acode">                continue                              </span><span class="aann">&#8592; skip &mdash; never add '.' to sets</span></div>
+<div class="ann-line"><span class="acode">            box_idx = (r // 3) * 3 + (c // 3)       </span><span class="aann">&#8592; maps (r,c) to one of 9 boxes</span></div>
+<div class="ann-line"><span class="acode">            if val in rows[r] or \                    </span><span class="aann">&#8592; duplicate in this row?</span></div>
+<div class="ann-line"><span class="acode">               val in cols[c] or \                    </span><span class="aann">&#8592; duplicate in this column?</span></div>
+<div class="ann-line"><span class="acode">               val in boxes[box_idx]:                </span><span class="aann">&#8592; duplicate in this 3&times;3 box?</span></div>
+<div class="ann-line"><span class="acode">                return False                          </span><span class="aann">&#8592; fail-fast on first conflict found</span></div>
+<div class="ann-line"><span class="acode">            rows[r].add(val)                          </span><span class="aann">&#8592; register in row tracker</span></div>
+<div class="ann-line"><span class="acode">            cols[c].add(val)                          </span><span class="aann">&#8592; register in column tracker</span></div>
+<div class="ann-line"><span class="acode">            boxes[box_idx].add(val)                   </span><span class="aann">&#8592; register in box tracker</span></div>
+<div class="ann-line"><span class="acode">    return True                                       </span><span class="aann">&#8592; all 81 cells passed, board is valid</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">&#9888;&#65039; Don&rsquo;t Forget to Skip &lsquo;.&rsquo;</div>
+      <p><code>'.'</code> is not a digit &mdash; it represents an empty cell with no constraints. If you don&rsquo;t skip it, you would add <code>'.'</code> to the sets, and the second empty cell in any unit would be falsely flagged as a duplicate. Always <code>continue</code> when <code>val == '.'</code>.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">&#9888;&#65039; Memorize the Box Index Formula</div>
+      <p><code>(r // 3) * 3 + (c // 3)</code> is the critical insight. The <code>//3</code> operation collapses 9 rows into 3 row-groups, and 9 cols into 3 col-groups. Multiplying row-group by 3 and adding col-group yields a unique number 0&ndash;8 for each of the 9 boxes. Practice deriving it from scratch on paper.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 &mdash; Three-Pass Brute Force (simpler to reason about)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isValidSudoku(board):                             </span></div>
+<div class="ann-line"><span class="acode">    def has_dup(unit):                                </span><span class="aann">&#8592; helper: does this unit have a duplicate?</span></div>
+<div class="ann-line"><span class="acode">        nums = [x for x in unit if x != '.']         </span><span class="aann">&#8592; filter out empty cells</span></div>
+<div class="ann-line"><span class="acode">        return len(nums) != len(set(nums))            </span><span class="aann">&#8592; set removes dups; shorter means dup existed</span></div>
+<div class="ann-line"><span class="acode">    for i in range(9):                                </span><span class="aann">&#8592; check all 9 rows, cols, and boxes</span></div>
+<div class="ann-line"><span class="acode">        if has_dup(board[i]):                         </span><span class="aann">&#8592; row i = board[i] (list of 9 values)</span></div>
+<div class="ann-line"><span class="acode">            return False</span></div>
+<div class="ann-line"><span class="acode">        if has_dup(board[r][i] for r in range(9)):   </span><span class="aann">&#8592; col i: element i from each row</span></div>
+<div class="ann-line"><span class="acode">            return False</span></div>
+<div class="ann-line"><span class="acode">        br, bc = (i // 3) * 3, (i % 3) * 3          </span><span class="aann">&#8592; top-left corner of box i</span></div>
+<div class="ann-line"><span class="acode">        box = [board[br+dr][bc+dc]                   </span><span class="aann">&#8592; build flat list of 9 cells in this box</span></div>
+<div class="ann-line"><span class="acode">               for dr in range(3) for dc in range(3)]</span></div>
+<div class="ann-line"><span class="acode">        if has_dup(box): return False</span></div>
+<div class="ann-line"><span class="acode">    return True                                       </span><span class="aann">&#8592; all 27 units are clean</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">&#127908; Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box insight">
+      <div class="concept-box-title">&#128270; Pattern Recognition Signal</div>
+      <p>Grid problem + uniqueness constraint = hash sets for each unit. When you see &ldquo;each row/column/region must contain unique values,&rdquo; your reflex should be: one set per dimension, O(1) membership check per cell.</p>
+    </div>
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify the Constraints</div>
+        <p style="font-size:14px;color:var(--text)">Three independent uniqueness constraints: rows, columns, 3&times;3 boxes. Each is separate &mdash; a digit can repeat across different rows, different columns, and different boxes, but never <em>within</em> the same unit.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force First</div>
+        <p style="font-size:14px;color:var(--text)">&ldquo;For each of the 27 units (9 rows + 9 cols + 9 boxes), extract the digits and check for duplicates using a set. Three separate passes. Let me think if we can do it in one pass.&rdquo;</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize to Single Pass</div>
+        <p style="font-size:14px;color:var(--text)">&ldquo;I can maintain 27 sets simultaneously. At each cell, check all three constraints before adding. The key insight is mapping (r, c) to a box index: <code>(r//3)*3 + (c//3)</code>. Let me derive that formula.&rdquo;</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Derive the Box Formula Live</div>
+        <p style="font-size:14px;color:var(--text)">&ldquo;Rows 0&ndash;2 share box-row 0, rows 3&ndash;5 share box-row 1, rows 6&ndash;8 share box-row 2. So box-row = r//3. Same idea for columns. Box index = box-row * 3 + box-col = (r//3)*3 + (c//3).&rdquo;</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>&#128483;&#65039; What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The board has three types of units to validate: rows, columns, and 3x3 boxes.<br>
+I'll use 27 hash sets &mdash; 9 per type &mdash; and do a single left-to-right, top-to-bottom scan.<br>
+At each filled cell, I check if its value already appears in its row set, column set, or box set.<br>
+If it does, return False immediately &mdash; fail-fast. Otherwise add it to all three sets and continue.<br>
+The non-obvious part: box index = (r//3)*3 + (c//3) maps any (r,c) to one of 9 boxes.<br>
+Empty cells ('.' ) are skipped entirely. Time O(81)=O(1), Space O(27)=O(1)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">&#128302; Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>&ldquo;Now solve the Sudoku.&rdquo;</strong> &rarr; Use this validator inside a backtracking solver (LeetCode #37)</li>
+        <li><strong>&ldquo;Why 27 sets and not just 3?&rdquo;</strong> &rarr; Each of the 27 units is independent. A digit can appear in multiple rows, columns, or boxes &mdash; just not twice in the same one. You need separate tracking per unit.</li>
+        <li><strong>&ldquo;Validate a different board size?&rdquo;</strong> &rarr; For an N&times;N board with &radic;N-sized boxes: <code>(r // sqrt_n) * sqrt_n + (c // sqrt_n)</code></li>
+        <li><strong>&ldquo;Can you do it with less space?&rdquo;</strong> &rarr; Yes, bitmasks: a 9-bit integer per unit, set bit k for digit k. Same O(1) space but lower constant than hash sets.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:1rem;font-size:14px;color:var(--text2)">Walking through the classic valid Sudoku board. Watch as the algorithm scans each cell, skips dots, computes the box index, and updates three sets simultaneously. Steps cover rows 0&ndash;2 plus the final result.</p>
+
+    <div class="viz-area">
+      <!-- Sudoku Grid -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1rem">
+        <div class="sudoku-grid" id="sudoku-grid"></div>
+      </div>
+
+      <!-- Sets Panel -->
+      <div style="margin-top:1.5rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;text-align:center">Sets State (showing populated units from walkthrough)</div>
+        <div class="sets-panel" id="sets-panel"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-r">
+          <span class="var-name">r</span>
+          <span class="var-val" id="vv-r">&#8212;</span>
+        </div>
+        <div class="var-box" id="vb-c">
+          <span class="var-name">c</span>
+          <span class="var-val" id="vv-c">&#8212;</span>
+        </div>
+        <div class="var-box" id="vb-val">
+          <span class="var-name">val</span>
+          <span class="var-val" id="vv-val">&#8212;</span>
+        </div>
+        <div class="var-box" id="vb-box">
+          <span class="var-name">box_idx</span>
+          <span class="var-val" id="vv-box">&#8212;</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def isValidSudoku(board):</div>
+      <div class="code-line" id="cl-1">    rows  = [set() for _ in range(9)]</div>
+      <div class="code-line" id="cl-2">    cols  = [set() for _ in range(9)]</div>
+      <div class="code-line" id="cl-3">    boxes = [set() for _ in range(9)]</div>
+      <div class="code-line" id="cl-4">    for r in range(9):</div>
+      <div class="code-line" id="cl-5">        for c in range(9):</div>
+      <div class="code-line" id="cl-6">            val = board[r][c]</div>
+      <div class="code-line" id="cl-7">            if val == '.':</div>
+      <div class="code-line" id="cl-8">                continue</div>
+      <div class="code-line" id="cl-9">            box_idx = (r // 3) * 3 + (c // 3)</div>
+      <div class="code-line" id="cl-10">            if val in rows[r] or val in cols[c] or val in boxes[box_idx]:</div>
+      <div class="code-line" id="cl-11">                return False</div>
+      <div class="code-line" id="cl-12">            rows[r].add(val)</div>
+      <div class="code-line" id="cl-13">            cols[c].add(val)</div>
+      <div class="code-line" id="cl-14">            boxes[box_idx].add(val)</div>
+      <div class="code-line" id="cl-15">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 15</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>&#8592; Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next &#8594;</button>
+      <button class="btn" onclick="reset()">&#8635; Reset</button>
+    </div>
+    <div class="kbd-hint">Use &#8592; &#8594; arrow keys to navigate &middot; Press R to reset</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-s"></div> Active cell (being processed)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed (added to sets)</div>
+      <div class="legend-item"><div class="legend-swatch sw-chg"></div> Set just updated this step</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--surface);border-color:var(--border2)"></div> Not yet visited</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary & Key Takeaways -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Three independent constraints (row, col, box) are checked simultaneously using 27 hash sets &mdash; one per unit</div>
+      <div class="takeaway">Always skip empty cells ('.') &mdash; only filled cells participate in uniqueness constraints</div>
+      <div class="takeaway">box_idx = (r//3)*3 + (c//3) is the critical formula &mdash; maps any (r,c) to a unique box 0&ndash;8</div>
+      <div class="takeaway">Fail fast: return False the moment a duplicate is detected in any set, no need to scan the whole board</div>
+      <div class="takeaway">O(1) time and space because the board size is fixed (9&times;9 = 81 cells, 27 sets of at most 9 elements each)</div>
+      <div class="takeaway">This exact validator is reused as the validity check inside Sudoku Solver (LeetCode #37)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Three-Pass Brute Force</td>
+          <td>O(81) = O(1)</td>
+          <td>O(9) per pass</td>
+          <td>3 separate passes; materializes lists; less elegant</td>
+        </tr>
+        <tr>
+          <td><strong>Single-Pass Hash Sets &#10003;</strong></td>
+          <td class="mark-good">O(81) = O(1)</td>
+          <td class="mark-good">O(27) = O(1)</td>
+          <td>Optimal; fail-fast; all constraints checked in one scan</td>
+        </tr>
+        <tr>
+          <td>Bitmask (advanced)</td>
+          <td class="mark-good">O(81) = O(1)</td>
+          <td class="mark-good">O(27 ints)</td>
+          <td>27 integers (9-bit each); same logic, lower constant factor</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">&#127919; When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>&ldquo;Each row/column/region must contain unique values&rdquo; &rarr; hash set per unit</li>
+        <li>&ldquo;Check constraints across multiple dimensions simultaneously&rdquo; &rarr; one set per dimension</li>
+        <li>&ldquo;Grid with fixed size and per-unit uniqueness rules&rdquo; &rarr; O(1) everything due to fixed size</li>
+        <li>Any grid problem where &ldquo;have I seen this value in this unit?&rdquo; is the core question</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Hash Sets for Row/Col/Region)</div>
+      <div class="related-item"><strong>Sudoku Solver</strong><span class="related-diff diff-hard">Hard</span> &mdash; Backtracking using this exact validator as the check function at each placement step (#37)</div>
+      <div class="related-item"><strong>N-Queens</strong><span class="related-diff diff-hard">Hard</span> &mdash; Row/column/diagonal uniqueness via sets; same multi-constraint tracking pattern (#51)</div>
+      <div class="related-item"><strong>Set Matrix Zeroes</strong><span class="related-diff diff-med">Medium</span> &mdash; Track row/col state in a single matrix scan; similar pass structure (#73)</div>
+      <div class="related-item"><strong>Word Search</strong><span class="related-diff diff-med">Medium</span> &mdash; Grid traversal with visited state tracking; different constraint, same grid instinct (#79)</div>
+      <div class="related-item"><strong>Find the Duplicate Number</strong><span class="related-diff diff-med">Medium</span> &mdash; Hash set membership = duplicate detection; the core primitive of this problem (#287)</div>
+      <div class="related-item"><strong>Design Sudoku</strong> &mdash; Extend this validator to a full Sudoku game with insert and query operations</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">&#128218; Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md &mdash; Matrix / Grid Traversal section<br>
+      Sub-Pattern: <strong>Hash Sets for Row/Col/Box</strong> &middot; Main Pattern: Grid Traversal</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// Board Data
+const BOARD = [
+  ['5','3','.','.','7','.','.','.','.'],
+  ['6','.','.','1','9','5','.','.','.'],
+  ['.','9','8','.','.','.','.','6','.'],
+  ['8','.','.','.','6','.','.','.','3'],
+  ['4','.','.','8','.','3','.','.','1'],
+  ['7','.','.','.','2','.','.','.','6'],
+  ['.','6','.','.','.','.','2','8','.'],
+  ['.','.','.','4','1','9','.','.','5'],
+  ['.','.','.','.','8','.','.','7','9']
+];
+
+// Steps array
+const steps = [
+  {
+    r:-1, c:-1, val:null, boxIdx:null, skip:false,
+    activeLine:1, phase:'init', phaseClass:'phase-init', phaseLabel:'INIT',
+    title:'Initialize All Sets',
+    text:'Create 27 empty sets: rows[0..8], cols[0..8], boxes[0..8]. We will scan the board left-to-right, top-to-bottom. Any filled cell (non-dot) will be checked against the three relevant sets before being added to them.',
+    rows_state:{'0':[],'1':[],'2':[]},
+    cols_state:{'0':[],'1':[],'2':[],'3':[],'4':[],'5':[],'7':[]},
+    boxes_state:{'0':[],'1':[],'2':[]},
+    updatedSets:[],
+    vars:{r:'--',c:'--',val:'--',box_idx:'--'},
+    doneCells:[]
+  },
+  {
+    r:0, c:0, val:'5', boxIdx:0, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (0,0): val='5', box_idx=0",
+    text:"Value '5' found. box_idx = (0//3)*3 + (0//3) = 0*3+0 = 0 (top-left 3x3 box). '5' is not in rows[0]={}, cols[0]={}, or boxes[0]={}. Adding '5' to all three sets.",
+    rows_state:{'0':['5'],'1':[],'2':[]},
+    cols_state:{'0':['5'],'1':[],'2':[],'3':[],'4':[],'5':[],'7':[]},
+    boxes_state:{'0':['5'],'1':[],'2':[]},
+    updatedSets:['rows[0]','cols[0]','boxes[0]'],
+    vars:{r:0,c:0,val:"'5'",box_idx:0},
+    doneCells:[[0,0]]
+  },
+  {
+    r:0, c:1, val:'3', boxIdx:0, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (0,1): val='3', box_idx=0",
+    text:"Value '3' found. box_idx = (0//3)*3 + (1//3) = 0*3+0 = 0 (same top-left box). '3' is not in rows[0]={'5'}, cols[1]={}, or boxes[0]={'5'}. Adding '3' to all three.",
+    rows_state:{'0':['5','3'],'1':[],'2':[]},
+    cols_state:{'0':['5'],'1':['3'],'2':[],'3':[],'4':[],'5':[],'7':[]},
+    boxes_state:{'0':['5','3'],'1':[],'2':[]},
+    updatedSets:['rows[0]','cols[1]','boxes[0]'],
+    vars:{r:0,c:1,val:"'3'",box_idx:0},
+    doneCells:[[0,0],[0,1]]
+  },
+  {
+    r:0, c:2, val:'.', boxIdx:null, skip:true,
+    activeLine:8, phase:'skip', phaseClass:'phase-skip', phaseLabel:'SKIP',
+    title:"Cells (0,2) and (0,3): val='.', SKIP",
+    text:"board[0][2]='.' and board[0][3]='.'. Both empty -- the 'if val==\".\": continue' fires. We skip these cells entirely and do not update any sets.",
+    rows_state:{'0':['5','3'],'1':[],'2':[]},
+    cols_state:{'0':['5'],'1':['3'],'2':[],'3':[],'4':[],'5':[],'7':[]},
+    boxes_state:{'0':['5','3'],'1':[],'2':[]},
+    updatedSets:[],
+    vars:{r:0,c:2,val:"'.'",box_idx:'--'},
+    doneCells:[[0,0],[0,1]]
+  },
+  {
+    r:0, c:4, val:'7', boxIdx:1, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (0,4): val='7', box_idx=1",
+    text:"Value '7' found. box_idx = (0//3)*3 + (4//3) = 0*3+1 = 1 (top-center box). '7' is not in rows[0]={'5','3'}, cols[4]={}, or boxes[1]={}. Adding '7' to all three.",
+    rows_state:{'0':['5','3','7'],'1':[],'2':[]},
+    cols_state:{'0':['5'],'1':['3'],'2':[],'3':[],'4':['7'],'5':[],'7':[]},
+    boxes_state:{'0':['5','3'],'1':['7'],'2':[]},
+    updatedSets:['rows[0]','cols[4]','boxes[1]'],
+    vars:{r:0,c:4,val:"'7'",box_idx:1},
+    doneCells:[[0,0],[0,1],[0,4]]
+  },
+  {
+    r:1, c:0, val:'6', boxIdx:0, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"(0,5-8) all skipped. Cell (1,0): val='6', box_idx=0",
+    text:"board[0][5], [0][6], [0][7], [0][8] are all '.', skipped. Now at (1,0): val='6'. box_idx = (1//3)*3 + (0//3) = 0*3+0 = 0. '6' not in rows[1]={}, cols[0]={'5'}, or boxes[0]={'5','3'}. Adding '6'.",
+    rows_state:{'0':['5','3','7'],'1':['6'],'2':[]},
+    cols_state:{'0':['5','6'],'1':['3'],'2':[],'3':[],'4':['7'],'5':[],'7':[]},
+    boxes_state:{'0':['5','3','6'],'1':['7'],'2':[]},
+    updatedSets:['rows[1]','cols[0]','boxes[0]'],
+    vars:{r:1,c:0,val:"'6'",box_idx:0},
+    doneCells:[[0,0],[0,1],[0,4],[1,0]]
+  },
+  {
+    r:1, c:1, val:'.', boxIdx:null, skip:true,
+    activeLine:8, phase:'skip', phaseClass:'phase-skip', phaseLabel:'SKIP',
+    title:"Cells (1,1) and (1,2): val='.', SKIP",
+    text:"board[1][1]='.' and board[1][2]='.'. Both empty -- continue fires twice. No set updates.",
+    rows_state:{'0':['5','3','7'],'1':['6'],'2':[]},
+    cols_state:{'0':['5','6'],'1':['3'],'2':[],'3':[],'4':['7'],'5':[],'7':[]},
+    boxes_state:{'0':['5','3','6'],'1':['7'],'2':[]},
+    updatedSets:[],
+    vars:{r:1,c:1,val:"'.'",box_idx:'--'},
+    doneCells:[[0,0],[0,1],[0,4],[1,0]]
+  },
+  {
+    r:1, c:3, val:'1', boxIdx:1, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (1,3): val='1', box_idx=1",
+    text:"Value '1' found. box_idx = (1//3)*3 + (3//3) = 0*3+1 = 1 (top-center box). '1' not in rows[1]={'6'}, cols[3]={}, or boxes[1]={'7'}. Adding '1'.",
+    rows_state:{'0':['5','3','7'],'1':['6','1'],'2':[]},
+    cols_state:{'0':['5','6'],'1':['3'],'2':[],'3':['1'],'4':['7'],'5':[],'7':[]},
+    boxes_state:{'0':['5','3','6'],'1':['7','1'],'2':[]},
+    updatedSets:['rows[1]','cols[3]','boxes[1]'],
+    vars:{r:1,c:3,val:"'1'",box_idx:1},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3]]
+  },
+  {
+    r:1, c:4, val:'9', boxIdx:1, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (1,4): val='9', box_idx=1",
+    text:"Value '9' found. box_idx = 1 (still top-center box). '9' not in rows[1]={'6','1'}, cols[4]={'7'}, or boxes[1]={'7','1'}. Adding '9'.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9'],'2':[]},
+    cols_state:{'0':['5','6'],'1':['3'],'2':[],'3':['1'],'4':['7','9'],'5':[],'7':[]},
+    boxes_state:{'0':['5','3','6'],'1':['7','1','9'],'2':[]},
+    updatedSets:['rows[1]','cols[4]','boxes[1]'],
+    vars:{r:1,c:4,val:"'9'",box_idx:1},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4]]
+  },
+  {
+    r:1, c:5, val:'5', boxIdx:1, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (1,5): val='5', box_idx=1",
+    text:"Value '5' found. box_idx = (1//3)*3 + (5//3) = 0*3+1 = 1. '5' not in rows[1]={'6','1','9'}, cols[5]={}, or boxes[1]={'7','1','9'}. Note: '5' IS in rows[0] -- but we check rows[1], not rows[0]. Different row, no conflict! Adding '5'.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':[]},
+    cols_state:{'0':['5','6'],'1':['3'],'2':[],'3':['1'],'4':['7','9'],'5':['5'],'7':[]},
+    boxes_state:{'0':['5','3','6'],'1':['7','1','9','5'],'2':[]},
+    updatedSets:['rows[1]','cols[5]','boxes[1]'],
+    vars:{r:1,c:5,val:"'5'",box_idx:1},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5]]
+  },
+  {
+    r:2, c:1, val:'9', boxIdx:0, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"(1,6-8) and (2,0) skipped. Cell (2,1): val='9', box_idx=0",
+    text:"board[1][6..8] and board[2][0] are all '.', skipped. At (2,1): val='9'. box_idx = (2//3)*3 + (1//3) = 0*3+0 = 0 (still top-left box -- rows 0,1,2 all share box-row 0). '9' not in rows[2]={}, cols[1]={'3'}, or boxes[0]={'5','3','6'}. Adding '9'.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':['9']},
+    cols_state:{'0':['5','6'],'1':['3','9'],'2':[],'3':['1'],'4':['7','9'],'5':['5'],'7':[]},
+    boxes_state:{'0':['5','3','6','9'],'1':['7','1','9','5'],'2':[]},
+    updatedSets:['rows[2]','cols[1]','boxes[0]'],
+    vars:{r:2,c:1,val:"'9'",box_idx:0},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5],[2,1]]
+  },
+  {
+    r:2, c:2, val:'8', boxIdx:0, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"Cell (2,2): val='8', box_idx=0",
+    text:"Value '8' found. box_idx = 0 (still top-left box). '8' not in rows[2]={'9'}, cols[2]={}, or boxes[0]={'5','3','6','9'}. Adding '8'. The top-left box now contains {5,3,6,9,8}.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':['9','8']},
+    cols_state:{'0':['5','6'],'1':['3','9'],'2':['8'],'3':['1'],'4':['7','9'],'5':['5'],'7':[]},
+    boxes_state:{'0':['5','3','6','9','8'],'1':['7','1','9','5'],'2':[]},
+    updatedSets:['rows[2]','cols[2]','boxes[0]'],
+    vars:{r:2,c:2,val:"'8'",box_idx:0},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5],[2,1],[2,2]]
+  },
+  {
+    r:2, c:7, val:'6', boxIdx:2, skip:false,
+    activeLine:12, phase:'scan', phaseClass:'phase-build', phaseLabel:'SCAN',
+    title:"(2,3-6) skipped. Cell (2,7): val='6', box_idx=2",
+    text:"board[2][3..6] are all '.', skipped. At (2,7): val='6'. box_idx = (2//3)*3 + (7//3) = 0*3+2 = 2 (top-right box). '6' not in rows[2]={'9','8'}, cols[7]={}, or boxes[2]={}. Adding '6'.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':['9','8','6']},
+    cols_state:{'0':['5','6'],'1':['3','9'],'2':['8'],'3':['1'],'4':['7','9'],'5':['5'],'7':['6']},
+    boxes_state:{'0':['5','3','6','9','8'],'1':['7','1','9','5'],'2':['6']},
+    updatedSets:['rows[2]','cols[7]','boxes[2]'],
+    vars:{r:2,c:7,val:"'6'",box_idx:2},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5],[2,1],[2,2],[2,7]]
+  },
+  {
+    r:2, c:8, val:'.', boxIdx:null, skip:true,
+    activeLine:8, phase:'skip', phaseClass:'phase-skip', phaseLabel:'SKIP',
+    title:"Cell (2,8): val='.', SKIP",
+    text:"board[2][8]='.'. Last cell of row 2 -- skipped. Rows 3-8 continue the same pattern: scan each cell, skip dots, compute box_idx, check all three sets, add if no conflict. The board is still looking valid.",
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':['9','8','6']},
+    cols_state:{'0':['5','6'],'1':['3','9'],'2':['8'],'3':['1'],'4':['7','9'],'5':['5'],'7':['6']},
+    boxes_state:{'0':['5','3','6','9','8'],'1':['7','1','9','5'],'2':['6']},
+    updatedSets:[],
+    vars:{r:2,c:8,val:"'.'",box_idx:'--'},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5],[2,1],[2,2],[2,7]]
+  },
+  {
+    r:-1, c:-1, val:null, boxIdx:null, skip:false,
+    activeLine:15, phase:'done', phaseClass:'phase-result', phaseLabel:'RETURN TRUE',
+    title:'Return True -- Board is Valid',
+    text:'All 81 cells have been processed (rows 3-8 continued similarly). No value was ever found already in its row set, column set, or box set before being added. Every constraint passed. The board is valid -- return True.',
+    rows_state:{'0':['5','3','7'],'1':['6','1','9','5'],'2':['9','8','6']},
+    cols_state:{'0':['5','6'],'1':['3','9'],'2':['8'],'3':['1'],'4':['7','9'],'5':['5'],'7':['6']},
+    boxes_state:{'0':['5','3','6','9','8'],'1':['7','1','9','5'],'2':['6']},
+    updatedSets:[],
+    vars:{r:'--',c:'--',val:'--',box_idx:'--'},
+    doneCells:[[0,0],[0,1],[0,4],[1,0],[1,3],[1,4],[1,5],[2,1],[2,2],[2,7]]
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Sudoku Grid
+  const grid = document.getElementById('sudoku-grid');
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = document.createElement('div');
+      cell.id = 'gc-' + r + '-' + c;
+      const val = BOARD[r][c];
+      let cls = 'sudoku-cell';
+      if (c === 2 || c === 5) cls += ' box-border-r';
+      if (r === 2 || r === 5) cls += ' box-border-b';
+      if (val === '.') cls += ' dot-cell';
+      cell.className = cls;
+      cell.textContent = val === '.' ? '·' : val;
+      grid.appendChild(cell);
+    }
+  }
+
+  // Sets Panel
+  const panel = document.getElementById('sets-panel');
+  const setDefs = [
+    {id:'rows-0',  label:'rows[0]'},
+    {id:'rows-1',  label:'rows[1]'},
+    {id:'rows-2',  label:'rows[2]'},
+    {id:'cols-0',  label:'cols[0]'},
+    {id:'cols-1',  label:'cols[1]'},
+    {id:'cols-2',  label:'cols[2]'},
+    {id:'cols-3',  label:'cols[3]'},
+    {id:'cols-4',  label:'cols[4]'},
+    {id:'cols-5',  label:'cols[5]'},
+    {id:'cols-7',  label:'cols[7]'},
+    {id:'boxes-0', label:'boxes[0]'},
+    {id:'boxes-1', label:'boxes[1]'},
+    {id:'boxes-2', label:'boxes[2]'}
+  ];
+  setDefs.forEach(def => {
+    const box = document.createElement('div');
+    box.className = 'set-box';
+    box.id = 'sb-' + def.id;
+    box.innerHTML = '<div class="set-label">' + def.label + '</div><div class="set-vals" id="sv-' + def.id + '">{}</div>';
+    panel.appendChild(box);
+  });
+
+  // Progress Dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+// Map from set panel id key to the label key used in updatedSets
+function getSetData(step, setId) {
+  if (setId.startsWith('rows-')) {
+    const k = setId.replace('rows-','');
+    return (step.rows_state[k] || []);
+  } else if (setId.startsWith('cols-')) {
+    const k = setId.replace('cols-','');
+    return (step.cols_state[k] || []);
+  } else if (setId.startsWith('boxes-')) {
+    const k = setId.replace('boxes-','');
+    return (step.boxes_state[k] || []);
+  }
+  return [];
+}
+
+function getSetLabel(setId) {
+  if (setId.startsWith('rows-')) return 'rows[' + setId.replace('rows-','') + ']';
+  if (setId.startsWith('cols-')) return 'cols[' + setId.replace('cols-','') + ']';
+  if (setId.startsWith('boxes-')) return 'boxes[' + setId.replace('boxes-','') + ']';
+  return '';
+}
+
+function render() {
+  const step = steps[current];
+
+  // Grid cells
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const el = document.getElementById('gc-' + r + '-' + c);
+      el.classList.remove('active','done');
+      if (step.phase === 'done') {
+        if (BOARD[r][c] !== '.') el.classList.add('done');
+      } else if (r === step.r && c === step.c) {
+        el.classList.add('active');
+      } else {
+        const isDone = step.doneCells.some(function(dc){ return dc[0]===r && dc[1]===c; });
+        if (isDone) el.classList.add('done');
+      }
+    }
+  }
+
+  // Sets
+  const setIds = ['rows-0','rows-1','rows-2','cols-0','cols-1','cols-2','cols-3','cols-4','cols-5','cols-7','boxes-0','boxes-1','boxes-2'];
+  setIds.forEach(function(sid) {
+    const box = document.getElementById('sb-' + sid);
+    const val = document.getElementById('sv-' + sid);
+    if (!box || !val) return;
+    const data = getSetData(step, sid);
+    const label = getSetLabel(sid);
+    const isUpdated = step.updatedSets.indexOf(label) !== -1;
+    box.classList.toggle('updated', isUpdated);
+    val.textContent = data.length === 0 ? '{}' : '{' + data.join(', ') + '}';
+  });
+
+  // Code lines
+  for (let i = 0; i <= 15; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  const v = step.vars;
+  document.getElementById('vv-r').textContent   = String(v.r);
+  document.getElementById('vv-c').textContent   = String(v.c);
+  document.getElementById('vv-val').textContent = String(v.val);
+  document.getElementById('vv-box').textContent = String(v.box_idx);
+
+  document.getElementById('vb-r').classList.toggle('changed', step.r !== -1 && step.r !== null && step.r !== undefined);
+  document.getElementById('vb-c').classList.toggle('changed', step.c !== -1 && step.c !== null && step.c !== undefined);
+  document.getElementById('vb-val').classList.toggle('changed', step.val !== null);
+  document.getElementById('vb-box').classList.toggle('changed', step.boxIdx !== null);
+
+  // Progress dots
+  steps.forEach(function(_, i) {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('visited', i < current);
+    }
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

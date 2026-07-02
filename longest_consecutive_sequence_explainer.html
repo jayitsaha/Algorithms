@@ -1,415 +1,981 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Longest Consecutive Sequence – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
-      --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
-      --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
-      --mono:'JetBrains Mono','Fira Code',monospace; --sans:'DM Sans',system-ui,sans-serif;
-      --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
-      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
-      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
-      --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
-      --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
-      --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
-      --radius:10px; --radius-lg:14px;
-    }
-    @media(prefers-color-scheme:dark){:root{
-      --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
-      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
-      --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
-      --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
-      --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
-      --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
-      --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
-      --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
-      --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
-    }}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
-    .container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}
-    h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}
-    .subtitle{color:var(--text2);font-size:.95rem;}
-    .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
-    .tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
-    .tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
-    .tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
-    .tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
-    .section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
-    .section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-    .section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
-    .collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}
-    .card.collapsed .collapse-icon{transform:rotate(-90deg);}
-    .card.collapsed .section-content{display:none;}
-    .section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .section-content p:last-child{margin-bottom:0;}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
-    .concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
-    .concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
-    .concept-box.insight .concept-box-title{color:var(--green-mid);}
-    .concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
-    .concept-box.warning .concept-box-title{color:var(--amber-mid);}
-    .concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
-    .concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
-    .concept-box p{color:var(--text);margin:0;}
-    .concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .concept-box li{margin-bottom:.25rem;}
-    .algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
-    .algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
-    .step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
-    .step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
-    .code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
-    .code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .code-comment{color:var(--text3);}
-    .strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
-    .step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
-    .interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
-    .script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .array-section{margin-bottom:1.5rem;}
-    .array-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-    .array-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
-    .cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;position:relative;}
-    .cell.current{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);transform:scale(1.1);}
-    .cell.in-seq{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}
-    .cell.seq-start{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}
-    .cell.not-start{opacity:.45;}
-    .cell.best{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}
-    .set-section{margin:1.5rem 0;}
-    .set-display{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px;background:var(--bg2);border-radius:var(--radius);}
-    .set-item{font-family:var(--mono);font-size:13px;padding:4px 10px;border-radius:6px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);}
-    .set-item.highlight{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid);font-weight:600;}
-    .var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
-    .var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
-    .var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
-    .var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
-    .var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:30px;text-align:center;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
-    .info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}
-    .phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:10px;}
-    .phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
-    .phase-skip{background:var(--amber-bg);color:var(--amber-mid);}
-    .phase-extend{background:var(--blue-bg);color:var(--blue-mid);}
-    .phase-best{background:var(--green-bg);color:var(--green-mid);}
-    .phase-done{background:var(--purple-bg);color:var(--purple-mid);}
-    .step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
-    .info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}
-    .info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}
-    .dot.active{background:var(--blue-mid);transform:scale(1.3);}
-    .dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}
-    .btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
-    .btn-primary{background:var(--blue-mid);color:white;}
-    .btn-primary:hover{filter:brightness(1.1);}
-    .btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}
-    .btn-secondary:hover{background:var(--border);}
-    .btn:disabled{opacity:.5;cursor:not-allowed;}
-    .kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
-    .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
-    .legend-color{width:14px;height:14px;border-radius:4px;border:2px solid;}
-    .legend-start{background:var(--purple-bg);border-color:var(--purple-mid);}
-    .legend-seq{background:var(--green-bg);border-color:var(--green-mid);}
-    .legend-best{background:var(--amber-bg);border-color:var(--amber-mid);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
-    .takeaway{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems{margin-top:1rem;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;}
-    .related-problems ul{margin-left:1.25rem;color:var(--text2);}
-    .related-problems li{margin-bottom:.25rem;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#128 · Longest Consecutive Sequence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Hash Set Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Number array row */
+.num-section{display:flex;align-items:flex-start;gap:12px;margin-bottom:1.5rem}
+.num-label-box{min-width:60px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);display:flex;align-items:center;padding-top:13px}
+.cells-row{display:flex;gap:4px;flex-wrap:wrap}
+.cell{
+  width:48px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.current{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.in-sequence{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.best{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+
+/* Hash Set display */
+.hash-set-section{margin:1rem 0}
+.hash-set-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.hash-set-grid{display:flex;gap:8px;flex-wrap:wrap}
+.set-item{
+  padding:6px 14px;border-radius:6px;
+  font-family:var(--mono);font-size:14px;font-weight:600;
+  border:2px solid var(--border2);background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+}
+.set-item.exists{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.set-item.seq-start{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.set-item.in-seq{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.set-item.checking{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.set-item.best-seq{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+
+/* Sequence tracker display */
+.seq-tracker{margin:1rem 0;padding:12px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)}
+.seq-tracker-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.seq-items{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seq-num{padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;font-weight:600;background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green-text)}
+.seq-arrow{color:var(--text3);font-size:14px;font-weight:700}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-scan{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-count{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-cur{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-start{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-seq{background:var(--green-bg);border-color:var(--green-border)}
+.sw-check{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-best{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Decision Flow Diagram ── */
+.decision-flow{display:flex;align-items:center;justify-content:center;gap:0;margin:1.25rem 0;flex-wrap:wrap;gap:8px}
+.diag-box{padding:12px 18px;border-radius:var(--radius);border:2px solid;text-align:center;font-size:13px;line-height:1.5}
+.diag-box.question{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.diag-box.yes-path{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.diag-box.no-path{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.diag-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.diag-arrow{color:var(--text3);font-size:20px;font-weight:700;padding:0 4px}
+</style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Longest Consecutive Sequence</h1>
-    <p class="subtitle">LeetCode #128 – Find the longest run of consecutive integers</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Hash Set</span>
-      <span class="tag tag-pattern">Sequence Start Check</span>
-      <span class="tag tag-complexity">O(n) Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>Given an unsorted array of integers, find the length of the longest sequence of consecutive integers (e.g., 1,2,3,4).</p>
-      <p><strong>Example:</strong> [100,4,200,1,3,2] → longest is 1,2,3,4 → length <strong>4</strong></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Only start counting from a sequence's <strong>beginning</strong> — a number <code>n</code> is a sequence start if <code>n-1</code> is NOT in the set. This avoids redundant counting and keeps time O(n).</p>
-      </div>
-      <div class="concept-box warning">
-        <div class="concept-box-title">⚠️ Why not sort?</div>
-        <p>Sorting gives O(n log n). The problem asks for O(n). Hash set lookup is O(1), enabling a linear solution.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #128</div>
+  <h1>Longest Consecutive Sequence</h1>
+  <p class="subtitle">Given an unsorted array of integers, return the length of the longest consecutive elements sequence. Must run in O(n) time.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Hash Tables</span>
+    <span class="tag tag-pattern">Hash Set + Sequence Start Check</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Hash Set + Sequence Start Check</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-        <div class="algo-step"><span class="step-num">1</span><span class="step-text">Insert all numbers into a hash set</span></div>
-        <div class="algo-step"><span class="step-num">2</span><span class="step-text">For each number, check: is <code>num-1</code> in the set? If yes → skip (not a sequence start)</span></div>
-        <div class="algo-step"><span class="step-num">3</span><span class="step-text">If no → this is a sequence start. Count up: how far does num, num+1, num+2… go?</span></div>
-        <div class="algo-step"><span class="step-num">4</span><span class="step-text">Update best answer</span></div>
-      </div>
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 Why Each Number Is Visited At Most Twice</div>
-        <p>Each number is touched once when we check if it's a start, and at most once when it's counted as part of a sequence starting from a smaller number. Total work = O(n).</p>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Given an <strong>unsorted</strong> array of integers — say <code>[100, 4, 200, 1, 3, 2]</code> — find the length of the longest sequence of consecutive integers that can be formed from the array's elements. Order in the original array doesn't matter; only which values exist.</p>
 
-  <!-- Section 3 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:0.75rem">The sequence <code>1, 2, 3, 4</code> can be formed from the example (all four values are present), giving a length of 4. The lone values 100 and 200 each form sequences of length 1. So the answer is 4.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A number <code>n</code> is the <strong>start of a new sequence</strong> if and only if <code>n - 1</code> is NOT in the array. By only counting sequences from their starts, we process every element at most twice — giving us O(n). The hash set provides O(1) membership checks to make this efficient.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>We only expand sequences that start from their true beginning. A number is a start iff <code>num-1 ∉ set</code>. This means each sequence is counted exactly once — from its leftmost element.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: [100, 4, 200, 1, 3, 2]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          Sequences present:<br>
+          [100] → length 1<br>
+          [1, 2, 3, 4] → length 4 ← best<br>
+          [200] → length 1<br>
+          <strong>Answer: 4</strong>
+        </p>
       </div>
-      <p>This prevents O(n²) redundancy: if we start counting from every element, we'd recount subsequences. By skipping non-starts, each consecutive chain is traversed exactly once.</p>
+      <div class="panel-box before">
+        <div class="panel-title">Edge Cases to Handle</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          [] → 0 (empty array)<br>
+          [7] → 1 (single element)<br>
+          [1,1,2,2] → 2 (duplicates)<br>
+          [-2,-1,0,1] → 4 (negatives OK)<br>
+          [9,5,1,3,7] → 1 (no consec pairs)
+        </p>
+      </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>What "consecutive" means here:</strong> integers differing by exactly 1. The problem is NOT asking for the longest increasing subsequence in array order — it's about which integer values exist, regardless of their positions.</p>
   </div>
+</div>
 
-  <!-- Section 4 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel">
-        <div class="code-line">def longestConsecutive(nums):</div>
-        <div class="code-line">    num_set = set(nums)  <span class="code-comment"># O(n) lookup</span></div>
-        <div class="code-line">    best = 0</div>
-        <div class="code-line">    </div>
-        <div class="code-line">    for num in num_set:</div>
-        <div class="code-line">        <span class="code-comment"># Only start from sequence beginnings</span></div>
-        <div class="code-line">        if num - 1 not in num_set:</div>
-        <div class="code-line">            length = 1</div>
-        <div class="code-line">            while num + length in num_set:</div>
-        <div class="code-line">                length += 1</div>
-        <div class="code-line">            best = max(best, length)</div>
-        <div class="code-line">    return best</div>
-      </div>
-      <p style="margin-top:1rem;color:var(--text2);font-size:13px;">Time: O(n) — each element touched at most twice. Space: O(n) for the set.</p>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Hash Set + Sequence Start Check</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>The trick: use a <strong>hash set for O(1) lookups</strong>, then only "start counting" a sequence at its unique beginning. Every sequence has exactly one start — the element whose predecessor is absent. We skip all middle elements.</p>
 
-  <!-- Section 5 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-steps">
-        <div class="strategy-step">
-          <div class="step-label">Step 1: Clarify the constraint</div>
-          <p>Interviewer wants O(n). Sorting is O(n log n) — mention it, then explain why we can do better with a hash set.</p>
-        </div>
-        <div class="strategy-step">
-          <div class="step-label">Step 2: Key observation</div>
-          <p>Only need to start counting from sequence beginnings. A number starts a sequence iff <code>num-1</code> is absent.</p>
-        </div>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build hash set:</strong> <code>num_set = set(nums)</code>. This costs O(n) time and O(n) space. Duplicates are deduplicated. From here, "is X in the array?" runs in O(1) average time.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"I'll insert all numbers into a set. For each number, I only start counting if num-1 isn't in the set — that means it's a sequence start. Then I extend upward while num+length is in the set. This is O(n) because each number is visited at most twice."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Identify sequence starts:</strong> For each <code>n</code> in <code>num_set</code>, check: is <code>n - 1</code> in the set? If YES → skip (n is in the middle of someone else's sequence). If NO → n is the unique start of a new sequence.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Count forward from each start:</strong> From a confirmed start <code>n</code>, walk <code>cur = n, n+1, n+2 ...</code> as long as each next value is in the set. Count the length of this run.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Track global maximum:</strong> After each sequence is fully counted, <code>best = max(best, length)</code>. Return <code>best</code> when all elements have been processed.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div class="array-section">
-          <div class="array-label">Input Array</div>
-          <div class="array-row" id="arr"></div>
+    <!-- Decision flow -->
+    <p style="margin-top:1rem;font-size:13px;font-weight:700;color:var(--text2);margin-bottom:0.5rem">Decision at each number n:</p>
+    <div class="decision-flow">
+      <div class="diag-box question">
+        <div class="diag-label">For each n in num_set</div>
+        Is (n − 1) in num_set?
+      </div>
+      <div class="diag-arrow">→</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="diag-box yes-path">
+          <div class="diag-label">YES → SKIP</div>
+          n is in the middle of another sequence — don't double-count
         </div>
-        <div class="set-section">
-          <div class="array-label">Hash Set</div>
-          <div class="set-display" id="setDisplay"></div>
-        </div>
-        <div class="var-tracker" id="vars"></div>
-        <div class="code-panel" id="code"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phase">INIT</span>
-            <span class="step-counter" id="stepCtr">Step 0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to begin.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-color legend-start"></div>Sequence Start</div>
-          <div class="legend-item"><div class="legend-color legend-seq"></div>In Sequence</div>
-          <div class="legend-item"><div class="legend-color legend-best"></div>Best Sequence</div>
+        <div class="diag-box no-path">
+          <div class="diag-label">NO → COUNT</div>
+          n is a sequence start — count forward: n, n+1, n+2 ...
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Section 7 -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Insert all numbers into a set for O(1) lookup</div>
-        <div class="takeaway">✓ Only start counting from sequence beginnings (num-1 not in set)</div>
-        <div class="takeaway">✓ Each number is processed at most twice → O(n) overall</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <ul>
-          <li>Finding runs/streaks in unsorted data</li>
-          <li>O(n) requirement with lookup-heavy logic</li>
-          <li>"Sequence start" filtering to avoid double work</li>
-        </ul>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems</h4>
-        <ul>
-          <li><strong>Contains Duplicate</strong> (Easy) — Hash set membership</li>
-          <li><strong>Missing Number</strong> (Easy) — Set difference</li>
-          <li><strong>Longest Arithmetic Subsequence</strong> (Medium) — DP generalization</li>
-          <li><strong>Maximum Consecutive Ones III</strong> (Medium) — Sliding window variant</li>
-        </ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why This Is O(n): Amortized Analysis</div>
+      <p>The outer loop visits each of the n unique values once: O(n). The inner while-loop, <em>across all invocations</em>, can visit each element at most once total — because sequences are non-overlapping and we only count from starts. Total inner-loop iterations ≤ n. Combined: O(n + n) = O(n).</p>
     </div>
   </div>
 </div>
 
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Core Invariant</div>
+      <p>Every maximal consecutive sequence has exactly one element where <code>n - 1</code> is absent: its start. By counting only from these starts, <strong>every sequence is processed exactly once</strong> — never missed, never double-counted.</p>
+    </div>
+
+    <p><strong>Proof of completeness (no sequence is missed):</strong> Let S = {a, a+1, ..., a+k} be any maximal consecutive sequence in the array. By "maximal," <code>a-1</code> is not in the array. So when the outer loop reaches <code>a</code>, the check <code>a-1 not in num_set</code> is True, and we count S in full. Every sequence is found.</p>
+
+    <p style="margin-top:0.75rem"><strong>Proof of no double-counting:</strong> For any non-start element <code>m</code> (where <code>m-1</code> is in the set), we immediately skip it. <code>m</code> is only counted during the sequence that starts at <code>a &lt; m</code>. Each element contributes to at most one sequence's count.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Sorting Doesn't Meet the Requirement</div>
+      <p>The intuitive solution is to sort the array and scan for consecutive runs: O(n log n). This works correctly but fails the O(n) constraint. With a hash set, we replace sorted order with O(1) membership queries — getting the same logical scanning without sorting. This is the core trade-off to articulate in an interview.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Duplicate handling:</strong> Since we build a <em>set</em>, duplicates are automatically removed. <code>[1, 1, 2, 2, 3]</code> → <code>{1, 2, 3}</code>. The sequence 1→2→3 has length 3, correctly ignoring the duplicate values.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Intuition: The "Secretary" Analogy</div>
+      <p>Imagine each integer is an employee, and consecutive employees form a team. We ask each employee: "Is there someone with employee ID one less than you?" If yes, that person is your supervisor — you're in the middle of a chain, so wait. If no, you're the team leader — count how many are in your chain. Every team gets counted exactly once, by its leader.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Hash Set + Sequence Start Check (Optimal · Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestConsecutive(nums: list[int]) -> int:</span></div>
+<div class="ann-line"><span class="acode">    num_set = set(nums)              </span><span class="aann">← O(n): build set, deduplicate, O(1) lookups</span></div>
+<div class="ann-line"><span class="acode">    best = 0                         </span><span class="aann">← Global max (0 handles empty input)</span></div>
+<div class="ann-line"><span class="acode">    for n in num_set:                </span><span class="aann">← Iterate SET (not list) to avoid reprocessing duplicates</span></div>
+<div class="ann-line"><span class="acode">        if n - 1 not in num_set:     </span><span class="aann">← Only start counting from sequence starts</span></div>
+<div class="ann-line"><span class="acode">            cur = n                  </span><span class="aann">← cur walks forward through the sequence</span></div>
+<div class="ann-line"><span class="acode">            length = 1               </span><span class="aann">← Start element counts as length 1</span></div>
+<div class="ann-line"><span class="acode">            while cur + 1 in num_set:</span><span class="aann">← Extend while next consecutive exists</span></div>
+<div class="ann-line"><span class="acode">                cur += 1             </span><span class="aann">← Advance pointer</span></div>
+<div class="ann-line"><span class="acode">                length += 1          </span><span class="aann">← Tally one more element in this run</span></div>
+<div class="ann-line"><span class="acode">            best = max(best, length) </span><span class="aann">← Sequence done — update global max</span></div>
+<div class="ann-line"><span class="acode">    return best                      </span><span class="aann">← 0 if empty input; longest sequence otherwise</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why `for n in num_set` not `for n in nums`?</div>
+      <p>If <code>nums = [1, 1, 1, 2, 3]</code> and we iterate <code>nums</code>, we process 1 as a start <em>three times</em>, each time counting 1→2→3. The answer is still correct (best = 3), but we do O(duplicate_count × sequence_length) redundant work. Iterating the set — where 1 appears once — keeps it strictly O(n).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Sort and Linear Scan (O(n log n) · Simpler)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestConsecutive(nums: list[int]) -> int:</span></div>
+<div class="ann-line"><span class="acode">    if not nums: return 0</span></div>
+<div class="ann-line"><span class="acode">    nums = sorted(set(nums))         </span><span class="aann">← Sort unique values; O(n log n)</span></div>
+<div class="ann-line"><span class="acode">    best = cur_len = 1               </span><span class="aann">← Start at length 1</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, len(nums)):    </span><span class="aann">← Compare each element to its predecessor</span></div>
+<div class="ann-line"><span class="acode">        if nums[i] == nums[i-1] + 1: </span><span class="aann">← Consecutive → extend current run</span></div>
+<div class="ann-line"><span class="acode">            cur_len += 1</span></div>
+<div class="ann-line"><span class="acode">        else:                        </span><span class="aann">← Gap → save best, reset</span></div>
+<div class="ann-line"><span class="acode">            best = max(best, cur_len)</span></div>
+<div class="ann-line"><span class="acode">            cur_len = 1</span></div>
+<div class="ann-line"><span class="acode">    return max(best, cur_len)        </span><span class="aann">← Handle the final run (don't forget!)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Hash Set (optimal):</strong> Time O(n) · Space O(n) — interview answer<br>
+        <strong>Sort + Scan:</strong> Time O(n log n) · Space O(n) — propose this first as stepping stone<br>
+        <strong>Brute Force:</strong> Time O(n³) — for each element, search for consecutive chain — never do this
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Restate and Clarify</div>
+        <p style="font-size:14px;color:var(--text)">"I need the length of the longest run of consecutive integers in an unsorted array. This is about which values exist, not their positions." Ask: "Are there duplicates?" (Yes — they don't extend sequences.) Ask: "Can values be negative?" (Yes — hash set handles this fine.)</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose the O(n log n) Approach</div>
+        <p style="font-size:14px;color:var(--text)">"The natural approach: sort the array, then scan for consecutive runs — O(n log n). This is correct and easy to implement. But the problem asks for O(n), so I need to find a way to avoid sorting."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Arrive at the O(n) Insight</div>
+        <p style="font-size:14px;color:var(--text)">"What did sorting give me? The ability to check 'is n+1 present?' cheaply. A hash set gives me the same in O(1). The remaining issue is avoiding redundant counting — I solve this by only counting from sequence starts (where n-1 is absent)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Prove the Time Complexity</div>
+        <p style="font-size:14px;color:var(--text)">"The outer loop visits n elements. The inner while-loop, summed over all outer iterations, visits each element at most once — because sequences don't overlap and we only enter the while-loop at starts. Total: O(n). This is the amortized argument."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll start by building a hash set of all numbers — O(n) time and space.<br>
+Then I iterate through the set. For each n, I check: is n-1 in the set?<br>
+If yes, n is in the middle of a longer sequence — skip it to avoid double-counting.<br>
+If no, n is a unique sequence start — I count forward while n, n+1, n+2 ... exist in the set.<br>
+I track the max length seen. At the end I return it.<br>
+Time O(n) — each element is processed at most twice across all iterations.<br>
+Space O(n) for the hash set. This handles duplicates, negatives, and empty input."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Return the actual sequence, not just the length?"</strong> → Track <code>best_start</code> alongside <code>best</code>; reconstruct with <code>range(best_start, best_start + best)</code>.</li>
+        <li><strong>"What if numbers are huge but sparse?"</strong> → Same approach works perfectly — hash set is index-independent.</li>
+        <li><strong>"Alternative approach?"</strong> → Union-Find: union n with n+1 when both exist; largest component = answer. Also O(n α(n)).</li>
+        <li><strong>"Longest arithmetic subsequence?"</strong> → Harder — use DP with a hash map tracking sequence lengths per difference (#1218).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: nums = [100, 4, 200, 1, 3, 2]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Input array -->
+      <div class="num-section">
+        <div class="num-label-box">nums</div>
+        <div class="cells-row" id="num-cells"></div>
+      </div>
+
+      <!-- Hash Set (sorted display) -->
+      <div class="hash-set-section">
+        <div class="hash-set-title">num_set (displayed sorted)</div>
+        <div class="hash-set-grid" id="hash-set-grid"></div>
+      </div>
+
+      <!-- Current Sequence tracker -->
+      <div class="seq-tracker" id="seq-tracker" style="display:none">
+        <div class="seq-tracker-title">Current sequence being counted</div>
+        <div class="seq-items" id="seq-items"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-n">
+          <span class="var-name">n</span>
+          <span class="var-val" id="vv-n">—</span>
+        </div>
+        <div class="var-box" id="vb-len">
+          <span class="var-name">length</span>
+          <span class="var-val" id="vv-len">—</span>
+        </div>
+        <div class="var-box" id="vb-best">
+          <span class="var-name">best</span>
+          <span class="var-val" id="vv-best">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def longestConsecutive(nums):</div>
+      <div class="code-line" id="cl-1">    num_set = set(nums)</div>
+      <div class="code-line" id="cl-2">    best = 0</div>
+      <div class="code-line" id="cl-3">    for n in num_set:</div>
+      <div class="code-line" id="cl-4">        if n - 1 not in num_set:</div>
+      <div class="code-line" id="cl-5">            cur = n; length = 1</div>
+      <div class="code-line" id="cl-6">            while cur + 1 in num_set:</div>
+      <div class="code-line" id="cl-7">                cur += 1; length += 1</div>
+      <div class="code-line" id="cl-8">            best = max(best, length)</div>
+      <div class="code-line" id="cl-9">    return best</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 16</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div> Checking (n)</div>
+      <div class="legend-item"><div class="legend-swatch sw-start"></div> Sequence start</div>
+      <div class="legend-item"><div class="legend-swatch sw-seq"></div> In current sequence</div>
+      <div class="legend-item"><div class="legend-swatch sw-check"></div> Checking membership</div>
+      <div class="legend-item"><div class="legend-swatch sw-best"></div> Best sequence</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Build a hash set first — O(1) membership queries replace the need to sort</div>
+      <div class="takeaway">Only count from sequence STARTS (where n-1 is absent) — prevents all double-counting</div>
+      <div class="takeaway">Each element is processed at most twice across all loop iterations — amortized O(n)</div>
+      <div class="takeaway">Iterate num_set, not nums — avoids unnecessary reprocessing of duplicates</div>
+      <div class="takeaway">In interviews: propose O(n log n) sort first, then show the O(n) hash-set upgrade</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (triple loop)</td>
+          <td class="mark-bad">O(n³)</td>
+          <td>O(1)</td>
+          <td>For each pair, search for chain — never acceptable</td>
+        </tr>
+        <tr>
+          <td>Sort + Linear Scan</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Correct; good warm-up in interview</td>
+        </tr>
+        <tr>
+          <td><strong>Hash Set + Start Check ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td>O(n)</td>
+          <td>Optimal — the interview answer</td>
+        </tr>
+        <tr>
+          <td>Union-Find</td>
+          <td class="mark-good">O(n α(n))</td>
+          <td>O(n)</td>
+          <td>Elegant alternative; α(n) ≈ O(1) in practice</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Longest consecutive run" + unsorted data + O(n) required → Hash Set + Start Check</li>
+        <li>Any problem needing O(1) repeated membership queries in a collection → build a set first</li>
+        <li>Counting/finding patterns where you need to avoid double-processing → identify and skip non-starts</li>
+        <li>"Is n+k present?" style questions repeated for many n → precompute set, query O(1)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems</div>
+      <div class="related-item"><strong>Contains Duplicate</strong><span class="related-diff diff-easy">Easy</span> — Foundational hash set usage: add and detect collisions (#217)</div>
+      <div class="related-item"><strong>Missing Number</strong><span class="related-diff diff-easy">Easy</span> — Which number in [0..n] is absent? Set vs math approaches (#268)</div>
+      <div class="related-item"><strong>Longest Arithmetic Subsequence of Given Difference</strong><span class="related-diff diff-med">Medium</span> — Generalization: step d instead of 1; requires DP + hashmap (#1218)</div>
+      <div class="related-item"><strong>Find All Numbers Disappeared in an Array</strong><span class="related-diff diff-easy">Easy</span> — Set comparison with expected range [1..n] (#448)</div>
+      <div class="related-item"><strong>Longest Increasing Subsequence</strong><span class="related-diff diff-med">Medium</span> — Subsequence in array order (harder); uses DP or patience sorting (#300)</div>
+      <div class="related-item"><strong>Number of Islands</strong><span class="related-diff diff-med">Medium</span> — Connected components; Union-Find alternative applies to both (#200)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section: Hash Tables<br>
+      Sub-Pattern: <strong>Hash Set + Sequence Start Check</strong><br>
+      Recognition signal: "find longest consecutive run" + O(n) required + unsorted input</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-const nums = [100,4,200,1,3,2];
-const numSet = new Set(nums);
-const codeLns = [
-  'def longestConsecutive(nums):',
-  '    num_set = set(nums)',
-  '    best = 0',
-  '    ',
-  '    for num in num_set:',
-  '        if num - 1 not in num_set:',
-  '            length = 1',
-  '            while num + length in num_set:',
-  '                length += 1',
-  '            best = max(best, length)',
-  '    return best'
+const NUMS = [100, 4, 200, 1, 3, 2];
+const SET_SORTED = [1, 2, 3, 4, 100, 200];
+
+// Each step defines: setHighlight (val->class), seqItems (values in current seq),
+// which input array cells to highlight, variable values, and the info card content.
+const steps = [
+  {
+    id: 0, phase: 'init', phaseLabel: 'INIT', phaseClass: 'phase-init',
+    activeLine: 0,
+    n: '—', length: '—', best: 0,
+    setHighlight: {},
+    seqItems: [],
+    numHighlight: {},
+    title: 'Problem Setup',
+    text: 'nums = [100, 4, 200, 1, 3, 2]. We want the longest run of consecutive integers. The O(n) constraint rules out sorting. Step through to see the hash-set approach.',
+    changedVars: []
+  },
+  {
+    id: 1, phase: 'build', phaseLabel: 'BUILD SET', phaseClass: 'phase-build',
+    activeLine: 1,
+    n: '—', length: '—', best: 0,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'exists',200:'exists'},
+    seqItems: [],
+    numHighlight: {},
+    title: 'Build num_set = {1, 2, 3, 4, 100, 200}',
+    text: 'Insert all values into a hash set. Duplicates collapse (none here). Now "is X present?" costs O(1). The set is displayed sorted for readability, but internally order doesn\'t matter.',
+    changedVars: []
+  },
+  {
+    id: 2, phase: 'build', phaseLabel: 'INIT BEST', phaseClass: 'phase-build',
+    activeLine: 2,
+    n: '—', length: '—', best: 0,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'exists',200:'exists'},
+    seqItems: [],
+    numHighlight: {},
+    title: 'best = 0',
+    text: 'Initialize best = 0. This handles the edge case where nums is empty (returns 0). We\'ll update best whenever we finish counting a sequence.',
+    changedVars: ['best']
+  },
+  {
+    id: 3, phase: 'scan', phaseLabel: 'CHECK n=100', phaseClass: 'phase-scan',
+    activeLine: 4,
+    n: 100, length: '—', best: 0,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'checking',200:'exists'},
+    seqItems: [],
+    numHighlight: {0: 'current'},
+    title: 'n=100: Is (100−1)=99 in num_set?',
+    text: 'Checking n=100. Is 99 in num_set? NO — 99 is absent. This means 100 is a sequence start (nothing comes before it). We\'ll count how far this sequence extends.',
+    changedVars: ['n']
+  },
+  {
+    id: 4, phase: 'count', phaseLabel: 'COUNT 100', phaseClass: 'phase-count',
+    activeLine: 5,
+    n: 100, length: 1, best: 0,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'seq-start',200:'exists'},
+    seqItems: [100],
+    numHighlight: {0: 'in-sequence'},
+    title: 'Start counting: cur=100, length=1',
+    text: 'cur=100, length=1 (100 itself counts). Now enter the while-loop: is cur+1=101 in num_set?',
+    changedVars: ['length']
+  },
+  {
+    id: 5, phase: 'count', phaseLabel: 'SEQ 100 DONE', phaseClass: 'phase-count',
+    activeLine: 8,
+    n: 100, length: 1, best: 1,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'seq-start',200:'exists'},
+    seqItems: [100],
+    numHighlight: {0: 'in-sequence'},
+    title: '101 not in set — done. best = max(0,1) = 1',
+    text: '101 is not in num_set. Sequence [100] has length 1. best = max(0, 1) = 1. This is our current champion (not for long!).',
+    changedVars: ['best']
+  },
+  {
+    id: 6, phase: 'scan', phaseLabel: 'CHECK n=4', phaseClass: 'phase-scan',
+    activeLine: 4,
+    n: 4, length: '—', best: 1,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'checking',100:'exists',200:'exists'},
+    seqItems: [],
+    numHighlight: {1: 'current'},
+    title: 'n=4: Is (4−1)=3 in num_set?',
+    text: 'Now n=4. Is 3 in num_set? YES — 3 is present! So 4 is NOT a sequence start; it\'s in the middle of a longer run. We SKIP n=4 entirely to avoid double-counting.',
+    changedVars: ['n']
+  },
+  {
+    id: 7, phase: 'scan', phaseLabel: 'CHECK n=200', phaseClass: 'phase-scan',
+    activeLine: 4,
+    n: 200, length: '—', best: 1,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'exists',200:'checking'},
+    seqItems: [],
+    numHighlight: {2: 'current'},
+    title: 'n=200: Is (200−1)=199 in num_set?',
+    text: 'Now n=200. Is 199 in num_set? NO — 199 is absent. So 200 is a sequence start. Count forward from it.',
+    changedVars: ['n']
+  },
+  {
+    id: 8, phase: 'count', phaseLabel: 'SEQ 200 DONE', phaseClass: 'phase-count',
+    activeLine: 8,
+    n: 200, length: 1, best: 1,
+    setHighlight: {1:'exists',2:'exists',3:'exists',4:'exists',100:'exists',200:'seq-start'},
+    seqItems: [200],
+    numHighlight: {2: 'in-sequence'},
+    title: '201 not in set — done. best stays 1',
+    text: 'cur+1=201 is not in num_set. Sequence [200] has length 1. best = max(1, 1) = 1 — no improvement. Keep going.',
+    changedVars: ['length']
+  },
+  {
+    id: 9, phase: 'scan', phaseLabel: 'CHECK n=1', phaseClass: 'phase-scan',
+    activeLine: 4,
+    n: 1, length: '—', best: 1,
+    setHighlight: {1:'checking',2:'exists',3:'exists',4:'exists',100:'exists',200:'exists'},
+    seqItems: [],
+    numHighlight: {3: 'current'},
+    title: 'n=1: Is (1−1)=0 in num_set?',
+    text: 'Now n=1. Is 0 in num_set? NO — 0 is absent. So 1 is a sequence start! This is about to be the big one. Start counting.',
+    changedVars: ['n']
+  },
+  {
+    id: 10, phase: 'count', phaseLabel: 'COUNT 1→2', phaseClass: 'phase-count',
+    activeLine: 7,
+    n: 1, length: 2, best: 1,
+    setHighlight: {1:'seq-start',2:'in-seq',3:'exists',4:'exists',100:'exists',200:'exists'},
+    seqItems: [1, 2],
+    numHighlight: {3: 'in-sequence', 5: 'in-sequence'},
+    title: '2 is in set! cur=2, length=2',
+    text: 'cur+1=2 is in num_set. Advance: cur=2, length=2. Sequence so far: [1, 2]. Is 3 in the set?',
+    changedVars: ['length']
+  },
+  {
+    id: 11, phase: 'count', phaseLabel: 'COUNT 2→3', phaseClass: 'phase-count',
+    activeLine: 7,
+    n: 1, length: 3, best: 1,
+    setHighlight: {1:'seq-start',2:'in-seq',3:'in-seq',4:'exists',100:'exists',200:'exists'},
+    seqItems: [1, 2, 3],
+    numHighlight: {3: 'in-sequence', 4: 'in-sequence', 5: 'in-sequence'},
+    title: '3 is in set! cur=3, length=3',
+    text: 'cur+1=3 is in num_set. Advance: cur=3, length=3. Sequence: [1, 2, 3]. Is 4 in the set?',
+    changedVars: ['length']
+  },
+  {
+    id: 12, phase: 'count', phaseLabel: 'COUNT 3→4', phaseClass: 'phase-count',
+    activeLine: 7,
+    n: 1, length: 4, best: 1,
+    setHighlight: {1:'seq-start',2:'in-seq',3:'in-seq',4:'in-seq',100:'exists',200:'exists'},
+    seqItems: [1, 2, 3, 4],
+    numHighlight: {1: 'in-sequence', 3: 'in-sequence', 4: 'in-sequence', 5: 'in-sequence'},
+    title: '4 is in set! cur=4, length=4',
+    text: 'cur+1=4 is in num_set. Advance: cur=4, length=4. Sequence: [1, 2, 3, 4]. Is 5 in the set?',
+    changedVars: ['length']
+  },
+  {
+    id: 13, phase: 'count', phaseLabel: 'SEQ 1→4 DONE', phaseClass: 'phase-count',
+    activeLine: 8,
+    n: 1, length: 4, best: 4,
+    setHighlight: {1:'seq-start',2:'in-seq',3:'in-seq',4:'in-seq',100:'exists',200:'exists'},
+    seqItems: [1, 2, 3, 4],
+    numHighlight: {1: 'in-sequence', 3: 'in-sequence', 4: 'in-sequence', 5: 'in-sequence'},
+    title: '5 not in set — done! best = max(1, 4) = 4',
+    text: '5 is not in num_set. Sequence [1, 2, 3, 4] has length 4. best = max(1, 4) = 4. New global maximum! This is the answer.',
+    changedVars: ['best']
+  },
+  {
+    id: 14, phase: 'scan', phaseLabel: 'SKIP n=2,3', phaseClass: 'phase-scan',
+    activeLine: 4,
+    n: '2,3', length: '—', best: 4,
+    setHighlight: {1:'exists',2:'checking',3:'checking',4:'exists',100:'exists',200:'exists'},
+    seqItems: [],
+    numHighlight: {},
+    title: 'n=2: 1 is in set → SKIP. n=3: 2 is in set → SKIP.',
+    text: 'When we reach n=2: is 1 in num_set? YES → skip (2 is in the middle of the 1→4 sequence). When we reach n=3: is 2 in num_set? YES → skip. These were already counted when we started from 1.',
+    changedVars: ['n']
+  },
+  {
+    id: 15, phase: 'result', phaseLabel: 'RETURN 4', phaseClass: 'phase-result',
+    activeLine: 9,
+    n: '—', length: '—', best: 4,
+    setHighlight: {1:'best-seq',2:'best-seq',3:'best-seq',4:'best-seq',100:'exists',200:'exists'},
+    seqItems: [1, 2, 3, 4],
+    numHighlight: {1: 'best', 3: 'best', 4: 'best', 5: 'best'},
+    title: 'Return best = 4 ✓',
+    text: 'All elements processed. The longest consecutive sequence is [1, 2, 3, 4] with length 4. The algorithm visited each element at most twice total — confirming O(n) time.',
+    changedVars: ['best']
+  }
 ];
 
-function buildSteps(){
-  const steps=[];
-  steps.push({phase:'INIT',phaseClass:'phase-init',title:'Build Hash Set',text:'Insert all numbers into a set for O(1) lookup: {100, 4, 200, 1, 3, 2}.',activeLine:1,cur:-1,seqNums:[],best:0,len:0});
-  
-  const starts = [...numSet].filter(n=>!numSet.has(n-1)).sort((a,b)=>a-b);
-  let best=0;
-  for(const start of starts){
-    let len=1;
-    steps.push({phase:'CHECK',phaseClass:'phase-init',title:`Check num=${start}: is ${start-1} in set?`,text:`${start-1} is NOT in set → ${start} is a sequence start! Begin counting.`,activeLine:5,cur:start,seqNums:[start],best,len,highlight:start});
-    while(numSet.has(start+len)){
-      steps.push({phase:'EXTEND',phaseClass:'phase-extend',title:`Extend: ${start+len} in set`,text:`Found ${start+len} in set. Sequence length now ${len+1}.`,activeLine:7,cur:start,seqNums:Array.from({length:len+1},(_,i)=>start+i),best,len:len+1,highlight:start+len});
-      len++;
-    }
-    best=Math.max(best,len);
-    steps.push({phase:'BEST',phaseClass:'phase-best',title:`Sequence ${start}…${start+len-1} has length ${len}`,text:`best = max(${best===len?best-0:best}, ${len}) = ${best}`,activeLine:9,cur:start,seqNums:Array.from({length:len},(_,i)=>start+i),best,len,isBest:best===len});
+let current = 0;
+
+function buildDom() {
+  const numCells = document.getElementById('num-cells');
+  NUMS.forEach((num, i) => {
+    const c = document.createElement('div');
+    c.className = 'cell normal'; c.id = 'nc-' + i;
+    c.textContent = num;
+    numCells.appendChild(c);
+  });
+
+  const grid = document.getElementById('hash-set-grid');
+  SET_SORTED.forEach(val => {
+    const item = document.createElement('div');
+    item.className = 'set-item'; item.id = 'si-' + val;
+    item.textContent = val;
+    grid.appendChild(item);
+  });
+
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
   }
-  // also show a skipped non-start
-  steps.push({phase:'DONE',phaseClass:'phase-done',title:`Result: ${best}`,text:`Longest consecutive sequence has length ${best}: 1→2→3→4.`,activeLine:10,cur:-1,seqNums:[1,2,3,4],best,len:best});
-  return steps;
 }
 
-const steps=buildSteps();
-let cur=0;
+function render() {
+  const step = steps[current];
 
-function render(){
-  const s=steps[cur];
-  // array
-  document.getElementById('arr').innerHTML=nums.map(n=>{
-    let cls='cell';
-    if(s.seqNums&&s.seqNums.includes(n)){
-      cls+= s.phase==='BEST'&&s.isBest?' best':' in-seq';
-      if(n===s.seqNums[0])cls+=' seq-start';
-    }
-    return `<div class="${cls}">${n}</div>`;
-  }).join('');
-  // set
-  document.getElementById('setDisplay').innerHTML=[...numSet].sort((a,b)=>a-b).map(n=>{
-    let cls='set-item';
-    if(s.highlight===n)cls+=' highlight';
-    if(s.seqNums&&s.seqNums.includes(n)&&s.phase!=='INIT')cls+=' highlight';
-    return `<div class="${cls}">${n}</div>`;
-  }).join('');
-  // vars
-  const vars=[{name:'best',val:s.best},{name:'length',val:s.len??'-'},{name:'cur',val:s.cur===-1?'-':s.cur}];
-  document.getElementById('vars').innerHTML=vars.map(v=>`<div class="var-box"><span class="var-name">${v.name}</span><span class="var-val">${v.val}</span></div>`).join('');
-  // code
-  document.getElementById('code').innerHTML=codeLns.map((l,i)=>`<div class="code-line${i===s.activeLine?' active':''}">${l}</div>`).join('');
-  // info
-  document.getElementById('phase').textContent=s.phase;
-  document.getElementById('phase').className='phase-badge '+s.phaseClass;
-  document.getElementById('stepCtr').textContent=`Step ${cur}/${steps.length-1}`;
-  document.getElementById('infoTitle').textContent=s.title;
-  document.getElementById('infoText').textContent=s.text;
-  // dots
-  document.getElementById('dots').innerHTML=steps.map((_,i)=>`<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled=cur===0;
-  document.getElementById('nextBtn').disabled=cur===steps.length-1;
+  // ── Input array cells ──
+  NUMS.forEach((num, i) => {
+    const cell = document.getElementById('nc-' + i);
+    cell.className = 'cell';
+    const nh = step.numHighlight[i];
+    if (nh === 'best') cell.classList.add('best');
+    else if (nh === 'in-sequence') cell.classList.add('in-sequence');
+    else if (nh === 'current') cell.classList.add('current');
+    else cell.classList.add('normal');
+  });
+
+  // ── Hash Set display ──
+  SET_SORTED.forEach(val => {
+    const el = document.getElementById('si-' + val);
+    el.className = 'set-item';
+    const cls = step.setHighlight[val];
+    if (cls === 'seq-start') el.classList.add('seq-start');
+    else if (cls === 'in-seq') el.classList.add('in-seq');
+    else if (cls === 'checking') el.classList.add('checking');
+    else if (cls === 'best-seq') el.classList.add('best-seq');
+    else if (cls === 'exists') el.classList.add('exists');
+  });
+
+  // ── Sequence tracker ──
+  const seqTracker = document.getElementById('seq-tracker');
+  const seqItemsEl = document.getElementById('seq-items');
+  if (step.seqItems && step.seqItems.length > 0) {
+    seqTracker.style.display = '';
+    seqItemsEl.innerHTML = '';
+    step.seqItems.forEach((num, i) => {
+      if (i > 0) {
+        const arrow = document.createElement('span');
+        arrow.className = 'seq-arrow';
+        arrow.textContent = '→';
+        seqItemsEl.appendChild(arrow);
+      }
+      const el = document.createElement('span');
+      el.className = 'seq-num';
+      el.textContent = num;
+      seqItemsEl.appendChild(el);
+    });
+    const info = document.createElement('span');
+    info.style.cssText = 'font-size:12px;color:var(--text3);margin-left:10px;font-family:var(--mono)';
+    info.textContent = '(length: ' + step.seqItems.length + ')';
+    seqItemsEl.appendChild(info);
+  } else {
+    seqTracker.style.display = 'none';
+  }
+
+  // ── Code panel ──
+  for (let i = 0; i <= 9; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  document.getElementById('vv-n').textContent = step.n;
+  document.getElementById('vv-len').textContent = step.length;
+  document.getElementById('vv-best').textContent = step.best;
+  document.getElementById('vb-n').classList.toggle('changed', step.changedVars.includes('n'));
+  document.getElementById('vb-len').classList.toggle('changed', step.changedVars.includes('length'));
+  document.getElementById('vb-best').classList.toggle('changed', step.changedVars.includes('best'));
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
 }
-function go(d){if(cur+d>=0&&cur+d<steps.length){cur+=d;render();}}
-function goTo(i){cur=i;render();}
-function reset(){cur=0;render();}
-function toggleSection(h){h.closest('.card').classList.toggle('collapsed');}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key==='r'||e.key==='R')reset();});
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
 render();
 </script>
 </body>

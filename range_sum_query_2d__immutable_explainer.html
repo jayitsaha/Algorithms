@@ -1,88 +1,976 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Range Sum Query 2D - Immutable — LC #304</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#304 · Range Sum Query 2D - Immutable</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── 2D Grid Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-wrapper{display:flex;gap:2.5rem;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.grid-section{display:flex;flex-direction:column;align-items:center;gap:6px}
+.grid-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:2px}
+.col-labels-row{display:flex;gap:4px;margin-left:24px;margin-bottom:2px}
+.col-lbl,.row-lbl{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text3);font-family:var(--mono)}
+.col-lbl{width:44px;height:16px}
+.row-lbl{width:20px;height:44px}
+.grid-body{display:flex;gap:0}
+.row-labels-col{display:flex;flex-direction:column;gap:4px;margin-right:4px}
+.grid-rows{display:flex;flex-direction:column;gap:4px}
+.grid-row{display:flex;gap:4px}
+.gcell{
+  width:44px;height:44px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.gcell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.gcell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.gcell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.gcell.highlight{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.gcell.query-region{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.gcell.contrib{background:var(--blue-bg);border-color:var(--blue-mid);color:var(--blue-text)}
+.gcell.exclude{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.gcell.corner-add{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.gcell.result{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-text);font-weight:700}
+.gcell.sentinel{background:var(--bg2);border-color:var(--border);color:var(--text3);font-size:11px}
+
+/* ── Formula Box ── */
+.formula-box{background:var(--surface);border:1.5px solid var(--purple-border);border-radius:var(--radius);padding:14px 18px;margin:1rem 0;font-family:var(--mono);font-size:13px;line-height:2.4}
+.fv-big{color:var(--blue-mid);font-weight:700}
+.fv-sub{color:var(--red-mid);font-weight:700}
+.fv-add{color:var(--green-mid);font-weight:700}
+.fcomment{font-family:var(--sans);font-size:11px;color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-query{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-blue{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-green{background:var(--green-bg);border-color:var(--green-border)}
+.sw-purple{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-amber{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-red{background:var(--red-bg);border-color:var(--red-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Range Sum Query 2D - Immutable</h1>
-<div class="subtitle">LeetCode #304 &mdash; 2D Prefix Sum</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Array Manipulation</span><span class="tag tag-pattern">2D Prefix Sum</span><span class="tag tag-cx">O(mn) init, O(1) query Time &middot; O(mn) Space</span></div>
-</div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>NumMatrix class: sumRegion(row1,col1,row2,col2) returns sum of rectangle in O(1) after O(mn) preprocessing.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Build 2D prefix sum P where P[i][j] = sum of rectangle from (0,0) to (i-1,j-1). Query (r1,c1,r2,c2) = P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1] (inclusion-exclusion).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: 2D Prefix Sum Matrix</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: 2D Prefix Sum Matrix</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Build P[m+1][n+1] with P[0][*]=P[*][0]=0</span></div><div class="step"><span class="snum">2</span><span class="stxt">P[i][j] = matrix[i-1][j-1] + P[i-1][j] + P[i][j-1] - P[i-1][j-1]</span></div><div class="step"><span class="snum">3</span><span class="stxt">sumRegion: P[r2+1][c2+1] - P[r1][c2+1] - P[r2+1][c1] + P[r1][c1]</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="box bk"><div class="boxt">&#128274; Invariant</div><p>P[i][j] = sum of all elements in rectangle (0,0) to (i-1,j-1).</p></div><p>Inclusion-exclusion: full rectangle minus left strip minus top strip plus top-left corner (which was subtracted twice).</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(mn) init, O(1) query</strong> | Space: <strong>O(mn)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">class NumMatrix:
-    def __init__(self, matrix: list[list[int]]):
-        m, n = len(matrix), len(matrix[0])
-        self.P = [[0]*(n+1) for _ in range(m+1)]
-        for i in range(1, m+1):
-            for j in range(1, n+1):
-                self.P[i][j] = (matrix[i-1][j-1]
-                    + self.P[i-1][j]
-                    + self.P[i][j-1]
-                    - self.P[i-1][j-1])
+<div class="page-wrapper">
 
-    def sumRegion(self, r1,c1,r2,c2):
-        return (self.P[r2+1][c2+1]
-                - self.P[r1][c2+1]
-                - self.P[r2+1][c1]
-                + self.P[r1][c1])</pre><div class="box bw"><div class="boxt">&#9888; Common Mistake</div><p>Off-by-one everywhere — P has dimensions (m+1)×(n+1) with 1-indexed rows/cols. Matrix element at (i,j) is matrix[i-1][j-1].</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Draw the four rectangles for inclusion-exclusion — it always confuses without a diagram</span></div><div class="step"><span class="snum">2</span><span class="stxt">P[i][j] uses P[i-1][j], P[i][j-1], P[i-1][j-1] — requires building left-to-right, top-to-bottom</span></div><div class="step"><span class="snum">3</span><span class="stxt">Extension: 3D prefix sum for cuboid queries</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>2D Prefix Sum Matrix</td><td>O(mn) init, O(1) query</td><td>O(mn)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Range Sum Query 1D</span><span class="pd de">Easy</span> — 1D version — same idea</li><li><span class="pn">Matrix Block Sum</span><span class="pd dm">Medium</span> — Each cell gets sum of neighborhood</li><li><span class="pn">Maximal Square</span><span class="pd dm">Medium</span> — 2D DP with similar recurrence</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>2D Prefix Sum</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"matrix": "[[3,0,1,4],[5,6,3,2],[1,2,0,1]]", "query": "sumRegion(2,1,4,3)"}, "title": "2D Prefix Sum: inclusion-exclusion", "desc": "P[i][j]=matrix[i-1][j-1]+P[i-1][j]+P[i][j-1]-P[i-1][j-1]. Query=[P[r2+1][c2+1]-P[r1][c2+1]-P[r2+1][c1]+P[r1][c1]].", "phase": "init", "pl": "Walkthrough"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--purple)"></div>2D prefix sum</div><div class="li"><div class="ld" style="background:var(--green)"></div>query rectangle</div></div></div></div>
+<header>
+  <div class="problem-number">LeetCode #304</div>
+  <h1>Range Sum Query 2D — Immutable</h1>
+  <p class="subtitle">Preprocess a 2D matrix so any sub-rectangle sum can be answered in O(1) using the inclusion-exclusion principle.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Prefix Sum</span>
+    <span class="tag tag-pattern">2D Prefix Sum</span>
+    <span class="tag tag-complexity">Init: O(m·n)</span>
+    <span class="tag tag-complexity">Query: O(1)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're given a <strong>2D integer matrix that never changes</strong> after it's created. You'll be called many times with a rectangle defined by its <strong>top-left corner <code>(row1, col1)</code> and bottom-right corner <code>(row2, col2)</code></strong>. Each call should return the sum of all elements inside that rectangle as fast as possible.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>If we precompute a "prefix sum table" where each cell stores the sum of <strong>the entire top-left rectangle up to that cell</strong>, we can compute any rectangle sum using just <strong>four table lookups and three arithmetic operations</strong> — constant time, no matter how large the region.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Without Preprocessing: O(m·n) per query</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">
+          Iterate every cell in the rectangle.<br>
+          100×100 matrix, 10,000 queries<br>
+          → up to <strong>10<sup>8</sup> operations</strong>. Too slow!
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">With 2D Prefix Sum: O(1) per query</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          O(m·n) build once. Then each query:<br>
+          4 lookups + 3 arithmetic ops.<br>
+          10,000 queries → <strong>40,000 operations</strong>. Fast!
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Concrete walkthrough with a 3×4 matrix:</strong></p>
+    <p style="margin-top:0.5rem;font-size:14px;color:var(--text2)">
+      Consider the matrix: row 0 = [3, 0, 1, 4], row 1 = [5, 6, 3, 2], row 2 = [1, 2, 0, 1].<br>
+      Query: <code>sumRegion(1, 1, 2, 3)</code> — rows 1–2, cols 1–3.<br>
+      Cells: 6 + 3 + 2 + 2 + 0 + 1 = <strong>14</strong>. We'll verify this with the prefix table in Section 6.
+    </p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases to consider:</strong> query spanning single cell (row1=row2, col1=col2), query covering the whole matrix, matrix of size 1×1, and matrices with negative numbers (the formula handles all uniformly).</p>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 2D Prefix Sum with Inclusion-Exclusion</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The idea extends the familiar 1D prefix sum to two dimensions. Define <code>pre[i][j]</code> = sum of all matrix elements in the <strong>top-left rectangle from (0,0) to (i-1, j-1)</strong>. We use a 1-indexed prefix table of size <code>(m+1)×(n+1)</code> so the zero-row and zero-column act as sentinel boundaries.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Allocate prefix table:</strong> Create <code>pre = [[0]*(n+1) for _ in range(m+1)]</code>. Every cell starts at zero. The extra row/column means <code>pre[0][*] = 0</code> and <code>pre[*][0] = 0</code> always, eliminating boundary edge cases.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Fill prefix table (row-major):</strong> For each matrix cell <code>(i, j)</code>, compute:<br>
+        <code>pre[i+1][j+1] = matrix[i][j] + pre[i][j+1] + pre[i+1][j] - pre[i][j]</code><br>
+        This adds the current cell plus the rectangle above (<code>pre[i][j+1]</code>) and the rectangle to the left (<code>pre[i+1][j]</code>), then subtracts the overlap corner (<code>pre[i][j]</code>) counted twice.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Answer any query in O(1):</strong> For <code>sumRegion(r1, c1, r2, c2)</code>:<br>
+        <code>return pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1]</code><br>
+        Start with the big top-left rectangle; cut away the strip above and the strip to the left; add back the top-left corner that was removed twice.</span>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      sumRegion(r1, c1, r2, c2) =<br>
+      &nbsp;&nbsp;<span class="fv-big">pre[r2+1][c2+1]</span>  <span class="fcomment">← big rectangle: (0,0) → (r2,c2)</span><br>
+      − <span class="fv-sub">pre[r1][c2+1]</span>    <span class="fcomment">← strip above: (0,0) → (r1-1, c2)</span><br>
+      − <span class="fv-sub">pre[r2+1][c1]</span>    <span class="fcomment">← strip left: (0,0) → (r2, c1-1)</span><br>
+      + <span class="fv-add">pre[r1][c1]</span>       <span class="fcomment">← corner added back (double-subtracted)</span>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why (m+1)×(n+1) instead of m×n?</div>
+      <p>With a 1-indexed prefix table, <code>pre[0][*]</code> and <code>pre[*][0]</code> are always 0. This means the query formula <code>pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1]</code> works correctly even when r1=0 or c1=0 — no special-case branching needed. The +1 offset aligns "sum up to row i" with index i+1.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times after construction: <code>pre[i][j]</code> = the sum of every element in the sub-matrix from row 0, col 0 to row <code>i-1</code>, col <code>j-1</code> (inclusive). It represents "the cumulative sum of the top-left rectangle that ends just before row <code>i</code> and col <code>j</code>."</p>
+    </div>
+
+    <p><strong>Why the build recurrence is correct — the inclusion-exclusion for prefix fill:</strong></p>
+    <p style="margin-top:0.5rem;font-size:14px;color:var(--text2)">
+      To compute <code>pre[i+1][j+1]</code> (the sum covering rows 0..i and cols 0..j), we need everything in the row above (<code>pre[i][j+1]</code>, covers rows 0..i-1, cols 0..j) plus everything in the column to the left (<code>pre[i+1][j]</code>, covers rows 0..i, cols 0..j-1) plus the current cell. But the top-left rectangle <code>pre[i][j]</code> (rows 0..i-1, cols 0..j-1) is included in <em>both</em> of those terms — subtract it once to fix the double-count.
+    </p>
+
+    <p style="margin-top:0.75rem"><strong>Why the query formula isolates exactly the target rectangle:</strong></p>
+    <p style="margin-top:0.5rem;font-size:14px;color:var(--text2)">
+      Think geometrically. <code>pre[r2+1][c2+1]</code> covers the entire region from (0,0) to (r2,c2). To isolate just (r1,c1) → (r2,c2):
+    </p>
+    <ul style="margin-left:1.5rem;margin-top:0.5rem;font-size:14px;color:var(--text2);line-height:2.1">
+      <li>Subtract the strip <strong>above</strong> the query (rows 0..r1-1): that's <code>pre[r1][c2+1]</code></li>
+      <li>Subtract the strip <strong>left</strong> of the query (cols 0..c1-1): that's <code>pre[r2+1][c1]</code></li>
+      <li>The corner (rows 0..r1-1, cols 0..c1-1 = <code>pre[r1][c1]</code>) was subtracted <strong>twice</strong> — add it back once</li>
+    </ul>
+    <p style="margin-top:0.5rem;font-size:14px;color:var(--text2)">What remains is exactly the desired rectangle.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Most Common Off-by-One Bug</div>
+      <p>Confusing 0-indexed matrix coordinates with 1-indexed prefix table coordinates. The matrix cell <code>matrix[i][j]</code> corresponds to prefix cell <code>pre[i+1][j+1]</code>. In a query <code>sumRegion(r1,c1,r2,c2)</code>, always add 1 to get the "bottom-right" inclusive corner: <code>pre[r2+1][c2+1]</code>. The "top-left" corners r1 and c1 are used as-is — no +1 — because they represent the exclusive start boundary of the top-left strips.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Edge-case verification:</strong></p>
+    <p style="font-size:14px;color:var(--text2)">Single cell query at (0,0): <code>pre[1][1] - pre[0][1] - pre[1][0] + pre[0][0]</code> = matrix[0][0] − 0 − 0 + 0 = matrix[0][0]. ✓<br>
+    Whole matrix (r1=c1=0, r2=m-1, c2=n-1): <code>pre[m][n] - 0 - 0 + 0 = pre[m][n]</code>. ✓</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — 2D Prefix Sum (Optimal — Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class NumMatrix:                                     </span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, matrix):                      </span><span class="aann">← Called once at construction time</span></div>
+<div class="ann-line"><span class="acode">        m, n = len(matrix), len(matrix[0])          </span><span class="aann">← Grid dimensions (rows, cols)</span></div>
+<div class="ann-line"><span class="acode">        self.pre = [[0]*(n+1) for _ in range(m+1)]  </span><span class="aann">← (m+1)×(n+1) zeros — sentinel borders</span></div>
+<div class="ann-line"><span class="acode">        for i in range(m):                           </span><span class="aann">← Fill row by row</span></div>
+<div class="ann-line"><span class="acode">            for j in range(n):                       </span><span class="aann">← Fill col by col (left to right)</span></div>
+<div class="ann-line"><span class="acode">                self.pre[i+1][j+1] = (               </span><span class="aann">← 1-indexed in prefix, 0-indexed in matrix</span></div>
+<div class="ann-line"><span class="acode">                    matrix[i][j]                     </span><span class="aann">← current cell value</span></div>
+<div class="ann-line"><span class="acode">                    + self.pre[i][j+1]               </span><span class="aann">← rectangle strictly above current cell</span></div>
+<div class="ann-line"><span class="acode">                    + self.pre[i+1][j]               </span><span class="aann">← rectangle strictly left of current cell</span></div>
+<div class="ann-line"><span class="acode">                    - self.pre[i][j]                 </span><span class="aann">← subtract top-left corner (double-counted)</span></div>
+<div class="ann-line"><span class="acode">                )                                    </span></div>
+<div class="ann-line"><span class="acode">                                                     </span></div>
+<div class="ann-line"><span class="acode">    def sumRegion(self, r1, c1, r2, c2):             </span><span class="aann">← O(1) — just 4 lookups + 3 arithmetic ops</span></div>
+<div class="ann-line"><span class="acode">        return (                                     </span></div>
+<div class="ann-line"><span class="acode">            self.pre[r2+1][c2+1]                     </span><span class="aann">← sum of entire (0,0)→(r2,c2) rectangle</span></div>
+<div class="ann-line"><span class="acode">            - self.pre[r1][c2+1]                     </span><span class="aann">← remove strip above query: (0,0)→(r1-1,c2)</span></div>
+<div class="ann-line"><span class="acode">            - self.pre[r2+1][c1]                     </span><span class="aann">← remove strip left of query: (0,0)→(r2,c1-1)</span></div>
+<div class="ann-line"><span class="acode">            + self.pre[r1][c1]                       </span><span class="aann">← add back corner subtracted twice</span></div>
+<div class="ann-line"><span class="acode">        )                                            </span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why not store matrix and compute on the fly?</div>
+      <p>A single brute-force query takes O((r2−r1+1)×(c2−c1+1)) time — potentially O(m·n) per call. With k queries, total cost is O(k·m·n). For 10,000 queries on a 200×200 matrix that's 400 million operations. The prefix sum pays O(m·n) once and reduces each query to O(1): total O(m·n + k). Dramatically better when k is large.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Row-Only Prefix Sum (partial optimization)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class NumMatrix:                                     </span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, matrix):                      </span><span class="aann">← Precompute prefix sums within each row only</span></div>
+<div class="ann-line"><span class="acode">        self.row_pre = []                            </span></div>
+<div class="ann-line"><span class="acode">        for row in matrix:                           </span></div>
+<div class="ann-line"><span class="acode">            rp = [0]                                 </span></div>
+<div class="ann-line"><span class="acode">            for v in row: rp.append(rp[-1] + v)     </span><span class="aann">← 1D prefix sum for this row</span></div>
+<div class="ann-line"><span class="acode">            self.row_pre.append(rp)                  </span></div>
+<div class="ann-line"><span class="acode">    def sumRegion(self, r1, c1, r2, c2):             </span><span class="aann">← O(m) per query — still linear in rows</span></div>
+<div class="ann-line"><span class="acode">        total = 0                                    </span></div>
+<div class="ann-line"><span class="acode">        for r in range(r1, r2+1):                   </span><span class="aann">← sum each row's range using row prefix</span></div>
+<div class="ann-line"><span class="acode">            total += self.row_pre[r][c2+1] - self.row_pre[r][c1]</span></div>
+<div class="ann-line"><span class="acode">        return total                                 </span><span class="aann">← Better than brute force, but not O(1)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>2D Prefix Sum (optimal):</strong> Init O(m·n), Query O(1), Space O(m·n)<br>
+        <strong>Row-only prefix sum:</strong> Init O(m·n), Query O(m), Space O(m·n)<br>
+        <strong>Brute force:</strong> Init O(1), Query O(m·n), Space O(1)<br>
+        For large k (many queries), the 2D prefix sum dominates. For a single query, brute force is fine.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Spot the "Many Queries on Immutable Data" Pattern</div>
+        <p style="font-size:14px;color:var(--text)">The problem says the matrix never changes and <code>sumRegion</code> will be called <em>many times</em>. This is the classic signal for preprocessing. Say: "Since the matrix is immutable, I should precompute something that makes each query O(1), trading space for time."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Extend 1D Prefix Sums to 2D</div>
+        <p style="font-size:14px;color:var(--text)">"In 1D, prefix[i] = sum of first i elements; range sum(l,r) = prefix[r+1] − prefix[l]. In 2D, pre[i][j] = sum of top-left rectangle. Rectangle query = inclusion-exclusion of four corner lookups."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Draw the Inclusion-Exclusion Diagram</div>
+        <p style="font-size:14px;color:var(--text)">Draw on paper: "The big rectangle minus the strip above, minus the strip to the left. The top-left corner gets subtracted twice, so I add it back once. This is exactly the formula: pre[r2+1][c2+1] − pre[r1][c2+1] − pre[r2+1][c1] + pre[r1][c1]."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Justify the (m+1)×(n+1) Table Size</div>
+        <p style="font-size:14px;color:var(--text)">"I'll use a 1-indexed prefix table with sentinel zeros on row 0 and column 0. This makes the formula work uniformly for any query including those starting at row 0 or column 0 — no if-else boundary guards."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The matrix is immutable and sumRegion is called many times — classic preprocessing problem.<br>
+I'll build a 2D prefix sum table in O(m·n) where pre[i][j] = sum of top-left rectangle to (i-1,j-1).<br>
+Build: pre[i+1][j+1] = matrix[i][j] + pre[i][j+1] + pre[i+1][j] - pre[i][j].<br>
+Query: pre[r2+1][c2+1] - pre[r1][c2+1] - pre[r2+1][c1] + pre[r1][c1].<br>
+Init: O(m·n). Each query: O(1). Space: O(m·n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if the matrix is mutable (updates allowed)?"</strong> → 2D Binary Indexed Tree (Fenwick Tree): O(log m · log n) per update and query (#308)</li>
+        <li><strong>"How does this extend to 3D?"</strong> → 3D prefix sum: <code>pre[i][j][k]</code> = sum of top-left cuboid; queries need 8 inclusion-exclusion terms</li>
+        <li><strong>"Find the maximum submatrix sum?"</strong> → Fix two rows, apply Kadane's 1D on the column sums — O(m²·n)</li>
+        <li><strong>"Count sub-matrices summing to target T?"</strong> → Fix two rows, use 1D prefix sum + hash map — O(m²·n) — LeetCode #1074</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Building prefix table + O(1) Query</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="grid-wrapper">
+        <!-- Original Matrix 3×4 -->
+        <div class="grid-section">
+          <div class="grid-label">Matrix (3×4)</div>
+          <div class="col-labels-row" id="mat-col-labels"></div>
+          <div class="grid-body">
+            <div class="row-labels-col" id="mat-row-labels"></div>
+            <div class="grid-rows" id="mat-grid"></div>
+          </div>
+        </div>
+        <!-- Prefix Table 4×5 -->
+        <div class="grid-section">
+          <div class="grid-label">Prefix Table pre (4×5)</div>
+          <div class="col-labels-row" id="pre-col-labels"></div>
+          <div class="grid-body">
+            <div class="row-labels-col" id="pre-row-labels"></div>
+            <div class="grid-rows" id="pre-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-ij">
+          <span class="var-name">cell (i,j)</span>
+          <span class="var-val" id="vv-ij">—</span>
+        </div>
+        <div class="var-box" id="vb-pre">
+          <span class="var-name">pre[i+1][j+1]</span>
+          <span class="var-val" id="vv-pre">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">query sum</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">class NumMatrix:</div>
+      <div class="code-line" id="cl-1">    def __init__(self, matrix):</div>
+      <div class="code-line" id="cl-2">        m, n = len(matrix), len(matrix[0])</div>
+      <div class="code-line" id="cl-3">        self.pre = [[0]*(n+1) for _ in range(m+1)]</div>
+      <div class="code-line" id="cl-4">        for i in range(m):</div>
+      <div class="code-line" id="cl-5">            for j in range(n):</div>
+      <div class="code-line" id="cl-6">                self.pre[i+1][j+1] = (matrix[i][j]</div>
+      <div class="code-line" id="cl-7">                    + self.pre[i][j+1] + self.pre[i+1][j] - self.pre[i][j])</div>
+      <div class="code-line" id="cl-8">    def sumRegion(self, r1, c1, r2, c2):</div>
+      <div class="code-line" id="cl-9">        return (self.pre[r2+1][c2+1] - self.pre[r1][c2+1]</div>
+      <div class="code-line" id="cl-10">                - self.pre[r2+1][c1] + self.pre[r1][c1])</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 1</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to walk through building the 2D prefix table cell by cell, then watch a query answered in O(1).</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-blue"></div> Current cell (building)</div>
+      <div class="legend-item"><div class="legend-swatch sw-green"></div> Just computed / answer</div>
+      <div class="legend-item"><div class="legend-swatch sw-purple"></div> Query region (matrix)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan-bg);border-color:var(--cyan-border)"></div> Big rectangle (prefix)</div>
+      <div class="legend-item"><div class="legend-swatch sw-red"></div> Subtracted (strip)</div>
+      <div class="legend-item"><div class="legend-swatch sw-amber"></div> Corner added back</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Already computed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Immutable matrix + many queries → precompute 2D prefix table in O(m·n); answer each query in O(1)</div>
+      <div class="takeaway">pre[i][j] = sum of top-left rectangle from (0,0) to (i-1,j-1) — the core invariant</div>
+      <div class="takeaway">Build recurrence uses inclusion-exclusion: current cell + above + left − corner (to fix double-count)</div>
+      <div class="takeaway">Query formula: big rectangle − strip above − strip left + corner (same inclusion-exclusion principle)</div>
+      <div class="takeaway">Use (m+1)×(n+1) with sentinel zeros: eliminates all boundary conditions from both build and query formulas</div>
+      <div class="takeaway">For mutable matrices, upgrade to 2D Binary Indexed Tree (O(log m · log n) per operation)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Init Time</th><th>Query Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-bad">O(m·n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Fine for rare queries</td>
+        </tr>
+        <tr>
+          <td>Row-Only Prefix</td>
+          <td>O(m·n)</td>
+          <td class="mark-bad">O(m)</td>
+          <td>O(m·n)</td>
+          <td>Halfway there</td>
+        </tr>
+        <tr>
+          <td><strong>2D Prefix Sum ✓</strong></td>
+          <td>O(m·n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>O(m·n)</td>
+          <td>Optimal for immutable</td>
+        </tr>
+        <tr>
+          <td>2D Fenwick Tree</td>
+          <td>O(m·n log m·log n)</td>
+          <td class="mark-good">O(log m·log n)</td>
+          <td>O(m·n)</td>
+          <td>Supports point updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the 2D Prefix Sum Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Multiple rectangle sum queries on a <strong>static</strong> 2D array</li>
+        <li>"Count cells satisfying a condition in a rectangle" → treat condition as 1/0, use 2D prefix sum</li>
+        <li>Image processing: "average pixel intensity in a region" → integral image (identical concept)</li>
+        <li>"Submatrix sum closest to target" → 2D prefix sum + sorted containers</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Prefix Sum family)</div>
+      <div class="related-item"><strong>Range Sum Query — Immutable</strong><span class="related-diff diff-easy">Easy</span> — 1D version of this exact problem; build intuition here first (#303)</div>
+      <div class="related-item"><strong>Range Sum Query 2D — Mutable</strong><span class="related-diff diff-hard">Hard</span> — Same query but updates allowed; requires 2D Binary Indexed Tree (#308)</div>
+      <div class="related-item"><strong>Subarray Sum Equals K</strong><span class="related-diff diff-med">Medium</span> — 1D prefix sums + hash map; counts subarrays with target sum (#560)</div>
+      <div class="related-item"><strong>Count Sub-matrices That Sum to Target</strong><span class="related-diff diff-hard">Hard</span> — Fix two rows, apply 1D prefix + hash map on column sums (#1074)</div>
+      <div class="related-item"><strong>Max Side Length of Square with Sum ≤ Threshold</strong><span class="related-diff diff-med">Medium</span> — 2D prefix sum + binary search on side length (#1292)</div>
+      <div class="related-item"><strong>Matrix Block Sum</strong><span class="related-diff diff-med">Medium</span> — Each cell gets sum of its neighborhood using prefix table (#1314)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 1.3 (Prefix Sum Pattern)<br>
+      Sub-Pattern: <strong>2D Prefix Sum</strong> · Source: Guide Section 1.3</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Data ──
+const MATRIX = [
+  [3, 0, 1, 4],
+  [5, 6, 3, 2],
+  [1, 2, 0, 1]
+];
+const M = 3, N = 4;
+
+// Compute full prefix table
+const PRE = Array.from({length: M+1}, () => Array(N+1).fill(0));
+for (let i = 0; i < M; i++) {
+  for (let j = 0; j < N; j++) {
+    PRE[i+1][j+1] = MATRIX[i][j] + PRE[i][j+1] + PRE[i+1][j] - PRE[i][j];
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+// Query: sumRegion(1, 1, 2, 3) = expected 14
+const Q = {r1:1, c1:1, r2:2, c2:3};
+const QUERY_RESULT = PRE[Q.r2+1][Q.c2+1] - PRE[Q.r1][Q.c2+1] - PRE[Q.r2+1][Q.c1] + PRE[Q.r1][Q.c1];
+
+// ── Steps ──
+const steps = [];
+
+// Step 0: init
+steps.push({
+  phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:3,
+  buildI:-1, buildJ:-1, filled: new Set(),
+  matMode:'normal', preMode:'normal',
+  queryStep: null,
+  title:'Initialize: Allocate Prefix Table',
+  text:'Matrix is 3×4. We allocate a 4×5 prefix table (pre) initialized to all zeros. The extra row and column of zeros (row 0, col 0) act as sentinel boundaries — they ensure the build and query formulas work correctly even at matrix edges without special-case checks.',
+  ij:'—', preVal:'—', result:'—'
+});
+
+// Build steps (12 cells)
+let filled = new Set();
+for (let i = 0; i < M; i++) {
+  for (let j = 0; j < N; j++) {
+    filled = new Set(filled);
+    filled.add(`${i+1},${j+1}`);
+    const above = PRE[i][j+1], left = PRE[i+1][j], corner = PRE[i][j];
+    const val = PRE[i+1][j+1];
+    steps.push({
+      phase:'build', phaseLabel:'BUILD', phaseClass:'phase-build', activeLine: 6,
+      buildI:i, buildJ:j, filled: new Set(filled),
+      matMode:'build', preMode:'build',
+      queryStep: null,
+      title:`Build pre[${i+1}][${j+1}]  (covers matrix rows 0–${i}, cols 0–${j})`,
+      text:`pre[${i+1}][${j+1}] = matrix[${i}][${j}] (${MATRIX[i][j]}) + pre[${i}][${j+1}] (above=${above}) + pre[${i+1}][${j}] (left=${left}) − pre[${i}][${j}] (corner=${corner}) = ${val}. This entry now holds the sum of all elements from (0,0) to (${i},${j}).`,
+      ij:`(${i},${j})=${MATRIX[i][j]}`, preVal:`${val}`, result:'—'
+    });
+  }
+}
+
+// Query steps
+steps.push({
+  phase:'query', phaseLabel:'QUERY', phaseClass:'phase-query', activeLine:8,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'query-intro', preMode:'done',
+  queryStep:'intro',
+  title:`Query: sumRegion(${Q.r1}, ${Q.c1}, ${Q.r2}, ${Q.c2})`,
+  text:'All 12 prefix cells are computed. A query arrives: sum of the rectangle from (1,1) to (2,3). We apply the inclusion-exclusion formula — just 4 lookups into the prefix table. The highlighted cells in the matrix show the region we want.',
+  ij:'—', preVal:'—', result:'?'
+});
+
+const running1 = PRE[Q.r2+1][Q.c2+1];
+steps.push({
+  phase:'query', phaseLabel:'BIG RECT', phaseClass:'phase-query', activeLine:9,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'query-region', preMode:'big',
+  queryStep:'big',
+  title:`Lookup pre[${Q.r2+1}][${Q.c2+1}] = ${running1}  (big top-left rectangle)`,
+  text:`pre[${Q.r2+1}][${Q.c2+1}] = ${running1}. This is the sum of the ENTIRE top-left rectangle from (0,0) to (${Q.r2},${Q.c2}). It includes our target PLUS the strip above rows 0..${Q.r1-1} AND the strip left of cols 0..${Q.c1-1}. We'll trim those away next.`,
+  ij:'—', preVal:`${running1}`, result:'?'
+});
+
+const running2 = running1 - PRE[Q.r1][Q.c2+1];
+steps.push({
+  phase:'query', phaseLabel:'− ABOVE', phaseClass:'phase-query', activeLine:9,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'query-region', preMode:'subAbove',
+  queryStep:'subAbove',
+  title:`Subtract pre[${Q.r1}][${Q.c2+1}] = ${PRE[Q.r1][Q.c2+1]}  (strip above query)`,
+  text:`pre[${Q.r1}][${Q.c2+1}] = ${PRE[Q.r1][Q.c2+1]}. This covers rows 0..${Q.r1-1}, cols 0..${Q.c2} — the strip above our query region. After subtracting: ${running1} − ${PRE[Q.r1][Q.c2+1]} = ${running2}.`,
+  ij:'—', preVal:`${running2}`, result:'?'
+});
+
+const running3 = running2 - PRE[Q.r2+1][Q.c1];
+steps.push({
+  phase:'query', phaseLabel:'− LEFT', phaseClass:'phase-query', activeLine:10,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'query-region', preMode:'subLeft',
+  queryStep:'subLeft',
+  title:`Subtract pre[${Q.r2+1}][${Q.c1}] = ${PRE[Q.r2+1][Q.c1]}  (strip left of query)`,
+  text:`pre[${Q.r2+1}][${Q.c1}] = ${PRE[Q.r2+1][Q.c1]}. This covers rows 0..${Q.r2}, cols 0..${Q.c1-1} — the strip to the left of our query. After subtracting: ${running2} − ${PRE[Q.r2+1][Q.c1]} = ${running3}. But we've now removed the top-left corner twice!`,
+  ij:'—', preVal:`${running3}`, result:'?'
+});
+
+steps.push({
+  phase:'query', phaseLabel:'+ CORNER', phaseClass:'phase-query', activeLine:10,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'query-region', preMode:'addCorner',
+  queryStep:'addCorner',
+  title:`Add back pre[${Q.r1}][${Q.c1}] = ${PRE[Q.r1][Q.c1]}  (over-subtracted corner)`,
+  text:`pre[${Q.r1}][${Q.c1}] = ${PRE[Q.r1][Q.c1]}. The top-left corner (rows 0..${Q.r1-1}, cols 0..${Q.c1-1}) was subtracted once in the "above" step and once in the "left" step — twice total. We add it back: ${running3} + ${PRE[Q.r1][Q.c1]} = ${QUERY_RESULT}. That's our answer!`,
+  ij:'—', preVal:`${QUERY_RESULT}`, result:`${QUERY_RESULT}`
+});
+
+steps.push({
+  phase:'result', phaseLabel:'RESULT ✓', phaseClass:'phase-result', activeLine:10,
+  buildI:-1, buildJ:-1, filled: new Set(filled),
+  matMode:'done', preMode:'done',
+  queryStep:'done',
+  title:`sumRegion(1, 1, 2, 3) = ${QUERY_RESULT}  ✓`,
+  text:`4 lookups + 3 arithmetic operations → answer = ${QUERY_RESULT}. Verify by hand: matrix cells at rows 1–2, cols 1–3: 6+3+2 + 2+0+1 = ${QUERY_RESULT}. ✓  No matter how large the matrix or rectangle, the O(1) formula always works the same way.`,
+  ij:'—', preVal:`${QUERY_RESULT}`, result:`${QUERY_RESULT} ✓`
+});
+
+// ── DOM ──
+let current = 0;
+
+function buildDom() {
+  // Matrix column labels
+  const mcl = document.getElementById('mat-col-labels');
+  for (let j = 0; j < N; j++) {
+    const d = document.createElement('div');
+    d.className = 'col-lbl'; d.textContent = 'c'+j;
+    mcl.appendChild(d);
+  }
+  // Matrix rows + row labels
+  const mrl = document.getElementById('mat-row-labels');
+  const mg  = document.getElementById('mat-grid');
+  for (let i = 0; i < M; i++) {
+    const rl = document.createElement('div');
+    rl.className = 'row-lbl'; rl.textContent = 'r'+i;
+    mrl.appendChild(rl);
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    for (let j = 0; j < N; j++) {
+      const c = document.createElement('div');
+      c.className = 'gcell normal'; c.id = `mc-${i}-${j}`;
+      c.textContent = MATRIX[i][j];
+      row.appendChild(c);
+    }
+    mg.appendChild(row);
+  }
+
+  // Prefix table column labels
+  const pcl = document.getElementById('pre-col-labels');
+  for (let j = 0; j <= N; j++) {
+    const d = document.createElement('div');
+    d.className = 'col-lbl'; d.textContent = j;
+    pcl.appendChild(d);
+  }
+  // Prefix rows + row labels
+  const prl = document.getElementById('pre-row-labels');
+  const pg  = document.getElementById('pre-grid');
+  for (let i = 0; i <= M; i++) {
+    const rl = document.createElement('div');
+    rl.className = 'row-lbl'; rl.textContent = i;
+    prl.appendChild(rl);
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    for (let j = 0; j <= N; j++) {
+      const c = document.createElement('div');
+      c.className = 'gcell sentinel'; c.id = `pc-${i}-${j}`;
+      c.textContent = '0';
+      row.appendChild(c);
+    }
+    pg.appendChild(row);
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-'+i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const s = steps[current];
+
+  // ── Matrix cells ──
+  for (let i = 0; i < M; i++) {
+    for (let j = 0; j < N; j++) {
+      const c = document.getElementById(`mc-${i}-${j}`);
+      if (s.matMode === 'build' && i === s.buildI && j === s.buildJ) {
+        c.className = 'gcell active';
+      } else if ((s.matMode === 'query-region' || s.matMode === 'query-intro' || s.matMode === 'done') &&
+                 i >= Q.r1 && i <= Q.r2 && j >= Q.c1 && j <= Q.c2) {
+        c.className = s.queryStep === 'done' ? 'gcell result' : 'gcell query-region';
+      } else {
+        c.className = 'gcell normal';
+      }
+    }
+  }
+
+  // ── Prefix table cells ──
+  for (let i = 0; i <= M; i++) {
+    for (let j = 0; j <= N; j++) {
+      const c = document.getElementById(`pc-${i}-${j}`);
+      const isSentinel = (i === 0 || j === 0);
+
+      if (isSentinel) {
+        c.className = 'gcell sentinel'; c.textContent = '0';
+        continue;
+      }
+
+      const isFilled = s.filled.has(`${i},${j}`);
+      const isActive = s.buildI >= 0 && i === s.buildI+1 && j === s.buildJ+1;
+
+      if (s.preMode === 'build') {
+        if (isActive) {
+          c.className = 'gcell highlight';
+          c.textContent = s.buildI >= 0 ? PRE[i][j] : '?';
+        } else if (isFilled) {
+          c.className = 'gcell done'; c.textContent = PRE[i][j];
+        } else {
+          c.className = 'gcell normal'; c.textContent = '?';
+        }
+      } else if (s.preMode === 'done' || s.preMode === 'query-intro') {
+        c.className = 'gcell done'; c.textContent = PRE[i][j];
+      } else if (s.preMode === 'big') {
+        const isBig = (i === Q.r2+1 && j === Q.c2+1);
+        c.className = isBig ? 'gcell contrib' : 'gcell done';
+        c.textContent = PRE[i][j];
+      } else if (s.preMode === 'subAbove') {
+        const isAbove = (i === Q.r1 && j === Q.c2+1);
+        c.className = isAbove ? 'gcell exclude' : 'gcell done';
+        c.textContent = PRE[i][j];
+      } else if (s.preMode === 'subLeft') {
+        const isLeft = (i === Q.r2+1 && j === Q.c1);
+        c.className = isLeft ? 'gcell exclude' : 'gcell done';
+        c.textContent = PRE[i][j];
+      } else if (s.preMode === 'addCorner') {
+        const isCorner = (i === Q.r1 && j === Q.c1);
+        c.className = isCorner ? 'gcell corner-add' : 'gcell done';
+        c.textContent = PRE[i][j];
+      } else {
+        c.className = 'gcell normal'; c.textContent = isFilled ? PRE[i][j] : '?';
+      }
+    }
+  }
+
+  // Also show computed values in all filled cells during build after they're done
+  if (s.preMode === 'build') {
+    s.filled.forEach(key => {
+      const [i,j] = key.split(',').map(Number);
+      const el = document.getElementById(`pc-${i}-${j}`);
+      if (el && el.className !== 'gcell highlight') {
+        el.className = 'gcell done';
+        el.textContent = PRE[i][j];
+      }
+    });
+  }
+
+  // ── Code panel ──
+  for (let i = 0; i <= 10; i++) {
+    const el = document.getElementById('cl-'+i);
+    if (el) el.classList.toggle('active', i === s.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge '+s.phaseClass;
+  badge.textContent = s.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step '+(current+1)+' / '+steps.length;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // ── Variable tracker ──
+  document.getElementById('vv-ij').textContent = s.ij;
+  document.getElementById('vv-pre').textContent = s.preVal;
+  document.getElementById('vv-result').textContent = s.result;
+  document.getElementById('vb-ij').classList.toggle('changed', s.phase === 'build');
+  document.getElementById('vb-pre').classList.toggle('changed', s.preVal !== '—' && s.preVal !== '?');
+  document.getElementById('vb-result').classList.toggle('changed', s.result !== '—' && s.result !== '?');
+
+  // ── Progress dots ──
+  steps.forEach((_,i) => {
+    const d = document.getElementById('dot-'+i);
+    d.classList.toggle('active', i === current);
+    d.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next; render();
+}
+function reset() { current = 0; render(); }
+function toggle(header) {
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

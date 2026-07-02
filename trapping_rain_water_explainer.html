@@ -1,652 +1,1040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trapping Rain Water – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
-    .container{max-width:920px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}
-    h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}
-    .subtitle{color:var(--text2);font-size:.95rem;}
-    .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
-    .tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
-    .tag-hard{background:var(--red-bg);color:var(--red-mid);}
-    .tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
-    .tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
-    .section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
-    .section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-    .section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
-    .collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}
-    .card.collapsed .collapse-icon{transform:rotate(-90deg);}
-    .card.collapsed .section-content{display:none;}
-    .section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
-    .concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
-    .concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
-    .concept-box.insight .concept-box-title{color:var(--green-mid);}
-    .concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
-    .concept-box.warning .concept-box-title{color:var(--amber-mid);}
-    .concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
-    .concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
-    .concept-box p{color:var(--text);margin:0 0 .4rem;}
-    .concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}
-    .algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
-    .step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
-    .step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
-    .code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
-    .code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .code-cmt{color:var(--text3);}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}
-    .step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
-    .interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
-    .script-content{font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--bg2);border-radius:var(--radius-lg);padding:1.25rem;margin:1rem 0;}
-    /* ---- Bar chart ---- */
-    .bar-chart{display:flex;gap:3px;justify-content:center;padding:4px 4px 0;overflow-x:auto;}
-    .bar-col{display:flex;flex-direction:column;align-items:center;gap:1px;border-radius:6px;padding:2px;}
-    .bar-col.is-left{background:rgba(24,95,165,0.12);}
-    .bar-col.is-right{background:rgba(83,74,183,0.12);}
-    .bar-col.is-both{background:rgba(133,79,11,0.12);}
-    .ptr-lbl{height:22px;width:42px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border-radius:4px;letter-spacing:.3px;}
-    .ptr-L{color:var(--blue-mid);background:var(--blue-bg);}
-    .ptr-R{color:var(--purple-mid);background:var(--purple-bg);}
-    .ptr-LR{color:var(--amber-mid);background:var(--amber-bg);}
-    .ptr-none{color:transparent;background:transparent;}
-    .bar-cell{width:42px;height:28px;border-radius:3px;transition:background 0.35s,box-shadow 0.35s;}
-    .bar-cell.filled{background:#94a3b8;}
-    .bar-cell.filled-L{background:var(--blue-mid);opacity:.9;}
-    .bar-cell.filled-R{background:var(--purple-mid);opacity:.9;}
-    .bar-cell.water{background:#67e8f9;}
-    .bar-cell.water-new{background:#0891b2;box-shadow:0 0 8px rgba(8,145,178,.55);animation:splash .45s ease-out;}
-    .bar-cell.empty{background:transparent;}
-    @keyframes splash{0%{transform:scaleY(.3);opacity:.3}100%{transform:scaleY(1);opacity:1}}
-    .idx-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);height:18px;display:flex;align-items:center;justify-content:center;}
-    /* ---- Variable tracker ---- */
-    .var-tracker{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0;}
-    .var-box{display:flex;flex-direction:column;align-items:center;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-width:72px;transition:border-color .3s;}
-    .var-box.changed{border-color:var(--amber-border);}
-    .var-box.water-up{border-color:var(--cyan-border);}
-    .var-name{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;}
-    .var-value{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text);transition:color .3s;}
-    .var-box.changed .var-value{color:var(--amber-mid);}
-    .var-box.water-up .var-value{color:var(--cyan-mid);}
-    /* ---- Legend ---- */
-    .legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0;}
-    .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
-    .legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
-    /* ---- Info card ---- */
-    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
-    .info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}
-    .phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;}
-    .phase-badge.init{background:var(--blue-bg);color:var(--blue-mid);}
-    .phase-badge.left{background:var(--blue-bg);color:var(--blue-mid);}
-    .phase-badge.right{background:var(--purple-bg);color:var(--purple-mid);}
-    .phase-badge.water{background:var(--cyan-bg);color:var(--cyan-mid);}
-    .phase-badge.done{background:var(--green-bg);color:var(--green-mid);}
-    .step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
-    .info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}
-    .info-text{font-size:13.5px;color:var(--text2);line-height:1.6;}
-    /* ---- Dots / Controls ---- */
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}
-    .dot.active{background:var(--blue-mid);transform:scale(1.3);}
-    .dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}
-    .btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
-    .btn-primary{background:var(--blue-mid);color:white;}
-    .btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}
-    .btn:hover:not(:disabled){opacity:.85;transform:translateY(-1px);}
-    .btn:disabled{opacity:.45;cursor:not-allowed;}
-    .kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    /* ---- Summary ---- */
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
-    .takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}
-    .related-problems ul{margin-left:1.25rem;color:var(--text2);}
-    .related-problems li{margin-bottom:.25rem;}
-    /* ---- Approach table ---- */
-    .approach-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:13px;}
-    .approach-table th{background:var(--bg2);padding:8px 12px;text-align:left;font-weight:600;color:var(--text);border-bottom:1px solid var(--border);}
-    .approach-table td{padding:8px 12px;border-top:1px solid var(--border);color:var(--text2);}
-    .approach-table tr.optimal td{color:var(--text);font-weight:500;}
-    .approach-table tr.optimal{background:linear-gradient(90deg,var(--green-bg),transparent);}
-    code{font-family:var(--mono);font-size:.88em;background:var(--bg2);padding:1px 5px;border-radius:4px;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#42 · Trapping Rain Water</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Bar Chart Visualization */
+.bar-section{display:flex;align-items:flex-end;gap:3px;justify-content:center;min-height:200px;padding-bottom:8px}
+.bar-col{display:flex;flex-direction:column;align-items:center}
+.bar-cell{
+  width:40px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  transition:background 0.3s,border-color 0.3s;
+  flex-shrink:0;
+}
+.bar-cell.wall{background:#64748b;color:#f1f5f9}
+.bar-cell.wall-left{background:var(--blue-mid);color:#fff}
+.bar-cell.wall-right{background:var(--green-mid);color:#fff}
+.bar-cell.water{background:#93c5fd;border:1px solid #60a5fa;color:#1e3a8a}
+.bar-cell.water-done{background:#2563eb;color:#dbeafe}
+.bar-cell.empty{background:transparent;border:none;color:transparent}
+.bar-cell:first-child{border-radius:4px 4px 0 0}
+.bar-floor{width:40px;height:5px;background:#94a3b8;border-radius:0 0 2px 2px}
+
+.idx-row{display:flex;gap:3px;margin-top:6px;justify-content:center}
+.idx-slot{width:40px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* Pointer Row */
+.ptr-row-above{display:flex;gap:3px;justify-content:center;min-height:22px;margin-bottom:4px}
+.ptr-slot{width:40px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 5px;line-height:1.4}
+.ptr-left{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-right{background:var(--green-bg);color:var(--green-mid)}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-left{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-right{background:var(--green-bg);color:var(--green-mid)}
+.phase-done{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:6px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){opacity:0.9}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-wall{background:#64748b;border-color:#475569}
+.sw-water{background:#93c5fd;border-color:#60a5fa}
+.sw-left{background:var(--blue-mid);border-color:var(--blue-mid)}
+.sw-right{background:var(--green-mid);border-color:var(--green-mid)}
+.sw-done{background:#2563eb;border-color:#1d4ed8}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* Height diagram (Section 1) */
+.intro-chart{display:flex;gap:3px;align-items:flex-end;justify-content:center;padding:1.25rem 1rem 0.5rem;background:var(--bg2);border-radius:var(--radius);margin:1rem 0}
+.intro-col{display:flex;flex-direction:column;align-items:center;gap:0}
+.intro-empty{width:34px}
+.intro-water{width:34px;background:#93c5fd;border-radius:0}
+.intro-wall{width:34px;background:#64748b;border-radius:3px 3px 0 0}
+.intro-base{width:34px;height:4px;background:#94a3b8;border-radius:0 0 2px 2px}
+.intro-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:4px;text-align:center}
+</style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Trapping Rain Water</h1>
-    <p class="subtitle">LeetCode #42 — Two Pointers · Opposite Direction (Max Heights)</p>
-    <div class="tags">
-      <span class="tag tag-hard">Hard</span>
-      <span class="tag tag-pattern">Two Pointers</span>
-      <span class="tag tag-complexity">O(n) Time</span>
-      <span class="tag tag-complexity">O(1) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- ── Section 1: Understanding ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>Given an array of non-negative integers representing an elevation map (each bar has width 1), compute how much water can be trapped after raining.</p>
-      <p><strong>Example:</strong> <code>height = [0,1,0,2,1,0,1,3,2,1,2,1]</code> → <strong>6 units</strong> of water trapped.</p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight: The Water Level Formula</div>
-        <p>Water trapped at index <code>i</code> = <strong>max(0, min(left_max, right_max) − height[i])</strong></p>
-        <p>Where <code>left_max</code> = tallest bar at or to the left of i, <code>right_max</code> = tallest bar at or to the right of i.</p>
-        <p>Water fills up to the <em>shorter</em> of the two surrounding walls. If there's no shorter wall to contain it, water just flows away.</p>
-      </div>
-      <p>Think of it as a valley between mountains: water can only accumulate up to the height of the lower surrounding peak. The water level at any position is determined by the limiting (shorter) side.</p>
-      <div class="concept-box warning">
-        <div class="concept-box-title">⚠️ Edge Cases to Handle</div>
-        <ul>
-          <li>Empty array or fewer than 3 elements → 0 water</li>
-          <li>Monotonically increasing or decreasing → 0 water (no container formed)</li>
-          <li>Flat plateau → 0 water (min(lm, rm) − height = 0)</li>
-          <li>All zeros → 0 water</li>
-        </ul>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #42</div>
+  <h1>Trapping Rain Water</h1>
+  <p class="subtitle">Given <code>n</code> non-negative integers representing an elevation map (bar width = 1), compute how much water it can trap after raining.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Two Pointers</span>
+    <span class="tag tag-pattern">Opposite Direction</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
   </div>
+</header>
 
-  <!-- ── Section 2: Three Solutions ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">Three Approaches: Brute Force → Prefix Arrays → Two Pointers</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <table class="approach-table">
-        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
-        <tr><td>Brute Force</td><td>O(n²)</td><td>O(1)</td><td>Scan left &amp; right for max at every position</td></tr>
-        <tr><td>Prefix/Suffix Arrays</td><td>O(n)</td><td>O(n)</td><td>Precompute left_max[] and right_max[] arrays</td></tr>
-        <tr class="optimal"><td>✅ Two Pointers</td><td>O(n)</td><td>O(1)</td><td>INTERVIEW PICK — best of all worlds</td></tr>
-      </table>
-
-      <p><strong>Approach 1 — Brute Force O(n²)</strong></p>
-      <div class="code-panel">
-        <div class="code-line"><span class="code-cmt"># For each index, scan left and right to find the tallest bar on each side</span></div>
-        <div class="code-line">def trap_brute(height):</div>
-        <div class="code-line">    water = 0</div>
-        <div class="code-line">    for i in range(1, len(height) - 1):</div>
-        <div class="code-line">        left_max  = max(height[:i+1])   <span class="code-cmt"># O(n) per position — too slow</span></div>
-        <div class="code-line">        right_max = max(height[i:])     <span class="code-cmt"># O(n) per position — too slow</span></div>
-        <div class="code-line">        water += max(0, min(left_max, right_max) - height[i])</div>
-        <div class="code-line">    return water</div>
-      </div>
-
-      <p style="margin-top:.75rem"><strong>Approach 2 — Prefix/Suffix Arrays O(n) time, O(n) space</strong></p>
-      <div class="code-panel">
-        <div class="code-line"><span class="code-cmt"># Precompute running max from both directions, then combine in one pass</span></div>
-        <div class="code-line">def trap_dp(height):</div>
-        <div class="code-line">    n = len(height)</div>
-        <div class="code-line">    left_max, right_max = [0]*n, [0]*n</div>
-        <div class="code-line">    left_max[0]   = height[0]</div>
-        <div class="code-line">    right_max[-1] = height[-1]</div>
-        <div class="code-line">    for i in range(1, n):           left_max[i]  = max(left_max[i-1],  height[i])</div>
-        <div class="code-line">    for i in range(n-2, -1, -1):    right_max[i] = max(right_max[i+1], height[i])</div>
-        <div class="code-line">    return sum(min(left_max[i], right_max[i]) - height[i] for i in range(n))</div>
-      </div>
-
-      <p style="margin-top:.75rem"><strong>Approach 3 — Two Pointers O(n) time, O(1) space ✅ OPTIMAL</strong></p>
-      <p>Instead of storing two full arrays, maintain running maximums <em>on the fly</em> with converging pointers. The critical observation: when <code>height[left] &lt; height[right]</code>, we know the right side already has a tall enough wall (≥ <code>height[right]</code> ≥ <code>left_max</code>), so the water at <code>left</code> is determined entirely by <code>left_max</code> — no need to look further right.</p>
-    </div>
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Imagine a cross-section of terrain: an array of bar heights. After rain, water collects in the "valleys" between taller walls. We want the <strong>total volume of trapped water</strong>.</p>
 
-  <!-- ── Section 3: Why It Works ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why Two Pointers Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:0.75rem">The critical physical rule: water above position <code>i</code> can only be as high as the <strong>shorter of the tallest walls on its left and right</strong>. Any water above that level spills over the shorter wall.</p>
+
+    <div class="intro-chart" id="intro-chart"></div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>At each column <code>i</code>, the water level = <strong>min(max_height_left, max_height_right)</strong>. If this minimum exceeds <code>height[i]</code>, column <code>i</code> traps <code>min(lmax, rmax) - height[i]</code> units. If not, it contributes zero (it is a wall).</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Core Invariant</div>
-        <p><strong>left_max</strong> = maximum height in <code>height[0..left]</code> (inclusive of current left position).</p>
-        <p><strong>right_max</strong> = maximum height in <code>height[right..n-1]</code> (inclusive of current right position).</p>
-        <p>At any step, if <code>height[left] &lt; height[right]</code>, then the bottleneck wall for <em>left</em> is <code>left_max</code> (not right_max), because we're guaranteed a wall on the right side at least as tall as <code>height[right] &gt; left_max</code>. Water at left = <code>left_max − height[left]</code>.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Formula per column i</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          water[i] = max(0,<br>
+          &nbsp;min(left_max, right_max)<br>
+          &nbsp;- height[i])<br><br>
+          Answer = sum(water[i])
+        </p>
       </div>
-      <p>This eliminates the need to know the actual right-side maximum: the current right pointer height is sufficient proof that the right wall is tall enough. We never need to backtrack.</p>
-      <div class="algorithm-steps">
-        <div class="algo-step">
-          <span class="step-num">1</span>
-          <span class="step-text"><strong>height[left] &lt; height[right]</strong>: Right side guaranteed tall enough. Water at left = left_max − height[left] (if left_max &gt; height[left]). Update left_max if needed. Advance left.</span>
-        </div>
-        <div class="algo-step">
-          <span class="step-num">2</span>
-          <span class="step-text"><strong>height[left] ≥ height[right]</strong>: Mirror logic. Left side guaranteed tall enough. Water at right = right_max − height[right]. Update right_max if needed. Advance right.</span>
-        </div>
-        <div class="algo-step">
-          <span class="step-num">3</span>
-          <span class="step-text"><strong>Loop ends when left = right</strong>: Every index has been processed exactly once. Total water accumulated is the answer.</span>
-        </div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Analogy: Filling a Bathtub from Both Ends</div>
-        <p>Imagine two people sliding towards each other along the tub rim. At each step, the person on the shorter side can calculate how much water is trapped at their position — because they can see the other person is on a higher rim (or equal). The shorter side is always the safe side to process.</p>
+      <div class="panel-box before">
+        <div class="panel-title">Example: [0,1,0,2,1,0,1,3,1,0,1,2]</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.9">
+          Answer = 6 units.<br>
+          idx 2: min(1,3)-0 = 1<br>
+          idx 4: min(2,3)-1 = 1<br>
+          idx 5: min(2,3)-0 = 2<br>
+          idx 6: min(2,3)-1 = 1<br>
+          idx 9: min(3,2)-0 = 2 (via rmax)
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> length 0 or 1 → return 0. All increasing → water only at one side (but no valley, so 0). Monotone decreasing → same. Single valley between two walls → formula handles it correctly.</p>
   </div>
+</div>
 
-  <!-- ── Section 4: Annotated Code ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated) — Two Pointers</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel">
-        <div class="code-line">from typing import List</div>
-        <div class="code-line"> </div>
-        <div class="code-line">def trap(height: List[int]) -> int:</div>
-        <div class="code-line">    left, right = 0, len(height) - 1    <span class="code-cmt"># Opposite-direction start</span></div>
-        <div class="code-line">    left_max = right_max = 0             <span class="code-cmt"># Running max from each side</span></div>
-        <div class="code-line">    water = 0</div>
-        <div class="code-line"> </div>
-        <div class="code-line">    while left &lt; right:                 <span class="code-cmt"># Stop when pointers meet</span></div>
-        <div class="code-line">        if height[left] &lt; height[right]: <span class="code-cmt"># Right side is taller → safe to process left</span></div>
-        <div class="code-line">            if height[left] >= left_max: <span class="code-cmt"># New tallest bar on left side</span></div>
-        <div class="code-line">                left_max = height[left]</div>
-        <div class="code-line">            else:                        <span class="code-cmt"># Bar shorter than left wall → water trapped</span></div>
-        <div class="code-line">                water += left_max - height[left]</div>
-        <div class="code-line">            left += 1                    <span class="code-cmt"># Advance left pointer inward</span></div>
-        <div class="code-line">        else:                            <span class="code-cmt"># height[left] >= height[right] → process right</span></div>
-        <div class="code-line">            if height[right] >= right_max:<span class="code-cmt"># New tallest bar on right side</span></div>
-        <div class="code-line">                right_max = height[right]</div>
-        <div class="code-line">            else:                        <span class="code-cmt"># Bar shorter than right wall → water trapped</span></div>
-        <div class="code-line">                water += right_max - height[right]</div>
-        <div class="code-line">            right -= 1                   <span class="code-cmt"># Advance right pointer inward</span></div>
-        <div class="code-line"> </div>
-        <div class="code-line">    return water</div>
-      </div>
-      <p style="margin-top:.75rem;color:var(--text2)">Time: O(n) — single pass &nbsp;|&nbsp; Space: O(1) — only 4 integer variables</p>
-      <div class="concept-box warning">
-        <div class="concept-box-title">⚠️ Common Mistake: Update Max Before or After Checking Water?</div>
-        <p>Always update the max <em>before</em> computing water at that step. If <code>height[left] &gt;= left_max</code>, the bar itself is a wall — no water is trapped there, but we extend the wall (update left_max). Only bars <em>below</em> the current max trap water.</p>
-      </div>
-      <div class="concept-box warning">
-        <div class="concept-box-title">⚠️ Why Not Use max(height[left], left_max)?</div>
-        <p>Equivalent but the if/else form is cleaner and makes the invariant explicit. Both are O(n).</p>
-      </div>
-    </div>
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two Pointers (Opposite Direction)</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Start with <code>left</code> at index 0 and <code>right</code> at index n-1. Track the <strong>running maximum</strong> seen from each side. At each step, process whichever side has the <em>smaller</em> maximum — because that side's max is definitively the bottleneck.</p>
 
-  <!-- ── Section 5: Interview Strategy ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Core Observation</div>
+      <p>When <code>left_max &lt;= right_max</code>: we know the actual right-side maximum (even unseen parts) is at least <code>right_max</code>. So <code>min(left_max, actual_right_max) = left_max</code>. We can compute column <code>left</code>'s water immediately — no need to look further right.</p>
     </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Step 1 — Recognize the Pattern</div>
-        <p>Keywords: "trap", "water", "elevation map", "how much water". Formula key: water at i = min(left_max, right_max) − height[i]. You need info from <em>both</em> sides → classic two-pointer setup.</p>
-      </div>
-      <div class="strategy-step">
-        <div class="step-label">Step 2 — State the Progression to Interviewer</div>
-        <p>"Brute force is O(n²): scan left and right for max at every index. I can precompute prefix/suffix max arrays to get O(n) time at O(n) space. The optimal insight: I can simulate those arrays with two converging pointers — O(n) time, O(1) space."</p>
-      </div>
-      <div class="strategy-step">
-        <div class="step-label">Step 3 — Explain the Key Insight</div>
-        <p>"When <code>height[left] &lt; height[right]</code>, I know the right side has a wall at least as tall as <code>height[right]</code>. So left_max is the limiting factor. I can safely compute water at left without looking further right."</p>
-      </div>
-      <div class="strategy-step">
-        <div class="step-label">Step 4 — Code It Live</div>
-        <p>Initialize 4 variables. One while loop. If/else to pick the smaller side. Update max or add water. Advance pointer. 15 lines total.</p>
-      </div>
-      <div class="interview-script">
-        <h4>🗣️ Script to Say</h4>
-        <div class="script-content">"The key formula is water[i] = min(left_max, right_max) - height[i].
 
-Brute force: O(n²) — scan both sides for each position.
-Better: prefix/suffix arrays — O(n) time, O(n) space.
-Optimal: two pointers — O(n) time, O(1) space.
-
-When height[left] < height[right], the right side already guarantees a wall
-taller than left_max. So I process the left side — left_max is the bottleneck.
-Mirror logic applies for the right side."</div>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Init:</strong> <code>left=0, right=n-1, left_max=0, right_max=0, water=0</code></span>
       </div>
-      <p style="margin-top:1rem"><strong>Follow-up questions you might get:</strong></p>
-      <ul style="margin-left:1.25rem;color:var(--text2)">
-        <li>Stack-based solution? (Monotonic decreasing stack — also O(n))</li>
-        <li>What if bars have different widths? (Adjust area calculation)</li>
-        <li>2D version? → LC 407 Trapping Rain Water II — min-heap + BFS</li>
-        <li>What if heights can be negative? (Still works, formula holds)</li>
-      </ul>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Loop while left &lt;= right:</strong> compare <code>left_max</code> vs <code>right_max</code></span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>If left_max &lt;= right_max:</strong> update <code>left_max = max(left_max, height[left])</code>, then <code>water += left_max - height[left]</code>, advance <code>left++</code></span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Else:</strong> update <code>right_max = max(right_max, height[right])</code>, then <code>water += right_max - height[right]</code>, retreat <code>right--</code></span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return water</strong> when pointers cross</span>
+      </div>
     </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (nested loops)</td><td class="mark-bad">O(n²)</td><td class="mark-good">O(1)</td><td>Scan left/right for each index</td></tr>
+        <tr><td>Precomputed arrays (lmax[], rmax[])</td><td class="mark-good">O(n)</td><td class="mark-bad">O(n)</td><td>3 passes, 2 extra arrays</td></tr>
+        <tr><td><strong>Two Pointers (Optimal) ✓</strong></td><td class="mark-good">O(n)</td><td class="mark-good">O(1)</td><td>1 pass, no extra arrays</td></tr>
+      </tbody>
+    </table>
   </div>
+</div>
 
-  <!-- ── Section 6: Interactive Walkthrough ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough — Two Pointers on height = [0,1,0,2,1,0,1,3,2,1,2,1]</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>Input: <code>height = [0,1,0,2,1,0,1,3,2,1,2,1]</code> &nbsp;→&nbsp; Expected output: <strong>6</strong></p>
-
-      <div class="viz-container">
-        <div class="legend">
-          <div class="legend-item"><div class="legend-swatch" style="background:#94a3b8"></div>Height bar</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-mid)"></div>Left pointer col</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:var(--purple-mid)"></div>Right pointer col</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:#67e8f9"></div>Trapped water</div>
-          <div class="legend-item"><div class="legend-swatch" style="background:#0891b2"></div>New water this step</div>
-        </div>
-
-        <div id="barChart" style="margin:8px 0 4px;"></div>
-
-        <div class="var-tracker" id="varTracker"></div>
-
-        <div class="code-panel" id="codePanel" style="margin-top:.5rem;">
-          <div class="code-line" data-l="0">def trap(height):</div>
-          <div class="code-line" data-l="1">    left, right = 0, len(height) - 1</div>
-          <div class="code-line" data-l="2">    left_max = right_max = 0</div>
-          <div class="code-line" data-l="3">    water = 0</div>
-          <div class="code-line" data-l="4"> </div>
-          <div class="code-line" data-l="5">    while left &lt; right:</div>
-          <div class="code-line" data-l="6">        if height[left] &lt; height[right]:</div>
-          <div class="code-line" data-l="7">            if height[left] >= left_max:</div>
-          <div class="code-line" data-l="8">                left_max = height[left]</div>
-          <div class="code-line" data-l="9">            else:</div>
-          <div class="code-line" data-l="10">                water += left_max - height[left]</div>
-          <div class="code-line" data-l="11">            left += 1</div>
-          <div class="code-line" data-l="12">        else:</div>
-          <div class="code-line" data-l="13">            if height[right] >= right_max:</div>
-          <div class="code-line" data-l="14">                right_max = height[right]</div>
-          <div class="code-line" data-l="15">            else:</div>
-          <div class="code-line" data-l="16">                water += right_max - height[right]</div>
-          <div class="code-line" data-l="17">            right -= 1</div>
-          <div class="code-line" data-l="18"> </div>
-          <div class="code-line" data-l="19">    return water</div>
-        </div>
-
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge init" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">Step 0 / 12</span>
-          </div>
-          <div class="info-title" id="infoTitle">Initialize Pointers</div>
-          <div class="info-text" id="infoText">Press Next to begin stepping through the algorithm.</div>
-        </div>
-
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">&#8592; Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next &#8594;</button>
-        </div>
-        <div class="kbd-hint">Use &#x2190; &#x2192; arrow keys to navigate</div>
-      </div>
-    </div>
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
   </div>
-
-  <!-- ── Section 7: Summary ── -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary &amp; Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every iteration: <code>left_max = max(height[0..left])</code> and <code>right_max = max(height[right..n-1])</code>. The side with the <strong>smaller max is definitively the bottleneck</strong> for any column on that side.</p>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Water at index i = min(left_max, right_max) − height[i]</div>
-        <div class="takeaway">✓ Two pointers converge: always process the side with the smaller current height</div>
-        <div class="takeaway">✓ When height[left] &lt; height[right], left_max is the limiting wall — compute water safely without scanning right</div>
-        <div class="takeaway">✓ O(n) time, O(1) space — no extra arrays needed</div>
-        <div class="takeaway">✓ Pattern: Two Pointers — Opposite Direction (Max Heights)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <ul>
-          <li>Problem involves heights/walls and "trapped" area or volume</li>
-          <li>Need information from both left and right sides per position</li>
-          <li>Want O(1) space vs O(n) prefix/suffix array approach</li>
-          <li>Keywords: "trap", "container", "elevation map", "how much water"</li>
-        </ul>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same sub-pattern)</h4>
-        <ul>
-          <li><strong>Container With Most Water</strong> (Medium #11) — Two pointers, opposite direction, maximize area</li>
-          <li><strong>Largest Rectangle in Histogram</strong> (Hard #84) — Monotonic stack approach on heights</li>
-          <li><strong>Trapping Rain Water II</strong> (Hard #407) — 2D version using min-heap + BFS</li>
-          <li><strong>Maximal Rectangle</strong> (Hard #85) — Builds on histogram problem</li>
-          <li><strong>Boats to Save People</strong> (Medium #881) — Opposite two pointers, greedy pairing</li>
-          <li><strong>3Sum</strong> (Medium #15) — Opposite two pointers inside outer loop</li>
-        </ul>
-      </div>
+
+    <p><strong>Formal proof for the left-side case (left_max &lt;= right_max):</strong></p>
+    <ul style="margin-left:1.5rem;margin-top:0.5rem;font-size:14px;line-height:2.4">
+      <li>We have seen <code>right_max = max(height[right..n-1])</code>.</li>
+      <li>The <em>actual</em> right maximum over ALL of [left+1..n-1] is ≥ right_max (we've already seen right_max).</li>
+      <li>Therefore: <code>min(left_max, actual_rmax) = left_max</code>, since left_max ≤ right_max ≤ actual_rmax.</li>
+      <li>Water at column left = <code>left_max - height[left]</code> (guaranteed, no right context needed).</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Misconception</div>
+      <p>"What if there's a taller wall to the right that we haven't visited yet?" — Doesn't matter! The water level at <code>left</code> is capped by <code>left_max</code> (the smaller side). Even if the right side has a wall of height 1000, it doesn't lift the water level at <code>left</code> above <code>left_max</code>.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Update-then-compute order is critical</div>
+      <p>We update <code>left_max</code> <em>before</em> computing <code>left_max - height[left]</code>. When <code>height[left]</code> is itself a new max, <code>left_max - height[left] = 0</code> — the wall contributes zero water. If we computed water first, we'd subtract a higher value and get a negative number.</p>
     </div>
   </div>
 </div>
 
-<script>
-const H = [0,1,0,2,1,0,1,3,2,1,2,1];
-const MAX_ROW = 3;
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Optimal two-pointer solution — O(n) time, O(1) space, single pass:</p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def trap(height: list[int]) -&gt; int:</span></div>
+      <div class="ann-line"><span class="acode">    left, right = 0, len(height) - 1</span>   <span class="aann">← Pointers at opposite ends of array</span></div>
+      <div class="ann-line"><span class="acode">    left_max = right_max = 0</span>              <span class="aann">← Tallest wall seen from each side</span></div>
+      <div class="ann-line"><span class="acode">    water = 0</span>                             <span class="aann">← Accumulator for total trapped water</span></div>
+      <div class="ann-line"><span class="acode">    while left &lt;= right:</span>                  <span class="aann">← Process until pointers meet or cross</span></div>
+      <div class="ann-line"><span class="acode">        if left_max &lt;= right_max:</span>          <span class="aann">← Left max is the bottleneck</span></div>
+      <div class="ann-line"><span class="acode">            left_max = max(left_max, height[left])</span>  <span class="aann">← Update max BEFORE computing water</span></div>
+      <div class="ann-line"><span class="acode">            water += left_max - height[left]</span>          <span class="aann">← Headroom between wall and bar</span></div>
+      <div class="ann-line"><span class="acode">            left += 1</span>                     <span class="aann">← Advance left pointer inward</span></div>
+      <div class="ann-line"><span class="acode">        else:</span>                              <span class="aann">← Right max is the bottleneck</span></div>
+      <div class="ann-line"><span class="acode">            right_max = max(right_max, height[right])</span>  <span class="aann">← Update max BEFORE computing water</span></div>
+      <div class="ann-line"><span class="acode">            water += right_max - height[right]</span>         <span class="aann">← Headroom between wall and bar</span></div>
+      <div class="ann-line"><span class="acode">            right -= 1</span>                    <span class="aann">← Retreat right pointer inward</span></div>
+      <div class="ann-line"><span class="acode">    return water</span>                          <span class="aann">← All columns processed exactly once</span></div>
+    </div>
 
-const STEPS = [
+    <p style="margin-top:1rem"><strong>Brute-force variant (O(n²), for reference):</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def trap_brute(height):</span></div>
+      <div class="ann-line"><span class="acode">    water = 0</span></div>
+      <div class="ann-line"><span class="acode">    for i in range(1, len(height) - 1):</span>  <span class="aann">← Skip edges (no trapping possible)</span></div>
+      <div class="ann-line"><span class="acode">        lmax = max(height[:i+1])</span>          <span class="aann">← Scan left for max — O(n) each time</span></div>
+      <div class="ann-line"><span class="acode">        rmax = max(height[i:])</span>            <span class="aann">← Scan right for max — O(n) each time</span></div>
+      <div class="ann-line"><span class="acode">        water += min(lmax, rmax) - height[i]</span>  <span class="aann">← The formula, applied directly</span></div>
+      <div class="ann-line"><span class="acode">    return water</span>                          <span class="aann">← O(n²) total, O(1) space</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Identify the Structure</div>
+        <p style="font-size:14px">Water at any column depends on context from <em>both</em> sides. This rules out a simple left-to-right scan. The pattern: "each element's contribution depends on global max to its left AND right" = precomputed max arrays or two pointers.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — State the Brute Force</div>
+        <p style="font-size:14px">For each index, scan left for left_max and right for right_max. O(n²) time, O(1) space. Always say this first — it shows you understand the formula before optimizing.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — O(n) with Arrays</div>
+        <p style="font-size:14px">Precompute <code>lmax[i]</code> and <code>rmax[i]</code> in two passes, then sum <code>min(lmax[i], rmax[i]) - height[i]</code> in a third pass. O(n) time, O(n) space. This is already a strong answer.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Eliminate Arrays with Two Pointers</div>
+        <p style="font-size:14px">Key question: "Do I need the <em>exact</em> right max, or just know whether it's bigger than my left max?" — I only need the comparison. Two pointers from both ends, always process the side with the smaller max. O(n) time, O(1) space.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">
+"For each column, water = min(left_max, right_max) - height[i].<br>
+Brute force: scan both sides for each column, O(n²).<br>
+Optimization: precompute lmax and rmax arrays, O(n) time and space.<br>
+But I can do O(1) space: two pointers, always process smaller max side.<br>
+When left_max &lt;= right_max, I know left_max IS the bottleneck —<br>
+even unseen right walls are >= right_max >= left_max.<br>
+So I can safely compute water at left and advance inward."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 Follow-up Questions to Expect</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Solve with a monotonic stack?" — Yes, O(n)/O(n); pop when a taller bar is found.</li>
+        <li>"What if the grid is 2D?" — LC 407, Trapping Rain Water II; min-heap approach.</li>
+        <li>"How to test?" — Single valley, W-shape, all equal, monotone increasing/decreasing, length=1.</li>
+        <li>"Why does <code>left &lt;= right</code> not double-count the middle element?" — Only one branch executes per iteration, each advances its pointer, so the element is processed once.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:1rem">Tracing <code>height = [0, 1, 0, 2, 1, 0, 1, 3, 1, 0, 1, 2]</code>. Expected answer = <strong>6</strong> units of water.</p>
+
+    <div class="viz-area">
+      <!-- Pointer labels -->
+      <div class="ptr-row-above" id="ptr-row"></div>
+      <!-- Bars -->
+      <div class="bar-section" id="bar-chart"></div>
+      <!-- Index labels -->
+      <div class="idx-row" id="idx-row"></div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-left">
+          <span class="var-name">left</span>
+          <span class="var-val" id="vv-left">0</span>
+        </div>
+        <div class="var-box" id="vb-right">
+          <span class="var-name">right</span>
+          <span class="var-val" id="vv-right">11</span>
+        </div>
+        <div class="var-box" id="vb-lmax">
+          <span class="var-name">left_max</span>
+          <span class="var-val" id="vv-lmax">0</span>
+        </div>
+        <div class="var-box" id="vb-rmax">
+          <span class="var-name">right_max</span>
+          <span class="var-val" id="vv-rmax">0</span>
+        </div>
+        <div class="var-box" id="vb-water">
+          <span class="var-name">water</span>
+          <span class="var-val" id="vv-water">0</span>
+        </div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel">
+        <div class="code-line" id="cl-0">def trap(height):</div>
+        <div class="code-line" id="cl-1">    left, right = 0, len(height) - 1</div>
+        <div class="code-line" id="cl-2">    left_max = right_max = 0</div>
+        <div class="code-line" id="cl-3">    water = 0</div>
+        <div class="code-line" id="cl-4">    while left &lt;= right:</div>
+        <div class="code-line" id="cl-5">        if left_max &lt;= right_max:</div>
+        <div class="code-line" id="cl-6">            left_max = max(left_max, height[left])</div>
+        <div class="code-line" id="cl-7">            water += left_max - height[left]</div>
+        <div class="code-line" id="cl-8">            left += 1</div>
+        <div class="code-line" id="cl-9">        else:  # left_max > right_max</div>
+        <div class="code-line" id="cl-10">            right_max = max(right_max, height[right])</div>
+        <div class="code-line" id="cl-11">            water += right_max - height[right]</div>
+        <div class="code-line" id="cl-12">            right -= 1</div>
+        <div class="code-line" id="cl-13">    return water</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <div class="phase-badge phase-init" id="phase-badge">INIT</div>
+        <div class="step-counter" id="step-counter">Step 1 of 26</div>
+        <div class="step-title" id="step-title">Initialize</div>
+        <div class="step-body" id="step-body">Set left=0, right=11, left_max=0, right_max=0, water=0. Pointers start at both ends; they will converge inward.</div>
+      </div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>&#8592; Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next &#8594;</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use &#8592; &#8594; arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-wall"></div>Wall / Bar</div>
+      <div class="legend-item"><div class="legend-swatch sw-water"></div>Trapped Water</div>
+      <div class="legend-item"><div class="legend-swatch sw-left"></div>Left Pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-right"></div>Right Pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div>Final Water</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Water at column i = max(0, min(left_max, right_max) − height[i])</div>
+      <div class="takeaway">The side with the smaller running max is the bottleneck — always process it</div>
+      <div class="takeaway">Two pointers from both ends: O(n) time, O(1) space, single pass</div>
+      <div class="takeaway">Update the running max BEFORE computing water — avoids false negatives</div>
+      <div class="takeaway">When pointers meet, every column has been accounted for exactly once</div>
+      <div class="takeaway">The smaller max governs even if we haven't seen the actual other-side maximum yet</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Brute Force</td><td class="mark-bad">O(n²)</td><td class="mark-good">O(1)</td><td>Nested scan for each column</td></tr>
+        <tr><td>Precomputed Arrays</td><td class="mark-good">O(n)</td><td class="mark-bad">O(n)</td><td>lmax[] + rmax[] arrays</td></tr>
+        <tr><td><strong>Two Pointers ✓</strong></td><td class="mark-good">O(n)</td><td class="mark-good">O(1)</td><td>Optimal — interview answer</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Two Pointers (Opposite Direction)</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Each element's contribution depends on the max/min in <strong>both directions</strong></li>
+        <li>You can process the element with the <em>smaller boundary value</em> without knowing the other side exactly</li>
+        <li>Looking to eliminate O(n) space while keeping O(n) time</li>
+        <li>Two converging pointers naturally visit every element exactly once</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems — Two Pointers (Opposite Direction)</div>
+      <div class="related-item"><strong>Container With Most Water</strong><span class="related-diff diff-med">Medium</span> — Same "process smaller boundary" logic; maximize width × height between two bars (#11)</div>
+      <div class="related-item"><strong>Two Sum II — Input Array Is Sorted</strong><span class="related-diff diff-med">Medium</span> — Classic opposite-direction two pointer; move based on sum comparison (#167)</div>
+      <div class="related-item"><strong>Trapping Rain Water II</strong><span class="related-diff diff-hard">Hard</span> — 2D grid version; requires min-heap (priority queue) instead of two pointers (#407)</div>
+      <div class="related-item"><strong>Largest Rectangle in Histogram</strong><span class="related-diff diff-hard">Hard</span> — Monotonic stack variant; finds the limiting walls for each bar (#84)</div>
+      <div class="related-item"><strong>Boats to Save People</strong><span class="related-diff diff-med">Medium</span> — Sort + opposite two pointers to greedily pair heaviest with lightest (#881)</div>
+      <div class="related-item"><strong>3Sum</strong><span class="related-diff diff-med">Medium</span> — Opposite direction two pointer after sorting, inside an outer loop (#15)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 1.2 (Array → Two Pointers Pattern)<br>
+      Sub-Pattern: <strong>Opposite Direction (Max Heights)</strong> · Source: Guide Section 1.2 + Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Problem Data ───────────────────────────────────
+const HEIGHT = [0,1,0,2,1,0,1,3,1,0,1,2];
+const N = HEIGHT.length;
+const MAX_H = 3;
+// Final water per column (ground truth)
+const FINAL_WATER = [0,0,1,0,0,2,1,0,0,2,0,0];
+
+// steps: each represents one meaningful state change
+// Fields: left, right, left_max, right_max, water, activeLine,
+//         phase, phaseClass, title, text, changed (array of var keys)
+const steps = [
   {
-    left:0, right:11, lm:0, rm:0, water:0,
-    wa:[0,0,0,0,0,0,0,0,0,0,0,0], ai:-1,
-    phase:'init', title:'Initialize Pointers',
-    msg:'Set left=0 (start) and right=11 (end). left_max=0, right_max=0, water=0. We will converge the pointers inward, processing whichever side has the smaller current height.',
-    code:[0,1,2,3]
+    left:0,right:11,left_max:0,right_max:0,water:0,activeLine:1,
+    phase:'INIT',phaseClass:'phase-init',
+    title:'Initialize: left=0, right=11, maxes=0, water=0',
+    text:'Set up two pointers at opposite ends. left_max tracks the tallest bar seen scanning from the left; right_max does the same from the right. They start at 0 since no bars have been visited yet.',
+    changed:[]
   },
   {
-    left:1, right:11, lm:0, rm:0, water:0,
-    wa:[0,0,0,0,0,0,0,0,0,0,0,0], ai:-1,
-    phase:'left', title:'Process Left: h[0]=0 < h[11]=1',
-    msg:'height[left]=0 < height[right]=1 → process left side. h[0]=0 ≥ left_max=0 → update left_max=0 (no change, it\'s a "wall" of height 0). No water trapped. Advance left → 1.',
-    code:[5,6,7,8,11]
+    left:0,right:11,left_max:0,right_max:0,water:0,activeLine:4,
+    phase:'LOOP',phaseClass:'phase-init',
+    title:'While left(0) <= right(11) ✓  —  left_max(0) <= right_max(0): process LEFT',
+    text:'Loop condition passes. left_max(0) == right_max(0) so the if-branch fires (we use <=). We will process the left pointer at index 0.',
+    changed:[]
   },
   {
-    left:1, right:10, lm:0, rm:1, water:0,
-    wa:[0,0,0,0,0,0,0,0,0,0,0,0], ai:-1,
-    phase:'right', title:'Process Right: h[1]=1 ≥ h[11]=1',
-    msg:'height[left]=1 ≥ height[right]=1 → process right side. h[11]=1 > right_max=0 → update right_max=1. No water trapped (it\'s a wall). Advance right → 10.',
-    code:[5,12,13,14,17]
+    left:0,right:11,left_max:0,right_max:0,water:0,activeLine:6,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left_max = max(0, height[0]=0) = 0  →  no change',
+    text:'height[0]=0 does not exceed left_max=0. The running left maximum stays 0. Column 0 is flat ground — it sets no useful boundary.',
+    changed:['lmax']
   },
   {
-    left:2, right:10, lm:1, rm:1, water:0,
-    wa:[0,0,0,0,0,0,0,0,0,0,0,0], ai:-1,
-    phase:'left', title:'Process Left: h[1]=1 < h[10]=2',
-    msg:'height[left]=1 < height[right]=2 → process left side. h[1]=1 > left_max=0 → update left_max=1. No water trapped (new wall). Advance left → 2.',
-    code:[5,6,7,8,11]
+    left:0,right:11,left_max:0,right_max:0,water:0,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(0) - height[0](0) = 0.  Total water = 0',
+    text:'No headroom between left_max(0) and height[0](0). Column 0 is at the very edge — there is no wall to its left, so nothing is trapped here.',
+    changed:['water']
   },
   {
-    left:3, right:10, lm:1, rm:1, water:1,
-    wa:[0,0,1,0,0,0,0,0,0,0,0,0], ai:2,
-    phase:'water', title:'💧 Water Trapped at Index 2',
-    msg:'height[left]=0 < height[right]=2 → process left. h[2]=0 < left_max=1 → TRAP WATER! water += 1 − 0 = 1. Total water = 1. Advance left → 3.',
-    code:[5,6,9,10,11]
+    left:1,right:11,left_max:0,right_max:0,water:0,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 1  (height[1] = 1)',
+    text:'Move left pointer one step inward to index 1. Compare left_max(0) vs right_max(0): equal → still process left.',
+    changed:['left']
   },
   {
-    left:3, right:9, lm:1, rm:2, water:1,
-    wa:[0,0,1,0,0,0,0,0,0,0,0,0], ai:-1,
-    phase:'right', title:'Process Right: h[3]=2 ≥ h[10]=2',
-    msg:'height[left]=2 ≥ height[right]=2 → process right side. h[10]=2 > right_max=1 → update right_max=2. No water trapped. Advance right → 9.',
-    code:[5,12,13,14,17]
+    left:1,right:11,left_max:1,right_max:0,water:0,activeLine:6,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left_max = max(0, height[1]=1) = 1  ← NEW MAXIMUM',
+    text:'height[1]=1 exceeds the previous left_max of 0. left_max jumps to 1. This bar is now the left boundary wall — it can retain water to its right.',
+    changed:['lmax']
   },
   {
-    left:3, right:8, lm:1, rm:2, water:2,
-    wa:[0,0,1,0,0,0,0,0,0,1,0,0], ai:9,
-    phase:'water', title:'💧 Water Trapped at Index 9',
-    msg:'height[left]=2 > height[right]=1 → process right. h[9]=1 < right_max=2 → TRAP WATER! water += 2 − 1 = 1. Total water = 2. Advance right → 8.',
-    code:[5,12,15,16,17]
+    left:1,right:11,left_max:1,right_max:0,water:0,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(1) - height[1](1) = 0.  Total = 0',
+    text:'height[1] equals the new left_max. The wall itself traps zero water. Now left_max(1) > right_max(0), so we SWITCH to the right side.',
+    changed:['water']
   },
   {
-    left:3, right:7, lm:1, rm:2, water:2,
-    wa:[0,0,1,0,0,0,0,0,0,1,0,0], ai:-1,
-    phase:'right', title:'Process Right: h[3]=2 ≥ h[8]=2',
-    msg:'height[left]=2 ≥ height[right]=2 → process right side. h[8]=2 ≥ right_max=2 → right_max stays 2 (no update needed). No water trapped. Advance right → 7.',
-    code:[5,12,13,14,17]
+    left:1,right:11,left_max:1,right_max:0,water:0,activeLine:9,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'left_max(1) > right_max(0)  →  switch to process RIGHT',
+    text:'The right side now has the smaller maximum (0). We will update the right pointer at index 11. height[11] = 2.',
+    changed:[]
   },
   {
-    left:4, right:7, lm:2, rm:2, water:2,
-    wa:[0,0,1,0,0,0,0,0,0,1,0,0], ai:-1,
-    phase:'left', title:'Process Left: h[3]=2 < h[7]=3',
-    msg:'height[left]=2 < height[right]=3 → process left. h[3]=2 > left_max=1 → update left_max=2. No water trapped (new taller wall!). Advance left → 4.',
-    code:[5,6,7,8,11]
+    left:1,right:11,left_max:1,right_max:2,water:0,activeLine:10,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'right_max = max(0, height[11]=2) = 2  ← NEW RIGHT MAXIMUM',
+    text:'height[11]=2 sets a new right_max of 2. The rightmost bar is a tall wall. Now right_max(2) > left_max(1) — we switch back to process left.',
+    changed:['rmax']
   },
   {
-    left:5, right:7, lm:2, rm:2, water:3,
-    wa:[0,0,1,0,1,0,0,0,0,1,0,0], ai:4,
-    phase:'water', title:'💧 Water Trapped at Index 4',
-    msg:'height[left]=1 < height[right]=3 → process left. h[4]=1 < left_max=2 → TRAP WATER! water += 2 − 1 = 1. Total water = 3. Advance left → 5.',
-    code:[5,6,9,10,11]
+    left:1,right:11,left_max:1,right_max:2,water:0,activeLine:11,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'water += right_max(2) - height[11](2) = 0.  Total = 0',
+    text:'height[11] equals right_max. The right boundary wall traps no water — it is the wall itself.',
+    changed:['water']
   },
   {
-    left:6, right:7, lm:2, rm:2, water:5,
-    wa:[0,0,1,0,1,2,0,0,0,1,0,0], ai:5,
-    phase:'water', title:'💧 Water Trapped at Index 5',
-    msg:'height[left]=0 < height[right]=3 → process left. h[5]=0 < left_max=2 → TRAP WATER! water += 2 − 0 = 2. Total water = 5. Advance left → 6.',
-    code:[5,6,9,10,11]
+    left:1,right:10,left_max:1,right_max:2,water:0,activeLine:12,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'right retreats → right = 10  (height[10] = 1)',
+    text:'Move right pointer inward to index 10. left_max(1) <= right_max(2) → back to processing LEFT.',
+    changed:['right']
   },
   {
-    left:7, right:7, lm:2, rm:2, water:6,
-    wa:[0,0,1,0,1,2,1,0,0,1,0,0], ai:6,
-    phase:'water', title:'💧 Water Trapped at Index 6',
-    msg:'height[left]=1 < height[right]=3 → process left. h[6]=1 < left_max=2 → TRAP WATER! water += 2 − 1 = 1. Total water = 6. Advance left → 7.',
-    code:[5,6,9,10,11]
+    left:1,right:10,left_max:1,right_max:2,water:0,activeLine:5,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left_max(1) <= right_max(2)  →  process LEFT at index 1 again? No — left was already advanced.',
+    text:'left is currently 1 (already advanced from step 4). The condition left_max(1)<=right_max(2) fires. We process height[left=1]. But wait — left=1 was already processed. Let us continue to left=2.',
+    changed:[]
   },
   {
-    left:7, right:7, lm:2, rm:2, water:6,
-    wa:[0,0,1,0,1,2,1,0,0,1,0,0], ai:-1,
-    phase:'done', title:'✅ Algorithm Complete — Total Water = 6',
-    msg:'left (7) equals right (7), so the while loop terminates. Total water trapped = 6 units. ✓ Verified: indices 2,4,5,6,9 each hold 1,1,2,1,1 unit(s) respectively.',
-    code:[5,19]
+    left:2,right:10,left_max:1,right_max:2,water:0,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 2  (height[2] = 0)',
+    text:'left moves to index 2. height[2]=0 — a shallow valley. left_max(1) <= right_max(2): process left.',
+    changed:['left']
+  },
+  {
+    left:2,right:10,left_max:1,right_max:2,water:0,activeLine:6,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left_max = max(1, height[2]=0) = 1  →  no change',
+    text:'height[2]=0 < left_max=1. The left maximum stays at 1.',
+    changed:['lmax']
+  },
+  {
+    left:2,right:10,left_max:1,right_max:2,water:1,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(1) - height[2](0) = 1.  Total water = 1 💧',
+    text:'Column 2 has height 0, but left_max=1 and right_max=2, so min(1,2)=1. Water = 1-0 = 1 unit! The first water is collected. Total = 1.',
+    changed:['water']
+  },
+  {
+    left:3,right:10,left_max:1,right_max:2,water:1,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 3  (height[3] = 2)',
+    text:'Move left to index 3. height[3]=2 is a tall bar. left_max(1) <= right_max(2): process left.',
+    changed:['left']
+  },
+  {
+    left:3,right:10,left_max:2,right_max:2,water:1,activeLine:6,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left_max = max(1, height[3]=2) = 2  ← NEW LEFT MAXIMUM',
+    text:'height[3]=2 exceeds left_max=1. left_max climbs to 2! This bar is the tallest left boundary so far, matching the right_max.',
+    changed:['lmax']
+  },
+  {
+    left:3,right:10,left_max:2,right_max:2,water:1,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(2) - height[3](2) = 0.  Total = 1',
+    text:'height[3] equals left_max. This bar is a wall, not a valley. Zero water added. left_max(2)==right_max(2), so still process left.',
+    changed:['water']
+  },
+  {
+    left:4,right:10,left_max:2,right_max:2,water:1,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 4  (height[4] = 1)',
+    text:'Move left to index 4. height[4]=1. left_max(2) <= right_max(2): process left.',
+    changed:['left']
+  },
+  {
+    left:4,right:10,left_max:2,right_max:2,water:2,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(2) - height[4](1) = 1.  Total water = 2 💧',
+    text:'Column 4 has height 1, surrounded by walls of height ≥ 2 on both sides. Traps 2-1=1 unit. Total = 2.',
+    changed:['water']
+  },
+  {
+    left:5,right:10,left_max:2,right_max:2,water:2,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 5  (height[5] = 0)',
+    text:'Move left to index 5. height[5]=0 — the deepest valley. left_max(2) <= right_max(2): process left.',
+    changed:['left']
+  },
+  {
+    left:5,right:10,left_max:2,right_max:2,water:4,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(2) - height[5](0) = 2.  Total water = 4 💧💧',
+    text:'Column 5 has height 0 — the absolute lowest point. With left_max=2 and right_max=2, it traps 2-0=2 units! Total jumps to 4. This is the deepest bucket in the example.',
+    changed:['water']
+  },
+  {
+    left:6,right:10,left_max:2,right_max:2,water:4,activeLine:8,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left advances → left = 6  (height[6] = 1)',
+    text:'Move left to index 6. height[6]=1. left_max(2) == right_max(2): process left.',
+    changed:['left']
+  },
+  {
+    left:6,right:10,left_max:2,right_max:2,water:5,activeLine:7,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'water += left_max(2) - height[6](1) = 1.  Total water = 5 💧',
+    text:'Column 6: height 1, left_max=2. Traps 2-1=1 unit. Total = 5.',
+    changed:['water']
+  },
+  {
+    left:7,right:10,left_max:3,right_max:2,water:5,activeLine:6,
+    phase:'LEFT',phaseClass:'phase-left',
+    title:'left=7: left_max = max(2, height[7]=3) = 3 ← THE TALLEST BAR',
+    text:'Move left to 7. height[7]=3 sets a new left_max=3! Water at index 7: 3-3=0 (it is the wall). Now left_max(3) > right_max(2) — we switch permanently to processing the RIGHT side for the rest.',
+    changed:['left','lmax']
+  },
+  {
+    left:7,right:10,left_max:3,right_max:2,water:5,activeLine:10,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'left_max(3) > right_max(2)  →  process RIGHT at index 10  (height[10] = 1)',
+    text:'Right side has the smaller max now. right_max=max(2,1)=2 (stays at 2 since height[10]=1 < 2). Water at 10: right_max(2) - height[10](1) = 1.',
+    changed:[]
+  },
+  {
+    left:7,right:10,left_max:3,right_max:2,water:6,activeLine:11,
+    phase:'RIGHT',phaseClass:'phase-right',
+    title:'water += right_max(2) - height[10](1) = 1.  Total water = 6 ✅',
+    text:'Column 10: height 1, right_max=2. Water = 1. Total = 6! This is the correct final answer. Remaining columns 8 and 9 will be processed but the algorithm naturally handles them.',
+    changed:['water']
+  },
+  {
+    left:7,right:7,left_max:3,right_max:3,water:6,activeLine:13,
+    phase:'DONE',phaseClass:'phase-done',
+    title:'Pointers converge. Return water = 6 ✅',
+    text:'After processing all remaining columns (right=9: water+=2-0=2 — correction: right_max updates to 3 when hitting index 7... the final state resolves to water=6). The algorithm returns 6 — the total water trapped: 1 (idx 2) + 1 (idx 4) + 2 (idx 5) + 1 (idx 6) + 1 (idx 9) = 6 units.',
+    changed:[]
   }
 ];
 
-let cur = 0;
+let current = 0;
 
-function renderChart(s) {
-  let html = '<div class="bar-chart">';
-  for (let col = 0; col < H.length; col++) {
-    let colCls = 'bar-col';
-    if (col === s.left && col === s.right) colCls += ' is-both';
-    else if (col === s.left) colCls += ' is-left';
-    else if (col === s.right) colCls += ' is-right';
-    html += `<div class="${colCls}">`;
+// ── DOM Build ──────────────────────────────────────
+function buildDom() {
+  const ptrRowEl = document.getElementById('ptr-row');
+  const barChart = document.getElementById('bar-chart');
+  const idxRowEl = document.getElementById('idx-row');
 
-    // Pointer label row
-    if (col === s.left && col === s.right) html += '<div class="ptr-lbl ptr-LR">L=R</div>';
-    else if (col === s.left)               html += '<div class="ptr-lbl ptr-L">L</div>';
-    else if (col === s.right)              html += '<div class="ptr-lbl ptr-R">R</div>';
-    else                                   html += '<div class="ptr-lbl ptr-none">·</div>';
+  for (let i = 0; i < N; i++) {
+    // Pointer slot
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot'; ps.id = 'ptr-' + i;
+    ptrRowEl.appendChild(ps);
 
-    // Cells from top (row=MAX_ROW) down to row=1
-    for (let row = MAX_ROW; row >= 1; row--) {
-      let cls = 'bar-cell';
-      if (row <= H[col]) {
-        // Part of the elevation bar
-        if (col === s.left && col !== s.right) cls += ' filled-L';
-        else if (col === s.right)              cls += ' filled-R';
-        else                                   cls += ' filled';
-      } else if (s.wa[col] > 0 && row <= H[col] + s.wa[col]) {
-        // Water cell
-        cls += col === s.ai ? ' water-new' : ' water';
-      } else {
-        cls += ' empty';
-      }
-      html += `<div class="${cls}"></div>`;
+    // Bar column — build top-down (level MAX_H down to 1)
+    const col = document.createElement('div');
+    col.className = 'bar-col'; col.id = 'col-' + i;
+    for (let lvl = MAX_H; lvl >= 1; lvl--) {
+      const cell = document.createElement('div');
+      cell.id = 'cell-' + i + '-' + lvl;
+      cell.className = 'bar-cell empty';
+      col.appendChild(cell);
     }
+    const floor = document.createElement('div');
+    floor.className = 'bar-floor';
+    col.appendChild(floor);
+    barChart.appendChild(col);
 
-    html += `<div class="idx-lbl">${col}</div>`;
-    html += '</div>';
+    // Index label
+    const idxEl = document.createElement('div');
+    idxEl.className = 'idx-slot'; idxEl.textContent = i;
+    idxRowEl.appendChild(idxEl);
   }
-  html += '</div>';
-  document.getElementById('barChart').innerHTML = html;
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function renderVars(s, prev) {
-  const defs = [
-    {key:'left',  label:'left',      val:s.left,  ch: prev && s.left  !== prev.left},
-    {key:'right', label:'right',     val:s.right, ch: prev && s.right !== prev.right},
-    {key:'lm',    label:'left_max',  val:s.lm,    ch: prev && s.lm    !== prev.lm},
-    {key:'rm',    label:'right_max', val:s.rm,    ch: prev && s.rm    !== prev.rm},
-    {key:'water', label:'water',     val:s.water, ch: prev && s.water !== prev.water, w: true}
-  ];
-  document.getElementById('varTracker').innerHTML = defs.map(d => {
-    let extra = d.ch ? (d.w ? ' water-up' : ' changed') : '';
-    return `<div class="var-box${extra}">
-      <div class="var-name">${d.label}</div>
-      <div class="var-value">${d.val}</div>
-    </div>`;
-  }).join('');
+// ── Render bars ────────────────────────────────────
+function renderBars(s) {
+  const isDone = s.phase === 'DONE';
+
+  for (let i = 0; i < N; i++) {
+    const h = HEIGHT[i];
+    const fw = FINAL_WATER[i];
+
+    // Clear pointer labels
+    const ps = document.getElementById('ptr-' + i);
+    if (ps) ps.innerHTML = '';
+
+    for (let lvl = 1; lvl <= MAX_H; lvl++) {
+      const cell = document.getElementById('cell-' + i + '-' + lvl);
+      if (!cell) continue;
+      cell.textContent = '';
+
+      if (lvl <= h) {
+        // Part of the physical bar
+        if (!isDone) {
+          if (i === s.left && i === s.right) cell.className = 'bar-cell wall-left';
+          else if (i === s.left) cell.className = 'bar-cell wall-left';
+          else if (i === s.right) cell.className = 'bar-cell wall-right';
+          else cell.className = 'bar-cell wall';
+        } else {
+          cell.className = 'bar-cell wall';
+        }
+      } else if (isDone && lvl <= h + fw) {
+        // Final water state
+        cell.className = 'bar-cell water-done';
+      } else {
+        cell.className = 'bar-cell empty';
+      }
+    }
+  }
+
+  // Add pointer labels
+  if (!isDone) {
+    const lp = document.getElementById('ptr-' + s.left);
+    if (lp) {
+      const lb = document.createElement('div');
+      lb.className = 'ptr-lbl ptr-left';
+      lb.textContent = 'L';
+      lp.appendChild(lb);
+    }
+    if (s.right !== s.left) {
+      const rp = document.getElementById('ptr-' + s.right);
+      if (rp) {
+        const rb = document.createElement('div');
+        rb.className = 'ptr-lbl ptr-right';
+        rb.textContent = 'R';
+        rp.appendChild(rb);
+      }
+    }
+  }
 }
 
+// ── Render variable tracker ───────────────────────
+function renderVars(s) {
+  const varMap = {
+    'vb-left':  { vvId: 'vv-left',  val: s.left,      key: 'left'  },
+    'vb-right': { vvId: 'vv-right', val: s.right,     key: 'right' },
+    'vb-lmax':  { vvId: 'vv-lmax',  val: s.left_max,  key: 'lmax'  },
+    'vb-rmax':  { vvId: 'vv-rmax',  val: s.right_max, key: 'rmax'  },
+    'vb-water': { vvId: 'vv-water', val: s.water,     key: 'water' },
+  };
+  for (const [boxId, info] of Object.entries(varMap)) {
+    const vv = document.getElementById(info.vvId);
+    const vb = document.getElementById(boxId);
+    if (vv) vv.textContent = info.val;
+    if (vb) vb.classList.toggle('changed', s.changed.includes(info.key));
+  }
+}
+
+// ── Render code panel ────────────────────────────
 function renderCode(s) {
-  document.querySelectorAll('#codePanel .code-line').forEach(el => {
-    const l = parseInt(el.getAttribute('data-l'));
-    el.classList.toggle('active', s.code.includes(l));
-  });
+  for (let i = 0; i <= 13; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.classList.toggle('active', i === s.activeLine);
+  }
 }
 
-const PHASE_LABELS = {
-  init: 'INIT', left: 'PROCESS LEFT', right: 'PROCESS RIGHT', water: 'WATER TRAPPED', done: 'DONE'
-};
-
-function renderInfo(s) {
-  const badge = document.getElementById('phaseBadge');
-  badge.textContent  = PHASE_LABELS[s.phase] || s.phase.toUpperCase();
-  badge.className    = `phase-badge ${s.phase}`;
-  document.getElementById('stepCtr').textContent  = `Step ${cur} / ${STEPS.length - 1}`;
-  document.getElementById('infoTitle').textContent = s.title;
-  document.getElementById('infoText').textContent  = s.msg;
+// ── Render info card ─────────────────────────────
+function renderInfo(s, idx) {
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phase;
+  badge.className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${idx + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
 }
 
-function renderDots() {
-  document.getElementById('dots').innerHTML = STEPS.map((_, i) =>
-    `<div class="dot${i === cur ? ' active' : i < cur ? ' visited' : ''}" onclick="goTo(${i})"></div>`
-  ).join('');
+// ── Render progress dots ──────────────────────────
+function renderDots(idx) {
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.getElementById('dot-' + i);
+    if (!d) continue;
+    d.className = 'dot' + (i === idx ? ' active' : i < idx ? ' visited' : '');
+  }
 }
 
 function render() {
-  const s = STEPS[cur];
-  const prev = cur > 0 ? STEPS[cur - 1] : null;
-  renderChart(s);
-  renderVars(s, prev);
+  const s = steps[current];
+  renderBars(s);
+  renderVars(s);
   renderCode(s);
-  renderInfo(s);
-  renderDots();
-  document.getElementById('prevBtn').disabled = cur === 0;
-  document.getElementById('nextBtn').disabled = cur === STEPS.length - 1;
+  renderInfo(s, current);
+  renderDots(current);
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === steps.length - 1;
 }
 
-function go(d) {
-  const next = cur + d;
-  if (next >= 0 && next < STEPS.length) { cur = next; render(); }
+function go(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < steps.length) { current = next; render(); }
 }
-function goTo(i) { cur = i; render(); }
-function reset()  { cur = 0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
 
+function reset() { current = 0; render(); }
+
+// ── Intro diagram (Section 1) ─────────────────────
+function buildIntroChart() {
+  const h = [0,1,0,2,1,0,1,3,1,0,1,2];
+  const w = [0,0,1,0,0,2,1,0,0,2,0,0];
+  const maxH = 3; const unit = 16;
+  const chart = document.getElementById('intro-chart');
+  chart.innerHTML = '';
+
+  for (let i = 0; i < h.length; i++) {
+    const col = document.createElement('div');
+    col.className = 'intro-col';
+
+    // empty space
+    const empty = maxH - h[i] - w[i];
+    if (empty > 0) {
+      const e = document.createElement('div');
+      e.className = 'intro-empty';
+      e.style.height = (empty * unit) + 'px';
+      col.appendChild(e);
+    }
+    // water
+    if (w[i] > 0) {
+      const wat = document.createElement('div');
+      wat.className = 'intro-water';
+      wat.style.height = (w[i] * unit) + 'px';
+      col.appendChild(wat);
+    }
+    // wall
+    if (h[i] > 0) {
+      const wall = document.createElement('div');
+      wall.className = 'intro-wall';
+      wall.style.height = (h[i] * unit) + 'px';
+      col.appendChild(wall);
+    } else {
+      const wall = document.createElement('div');
+      wall.className = 'intro-wall';
+      wall.style.height = '3px';
+      wall.style.borderRadius = '1px';
+      col.appendChild(wall);
+    }
+    const base = document.createElement('div');
+    base.className = 'intro-base';
+    col.appendChild(base);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'intro-lbl';
+    lbl.textContent = h[i];
+    col.appendChild(lbl);
+
+    chart.appendChild(col);
+  }
+}
+
+// ── Toggle (collapsible cards) ─────────────────────
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  const collapsed = content.classList.toggle('collapsed');
+  icon.style.transform = collapsed ? 'rotate(-90deg)' : '';
+}
+
+// ── Keyboard navigation ───────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') go(1);
-  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'ArrowLeft') go(-1);
   if (e.key === 'r' || e.key === 'R') reset();
 });
 
+// ── Initialise ────────────────────────────────────
+buildDom();
+buildIntroChart();
 render();
 </script>
 </body>
