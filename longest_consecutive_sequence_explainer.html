@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Longest Consecutive Sequence – Visual Explainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+      --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+      --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+      --mono:'JetBrains Mono','Fira Code',monospace; --sans:'DM Sans',system-ui,sans-serif;
+      --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+      --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+      --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+      --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+      --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+      --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+      --radius:10px; --radius-lg:14px;
+    }
+    @media(prefers-color-scheme:dark){:root{
+      --bg:#18181a;--bg2:#222224;--surface:#2a2a2d;
+      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+      --text:#e8e6de;--text2:#9c9a92;--text3:#666460;
+      --blue-bg:#0c2a45;--blue-border:#378ADD;--blue-text:#B5D4F4;--blue-mid:#85B7EB;
+      --green-bg:#172a0a;--green-border:#639922;--green-text:#C0DD97;--green-mid:#97C459;
+      --amber-bg:#2e1c05;--amber-border:#BA7517;--amber-text:#FAC775;--amber-mid:#EF9F27;
+      --red-bg:#3a0a0a;--red-border:#E24B4A;--red-text:#F7C1C1;--red-mid:#A32D2D;
+      --purple-bg:#1e1a45;--purple-border:#7F77DD;--purple-text:#CECBF6;--purple-mid:#AFA9EC;
+      --cyan-bg:#004D54;--cyan-border:#26C6DA;--cyan-text:#B2EBF2;--cyan-mid:#4DD0E1;
+    }}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}
+    .container{max-width:900px;margin:0 auto;}
+    header{text-align:center;margin-bottom:2rem;}
+    h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}
+    .subtitle{color:var(--text2);font-size:.95rem;}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+    .tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}
+    .tag-medium{background:var(--amber-bg);color:var(--amber-mid);}
+    .tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}
+    .tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}
+    .section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}
+    .section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+    .section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}
+    .collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}
+    .card.collapsed .collapse-icon{transform:rotate(-90deg);}
+    .card.collapsed .section-content{display:none;}
+    .section-content p{margin-bottom:.75rem;color:var(--text2);}
+    .section-content p:last-child{margin-bottom:0;}
+    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}
+    .concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+    .concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}
+    .concept-box.insight .concept-box-title{color:var(--green-mid);}
+    .concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}
+    .concept-box.warning .concept-box-title{color:var(--amber-mid);}
+    .concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}
+    .concept-box.key-concept .concept-box-title{color:var(--blue-mid);}
+    .concept-box p{color:var(--text);margin:0;}
+    .concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
+    .concept-box li{margin-bottom:.25rem;}
+    .algorithm-steps{display:flex;flex-direction:column;gap:12px;margin:1rem 0;}
+    .algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}
+    .step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+    .step-text{color:var(--text);line-height:1.5;}
+    .code-panel{margin-top:1.25rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}
+    .code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}
+    .code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
+    .code-comment{color:var(--text3);}
+    .strategy-steps{display:flex;flex-direction:column;gap:16px;margin:1rem 0;}
+    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border);}
+    .step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}
+    .interview-script{margin-top:1.5rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}
+    .script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
+    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
+    .array-section{margin-bottom:1.5rem;}
+    .array-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+    .array-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+    .cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;position:relative;}
+    .cell.current{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);transform:scale(1.1);}
+    .cell.in-seq{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}
+    .cell.seq-start{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}
+    .cell.not-start{opacity:.45;}
+    .cell.best{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}
+    .set-section{margin:1.5rem 0;}
+    .set-display{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px;background:var(--bg2);border-radius:var(--radius);}
+    .set-item{font-family:var(--mono);font-size:13px;padding:4px 10px;border-radius:6px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);}
+    .set-item.highlight{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid);font-weight:600;}
+    .var-tracker{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;}
+    .var-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--radius);padding:8px 14px;border:1px solid transparent;transition:background .3s,border-color .3s;}
+    .var-box.changed{border-color:var(--amber-border);background:var(--amber-bg);}
+    .var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+    .var-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);min-width:30px;text-align:center;}
+    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}
+    .info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}
+    .phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:10px;}
+    .phase-init{background:var(--cyan-bg);color:var(--cyan-mid);}
+    .phase-skip{background:var(--amber-bg);color:var(--amber-mid);}
+    .phase-extend{background:var(--blue-bg);color:var(--blue-mid);}
+    .phase-best{background:var(--green-bg);color:var(--green-mid);}
+    .phase-done{background:var(--purple-bg);color:var(--purple-mid);}
+    .step-counter{font-size:12px;color:var(--text3);margin-left:auto;}
+    .info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}
+    .info-text{font-size:14px;color:var(--text2);line-height:1.6;}
+    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}
+    .dot.active{background:var(--blue-mid);transform:scale(1.3);}
+    .dot.visited{background:var(--green-mid);}
+    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}
+    .btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-primary{background:var(--blue-mid);color:white;}
+    .btn-primary:hover{filter:brightness(1.1);}
+    .btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}
+    .btn-secondary:hover{background:var(--border);}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
+    .legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+    .legend-color{width:14px;height:14px;border-radius:4px;border:2px solid;}
+    .legend-start{background:var(--purple-bg);border-color:var(--purple-mid);}
+    .legend-seq{background:var(--green-bg);border-color:var(--green-mid);}
+    .legend-best{background:var(--amber-bg);border-color:var(--amber-mid);}
+    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}
+    .takeaway{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
+    .related-problems{margin-top:1rem;}
+    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;}
+    .related-problems ul{margin-left:1.25rem;color:var(--text2);}
+    .related-problems li{margin-bottom:.25rem;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Longest Consecutive Sequence</h1>
+    <p class="subtitle">LeetCode #128 – Find the longest run of consecutive integers</p>
+    <div class="tags">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">Hash Set</span>
+      <span class="tag tag-pattern">Sequence Start Check</span>
+      <span class="tag tag-complexity">O(n) Time</span>
+      <span class="tag tag-complexity">O(n) Space</span>
+    </div>
+  </header>
+
+  <!-- Section 1 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">1</span>
+      <span class="section-title">Understanding the Problem</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Given an unsorted array of integers, find the length of the longest sequence of consecutive integers (e.g., 1,2,3,4).</p>
+      <p><strong>Example:</strong> [100,4,200,1,3,2] → longest is 1,2,3,4 → length <strong>4</strong></p>
+      <div class="concept-box insight">
+        <div class="concept-box-title">💡 Key Insight</div>
+        <p>Only start counting from a sequence's <strong>beginning</strong> — a number <code>n</code> is a sequence start if <code>n-1</code> is NOT in the set. This avoids redundant counting and keeps time O(n).</p>
+      </div>
+      <div class="concept-box warning">
+        <div class="concept-box-title">⚠️ Why not sort?</div>
+        <p>Sorting gives O(n log n). The problem asks for O(n). Hash set lookup is O(1), enabling a linear solution.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">2</span>
+      <span class="section-title">The Algorithm: Hash Set + Sequence Start Check</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="algorithm-steps">
+        <div class="algo-step"><span class="step-num">1</span><span class="step-text">Insert all numbers into a hash set</span></div>
+        <div class="algo-step"><span class="step-num">2</span><span class="step-text">For each number, check: is <code>num-1</code> in the set? If yes → skip (not a sequence start)</span></div>
+        <div class="algo-step"><span class="step-num">3</span><span class="step-text">If no → this is a sequence start. Count up: how far does num, num+1, num+2… go?</span></div>
+        <div class="algo-step"><span class="step-num">4</span><span class="step-text">Update best answer</span></div>
+      </div>
+      <div class="concept-box key-concept">
+        <div class="concept-box-title">🔐 Why Each Number Is Visited At Most Twice</div>
+        <p>Each number is touched once when we check if it's a start, and at most once when it's counted as part of a sequence starting from a smaller number. Total work = O(n).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">3</span>
+      <span class="section-title">Why It Works: The Invariant</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="concept-box key-concept">
+        <div class="concept-box-title">🔐 The Invariant</div>
+        <p>We only expand sequences that start from their true beginning. A number is a start iff <code>num-1 ∉ set</code>. This means each sequence is counted exactly once — from its leftmost element.</p>
+      </div>
+      <p>This prevents O(n²) redundancy: if we start counting from every element, we'd recount subsequences. By skipping non-starts, each consecutive chain is traversed exactly once.</p>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">4</span>
+      <span class="section-title">The Code (Annotated)</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="code-panel">
+        <div class="code-line">def longestConsecutive(nums):</div>
+        <div class="code-line">    num_set = set(nums)  <span class="code-comment"># O(n) lookup</span></div>
+        <div class="code-line">    best = 0</div>
+        <div class="code-line">    </div>
+        <div class="code-line">    for num in num_set:</div>
+        <div class="code-line">        <span class="code-comment"># Only start from sequence beginnings</span></div>
+        <div class="code-line">        if num - 1 not in num_set:</div>
+        <div class="code-line">            length = 1</div>
+        <div class="code-line">            while num + length in num_set:</div>
+        <div class="code-line">                length += 1</div>
+        <div class="code-line">            best = max(best, length)</div>
+        <div class="code-line">    return best</div>
+      </div>
+      <p style="margin-top:1rem;color:var(--text2);font-size:13px;">Time: O(n) — each element touched at most twice. Space: O(n) for the set.</p>
+    </div>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">5</span>
+      <span class="section-title">🎤 Interview Strategy</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="strategy-steps">
+        <div class="strategy-step">
+          <div class="step-label">Step 1: Clarify the constraint</div>
+          <p>Interviewer wants O(n). Sorting is O(n log n) — mention it, then explain why we can do better with a hash set.</p>
+        </div>
+        <div class="strategy-step">
+          <div class="step-label">Step 2: Key observation</div>
+          <p>Only need to start counting from sequence beginnings. A number starts a sequence iff <code>num-1</code> is absent.</p>
+        </div>
+      </div>
+      <div class="interview-script">
+        <h4>🗣️ What to Say</h4>
+        <div class="script-content">"I'll insert all numbers into a set. For each number, I only start counting if num-1 isn't in the set — that means it's a sequence start. Then I extend upward while num+length is in the set. This is O(n) because each number is visited at most twice."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Interactive -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">6</span>
+      <span class="section-title">Interactive Walkthrough</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="viz-container">
+        <div class="array-section">
+          <div class="array-label">Input Array</div>
+          <div class="array-row" id="arr"></div>
+        </div>
+        <div class="set-section">
+          <div class="array-label">Hash Set</div>
+          <div class="set-display" id="setDisplay"></div>
+        </div>
+        <div class="var-tracker" id="vars"></div>
+        <div class="code-panel" id="code"></div>
+        <div class="info-card">
+          <div class="info-header">
+            <span class="phase-badge" id="phase">INIT</span>
+            <span class="step-counter" id="stepCtr">Step 0/0</span>
+          </div>
+          <div class="info-title" id="infoTitle">Ready</div>
+          <div class="info-text" id="infoText">Click Next to begin.</div>
+        </div>
+        <div class="progress-dots" id="dots"></div>
+        <div class="controls">
+          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
+          <button class="btn btn-secondary" onclick="reset()">Reset</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+        </div>
+        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-color legend-start"></div>Sequence Start</div>
+          <div class="legend-item"><div class="legend-color legend-seq"></div>In Sequence</div>
+          <div class="legend-item"><div class="legend-color legend-best"></div>Best Sequence</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="card">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-number">7</span>
+      <span class="section-title">Summary & Key Takeaways</span>
+      <span class="collapse-icon">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="takeaways">
+        <div class="takeaway">✓ Insert all numbers into a set for O(1) lookup</div>
+        <div class="takeaway">✓ Only start counting from sequence beginnings (num-1 not in set)</div>
+        <div class="takeaway">✓ Each number is processed at most twice → O(n) overall</div>
+      </div>
+      <div class="concept-box insight">
+        <div class="concept-box-title">🎯 When to Use This Pattern</div>
+        <ul>
+          <li>Finding runs/streaks in unsorted data</li>
+          <li>O(n) requirement with lookup-heavy logic</li>
+          <li>"Sequence start" filtering to avoid double work</li>
+        </ul>
+      </div>
+      <div class="related-problems">
+        <h4>Related Problems</h4>
+        <ul>
+          <li><strong>Contains Duplicate</strong> (Easy) — Hash set membership</li>
+          <li><strong>Missing Number</strong> (Easy) — Set difference</li>
+          <li><strong>Longest Arithmetic Subsequence</strong> (Medium) — DP generalization</li>
+          <li><strong>Maximum Consecutive Ones III</strong> (Medium) — Sliding window variant</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const nums = [100,4,200,1,3,2];
+const numSet = new Set(nums);
+const codeLns = [
+  'def longestConsecutive(nums):',
+  '    num_set = set(nums)',
+  '    best = 0',
+  '    ',
+  '    for num in num_set:',
+  '        if num - 1 not in num_set:',
+  '            length = 1',
+  '            while num + length in num_set:',
+  '                length += 1',
+  '            best = max(best, length)',
+  '    return best'
+];
+
+function buildSteps(){
+  const steps=[];
+  steps.push({phase:'INIT',phaseClass:'phase-init',title:'Build Hash Set',text:'Insert all numbers into a set for O(1) lookup: {100, 4, 200, 1, 3, 2}.',activeLine:1,cur:-1,seqNums:[],best:0,len:0});
+  
+  const starts = [...numSet].filter(n=>!numSet.has(n-1)).sort((a,b)=>a-b);
+  let best=0;
+  for(const start of starts){
+    let len=1;
+    steps.push({phase:'CHECK',phaseClass:'phase-init',title:`Check num=${start}: is ${start-1} in set?`,text:`${start-1} is NOT in set → ${start} is a sequence start! Begin counting.`,activeLine:5,cur:start,seqNums:[start],best,len,highlight:start});
+    while(numSet.has(start+len)){
+      steps.push({phase:'EXTEND',phaseClass:'phase-extend',title:`Extend: ${start+len} in set`,text:`Found ${start+len} in set. Sequence length now ${len+1}.`,activeLine:7,cur:start,seqNums:Array.from({length:len+1},(_,i)=>start+i),best,len:len+1,highlight:start+len});
+      len++;
+    }
+    best=Math.max(best,len);
+    steps.push({phase:'BEST',phaseClass:'phase-best',title:`Sequence ${start}…${start+len-1} has length ${len}`,text:`best = max(${best===len?best-0:best}, ${len}) = ${best}`,activeLine:9,cur:start,seqNums:Array.from({length:len},(_,i)=>start+i),best,len,isBest:best===len});
+  }
+  // also show a skipped non-start
+  steps.push({phase:'DONE',phaseClass:'phase-done',title:`Result: ${best}`,text:`Longest consecutive sequence has length ${best}: 1→2→3→4.`,activeLine:10,cur:-1,seqNums:[1,2,3,4],best,len:best});
+  return steps;
+}
+
+const steps=buildSteps();
+let cur=0;
+
+function render(){
+  const s=steps[cur];
+  // array
+  document.getElementById('arr').innerHTML=nums.map(n=>{
+    let cls='cell';
+    if(s.seqNums&&s.seqNums.includes(n)){
+      cls+= s.phase==='BEST'&&s.isBest?' best':' in-seq';
+      if(n===s.seqNums[0])cls+=' seq-start';
+    }
+    return `<div class="${cls}">${n}</div>`;
+  }).join('');
+  // set
+  document.getElementById('setDisplay').innerHTML=[...numSet].sort((a,b)=>a-b).map(n=>{
+    let cls='set-item';
+    if(s.highlight===n)cls+=' highlight';
+    if(s.seqNums&&s.seqNums.includes(n)&&s.phase!=='INIT')cls+=' highlight';
+    return `<div class="${cls}">${n}</div>`;
+  }).join('');
+  // vars
+  const vars=[{name:'best',val:s.best},{name:'length',val:s.len??'-'},{name:'cur',val:s.cur===-1?'-':s.cur}];
+  document.getElementById('vars').innerHTML=vars.map(v=>`<div class="var-box"><span class="var-name">${v.name}</span><span class="var-val">${v.val}</span></div>`).join('');
+  // code
+  document.getElementById('code').innerHTML=codeLns.map((l,i)=>`<div class="code-line${i===s.activeLine?' active':''}">${l}</div>`).join('');
+  // info
+  document.getElementById('phase').textContent=s.phase;
+  document.getElementById('phase').className='phase-badge '+s.phaseClass;
+  document.getElementById('stepCtr').textContent=`Step ${cur}/${steps.length-1}`;
+  document.getElementById('infoTitle').textContent=s.title;
+  document.getElementById('infoText').textContent=s.text;
+  // dots
+  document.getElementById('dots').innerHTML=steps.map((_,i)=>`<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===steps.length-1;
+}
+function go(d){if(cur+d>=0&&cur+d<steps.length){cur+=d;render();}}
+function goTo(i){cur=i;render();}
+function reset(){cur=0;render();}
+function toggleSection(h){h.closest('.card').classList.toggle('collapsed');}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key==='r'||e.key==='R')reset();});
+render();
+</script>
+</body>
+</html>

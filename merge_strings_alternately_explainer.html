@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merge Strings Alternately — LC #1768</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;
+    --text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;
+    --yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
+  .page-header{text-align:center;padding:40px 20px 32px}
+  .page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
+  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}
+  .tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}
+  .tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}
+  .tag-complexity{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
+  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .section-header{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}
+  .section-number{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .section-title{font-weight:600;font-size:1rem;flex:1}
+  .section-toggle{color:var(--muted);font-size:1rem;transition:transform .2s}
+  .section-toggle.open{transform:rotate(180deg)}
+  .card-body{padding:22px;display:none}
+  .card-body.open{display:block}
+  p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}
+  code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
+  .concept-box{border-radius:10px;padding:14px 18px;margin:14px 0}
+  .concept-box-title{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .insight{background:#0d2136;border:1px solid #1a4060}.insight .concept-box-title{color:var(--blue)}
+  .key-concept{background:#0d1f2e;border:1px solid #1a3a50}.key-concept .concept-box-title{color:var(--cyan)}
+  .warning{background:#1e1200;border:1px solid #4a3000}.warning .concept-box-title{color:var(--yellow)}
+  .success{background:#0d2418;border:1px solid #1a5030}.success .concept-box-title{color:var(--green)}
+  .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+  .algo-step{display:flex;align-items:flex-start;gap:12px}
+  .step-num{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .step-text{line-height:1.6;font-size:.93rem}
+  .code-block{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0}
+  .code-comment{color:#556b88}.code-kw{color:#c792ea}.code-fn{color:var(--yellow)}.code-str{color:var(--green)}.code-num{color:var(--orange)}
+  .code-line{display:block}
+  .complexity-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .complexity-table th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}
+  .complexity-table td{padding:10px 14px;border:1px solid var(--border)}
+  .related-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .related-list li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}
+  .problem-name{font-weight:600;color:var(--blue)}.problem-diff{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}
+  .diff-easy{background:#0d3321;color:var(--green)}.diff-medium{background:#2a1f00;color:var(--yellow)}.diff-hard{background:#2a0d0d;color:var(--red)}
+  /* VIZ */
+  .viz-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .viz-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}
+  .viz-header h3{font-size:1rem;font-weight:600}
+  .viz-body{padding:24px 22px}
+  .strings-display{display:flex;flex-direction:column;gap:22px;margin-bottom:20px}
+  .string-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .string-label{font-size:.8rem;font-weight:600;width:62px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:10px}
+  .chars{display:flex;gap:5px;flex-wrap:wrap}
+  .char-cell{width:42px;height:42px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;position:relative;transition:all .25s}
+  .char-cell .idx-label{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
+  .w1{background:#0d1e36;border-color:var(--blue);color:var(--blue)}
+  .w2{background:#0d2418;border-color:var(--green);color:var(--green)}
+  .res{background:#1a1030;border-color:var(--purple);color:var(--purple)}
+  .tail{background:#1e1505;border-color:var(--orange);color:var(--orange)}
+  .active-cell{box-shadow:0 0 14px rgba(251,191,36,.65);border-color:var(--yellow)!important;transform:translateY(-5px)}
+  .done-cell{opacity:.3;transform:none}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .just-added{animation:pop .3s ease}
+  .var-tracker{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}
+  .var-chip{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}
+  .var-chip.changed{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
+  .info-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}
+  .info-phase{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}
+  .info-phase.append{background:var(--orange)}.info-phase.done{background:var(--green)}.info-phase.init{background:#556b88}
+  .info-title{font-weight:600;font-size:.95rem;margin-bottom:6px}
+  .info-desc{color:var(--muted);font-size:.88rem;line-height:1.6}
+  .progress-dots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}
+  .dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
+  .controls{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}
+  .btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
+  .kbd-hint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
+  .legend-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0}
+  .step-counter{font-size:.82rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>Merge Strings Alternately</h1>
+  <div class="subtitle">LeetCode #1768 &mdash; Two Pointers: Same Direction Interleave</div>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Two Pointers</span>
+    <span class="tag tag-pattern">Same Direction Interleave</span>
+    <span class="tag tag-complexity">O(m+n) Time &middot; O(m+n) Space</span>
+  </div>
+</div>
+<div class="container">
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">1</div><div class="section-title">Understanding the Problem</div><div class="section-toggle open">▼</div>
+  </div>
+  <div class="card-body open">
+    <p>Given two strings <code>word1</code> and <code>word2</code>, create a new string by taking one character from each in turn, starting with word1. When one string runs out, append all remaining characters of the other.</p>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Think of a zipper: teeth from the left side and right side interlock one at a time. When one side runs out of teeth, the remaining ones from the other side just extend past the end.</p>
+    </div>
+    <p><strong>Example:</strong> word1 = <code>"abc"</code>, word2 = <code>"pqrs"</code></p>
+    <p>Step 1: Take 'a' (word1) → "a"<br>Step 2: Take 'p' (word2) → "ap"<br>Step 3: Take 'b' (word1) → "apb"<br>Step 4: Take 'q' (word2) → "apbq"<br>Step 5: Take 'c' (word1) → "apbqc"<br>Step 6: word1 done, take 'r' (word2) → "apbqcr"<br>Step 7: Take 's' (word2) → "apbqcrs"</p>
+    <p><strong>Edge cases:</strong> Empty word1 → return word2. Equal length → no tail. word1 longer → word1's tail appended.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">2</div><div class="section-title">The Algorithm: Same-Direction Two Pointers</div><div class="section-toggle open">▼</div>
+  </div>
+  <div class="card-body open">
+    <p>Use two indices <strong>i</strong> (word1) and <strong>j</strong> (word2), both starting at 0, advancing simultaneously.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text">Initialise i = 0, j = 0, result = []</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text">While i &lt; len(word1) <strong>OR</strong> j &lt; len(word2):</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text">&nbsp;&nbsp;&nbsp;If word1 not exhausted: append word1[i], i += 1</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text">&nbsp;&nbsp;&nbsp;If word2 not exhausted: append word2[j], j += 1</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text">Return ''.join(result)</span></div>
+    </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why One Loop Handles Everything</div>
+      <p>The <code>while ... OR ...</code> condition keeps the loop alive until <em>both</em> strings are exhausted. Inside, the two <code>if</code> guards prevent index-out-of-bounds. When word1 is done, only the word2 guard fires — naturally appending the tail without any special-case code.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">3</div><div class="section-title">Why It Works: The Invariant</div><div class="section-toggle">▼</div>
+  </div>
+  <div class="card-body">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After each loop iteration, result contains exactly <code>i + j</code> characters, and no character from either string has been skipped or repeated. The relative order within each source string is preserved.</p>
+    </div>
+    <p>When word1 is exhausted (<code>i ≥ m</code>), the <code>if i &lt; m</code> guard silently skips — word2 continues appending at its natural pace. Neither pointer ever moves "backwards" or "past the end". Each pointer visits its string once: O(m + n) total operations.</p>
+    <div class="concept-box success">
+      <div class="concept-box-title">✅ Correctness</div>
+      <p>Every character of both strings appears in the output exactly once, in the order specified by the problem. The loop terminates because both i and j are strictly increasing (at least one advances per iteration).</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">4</div><div class="section-title">The Code (Annotated)</div><div class="section-toggle open">▼</div>
+  </div>
+  <div class="card-body open">
+    <div class="code-block">
+<span class="code-line"><span class="code-kw">def</span> <span class="code-fn">mergeAlternately</span>(word1: str, word2: str) -> str:</span>
+<span class="code-line">    i, j = <span class="code-num">0</span>, <span class="code-num">0</span>              <span class="code-comment"># one pointer per string</span></span>
+<span class="code-line">    result = []                     <span class="code-comment"># list is O(1) append; join at end avoids O(n²) concat</span></span>
+<span class="code-line">    <span class="code-kw">while</span> i &lt; len(word1) <span class="code-kw">or</span> j &lt; len(word2):  <span class="code-comment"># keep going until BOTH exhausted</span></span>
+<span class="code-line">        <span class="code-kw">if</span> i &lt; len(word1):              <span class="code-comment"># guard: word1 has chars left</span></span>
+<span class="code-line">            result.append(word1[i])    <span class="code-comment"># take one char from word1</span></span>
+<span class="code-line">            i += <span class="code-num">1</span>                       <span class="code-comment"># advance word1 pointer</span></span>
+<span class="code-line">        <span class="code-kw">if</span> j &lt; len(word2):              <span class="code-comment"># guard: word2 has chars left</span></span>
+<span class="code-line">            result.append(word2[j])    <span class="code-comment"># take one char from word2</span></span>
+<span class="code-line">            j += <span class="code-num">1</span>                       <span class="code-comment"># advance word2 pointer</span></span>
+<span class="code-line">    <span class="code-kw">return</span> <span class="code-str">''</span>.join(result)           <span class="code-comment"># O(m+n) final join</span></span>
+    </div>
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: AND vs OR</div>
+      <p>Using <code>while i &lt; m <strong>and</strong> j &lt; n</code> exits as soon as the shorter string ends. You then need separate <code>result += word1[i:]</code> and <code>result += word2[j:]</code> lines to append the tail. The <strong>OR</strong> version handles the tail automatically — simpler and harder to get wrong.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">5</div><div class="section-title">🎤 Interview Strategy</div><div class="section-toggle">▼</div>
+  </div>
+  <div class="card-body">
+    <div class="algorithm-steps">
+      <div class="algo-step"><span class="step-num">1</span><span class="step-text"><strong>Reframe aloud:</strong> "Zip them together; leftovers from the longer string are appended."</span></div>
+      <div class="algo-step"><span class="step-num">2</span><span class="step-text"><strong>Brute force mention:</strong> Python's <code>zip</code> + <code>chain</code> works but is less explicit about the pointer logic.</span></div>
+      <div class="algo-step"><span class="step-num">3</span><span class="step-text"><strong>Edge cases to state:</strong> one empty string, equal lengths, length-1 strings.</span></div>
+      <div class="algo-step"><span class="step-num">4</span><span class="step-text"><strong>Complexity:</strong> O(m+n) time, O(m+n) space (output). Cannot do better — must read every character.</span></div>
+      <div class="algo-step"><span class="step-num">5</span><span class="step-text"><strong>Mention string building:</strong> list + join is preferred over repeated string concat in Python (avoids O(n²) copies).</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">6</div><div class="section-title">Complexity Analysis</div><div class="section-toggle open">▼</div>
+  </div>
+  <div class="card-body open">
+    <table class="complexity-table">
+      <tr><th>Solution</th><th>Time</th><th>Space</th></tr>
+      <tr><td>Same Direction Two Pointers</td><td>O(m + n)</td><td>O(m + n) — output only</td></tr>
+    </table>
+    <p style="margin-top:12px;color:var(--muted);font-size:.88rem">m = len(word1), n = len(word2). The output string of length m+n is unavoidable.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-number">7</div><div class="section-title">🔗 Related Problems</div><div class="section-toggle">▼</div>
+  </div>
+  <div class="card-body">
+    <ul class="related-list">
+      <li><span class="problem-name">Merge Sorted Array</span><span class="problem-diff diff-easy">Easy</span> — Merge two arrays in-place from the end (Opposite Direction Two Pointers)</li>
+      <li><span class="problem-name">Move Zeroes</span><span class="problem-diff diff-easy">Easy</span> — Same-direction slow/fast pointer: write and read</li>
+      <li><span class="problem-name">String Compression</span><span class="problem-diff diff-medium">Medium</span> — Read-Write two pointers on a single string</li>
+      <li><span class="problem-name">Interleaving String</span><span class="problem-diff diff-medium">Medium</span> — Check if s3 is a valid interleave of s1 and s2 (DP)</li>
+      <li><span class="problem-name">Shuffle the Array</span><span class="problem-diff diff-easy">Easy</span> — Interleave first and second halves</li>
+    </ul>
+    <p style="margin-top:12px;color:var(--muted);font-size:.85rem">Shared technique: two forward-moving pointers picking characters from different sources.</p>
+    <div class="concept-box insight" style="margin-top:14px">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 1.2 Two Pointers: <strong>Same Direction Interleave</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- VISUALISER -->
+<div class="viz-section">
+  <div class="viz-header"><h3>🎬 Step-by-Step Visualizer</h3></div>
+  <div class="viz-body">
+    <div id="strings-display" class="strings-display"></div>
+    <div id="var-tracker" class="var-tracker"></div>
+    <div id="info-card" class="info-card"></div>
+    <div id="progress-dots" class="progress-dots"></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="prevStep()">&#9664; Prev</button>
+      <span class="step-counter" id="step-counter">Step 0 / 0</span>
+      <button class="btn primary" id="btn-next" onclick="nextStep()">Next &#9654;</button>
+      <button class="btn" onclick="resetViz()">&#8635; Reset</button>
+    </div>
+    <div class="kbd-hint">Use &larr; &rarr; arrow keys to navigate</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> word1 char</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> word2 char</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> result (interleaved)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div> tail char (no partner)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> active pointer</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- container -->
+<script>
+const W1 = "abc", W2 = "pqrs";
+
+function buildSteps() {
+  const S = [];
+  let i = 0, j = 0, res = [];
+  S.push({i,j,res:[...res],a1:-1,a2:-1,phase:'init',title:'Initialise',desc:'Set i=0, j=0. Both pointers at start. Result is empty.'});
+  while(i < W1.length || j < W2.length) {
+    let a1=-1, a2=-1;
+    if(i < W1.length){ a1=i; res.push({ch:W1[i],src:'w1',si:i}); i++; }
+    if(j < W2.length){ a2=j; res.push({ch:W2[j],src:'w2',si:j}); j++; }
+    const onlyW1 = a1>=0 && a2<0, onlyW2 = a1<0 && a2>=0;
+    S.push({i,j,res:[...res],a1,a2,
+      phase: onlyW1||onlyW2 ? 'append' : 'interleave',
+      title: onlyW1 ? `Tail: append word1[${i-1}]='${W1[i-1]}'` :
+             onlyW2 ? `Tail: append word2[${j-1}]='${W2[j-1]}'` :
+             `word1[${i-1}]='${W1[i-1]}' + word2[${j-1}]='${W2[j-1]}'`,
+      desc: onlyW1 ? `word2 is exhausted (j=${j}=len). Append remaining word1 characters.` :
+            onlyW2 ? `word1 is exhausted (i=${i}=len). Append remaining word2 characters.` :
+            `Both pointers valid. Append '${W1[i-1]}' from word1 then '${W2[j-1]}' from word2. i→${i}, j→${j}.`});
+  }
+  S.push({i,j,res:[...res],a1:-1,a2:-1,phase:'done',title:'Done!',desc:`Both exhausted. Result = "${res.map(r=>r.ch).join('')}"`});
+  return S;
+}
+
+const STEPS = buildSteps();
+let cur = 0;
+
+function render(s) {
+  const prev = cur > 0 ? STEPS[cur-1] : null;
+
+  const makeRow = (label, word, activeIdx, cls) => {
+    const cells = word.split('').map((ch,idx)=>{
+      const isActive = idx===activeIdx;
+      const isDone = idx < activeIdx;
+      return `<div class="char-cell ${cls}${isActive?' active-cell':''}${isDone?' done-cell':''}">
+        ${ch}<span class="idx-label">${idx}</span></div>`;
+    }).join('');
+    return `<div class="string-row"><div class="string-label">${label}</div><div class="chars">${cells}</div></div>`;
+  };
+
+  const resCells = s.res.map((r,idx)=>{
+    const isTail = (r.src==='w1' && W1.length > W2.length && r.si >= W2.length) ||
+                   (r.src==='w2' && W2.length > W1.length && r.si >= W1.length);
+    const isNew = prev && idx >= prev.res.length;
+    return `<div class="char-cell ${isTail?'tail':'res'}${isNew?' just-added':''}">${r.ch}</div>`;
+  }).join('');
+
+  document.getElementById('strings-display').innerHTML =
+    makeRow('word1:', W1, s.a1, 'w1') +
+    makeRow('word2:', W2, s.a2, 'w2') +
+    `<div class="string-row"><div class="string-label">result:</div><div class="chars">${resCells||'<span style="color:var(--muted);font-size:.85rem;padding-top:12px">(empty)</span>'}</div></div>`;
+
+  const iC = prev && prev.i!==s.i, jC = prev && prev.j!==s.j, rC = prev && prev.res.length!==s.res.length;
+  document.getElementById('var-tracker').innerHTML =
+    `<div class="var-chip${iC?' changed':''}">i = ${s.i}</div>` +
+    `<div class="var-chip${jC?' changed':''}">j = ${s.j}</div>` +
+    `<div class="var-chip${rC?' changed':''}">result = "${s.res.map(r=>r.ch).join('')}"</div>` +
+    `<div class="var-chip">length = ${s.res.length}</div>`;
+
+  document.getElementById('info-card').innerHTML =
+    `<span class="info-phase ${s.phase}">${s.phase==='init'?'Init':s.phase==='done'?'✅ Done':s.phase==='append'?'Tail Append':'Interleave'}</span>
+     <div class="info-title">${s.title}</div><div class="info-desc">${s.desc}</div>`;
+
+  document.getElementById('progress-dots').innerHTML =
+    STEPS.map((_,i)=>`<div class="dot${i<cur?' visited':''}${i===cur?' active':''}" onclick="go(${i})"></div>`).join('');
+
+  document.getElementById('btn-prev').disabled = cur===0;
+  document.getElementById('btn-next').disabled = cur===STEPS.length-1;
+  document.getElementById('step-counter').textContent = `Step ${cur} / ${STEPS.length-1}`;
+}
+
+function nextStep(){if(cur<STEPS.length-1){cur++;render(STEPS[cur]);}}
+function prevStep(){if(cur>0){cur--;render(STEPS[cur]);}}
+function resetViz(){cur=0;render(STEPS[0]);}
+function go(n){cur=n;render(STEPS[n]);}
+function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.section-toggle');b.classList.toggle('open');t.classList.toggle('open');}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nextStep();if(e.key==='ArrowLeft')prevStep();});
+render(STEPS[0]);
+</script>
+</body>
+</html>
