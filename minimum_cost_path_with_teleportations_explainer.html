@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#0 · Minimum Cost Path with Teleportations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── DP Grid Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-wrapper{display:flex;flex-direction:column;align-items:center;gap:6px}
+.grid-row{display:flex;gap:6px}
+.grid-cell{
+  width:52px;height:52px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;position:relative;
+}
+.grid-cell .cell-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px}
+.grid-cell .cell-val{font-size:15px;font-weight:700}
+.grid-cell.normal{background:var(--surface);border-color:var(--border2)}
+.grid-cell.start{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.grid-cell.teleport{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.grid-cell.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.grid-cell.computed{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.grid-cell.current-best{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.grid-cell.final{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--cyan-text)}
+.var-dp{color:var(--blue-mid);font-weight:600}
+.var-cost{color:var(--green-mid);font-weight:600}
+.var-tp{color:var(--purple-mid);font-weight:600}
+
+/* ── State Machine ── */
+.state-machine{display:flex;align-items:center;justify-content:center;gap:1rem;margin:1.5rem 0;flex-wrap:wrap}
+.state-node{
+  width:140px;height:100px;border-radius:16px;
+  border:3px solid var(--border2);background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;
+}
+.state-node.s-walk{border-color:var(--blue-border);background:var(--blue-bg)}
+.state-node.s-teleport{border-color:var(--purple-border);background:var(--purple-bg)}
+.state-node-icon{font-size:24px}
+.state-node-label{font-size:13px;font-weight:700;color:var(--text)}
+.state-node-cost{font-size:11px;color:var(--text2)}
+.state-arrow{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text3)}
+.arrow-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;padding:3px 8px;color:var(--text2)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-relax{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-teleport{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-start{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-computed{background:var(--green-bg);border-color:var(--green-border)}
+.sw-teleport{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-final{background:var(--red-bg);border-color:var(--red-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── DP Decision Panel ── */
+.decision-panel{background:var(--bg2);border-radius:var(--radius);padding:1rem;margin:0.75rem 0}
+.decision-header{margin-bottom:10px}
+.decision-question{font-size:13px;font-weight:600;color:var(--text2)}
+.decision-options{display:flex;gap:8px;flex-wrap:wrap}
+.decision-option{flex:1;min-width:140px;padding:10px 12px;border-radius:8px;border:2px solid var(--border2);background:var(--surface)}
+.decision-option.selected{border-color:var(--green-border);background:var(--green-bg)}
+.decision-option.rejected{border-color:var(--border);opacity:0.6}
+.option-action{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:4px}
+.option-formula{font-family:var(--mono);font-size:12px;color:var(--text2);margin-bottom:6px}
+.option-result{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text)}
+.option-check{color:var(--green-mid)}
+.option-x{color:var(--red-mid)}
+
+/* ── Segment ── */
+.segment-row{display:flex;gap:8px;align-items:center;margin:0.5rem 0;flex-wrap:wrap}
+.seg-node{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border:2px solid var(--border2);background:var(--surface);flex-shrink:0}
+.seg-node.start{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.seg-node.mid{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.seg-node.end-node{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid)}
+.seg-node.tp{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.seg-arrow{color:var(--text3);font-size:18px;font-weight:700}
+.seg-cost{font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;margin-top:2px}
+
+/* ── inline dp-table ── */
+.dp-mini-table{border-collapse:collapse;margin:0.75rem 0;font-family:var(--mono);font-size:13px}
+.dp-mini-table th,.dp-mini-table td{padding:8px 14px;border:1px solid var(--border);text-align:center}
+.dp-mini-table th{background:var(--bg2);font-weight:700}
+.dp-mini-table td.hi{background:var(--green-bg);color:var(--green-text);font-weight:700}
+.dp-mini-table td.future{color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">Custom Problem · Hard</div>
+  <h1>Minimum Cost Path with Teleportations</h1>
+  <p class="subtitle">Find the minimum cost to travel from node 0 to node n−1 in a weighted graph, where each node may offer a one-time free teleportation to a designated target node.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">DP with State</span>
+    <span class="tag tag-complexity">Time: O(n²)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have <code>n</code> nodes numbered <code>0</code> to <code>n−1</code>. You can walk from any node <code>i</code> to <code>i+1</code> paying edge weight <code>w[i]</code>. Additionally, each node <code>i</code> has a <strong>teleporter</strong>: pay cost <code>tp_cost[i]</code> and jump instantly to node <code>tp_dest[i]</code>. You start at node <code>0</code> and want to reach node <code>n−1</code> with <strong>minimum total cost</strong>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>At every node you make a <strong>binary decision</strong>: walk forward (pay the edge cost) or teleport (pay the teleport cost and jump). Optimal decisions at each node depend only on the best cost to reach that node — classic DP substructure.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Concrete small example:</strong> 5 nodes (0–4), edge costs <code>[3, 1, 2, 4]</code>, teleporters: node 2 → node 4 costs 1, node 1 → node 3 costs 2.</p>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">Walk-only path (no teleports)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          0→1: cost 3<br>
+          1→2: cost 1<br>
+          2→3: cost 2<br>
+          3→4: cost 4<br>
+          Total: <strong>10</strong>
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Optimal path (with teleport)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          0→1: cost 3<br>
+          1→2: cost 1<br>
+          TP 2→4: cost 1<br>
+          Total: <strong>5</strong> ✓
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> A teleport to a <em>lower-numbered</em> node (going backwards) is usually suboptimal but theoretically possible if costs allow. Teleport cost 0 is a free skip. The walk edges must be non-negative for this DP to be correct (otherwise Bellman-Ford or Dijkstra is needed).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 1-D State Machine DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We define a 1-D DP table <code>dp[i]</code> = minimum cost to reach node <code>i</code>. We fill it left to right. At each node <code>i</code>, we update all nodes reachable from <code>i</code> in a single step: the next node <code>i+1</code> (walk) and the teleport destination <code>tp_dest[i]</code>.</p>
+
+    <!-- State machine diagram -->
+    <div class="state-machine">
+      <div class="state-node s-walk">
+        <div class="state-node-icon">🚶</div>
+        <div class="state-node-label">Walk</div>
+        <div class="state-node-cost">dp[i] + w[i]</div>
+      </div>
+      <div class="state-arrow">
+        <span style="font-size:22px;color:var(--text3)">⇄</span>
+        <span class="arrow-label">At node i</span>
+      </div>
+      <div class="state-node s-teleport">
+        <div class="state-node-icon">⚡</div>
+        <div class="state-node-label">Teleport</div>
+        <div class="state-node-cost">dp[i] + tp_cost[i]</div>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>dp[0] = 0</code> (we're already at the start, no cost). All other <code>dp[i] = ∞</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Process node i (0 to n−2):</strong> For each node, compute two transitions: walk to <code>i+1</code> with cost <code>dp[i] + w[i]</code>; teleport to <code>tp_dest[i]</code> with cost <code>dp[i] + tp_cost[i]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Relax each destination:</strong> If the computed cost is better than the current best for that destination, update: <code>dp[dest] = min(dp[dest], new_cost)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Answer:</strong> After processing all nodes, <code>dp[n−1]</code> holds the minimum cost to reach the final node.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Process Left to Right?</div>
+      <p>If all walk-edge costs are non-negative (and teleports only go forward), node <code>i</code> is finalized before node <code>i+1</code> is ever processed. This is exactly the same ordering guarantee that Dijkstra exploits on DAGs — once we pop a node, its shortest path is settled. Here the topological order is just node index.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Optimal Substructure &amp; Overlapping Subproblems</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why Is This DP?</div>
+      <p><strong>Optimal substructure:</strong> The cheapest path to node <code>k</code> must go through some intermediate node <code>j &lt; k</code> via the cheapest path to <code>j</code>. Replacing that sub-path with a cheaper one to <code>j</code> would give a cheaper overall path — contradiction with optimality of <code>dp[j]</code>. So <code>dp[k]</code> depends optimally on <code>dp[j]</code>.</p>
+      <p style="margin-top:0.5rem"><strong>Overlapping subproblems:</strong> Multiple later nodes can be reached from the same intermediate node (via walk or teleport). Without memoizing <code>dp[i]</code>, naive recursion would recompute the cheapest path to <code>i</code> every time it's a stepping stone.</p>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relation</div>
+      <div class="recurrence-formula">
+        <span class="var-dp">dp[0]</span> = 0  <span style="color:var(--text3)">// base case</span><br><br>
+        <span class="var-dp">dp[i+1]</span> = min(<span class="var-dp">dp[i+1]</span>, <span class="var-dp">dp[i]</span> + <span class="var-cost">w[i]</span>)  <span style="color:var(--text3)">// walk forward</span><br>
+        <span class="var-dp">dp[tp_dest[i]]</span> = min(<span class="var-dp">dp[tp_dest[i]]</span>, <span class="var-dp">dp[i]</span> + <span class="var-tp">tp_cost[i]</span>)  <span style="color:var(--text3)">// teleport</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At the start of processing node <code>i</code>, <code>dp[i]</code> is the <strong>final, optimal</strong> minimum cost to reach node <code>i</code>. No future processing step can improve it (assuming forward-only teleports and non-negative walk costs). This is the key correctness guarantee that lets us process each node exactly once.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Proof sketch:</strong> By induction. Base: <code>dp[0] = 0</code> is trivially optimal. Inductive step: when we process node <code>i</code>, all nodes <code>j &lt; i</code> are already optimal (inductive hypothesis). The two transitions (walk and teleport) from <code>j</code> correctly propagate those optimal costs forward. Therefore <code>dp[i]</code>, which was relaxed by all <code>j &lt; i</code> that can reach <code>i</code>, contains the true optimum.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — DP (Bottom-Up Tabulation, Optimal)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def min_cost_teleport(n, walk_costs, tp_costs, tp_dests):</span></div>
+<div class="ann-line"><span class="acode">    INF = float('inf')                      </span><span class="aann">← sentinel: no known path yet</span></div>
+<div class="ann-line"><span class="acode">    dp = [INF] * n                          </span><span class="aann">← dp[i] = cheapest cost to reach node i</span></div>
+<div class="ann-line"><span class="acode">    dp[0] = 0                               </span><span class="aann">← base case: already at node 0</span></div>
+<div class="ann-line"><span class="acode">    for i in range(n - 1):                  </span><span class="aann">← process each node 0..n-2 in order</span></div>
+<div class="ann-line"><span class="acode">        if dp[i] == INF:                    </span><span class="aann">← skip unreachable nodes (safety)</span></div>
+<div class="ann-line"><span class="acode">            continue</span></div>
+<div class="ann-line"><span class="acode">        # Walk: move to next node           </span></div>
+<div class="ann-line"><span class="acode">        walk_cost = dp[i] + walk_costs[i]   </span><span class="aann">← cost of stepping right one node</span></div>
+<div class="ann-line"><span class="acode">        dp[i + 1] = min(dp[i + 1], walk_cost)</span><span class="aann">← relax neighbor — take it if cheaper</span></div>
+<div class="ann-line"><span class="acode">        # Teleport: jump to tp_dests[i]     </span></div>
+<div class="ann-line"><span class="acode">        dest = tp_dests[i]                  </span><span class="aann">← teleport landing node</span></div>
+<div class="ann-line"><span class="acode">        tp_total = dp[i] + tp_costs[i]      </span><span class="aann">← cost of teleporting from i</span></div>
+<div class="ann-line"><span class="acode">        dp[dest] = min(dp[dest], tp_total)  </span><span class="aann">← relax dest — update only if cheaper</span></div>
+<div class="ann-line"><span class="acode">    return dp[n - 1]                        </span><span class="aann">← answer: cheapest way to reach final node</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why is the skip-INF check needed?</div>
+      <p>If an earlier teleport jumped <em>past</em> node <code>i</code> without anyone providing a path to it, <code>dp[i]</code> stays <code>INF</code>. Adding <code>INF + walk_cost</code> could overflow integers (not in Python, but in other languages it would). The guard also prevents meaningless relaxations. Skip any node you can't yet reach.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force Recursive (Exponential)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def min_cost_brute(n, walk_costs, tp_costs, tp_dests, i=0, cost=0, best=[]):</span></div>
+<div class="ann-line"><span class="acode">    # DFS: try all walk/teleport combinations at every node</span></div>
+<div class="ann-line"><span class="acode">    if i == n - 1:</span></div>
+<div class="ann-line"><span class="acode">        best[0] = min(best[0], cost); return</span><span class="aann">← O(2^n) — try every subset of teleports</span></div>
+<div class="ann-line"><span class="acode">    if i &lt; n - 1:</span></div>
+<div class="ann-line"><span class="acode">        min_cost_brute(..., i+1, cost+walk_costs[i], best)  </span><span class="aann">← walk</span></div>
+<div class="ann-line"><span class="acode">        min_cost_brute(..., tp_dests[i], cost+tp_costs[i], best)  </span><span class="aann">← teleport</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — Top-Down Memoization</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache</span></div>
+<div class="ann-line"><span class="acode">def min_cost_memo(n, walk_costs, tp_costs, tp_dests):</span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)</span></div>
+<div class="ann-line"><span class="acode">    def dp(i):                              </span><span class="aann">← minimum cost to reach node i from 0</span></div>
+<div class="ann-line"><span class="acode">        if i == 0: return 0                 </span><span class="aann">← base case</span></div>
+<div class="ann-line"><span class="acode">        # Best cost among all nodes j that can reach i</span></div>
+<div class="ann-line"><span class="acode">        best = float('inf')</span></div>
+<div class="ann-line"><span class="acode">        if i - 1 &gt;= 0:                      </span><span class="aann">← walk: predecessor is i-1</span></div>
+<div class="ann-line"><span class="acode">            best = min(best, dp(i-1) + walk_costs[i-1])</span></div>
+<div class="ann-line"><span class="acode">        for j in range(n):                  </span><span class="aann">← any j whose teleport lands on i</span></div>
+<div class="ann-line"><span class="acode">            if tp_dests[j] == i:</span></div>
+<div class="ann-line"><span class="acode">                best = min(best, dp(j) + tp_costs[j])</span></div>
+<div class="ann-line"><span class="acode">        return best</span></div>
+<div class="ann-line"><span class="acode">    return dp(n - 1)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Bottom-Up vs Top-Down Trade-offs</div>
+      <p><strong>Bottom-up (Tabulation):</strong> O(n) space, processes each node once. Very cache-friendly. Preferred for production and interviews because it is iterative, avoids recursion stack, and makes the DP table explicit.<br>
+      <strong>Top-down (Memoization):</strong> Same O(n²) time (inner loop over teleporters), but O(n) recursion depth. Easier to derive directly from the recurrence, but the inner scan for "who teleports to me" is awkward compared to "where do I teleport from here."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the DP Signal</div>
+        <p style="font-size:14px;color:var(--text)">"We want the <em>minimum cost</em> path in a graph where decisions at each node affect future costs. These two signals — optimisation + sequential decisions — almost always mean DP."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the State</div>
+        <p style="font-size:14px;color:var(--text)">"At node <code>i</code>, all I need to know is the cheapest cost to have arrived here. Future decisions only depend on current position and current cost — no need to remember the full path."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Write the Recurrence</div>
+        <p style="font-size:14px;color:var(--text)">"<code>dp[i+1] = min(dp[i+1], dp[i] + walk[i])</code>  and  <code>dp[tp_dest[i]] = min(dp[tp_dest[i]], dp[i] + tp_cost[i])</code>. Two transitions, one min — that's the full recurrence."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Choose Tabulation (Bottom-Up)</div>
+        <p style="font-size:14px;color:var(--text)">"Because edges only go forward (or teleport to known targets), processing left to right ensures each dp[i] is finalized before it's used. No Dijkstra needed if all weights non-negative."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a shortest-path problem on a DAG, which maps directly to DP.<br>
+Let dp[i] = minimum cost to reach node i. Base: dp[0] = 0.<br>
+At each node i, I have two choices: walk to i+1 (cost dp[i] + w[i]) or teleport to tp_dest[i] (cost dp[i] + tp_cost[i]).<br>
+I process nodes left to right. Since edges go forward, dp[i] is final when I process it.<br>
+Time: O(n) for the main loop plus O(1) per node = O(n). Space: O(n) for the dp array.<br>
+Edge case: if a teleport goes to a lower index, we'd need to handle cycles — that changes it to Bellman-Ford."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if teleports can go backwards?"</strong> → Now there are cycles — use Dijkstra or Bellman-Ford</li>
+        <li><strong>"What if edge costs can be negative?"</strong> → Bellman-Ford or detect negative cycles</li>
+        <li><strong>"What if there are multiple teleports per node?"</strong> → Add one more loop inside, still O(nk)</li>
+        <li><strong>"Print the actual path, not just cost?"</strong> → Maintain a <code>parent</code> array, reconstruct from end to start</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: 5 Nodes, Mixed Walk/Teleport</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">
+      Example: <code>n=5</code>, walk costs <code>[3, 1, 2, 4]</code>, teleporters: node 1 → node 3 (cost 2), node 2 → node 4 (cost 1). Optimal path: 0→1→2→TP→4, total cost 5.
+    </p>
+
+    <div class="viz-area">
+      <!-- DP Table grid -->
+      <div style="text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px">dp table · minimum cost to reach each node</div>
+      <div class="grid-wrapper" id="dp-grid"></div>
+
+      <!-- Current transition info -->
+      <div id="transition-panel" style="margin-top:1rem"></div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">node i</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-dpi">
+          <span class="var-name">dp[i]</span>
+          <span class="var-val" id="vv-dpi">—</span>
+        </div>
+        <div class="var-box" id="vb-action">
+          <span class="var-name">action</span>
+          <span class="var-val" id="vv-action" style="font-size:13px">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">new cost</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def min_cost_teleport(n, walk_costs, tp_costs, tp_dests):</div>
+      <div class="code-line" id="cl-1">    dp = [INF] * n</div>
+      <div class="code-line" id="cl-2">    dp[0] = 0</div>
+      <div class="code-line" id="cl-3">    for i in range(n - 1):</div>
+      <div class="code-line" id="cl-4">        if dp[i] == INF: continue</div>
+      <div class="code-line" id="cl-5">        walk_cost = dp[i] + walk_costs[i]</div>
+      <div class="code-line" id="cl-6">        dp[i + 1] = min(dp[i + 1], walk_cost)</div>
+      <div class="code-line" id="cl-7">        dest = tp_dests[i]</div>
+      <div class="code-line" id="cl-8">        tp_total = dp[i] + tp_costs[i]</div>
+      <div class="code-line" id="cl-9">        dp[dest] = min(dp[dest], tp_total)</div>
+      <div class="code-line" id="cl-10">    return dp[n - 1]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-start"></div> Start / base case</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Currently processing</div>
+      <div class="legend-item"><div class="legend-swatch sw-computed"></div> Finalized / updated</div>
+      <div class="legend-item"><div class="legend-swatch sw-teleport"></div> Teleport destination</div>
+      <div class="legend-item"><div class="legend-swatch sw-final"></div> Goal node</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">State = node index; value = minimum cost to reach that node</div>
+      <div class="takeaway">Two transitions per node: walk (+edge cost) and teleport (+tp cost to dest)</div>
+      <div class="takeaway">Left-to-right order works when all transitions go forward (non-negative costs, forward teleports)</div>
+      <div class="takeaway">Relax with min() — never blindly overwrite; only update if strictly cheaper</div>
+      <div class="takeaway">Bottom-up tabulation is preferred over recursion for this problem — cleaner and avoids stack depth issues</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force DFS</td>
+          <td class="mark-bad">O(2ⁿ)</td>
+          <td>O(n)</td>
+          <td>Tries all walk/teleport combos</td>
+        </tr>
+        <tr>
+          <td>Top-Down Memo</td>
+          <td>O(n²)</td>
+          <td>O(n)</td>
+          <td>Inner scan for "who teleports to me"</td>
+        </tr>
+        <tr>
+          <td><strong>Bottom-Up DP ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Optimal; single left-to-right pass</td>
+        </tr>
+        <tr>
+          <td>Dijkstra (general)</td>
+          <td>O(n log n)</td>
+          <td>O(n)</td>
+          <td>Works for backward teleports too</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize DP with State Transitions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Minimum/maximum cost to reach a node/state" → DP</li>
+        <li>At each step you choose one of several actions, each with a cost → State Machine DP</li>
+        <li>Optimal path depends only on current state (Markov property) → DP, not greedy</li>
+        <li>If the graph has cycles or backward edges → Dijkstra or Bellman-Ford instead</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (DP with State / DP with State Machine)</div>
+      <div class="related-item"><strong>Min Cost Climbing Stairs</strong><span class="related-diff diff-easy">Easy</span> — 1-D DP; at each step choose jump-1 or jump-2 (LeetCode #746)</div>
+      <div class="related-item"><strong>Jump Game II</strong><span class="related-diff diff-med">Medium</span> — Minimum jumps to reach end; greedy / BFS but shares the "minimum cost to reach state" framing (LeetCode #45)</div>
+      <div class="related-item"><strong>Minimum Cost For Tickets</strong><span class="related-diff diff-med">Medium</span> — 1-D DP over travel days; at each day choose 1-day, 7-day, or 30-day pass (LeetCode #983)</div>
+      <div class="related-item"><strong>Best Time to Buy and Sell Stock with Cooldown</strong><span class="related-diff diff-med">Medium</span> — State machine DP: HOLD / CASH / REST states, transition costs (LeetCode #309)</div>
+      <div class="related-item"><strong>Frog Jump</strong><span class="related-diff diff-hard">Hard</span> — At each stone, can jump k−1, k, or k+1 units; DP over (stone, last_k) state (LeetCode #403)</div>
+      <div class="related-item"><strong>Minimum Falling Path Sum</strong><span class="related-diff diff-med">Medium</span> — 2-D DP grid; at each row pick min of 3 paths from above (LeetCode #931)</div>
+      <div class="related-item"><strong>Cheapest Flights Within K Stops</strong><span class="related-diff diff-med">Medium</span> — DP/Bellman-Ford with state (node, stops_remaining); each edge is a transition (LeetCode #787)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>Main Pattern: <strong>Dynamic Programming</strong><br>
+      Sub-Pattern: <strong>DP with State</strong> — 1-D state (node index), two transition actions (walk / teleport), bottom-up tabulation<br>
+      Classification source: Analysis (custom problem; DP with State is a standard sub-pattern in the DSA Patterns Guide Section 18)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Problem parameters ──
+const N = 5;
+const WALK = [3, 1, 2, 4];        // walk cost from node i to i+1
+const TP_COST = [99, 2, 1, 99];   // teleport cost from node i (99 = not useful)
+const TP_DEST = [0, 3, 4, 4];     // teleport destination from node i
+const INF = Infinity;
+
+// Hand-authored steps: each step shows dp state, active node, action
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    dp:[0, INF, INF, INF, INF],
+    activeNode:-1, action:'—', result:'—', changed:[], activeLine:2,
+    title:'Initialize DP Table',
+    text:'Set dp[0] = 0 (already at node 0, no cost). All other dp[i] = ∞ (not yet reached). We will fill left to right, updating the cheapest known cost to each node.',
+    decisionInfo:null
+  },
+  {
+    id:1, phase:'relax', phaseLabel:'WALK', phaseClass:'phase-relax',
+    dp:[0, 3, INF, INF, INF],
+    activeNode:0, action:'Walk 0→1', result:'3', changed:[1], activeLine:5,
+    title:'Node 0 → Walk to Node 1',
+    text:'Process node 0: dp[0]=0. Walk cost = dp[0] + walk[0] = 0 + 3 = 3. dp[1] = min(∞, 3) = 3. Updated!',
+    decisionInfo:{question:'Can we walk from node 0 to node 1?', from:0, to:1, cost:'0 + 3 = 3', accepted:true}
+  },
+  {
+    id:2, phase:'teleport', phaseLabel:'TELEPORT', phaseClass:'phase-teleport',
+    dp:[0, 3, INF, INF, INF],
+    activeNode:0, action:'TP 0→0 (skip)', result:'skip', changed:[], activeLine:9,
+    title:'Node 0 → Teleport (useless here)',
+    text:'Teleport from node 0 goes back to node 0 (tp_dest[0]=0) at high cost 99. dp[0] = min(0, 0+99) = 0. No improvement — teleport from node 0 is useless.',
+    decisionInfo:{question:'Teleport from node 0 to node 0: worth it?', from:0, to:0, cost:'0 + 99 = 99 > 0', accepted:false}
+  },
+  {
+    id:3, phase:'relax', phaseLabel:'WALK', phaseClass:'phase-relax',
+    dp:[0, 3, 4, INF, INF],
+    activeNode:1, action:'Walk 1→2', result:'4', changed:[2], activeLine:5,
+    title:'Node 1 → Walk to Node 2',
+    text:'Process node 1: dp[1]=3. Walk cost = 3 + walk[1] = 3 + 1 = 4. dp[2] = min(∞, 4) = 4. Updated!',
+    decisionInfo:{question:'Walk from node 1 to node 2?', from:1, to:2, cost:'3 + 1 = 4', accepted:true}
+  },
+  {
+    id:4, phase:'teleport', phaseLabel:'TELEPORT', phaseClass:'phase-teleport',
+    dp:[0, 3, 4, 5, INF],
+    activeNode:1, action:'TP 1→3', result:'5', changed:[3], activeLine:9,
+    title:'Node 1 → Teleport to Node 3!',
+    text:'Teleport from node 1: tp_dest[1]=3, cost = dp[1] + tp_cost[1] = 3 + 2 = 5. dp[3] = min(∞, 5) = 5. Teleport gives us a shortcut to node 3!',
+    decisionInfo:{question:'Teleport from node 1 to node 3 (cost 2)?', from:1, to:3, cost:'3 + 2 = 5', accepted:true}
+  },
+  {
+    id:5, phase:'relax', phaseLabel:'WALK', phaseClass:'phase-relax',
+    dp:[0, 3, 4, 5, 6],
+    activeNode:2, action:'Walk 2→3', result:'6→skip', changed:[], activeLine:6,
+    title:'Node 2 → Walk to Node 3 (Not Better)',
+    text:'Process node 2: dp[2]=4. Walk = 4 + walk[2] = 4 + 2 = 6. dp[3] = min(5, 6) = 5. Already 5 via teleport — walking does NOT improve node 3!',
+    decisionInfo:{question:'Walk from node 2 to node 3?', from:2, to:3, cost:'4 + 2 = 6 vs current 5', accepted:false}
+  },
+  {
+    id:6, phase:'teleport', phaseLabel:'TELEPORT', phaseClass:'phase-teleport',
+    dp:[0, 3, 4, 5, 5],
+    activeNode:2, action:'TP 2→4', result:'5', changed:[4], activeLine:9,
+    title:'Node 2 → Teleport to Node 4! (Key move)',
+    text:'Teleport from node 2: tp_dest[2]=4, cost = dp[2] + tp_cost[2] = 4 + 1 = 5. dp[4] = min(∞, 5) = 5. This is the key teleport — jumping straight to the goal at cost 5!',
+    decisionInfo:{question:'Teleport from node 2 to node 4 (cost 1)?', from:2, to:4, cost:'4 + 1 = 5', accepted:true}
+  },
+  {
+    id:7, phase:'relax', phaseLabel:'WALK', phaseClass:'phase-relax',
+    dp:[0, 3, 4, 5, 5],
+    activeNode:3, action:'Walk 3→4', result:'9→skip', changed:[], activeLine:6,
+    title:'Node 3 → Walk to Node 4 (Not Better)',
+    text:'Process node 3: dp[3]=5. Walk = 5 + walk[3] = 5 + 4 = 9. dp[4] = min(5, 9) = 5. Already 5 — walking from node 3 is far worse than the teleport we found.',
+    decisionInfo:{question:'Walk from node 3 to node 4?', from:3, to:4, cost:'5 + 4 = 9 vs current 5', accepted:false}
+  },
+  {
+    id:8, phase:'teleport', phaseLabel:'TELEPORT', phaseClass:'phase-teleport',
+    dp:[0, 3, 4, 5, 5],
+    activeNode:3, action:'TP 3→4 (high cost)', result:'skip', changed:[], activeLine:9,
+    title:'Node 3 → Teleport to Node 4 (Not Better)',
+    text:'Teleport from node 3: tp_dest[3]=4, cost = dp[3] + tp_cost[3] = 5 + 99 = 104. dp[4] = min(5, 104) = 5. Way worse — tp_cost[3] is effectively disabled.',
+    decisionInfo:{question:'Teleport from node 3 to node 4 (cost 99)?', from:3, to:4, cost:'5 + 99 = 104 vs 5', accepted:false}
+  },
+  {
+    id:9, phase:'result', phaseLabel:'ANSWER', phaseClass:'phase-result',
+    dp:[0, 3, 4, 5, 5],
+    activeNode:4, action:'dp[4]', result:'5', changed:[], activeLine:10,
+    title:'Answer: dp[4] = 5',
+    text:'All nodes processed. dp[4] = 5 is the minimum cost to reach node 4. The optimal path was: 0→1 (cost 3) → 2 (cost +1=4) → TELEPORT to 4 (cost +1=5). Total: 5.',
+    decisionInfo:null
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build DP grid cells (single row of n nodes)
+  const grid = document.getElementById('dp-grid');
+  const row = document.createElement('div');
+  row.className = 'grid-row';
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell normal';
+    cell.id = 'dc-' + i;
+    cell.innerHTML = '<div class="cell-label">node ' + i + '</div><div class="cell-val" id="dv-' + i + '">∞</div>';
+    row.appendChild(cell);
+  }
+  grid.appendChild(row);
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function dpValStr(v) {
+  return v === INF ? '∞' : String(v);
+}
+
+function render() {
+  const step = steps[current];
+
+  // ── DP Grid cells ──
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('dc-' + i);
+    const val  = document.getElementById('dv-' + i);
+    val.textContent = dpValStr(step.dp[i]);
+    cell.className = 'grid-cell';
+    if (step.phase === 'result' && i === N - 1) {
+      cell.classList.add('final');
+    } else if (i === step.activeNode) {
+      cell.classList.add('active');
+    } else if (step.changed.includes(i)) {
+      cell.classList.add('computed');
+    } else if (i === 0 && step.id === 0) {
+      cell.classList.add('start');
+    } else if (step.dp[i] < INF) {
+      cell.classList.add('computed');
+    } else {
+      cell.classList.add('normal');
+    }
+  }
+
+  // ── Transition panel ──
+  const panel = document.getElementById('transition-panel');
+  if (step.decisionInfo) {
+    const d = step.decisionInfo;
+    const acceptedClass = d.accepted ? 'selected' : 'rejected';
+    panel.innerHTML = `<div class="decision-panel">
+      <div class="decision-header"><div class="decision-question">${d.question}</div></div>
+      <div class="decision-options">
+        <div class="decision-option ${acceptedClass}">
+          <div class="option-action">${d.accepted ? '✓ Applied' : '✗ Skipped'}</div>
+          <div class="option-formula">${d.cost}</div>
+          <div class="option-result">${d.accepted ? '<span class="option-check">dp[' + d.to + '] improved</span>' : '<span class="option-x">no improvement</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  } else {
+    panel.innerHTML = '';
+  }
+
+  // ── Variable tracker ──
+  const nodeStr = step.activeNode >= 0 ? String(step.activeNode) : '—';
+  const dpiStr  = step.activeNode >= 0 && step.activeNode < N ? dpValStr(step.dp[step.activeNode]) : '—';
+  document.getElementById('vv-i').textContent = nodeStr;
+  document.getElementById('vv-dpi').textContent = dpiStr;
+  document.getElementById('vv-action').textContent = step.action;
+  document.getElementById('vv-result').textContent = step.result;
+
+  const changedVars = step.changed.length > 0;
+  document.getElementById('vb-result').classList.toggle('changed', changedVars);
+  document.getElementById('vb-action').classList.toggle('changed', changedVars);
+
+  // ── Code panel ──
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

@@ -1,206 +1,255 @@
 """
-gen_coin_change_ii.py — Rebuild Notion page for Coin Change II (LeetCode #518)
-notion_page_id: 39193418-809c-81d8-8d3b-fca7af8a7f06
+gen_coin_change_ii.py — Regenerate Notion page for Coin Change II (LeetCode #518)
+Unbounded Knapsack / Count Combinations DP problem.
 """
-import sys
-import os
-
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import notion_lib as N
 
 PAGE_ID = "39193418-809c-81d8-8d3b-fca7af8a7f06"
 
-print("Step 1: Setting page properties...")
+# ─── 1. Properties ───────────────────────────────────────────────────────────
+print("Setting properties...")
 N.set_properties(
     PAGE_ID,
     difficulty="Medium",
     number=518,
     pattern="Dynamic Programming",
-    subpatterns=["Unbounded Knapsack"],
+    subpatterns=["Unbounded Knapsack", "Count combinations"],
     tc="O(n x amount)",
     sc="O(amount)",
-    key_insight="Outer loop coins, inner loop amounts: ensures combinations (not permutations) are counted.",
+    key_insight="Outer loop over coins, inner over amounts: ensures combinations (not permutations) are counted exactly once.",
     icon="\U0001f7e1"
 )
-print("  Properties set.")
+print("Properties set.")
 
-print("Step 2: Wiping existing page body...")
-wiped = N.wipe_page(PAGE_ID)
-print(f"  Wiped {wiped} blocks.")
+# ─── 2. Wipe old body ────────────────────────────────────────────────────────
+print("Wiping existing body...")
+deleted = N.wipe_page(PAGE_ID)
+print(f"Wiped {deleted} blocks.")
 
-print("Step 3: Building new page body...")
+# ─── 3. Build new body ───────────────────────────────────────────────────────
+print("Building new body...")
 blocks = []
 
-# Problem
+# ── Problem statement ────────────────────────────────────────────────────────
 blocks += [
     N.h2("Problem"),
     N.para(N.rich([
-        ("You are given an integer "), ("amount", {"code": True}),
-        (" and an array "), ("coins", {"code": True}),
-        (" of distinct denominations. You have an unlimited supply of each coin. "
-         "Return the number of distinct "),
+        ("You are given an integer ", {}),
+        ("amount", {"code": True}),
+        (" and an array ", {}),
+        ("coins", {"code": True}),
+        (" of distinct denominations. Return the number of ", {}),
         ("combinations", {"bold": True}),
-        (" (order doesn't matter) that sum exactly to "), ("amount", {"code": True}), ("."),
+        (" (not permutations) that make up that amount. You may use each coin an unlimited number of times. "
+         "If no combination exists, return ", {}),
+        ("0", {"code": True}),
+        (".", {}),
     ])),
     N.para(N.rich([
-        ("Example: "), ("amount = 5", {"code": True}), (", "),
+        ("Example: ", {"bold": True}),
+        ("amount = 5", {"code": True}),
+        (", ", {}),
         ("coins = [1, 2, 5]", {"code": True}),
-        (" => return 4. Combinations: [5], [2,2,1], [2,1,1,1], [1,1,1,1,1]."),
+        (" => 4. Combinations: [5], [2,2,1], [2,1,1,1], [1,1,1,1,1].", {}),
     ])),
     N.callout(
         N.rich([
-            ("Key distinction: ", {"bold": True}),
-            ("[1,2] and [2,1] count as ONE combination. Only distinct unordered groupings are counted. "
-             "This shapes the entire loop structure.")
+            ("Key constraint: ", {"bold": True}),
+            ("Order does NOT matter. [1,2] and [2,1] are the same combination. "
+             "This is the critical difference from Combination Sum IV (which counts permutations).", {}),
         ]),
-        "\U0001f4a1", "green_background"
+        "\U0001f3af", "blue_background"
     ),
     N.divider(),
 ]
 
-# Solution 1 - Tabulation
+# ── Solution 1 — Tabulation (Interview Pick) ─────────────────────────────────
 sol1_code = (
     "def change(amount: int, coins: list[int]) -> int:\n"
-    "    dp = [0] * (amount + 1)      # dp[i] = ways to make amount i\n"
-    "    dp[0] = 1                    # base: empty combination\n"
+    "    dp = [0] * (amount + 1)   # dp[a] = ways to make amount a\n"
+    "    dp[0] = 1                  # base case: empty combination\n"
     "\n"
-    "    for coin in coins:           # OUTER: process each denomination fully\n"
-    "        for a in range(coin, amount + 1):  # INNER: amounts this coin reaches\n"
-    "            dp[a] += dp[a - coin]           # accumulate new combinations\n"
+    "    for c in coins:            # outer: process each coin denomination\n"
+    "        for a in range(c, amount + 1):  # inner: amounts this coin reaches\n"
+    "            dp[a] += dp[a - c]  # extend combinations that reach (a - c)\n"
     "\n"
-    "    return dp[amount]            # total distinct combinations\n"
+    "    return dp[amount]\n"
     "\n"
     "# Time:  O(n * amount)  n = len(coins)\n"
-    "# Space: O(amount)\n"
+    "# Space: O(amount)"
 )
 
 blocks += [
     N.h2("Solution 1 - Tabulation / Bottom-Up (Interview Pick)"),
     N.toggle_h3("\U0001f4a1 Intuition: How to Arrive at This", [
         N.h4("Reframe the Problem"),
-        N.para("Count unordered selections (baskets of coins) from unlimited supply that sum to target. "
-               "Every combination for amount A that includes coin c comes from a combination for A-c."),
+        N.para(
+            "We are filling a knapsack of capacity amount. Each coin is an item with weight = its value. "
+            "Items can be reused (unbounded). Instead of maximizing value, we count distinct ways to "
+            "exactly fill the knapsack. The combinations (not permutations) constraint is the key twist."
+        ),
         N.h4("What Doesn't Work"),
-        N.para("Brute-force recursion is exponential. Greedy only finds one combination. "
-               "We need DP to count all valid groupings systematically."),
+        N.para(
+            "Naive recursion without memoization is exponential. Even with memoization, iterating over "
+            "coin order permutation-style would count [1,2] and [2,1] as separate paths — giving the "
+            "wrong answer. Greedy fails: for amount=4, coins=[1,3], greedy picks 3, then is stuck."
+        ),
         N.h4("The Key Observation"),
-        N.para("dp[a] += dp[a - coin]: every combination reaching a-coin can be extended by one coin to reach a. "
-               "Accumulate this across all coin denominations."),
+        N.para(
+            "To count combinations (not permutations), process coins in a fixed outer order. "
+            "For each coin c, ask: how many ways can I make each sub-amount a if I only use coin c "
+            "and coins processed before c? This prevents re-ordering because once we are done with "
+            "coin c, it can never appear after c in any combination."
+        ),
         N.h4("Building the Solution"),
-        N.para("1. dp[0..amount] = 0, dp[0] = 1.\n"
-               "2. For each coin (outer), for each amount a >= coin (inner): dp[a] += dp[a-coin].\n"
-               "3. Coins outer = combinations (not permutations). Return dp[amount]."),
+        N.para(
+            "Initialize dp[0] = 1 (one way to make amount 0: the empty set). "
+            "For each coin c, iterate a from c to amount: dp[a] += dp[a - c]. "
+            "This adds one more coin c to every combination that already reaches a-c. "
+            "The dp array at the end gives dp[amount] = total combinations."
+        ),
         N.callout(
-            "Analogy: Stamp Book. Complete all arrangements using only 1-cent stamps, then add 2-cent, etc. "
-            "Each denomination adds on top of existing counts without reordering.",
+            N.rich([
+                ("Analogy: ", {"bold": True}),
+                ("Imagine filling a jar with marbles, processing one size at a time. "
+                 "For each marble size, extend all partial fillings. By fixing the processing order, "
+                 "you never double-count 'large then small' vs 'small then large'.", {}),
+            ]),
             "\U0001f9e0", "blue_background"
         ),
     ]),
+
     N.h3("Why Is This Dynamic Programming?"),
-    N.para(N.rich([("Optimal Substructure: ", {"bold": True}),
-                   ("Count for amount A is directly built from counts for smaller amounts (A-coin). "
-                    "No need to recompute from scratch.")])),
-    N.para(N.rich([("Overlapping Subproblems: ", {"bold": True}),
-                   ("Without caching, the count for 'amount 3' is recomputed many times across different "
-                    "recursive paths. DP computes each sub-amount once.")])),
+    N.para(N.rich([
+        ("Optimal Substructure: ", {"bold": True}),
+        ("The number of combinations for amount a using coins up to index i equals (combinations "
+         "using coins 0..i-1 only) + (combinations using coins 0..i for amount a - coins[i]).", {}),
+    ])),
+    N.para(N.rich([
+        ("Overlapping Subproblems: ", {"bold": True}),
+        ("Without memoization, dp(amount=5) recomputes dp(3) via path 5->2->3 and separately "
+         "via 5->1->4->3. Memoization or tabulation ensures each sub-amount is computed once.", {}),
+    ])),
+
     N.h3("Recurrence Relation"),
     N.code(
-        "dp[0] = 1                    # base: one empty combination reaches 0\n"
-        "dp[a] += dp[a - coin]        # for each coin <= a\n\n"
-        "# Left-to-right inner loop enables unlimited coin reuse (Unbounded Knapsack).\n"
-        "# When dp[a] reads dp[a-coin], that entry may already include this same coin.\n"
-        "# This is intentional and correct.\n"
+        "# dp[a] = number of combinations that make amount a\n"
+        "# Base case:\n"
+        "dp[0] = 1     # one way to make 0: the empty set\n\n"
+        "# Transition (for each coin c, each sub-amount a >= c):\n"
+        "dp[a] += dp[a - c]\n\n"
+        "# The outer coin loop is what ensures combinations (not permutations):\n"
+        "# coin c is only ever appended to combinations of a-c, never placed 'before'\n"
+        "# a denomination that was processed in a previous outer iteration.",
+        "python"
     ),
+
     N.h3("Code"),
-    N.code(sol1_code),
+    N.code(sol1_code, "python"),
+
     N.h3("Line by Line"),
-    N.para(N.rich([("dp = [0] * (amount + 1)", {"code": True}),
-                   (" - 1D array size amount+1. Index i = target amount i.")])),
-    N.para(N.rich([("dp[0] = 1", {"code": True}),
-                   (" - Base: exactly one combination sums to 0 (empty selection). Seeds all future accumulation.")])),
-    N.para(N.rich([("for coin in coins:", {"code": True}),
-                   (" - Outer loop over denominations. Processing each coin completely first gives combinations.")])),
-    N.para(N.rich([("for a in range(coin, amount + 1):", {"code": True}),
-                   (" - Start at 'coin': amounts below coin cannot include it. Left-to-right enables reuse.")])),
-    N.para(N.rich([("dp[a] += dp[a - coin]", {"code": True}),
-                   (" - The recurrence: extend combinations reaching a-coin by appending this coin.")])),
-    N.para(N.rich([("return dp[amount]", {"code": True}),
-                   (" - Final answer: total distinct combinations for the full target.")])),
+    N.para(N.rich([
+        ("dp = [0] * (amount + 1)", {"code": True}),
+        (" - Create DP table of size amount+1, all zeros. dp[a] = ways to make exactly amount a.", {}),
+    ])),
+    N.para(N.rich([
+        ("dp[0] = 1", {"code": True}),
+        (" - Base case: exactly 1 way to make amount 0 (use no coins). Seeds the entire table.", {}),
+    ])),
+    N.para(N.rich([
+        ("for c in coins:", {"code": True}),
+        (" - Outer loop: commit to each coin denomination before moving on. This is the combinations key.", {}),
+    ])),
+    N.para(N.rich([
+        ("for a in range(c, amount + 1):", {"code": True}),
+        (" - Inner loop left-to-right from c. Smaller amounts cannot use this coin. Left-to-right allows reuse.", {}),
+    ])),
+    N.para(N.rich([
+        ("dp[a] += dp[a - c]", {"code": True}),
+        (" - Core transition: every combination previously summing to (a-c) can become one summing to a by appending c.", {}),
+    ])),
+    N.para(N.rich([
+        ("return dp[amount]", {"code": True}),
+        (" - Final answer: total combinations that exactly make up the target amount.", {}),
+    ])),
     N.callout(
         N.rich([
-            ("Critical warning: ", {"bold": True}),
-            ("Swapping loops (amounts outer, coins inner) counts permutations instead! "
-             "[1,2] and [2,1] become separate — inflating the answer. "
-             "Always: coins outer, amounts inner for combinations.")
+            ("Critical warning - loop order matters: ", {"bold": True}),
+            ("If you swap the loops (outer=amounts, inner=coins), you count permutations instead! "
+             "[1,2] and [2,1] become distinct paths — inflating the answer. "
+             "Coins outer + amounts inner = combinations always.", {}),
         ]),
         "⚠️", "yellow_background"
     ),
     N.divider(),
 ]
 
-# Solution 2 - Memoization
+# ── Solution 2 — Memoization (Top-Down) ──────────────────────────────────────
 sol2_code = (
     "from functools import cache\n\n"
     "def change(amount: int, coins: list[int]) -> int:\n"
     "    @cache\n"
     "    def dp(i: int, rem: int) -> int:\n"
-    "        if rem == 0:\n"
-    "            return 1              # valid combination found\n"
-    "        if i == len(coins) or rem < 0:\n"
-    "            return 0              # no coins left or overshot\n"
+    "        if rem == 0: return 1       # valid combination found\n"
+    "        if i == len(coins) or rem < 0: return 0  # dead end\n"
     "\n"
-    "        skip = dp(i + 1, rem)          # skip coin[i] entirely\n"
-    "        take = dp(i, rem - coins[i])   # use coin[i] (same i = unlimited)\n"
+    "        skip = dp(i + 1, rem)           # skip coin i\n"
+    "        take = dp(i, rem - coins[i])    # use coin i (same i = unlimited reuse)\n"
     "        return skip + take\n\n"
     "    return dp(0, amount)\n\n"
-    "# Time:  O(n * amount)  unique (i, rem) states\n"
-    "# Space: O(n * amount)  memo table + recursion stack\n"
+    "# Time:  O(n * amount)  n * (amount+1) unique (i, rem) states\n"
+    "# Space: O(n * amount)  memo table + O(n+amount) recursion stack"
 )
 
 blocks += [
     N.h2("Solution 2 - Memoization / Top-Down"),
     N.toggle_h3("\U0001f4a1 Intuition: How to Arrive at This", [
         N.h4("Reframe the Problem"),
-        N.para("Define recursive function dp(i, rem) = ways to form rem using coins[i:]. "
-               "At each state: skip this denomination or take this coin (unlimited reuse)."),
+        N.para(
+            "Define dp(i, rem) = ways to form rem using coins[i:]. "
+            "At each state: skip coin i (move to i+1) or take coin i once (stay at i for unlimited reuse). "
+            "Fixing the coin index i as a parameter prevents permutation counting."
+        ),
         N.h4("What Doesn't Work"),
-        N.para("Pure recursion recomputes (i, remaining) pairs exponentially. "
-               "Memoization caches each unique state exactly once."),
+        N.para(
+            "Pure recursion without memoization: state (i, rem) can be reached via multiple different "
+            "prefixes of coin choices, causing exponential recomputation."
+        ),
         N.h4("The Key Observation"),
-        N.para("dp(i, rem) = dp(i+1, rem) [skip] + dp(i, rem-coins[i]) [take]. "
-               "Passing same i for 'take' enables unlimited use of this coin."),
+        N.para(
+            "There are only n * (amount+1) unique states. Cache results: once we know how many ways "
+            "to fill rem starting from coin index i, never recompute it."
+        ),
         N.h4("Building the Solution"),
-        N.para("Base: rem==0 -> 1, i>=len or rem<0 -> 0.\n"
-               "Cache on (i, rem). Call dp(0, amount). "
-               "O(n*amount) unique states, each O(1) work."),
+        N.para(
+            "Base cases: rem==0 returns 1 (found combination), i>=len or rem<0 returns 0 (dead end). "
+            "Memoize on (i, rem). Call dp(0, amount)."
+        ),
+        N.callout(
+            N.rich([
+                ("Why dp(i, rem - coins[i]) not dp(i+1, ...)?", {"bold": True}),
+                (" Passing i+1 for 'take' means each coin used at most once (0/1 Knapsack). "
+                 "Staying at i allows this coin to appear again in the next recursive call, "
+                 "implementing unlimited reuse correctly.", {}),
+            ]),
+            "\U0001f4a1", "green_background"
+        ),
     ]),
     N.h3("Code"),
-    N.code(sol2_code),
+    N.code(sol2_code, "python"),
     N.h3("Line by Line"),
-    N.para(N.rich([("@cache", {"code": True}),
-                   (" - Python memoization decorator: auto-caches by (i, rem) arguments.")])),
-    N.para(N.rich([("if rem == 0: return 1", {"code": True}),
-                   (" - Reached target exactly: one valid combination found.")])),
-    N.para(N.rich([("if i == len(coins) or rem < 0: return 0", {"code": True}),
-                   (" - Out of coin types or overshot: invalid path.")])),
-    N.para(N.rich([("skip = dp(i + 1, rem)", {"code": True}),
-                   (" - Skip this denomination entirely, try next.")])),
-    N.para(N.rich([("take = dp(i, rem - coins[i])", {"code": True}),
-                   (" - Use this coin. Same i = can pick this denomination again (unbounded).")])),
-    N.para(N.rich([("return skip + take", {"code": True}),
-                   (" - Total = ways skipping this denomination + ways including it.")])),
-    N.callout(
-        N.rich([
-            ("Why dp(i, ...) not dp(i+1, ...) for take? ", {"bold": True}),
-            ("Passing i+1 would mean use each coin at most once (0/1 Knapsack). "
-             "Staying at i allows this denomination again on the next call.")
-        ]),
-        "\U0001f4a1", "green_background"
-    ),
+    N.para(N.rich([("@cache", {"code": True}), (" - Memoization decorator. Caches by (i, rem) tuple.", {})])),
+    N.para(N.rich([("if rem == 0: return 1", {"code": True}), (" - Reached target exactly: one valid combination.", {})])),
+    N.para(N.rich([("if i == len(coins) or rem < 0: return 0", {"code": True}), (" - Dead-end: out of coins or overshot.", {})])),
+    N.para(N.rich([("skip = dp(i + 1, rem)", {"code": True}), (" - Skip coin i: move to next denomination.", {})])),
+    N.para(N.rich([("take = dp(i, rem - coins[i])", {"code": True}), (" - Use coin i once more, staying at i (unbounded).", {})])),
+    N.para(N.rich([("return skip + take", {"code": True}), (" - Total combinations = ways skipping + ways taking coin i.", {})])),
     N.divider(),
 ]
 
-# Complexity table
+# ── Complexity ────────────────────────────────────────────────────────────────
 blocks += [
     N.h2("Complexity"),
     N.table([
@@ -209,71 +258,95 @@ blocks += [
         ["Tabulation (bottom-up)", "O(n x A)", "O(A)", "Best pick"],
         ["Memoization (top-down)", "O(n x A)", "O(n x A) + stack", "Good alternative"],
     ]),
-    N.para("n = coin count, A = amount, c = smallest coin value"),
+    N.para("n = coin count, A = amount, c = smallest coin value."),
+    N.para(N.rich([
+        ("Interview Pick: Tabulation. ", {"bold": True}),
+        ("Uses O(amount) space vs O(n x amount) for memoization, no call overhead, "
+         "and is simpler to explain and trace on a whiteboard.", {}),
+    ])),
     N.divider(),
 ]
 
-# Pattern Classification
+# ── Pattern Classification ────────────────────────────────────────────────────
 blocks += [
     N.h2("\U0001f3f7️ Pattern Classification"),
-    N.para(N.rich([("Main Pattern: ", {"bold": True}), ("Dynamic Programming")])),
-    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), ("Unbounded Knapsack (Count Combinations)")])),
+    N.para(N.rich([("Main Pattern: ", {"bold": True}), ("Dynamic Programming", {})])),
+    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), ("Unbounded Knapsack, Count Combinations", {})])),
     N.callout(
         N.rich([
-            ("When to recognize: ", {"bold": True}),
-            ("'Count the number of ways to reach target X' + unlimited items + combinations (not permutations). "
-             "Signals: 'infinite supply', 'number of combinations', 'distinct ways'. "
-             "Constraints: amount <= 5000, len(coins) <= 300.")
+            ("When to recognize this pattern: ", {"bold": True}),
+            ("(1) Counting ways to reach a target sum from a set of elements. "
+             "(2) Elements can be reused unlimited times. "
+             "(3) Order does not matter (combinations). "
+             "Signal words: 'number of ways', 'how many combinations', 'unlimited', 'distinct'. "
+             "Contrast: if order matters (permutations) -> swap loops (see Combination Sum IV).", {}),
         ]),
         "\U0001f50e", "green_background"
     ),
     N.para(N.rich([
-        ("Loop order rule: ", {"bold": True}),
-        ("Coins outer + Amounts inner = Combinations. "
-         "Amounts outer + Coins inner = Permutations. "
-         "This separates Coin Change II (this problem) from Combination Sum IV.")
+        ("The Definitive Loop Order Rule: ", {"bold": True}),
+        ("Coins outer + amounts inner = combinations (this problem). "
+         "Amounts outer + coins inner = permutations (Combination Sum IV). "
+         "Memorize this distinction — it is asked in nearly every unbounded knapsack interview.", {}),
     ])),
     N.divider(),
 ]
 
-# Related Problems
+# ── Related Problems ──────────────────────────────────────────────────────────
 blocks += [
     N.h2("\U0001f517 Related Problems"),
     N.para("Problems using Unbounded Knapsack or the same counting DP structure:"),
-    N.bullet(N.rich([("Coin Change", {"bold": True}),
-                     (" (Medium) - Minimum coins to reach target; same dp array with min() instead of sum")])),
-    N.bullet(N.rich([("Combination Sum IV", {"bold": True}),
-                     (" (Medium) - Same setup but counts permutations; swap loop order")])),
-    N.bullet(N.rich([("Partition Equal Subset Sum", {"bold": True}),
-                     (" (Medium) - 0/1 Knapsack; each element used at most once; reverse inner loop")])),
-    N.bullet(N.rich([("Perfect Squares", {"bold": True}),
-                     (" (Medium) - Unbounded Knapsack with squares as denominations; minimum count")])),
-    N.bullet(N.rich([("Climbing Stairs", {"bold": True}),
-                     (" (Easy) - Simplest unbounded DP; excellent entry point for this pattern")])),
-    N.bullet(N.rich([("Target Sum", {"bold": True}),
-                     (" (Medium) - Counting DP; assign +/- to elements to reach target")])),
-    N.bullet(N.rich([("Integer Break", {"bold": True}),
-                     (" (Medium) - Unbounded factoring; same recurrence structure")])),
-    N.para("These problems share the core technique: accumulate sub-solution counts across a 1D dp array."),
+    N.bullet(N.rich([
+        ("Coin Change (LC 322)", {"bold": True}),
+        (" (Medium) - Same coins, but minimize number of coins to reach amount. dp[a] = min(dp[a-c]+1).", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Combination Sum IV (LC 377)", {"bold": True}),
+        (" (Medium) - Same setup but counts permutations: amounts outer, coins inner.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Partition Equal Subset Sum (LC 416)", {"bold": True}),
+        (" (Medium) - 0/1 Knapsack (each element once). Can you reach exactly sum/2?", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Perfect Squares (LC 279)", {"bold": True}),
+        (" (Medium) - Unbounded knapsack with squares as denominations; minimum count.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Climbing Stairs (LC 70)", {"bold": True}),
+        (" (Easy) - Simplest unbounded DP: ways to reach n steps with 1 or 2 step jumps.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Target Sum (LC 494)", {"bold": True}),
+        (" (Medium) - Counting DP: assign +/- signs to elements to reach target.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Integer Break (LC 343)", {"bold": True}),
+        (" (Medium) - Unbounded factoring: each number 2..n is a 'coin'.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Word Break (LC 139)", {"bold": True}),
+        (" (Medium) - Unbounded knapsack on strings: can dictionary words tile the string?", {}),
+    ])),
+    N.para("These problems share the core technique: dp[a] += dp[a - item] with careful loop ordering."),
     N.callout(
-        "Reference: DSA_Patterns_and_SubPatterns_Guide.md - Section 18: Dynamic Programming -> Unbounded Knapsack",
+        "Reference: DSA_Patterns_and_SubPatterns_Guide.md Section 18: Dynamic Programming -> Unbounded Knapsack",
         "\U0001f4da", "gray_background"
     ),
+    N.divider(),
 ]
 
-# Embed
+# ── Interactive Visual Explainer ──────────────────────────────────────────────
 blocks += [
-    N.divider(),
     N.h2("\U0001f3af Interactive Visual Explainer"),
     N.embed(N.embed_url_for("coin_change_ii")),
     N.para(N.rich([
-        ("Step through the algorithm visually - use Next/Prev or arrow keys.",
-         {"italic": True, "color": "gray"})
+        ("Step through the algorithm visually - use Next/Prev or arrow keys to watch the DP table fill row by row.",
+         {"italic": True, "color": "gray"}),
     ])),
 ]
 
-print(f"  Total blocks to append: {len(blocks)}")
+# ─── 4. Append blocks ────────────────────────────────────────────────────────
+print(f"Appending {len(blocks)} blocks...")
 N.append_blocks(PAGE_ID, blocks)
-print("  Blocks appended successfully.")
-
-print("\nNOTION OK", PAGE_ID)
+print(f"NOTION OK {PAGE_ID}")

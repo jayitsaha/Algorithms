@@ -5,7 +5,6 @@ Run from: /Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms/
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Override token in notion_lib since it was redacted
 import notion_lib as N
 N.TOKEN = "NOTION_TOKEN_REDACTED"
 N._HEADERS["Authorization"] = f"Bearer {N.TOKEN}"
@@ -25,12 +24,12 @@ N.set_properties(
     key_insight="Build heights[] as DP (consecutive 1s per column); solve Largest Rectangle in Histogram on each row via monotonic stack.",
     icon="🔴"
 )
-print("  → properties OK")
+print("  -> properties OK")
 
 # ── 2) Wipe old body ───────────────────────────────────────────────────
 print("Wiping old blocks...")
 wiped = N.wipe_page(PAGE_ID)
-print(f"  → wiped {wiped} blocks")
+print(f"  -> wiped {wiped} blocks")
 
 # ── 3) Build new body ──────────────────────────────────────────────────
 print("Building body blocks...")
@@ -52,28 +51,56 @@ def maximalRectangle(matrix):
     return max_area
 
 def largestRect(heights):
-    stack = [-1]   # sentinel: left boundary before col 0
+    stack = [-1]   # sentinel: left boundary before column 0
     max_a = 0
-    for i, h in enumerate(heights + [0]):   # append 0 to flush all bars
+    for i, h in enumerate(heights + [0]):  # append 0 to flush all bars
         while stack[-1] != -1 and heights[stack[-1]] >= h:
             height = heights[stack.pop()]
-            width  = i - stack[-1] - 1     # span where height was the min
+            width  = i - stack[-1] - 1
             max_a  = max(max_a, height * width)
         stack.append(i)
     return max_a
 '''
 
 SOL2_CODE = '''\
+def maximalRectangle_v2(matrix):
+    """Explicit 2D heights table — clearer DP structure, O(mn) space."""
+    if not matrix or not matrix[0]:
+        return 0
+    m, n = len(matrix), len(matrix[0])
+    heights = [[0]*n for _ in range(m)]
+    for i in range(m):
+        for j in range(n):
+            if matrix[i][j] == '1':
+                heights[i][j] = (heights[i-1][j] + 1) if i > 0 else 1
+    max_area = 0
+    for i in range(m):
+        max_area = max(max_area, largestRect(heights[i]))
+    return max_area
+
+def largestRect(heights):
+    stack = [-1]
+    max_a = 0
+    for i, h in enumerate(heights + [0]):
+        while stack[-1] != -1 and heights[stack[-1]] >= h:
+            height = heights[stack.pop()]
+            width  = i - stack[-1] - 1
+            max_a  = max(max_a, height * width)
+        stack.append(i)
+    return max_a
+'''
+
+SOL3_CODE = '''\
 def maximalRectangle_bf(matrix):
-    """O(m^2 * n) brute force using row-pair DP."""
+    """Brute force O(m^2 * n): fix top & bottom rows, count valid column runs."""
     if not matrix: return 0
     m, n = len(matrix), len(matrix[0])
     max_area = 0
     for top in range(m):
-        col_ok = [True] * n  # column still all-1s from top to current bottom?
+        col_ok = [True] * n
         for bot in range(top, m):
             for j in range(n):
-                col_ok[j] = col_ok[j] and (matrix[bot][j] == '1')
+                col_ok[j] = col_ok[j] and matrix[bot][j] == '1'
             consec = 0
             for j in range(n - 1, -1, -1):
                 consec = consec + 1 if col_ok[j] else 0
@@ -81,201 +108,321 @@ def maximalRectangle_bf(matrix):
     return max_area
 '''
 
-SOL3_CODE = '''\
-# Memoization (top-down) variant — same O(mn) idea, recursive
-# Not commonly used for this problem (bottom-up is cleaner),
-# but illustrates the subproblem structure.
-from functools import lru_cache
-
-def maximalRectangle_memo(matrix):
-    if not matrix or not matrix[0]: return 0
-    m, n = len(matrix), len(matrix[0])
-
-    # Precompute heights: height[i][j] = consecutive 1s above (i,j)
-    heights = [[0]*n for _ in range(m)]
-    for i in range(m):
-        for j in range(n):
-            if matrix[i][j] == '1':
-                heights[i][j] = (heights[i-1][j] + 1) if i > 0 else 1
-
-    # For each row, solve LRH on heights[i]
-    ans = 0
-    for i in range(m):
-        ans = max(ans, largestRect(heights[i]))
-    return ans
-'''
-
-RECURRENCE = '''\
-Height DP:
-  heights[j] += 1  if matrix[i][j] == '1'
-  heights[j]  = 0  if matrix[i][j] == '0'
-
-Area when popping index k from stack:
-  height = heights[k]
-  width  = current_i - stack_top_after_pop - 1
-  area   = height * width
-'''
-
 blocks = []
 
 # ── Problem statement ──────────────────────────────────────────────────
 blocks += [
     N.h2("Problem"),
-    N.para(N.rich([
-        "Given an ", ("m × n", {"bold": True}), " binary matrix of ",
-        ("'0'", {"code": True}), "s and ", ("'1'", {"code": True}),
-        "s, find the largest rectangle containing only ", ("'1'", {"code": True}),
-        "s and return its area.\n\n"
-        "Example: matrix = [['1','0','1','0','0'],['1','0','1','1','1'],"
-        "['1','1','1','1','1'],['1','0','0','1','0']] → Output: 6"
-    ])),
+    N.para(
+        "Given a rows x cols binary matrix filled with '0's and '1's, "
+        "find the largest rectangle containing only '1's and return its area."
+    ),
+    N.para(
+        'Example: matrix = [["1","0","1","0","0"],["1","0","1","1","1"],'
+        '["1","1","1","1","1"],["1","0","0","1","0"]] -> Output: 6'
+    ),
+    N.para(
+        "Constraints: 1 <= rows, cols <= 200. matrix[i][j] is '0' or '1'."
+    ),
     N.divider(),
 ]
 
-# ── Solution 1: DP Heights + Monotonic Stack (Interview Pick) ──────────
+# ── Why Is This DP? ──────────────────────────────────────────────────
+blocks += [
+    N.h2("Why Is This Dynamic Programming?"),
+    N.para(N.rich([
+        ("Optimal Substructure: ", {"bold": True}),
+        ("The maximum all-1s rectangle with bottom edge at row i is determined by the "
+         "histogram of heights at row i. The height of column j at row i depends only on "
+         "row i-1: it's heights[i-1][j]+1 if cell is '1', else 0. Each subproblem (column "
+         "height) depends on exactly one prior subproblem.", {}),
+    ])),
+    N.para(N.rich([
+        ("Overlapping Subproblems: ", {"bold": True}),
+        ("Each heights[j] value (the column's consecutive-1s count) is computed once and "
+         "reused across the entire row scan. Without DP, you'd recount streaks from scratch "
+         "for every (top_row, bottom_row) pair — O(m^2*n) vs O(mn).", {}),
+    ])),
+    N.callout(
+        N.rich([
+            ("Key Reduction: ", {"bold": True}),
+            ("Every maximal rectangle has a unique bottom row. When we fix row i as the "
+             "bottom, the problem reduces to Largest Rectangle in Histogram on heights[]. "
+             "Iterating all rows and solving LRH on each gives the global maximum.", {}),
+        ]),
+        "💡", "blue_background"
+    ),
+    N.code(
+        "# DP Recurrence (height update):\n"
+        "heights[j] = heights[j] + 1    if matrix[i][j] == '1'\n"
+        "heights[j] = 0                  if matrix[i][j] == '0'\n\n"
+        "# Area when popping index k from monotonic stack:\n"
+        "height = heights[k]\n"
+        "width  = current_i - stack[-1] - 1   # left boundary from stack sentinel\n"
+        "area   = height * width",
+        "python"
+    ),
+    N.divider(),
+]
+
+# ── Solution 1: DP Heights + Monotonic Stack ───────────────────────
 blocks += [
     N.h2("Solution 1 — DP Heights + Monotonic Stack (Interview Pick)"),
     N.toggle_h3("💡 Intuition: How to Arrive at This", [
         N.h4("Reframe the Problem"),
-        N.para("Every valid all-1s rectangle has a bottom row. Fix that bottom row and ask: what is the maximum height (consecutive 1s) in each column directly above it? That gives a histogram. The maximal rectangle with that bottom row equals the Largest Rectangle in Histogram (LRH) for that histogram."),
+        N.para(
+            "An all-1s rectangle is defined by four edges. Instead of iterating all four, "
+            "fix the bottom row and ask: 'What's the tallest all-1s bar above each column?' "
+            "That gives a histogram. The answer for any fixed bottom row is the LRH answer."
+        ),
         N.h4("What Doesn't Work"),
-        N.para("Brute force: try every pair of top-left and bottom-right corners and verify all cells. O(m²n²). A slight improvement: fix the top row and extend the bottom — O(m²n). Still too slow for large grids."),
+        N.para(
+            "Brute force O(m^2*n^2): iterate all (top, bottom, left, right) tuples and "
+            "verify all cells are '1'. Too slow. Even O(m^2*n) (fix top/bottom row only) "
+            "is too slow for 200x200 grids."
+        ),
         N.h4("The Key Observation"),
-        N.para("The 2D problem reduces to m repeated 1D problems. Heights are computed via simple DP: heights[j] += 1 if cell is '1', else heights[j] = 0. Each 1D histogram can be solved in O(n) with a monotonic stack. Total: O(mn)."),
+        N.para(
+            "heights[j] = number of consecutive '1's directly above (and including) row i "
+            "in column j. Computed with a single DP step per row. Row i now gives a histogram, "
+            "and LRH on a histogram runs in O(n) with a monotonic stack."
+        ),
         N.h4("Building the Solution"),
-        N.para("Step 1: Maintain heights[] array (length n, all zeros initially). Step 2: For each row i, update heights using the DP recurrence. Step 3: Run largestRect(heights) using a monotonic increasing stack. Step 4: Return the max area seen across all rows."),
+        N.para(
+            "Step 1: Initialize heights = [0]*n. "
+            "Step 2: For each row i, update heights[j] (+1 if '1', reset to 0 if '0'). "
+            "Step 3: Run largestRect(heights) using a monotonic increasing stack. Pop bars "
+            "when a shorter bar arrives; popped bar's height is the bottleneck in some span; "
+            "width = current_pos - new_stack_top - 1. "
+            "Step 4: Track global maximum."
+        ),
         N.callout(
-            "Analogy: Think of each row as the ground floor of a city skyline. "
-            "heights[] gives the skyscraper heights at that ground level. "
-            "Largest Rectangle in Histogram finds the biggest billboard that fits in the skyline.",
-            "🏙️", "blue_background"
+            "Analogy: Think of each row as 'ground level' and look up. The columns of 1s "
+            "above each cell are buildings. LRH finds the largest rectangle you can fit in "
+            "the city skyline seen from that row.",
+            "🧠", "blue_background"
         ),
     ]),
-    N.h3("Why Is This DP?"),
-    N.para(N.rich([
-        ("Optimal substructure: ", {"bold": True}),
-        "heights[i][j] = heights[i-1][j] + 1 if matrix[i][j]=='1' else 0. Each cell's height depends only on the previous row's height.\n",
-        ("Overlapping subproblems: ", {"bold": True}),
-        "The heights array is reused across all histogram queries — we're not recomputing streaks from scratch each time."
-    ])),
-    N.callout(RECURRENCE, "📐", "gray_background"),
+    N.h3("Algorithm Deep-Dive: Monotonic Stack for LRH"),
+    N.para(
+        "The Largest Rectangle in Histogram problem (#84) is solved with a monotonic "
+        "increasing stack. The invariant: the stack holds bar indices in non-decreasing "
+        "order of height. When a shorter bar arrives, every popped bar was the minimum in "
+        "the span [stack_top+1 ... current_i-1]. This span is exactly the widest rectangle "
+        "where that bar's height is achievable."
+    ),
+    N.para(
+        "Sentinel -1: Initialize stack with [-1] so that when the leftmost bar is popped, "
+        "width = i - (-1) - 1 = i (extends all the way to position 0). "
+        "Sentinel 0 appended to heights forces all remaining bars to be flushed at the end."
+    ),
     N.h3("Code"),
     N.code(SOL1_CODE),
     N.h3("Line by Line"),
-    N.para(N.rich([("heights = [0] * n", {"code": True}), " — DP state: bar height per column, initialized to zero before any row is processed."])),
-    N.para(N.rich([("if matrix[i][j] == '1': heights[j] += 1", {"code": True}), " — Extend the upward streak for this column by one."])),
-    N.para(N.rich([("else: heights[j] = 0", {"code": True}), " — A '0' cell breaks the streak entirely. No rectangle can pass through a zero cell."])),
-    N.para(N.rich([("max_area = max(max_area, largestRect(heights))", {"code": True}), " — Solve the histogram for this row and update the global maximum."])),
-    N.para(N.rich([("stack = [-1]", {"code": True}), " — Sentinel index. When a bar is the leftmost, width = i - (-1) - 1 = i (full span to the left edge)."])),
-    N.para(N.rich([("heights + [0]", {"code": True}), " — The appended 0 acts as a sentinel bar that forces all remaining bars to be popped and computed at the end."])),
-    N.para(N.rich([("while stack[-1] != -1 and heights[stack[-1]] >= h:", {"code": True}), " — Pop while the bar on stack top is taller or equal to the current bar. We use >= to handle equal heights correctly."])),
-    N.para(N.rich([("width = i - stack[-1] - 1", {"code": True}), " — After popping, the new stack top is the left boundary. Width = distance from new top + 1 to i - 1."])),
-    N.para(N.rich([("max_a = max(max_a, height * width)", {"code": True}), " — Rectangle area with the popped bar as the height bottleneck."])),
+    N.para(N.rich([
+        ("heights = [0] * n", {"code": True}),
+        (" — DP state array. heights[j] = consecutive '1's ending at current row in column j. "
+         "A '0' cell resets this to 0.", {}),
+    ])),
+    N.para(N.rich([
+        ("heights[j] += 1", {"code": True}),
+        (" — DP recurrence: extend the upward streak of '1's.", {}),
+    ])),
+    N.para(N.rich([
+        ("heights[j] = 0", {"code": True}),
+        (" — A '0' cell destroys the streak; column can't be part of any rectangle bottomed here.", {}),
+    ])),
+    N.para(N.rich([
+        ("largestRect(heights)", {"code": True}),
+        (" — Solve LRH on the current histogram. O(n) amortized (each index pushed/popped once).", {}),
+    ])),
+    N.para(N.rich([
+        ("stack = [-1]", {"code": True}),
+        (" — Sentinel at index -1. Prevents empty-stack errors; gives correct width for leftmost bars.", {}),
+    ])),
+    N.para(N.rich([
+        ("heights + [0]", {"code": True}),
+        (" — Append a zero-height sentinel. Forces all remaining bars off the stack at the end.", {}),
+    ])),
+    N.para(N.rich([
+        ("while stack[-1] != -1 and heights[stack[-1]] >= h:", {"code": True}),
+        (" — Pop bars taller than current. Popped bar's height is the bottleneck in some span.", {}),
+    ])),
+    N.para(N.rich([
+        ("width = i - stack[-1] - 1", {"code": True}),
+        (" — New stack top is the left boundary (exclusive). Width = right_exclusive - left_exclusive - 1.", {}),
+    ])),
+    N.divider(),
+]
+
+# ── Solution 2: Full 2D DP Heights ─────────────────────────────────
+blocks += [
+    N.h2("Solution 2 — Explicit 2D Heights Table (DP Tabulation)"),
+    N.toggle_h3("💡 Intuition: How to Arrive at This", [
+        N.h4("Reframe the Problem"),
+        N.para(
+            "Instead of a rolling 1D heights array, build the full 2D table heights[i][j] "
+            "upfront, then apply LRH per row. More memory, but clearer DP subproblem structure."
+        ),
+        N.h4("What Doesn't Work"),
+        N.para(
+            "O(m*n) space for the 2D table is acceptable but unnecessary. The rolling array "
+            "(Solution 1) achieves O(n) space with the same time complexity."
+        ),
+        N.h4("The Key Observation"),
+        N.para(
+            "heights[i][j] = heights[i-1][j] + 1 if matrix[i][j]=='1', else 0. "
+            "Straightforward recurrence with base case heights[0][j] = 1 if matrix[0][j]=='1'."
+        ),
+        N.h4("Building the Solution"),
+        N.para("Fill heights[][] in O(mn). For each row, solve LRH(heights[i]) in O(n). Same O(mn) total."),
+    ]),
+    N.h3("Code"),
+    N.code(SOL2_CODE),
+    N.h3("Line by Line"),
+    N.para(N.rich([
+        ("heights[i][j] = (heights[i-1][j] + 1) if i > 0 else 1", {"code": True}),
+        (" — DP recurrence: height above (i,j) = height above (i-1,j) + 1 when cell is '1'. Base case row 0 = 1.", {}),
+    ])),
+    N.para(N.rich([
+        ("for i in range(m): max_area = max(max_area, largestRect(heights[i]))", {"code": True}),
+        (" — Apply LRH to each precomputed histogram row.", {}),
+    ])),
     N.callout(
-        "⚠️ Why heights[stack[-1]] >= h (not >)? "
-        "Using >= ensures equal-height bars don't stack up incorrectly. "
-        "When two adjacent bars have the same height, we pop the earlier one — "
-        "its area will be recomputed correctly through the later bar's span.",
+        "Memory Trade-off: O(mn) space vs O(n) for Solution 1. In interviews, Solution 1 is preferred. "
+        "Solution 2 is excellent for explaining the DP subproblem structure before optimizing memory.",
         "⚠️", "yellow_background"
     ),
     N.divider(),
 ]
 
-# ── Solution 2: Brute Force DP ─────────────────────────────────────────
+# ── Solution 3: Brute Force ─────────────────────────────────────────
 blocks += [
-    N.h2("Solution 2 — Brute Force Row-Pair DP"),
+    N.h2("Solution 3 — Brute Force Row-Pair (O(m^2 * n))"),
     N.toggle_h3("💡 Intuition: How to Arrive at This", [
         N.h4("Reframe the Problem"),
-        N.para("Fix the top row of the rectangle. Expand the bottom row downward one at a time. For each (top, bottom) pair, find the widest rectangle of all-1s columns spanning that height."),
+        N.para(
+            "Fix a top row and a bottom row. A rectangle spanning those rows must have all "
+            "columns continuously '1' from top to bottom. Count the longest run of valid "
+            "columns -> width. Height = bottom - top + 1."
+        ),
         N.h4("What Doesn't Work"),
-        N.para("Pure brute force checking every (top-left, bottom-right) corner pair: O(m²n²). This approach is only slightly better at O(m²n)."),
+        N.para(
+            "O(m^2*n^2): iterate all four boundaries and verify cells. Quadruple loop — too slow."
+        ),
         N.h4("The Key Observation"),
-        N.para("When we expand the bottom row, we can update which columns are still all-1s incrementally. A column is 'valid' for a (top, bottom) pair if every cell from top to bottom in that column is '1'. We can track this with a boolean array."),
+        N.para(
+            "A column's validity is monotone when extending downward: once a '0' appears, it "
+            "stays invalid. col_ok[] can be updated incrementally in O(n) per step."
+        ),
         N.h4("Building the Solution"),
-        N.para("For each top row, reset col_ok[j]=True for all j. For each bottom row: update col_ok[j] = col_ok[j] AND (matrix[bot][j]=='1'). Then scan from right to left counting consecutive valid columns and computing area."),
-    ]),
-    N.h3("Code"),
-    N.code(SOL2_CODE),
-    N.h3("Line by Line"),
-    N.para(N.rich([("col_ok = [True] * n", {"code": True}), " — Tracks whether column j is all-1s from the current top row to the current bottom row."])),
-    N.para(N.rich([("col_ok[j] = col_ok[j] and matrix[bot][j] == '1'", {"code": True}), " — Once a column hits a '0', it stays invalid for all further bottom extensions."])),
-    N.para(N.rich([("consec * (bot - top + 1)", {"code": True}), " — Area = consecutive valid columns × height of the row range. We scan right-to-left so consec counts valid columns ending at position j."])),
-    N.divider(),
-]
-
-# ── Solution 3: Memoization variant ───────────────────────────────────
-blocks += [
-    N.h2("Solution 3 — Top-Down (Precomputed Heights + Histogram)"),
-    N.toggle_h3("💡 Intuition: How to Arrive at This", [
-        N.h4("Reframe the Problem"),
-        N.para("Precompute the full heights table heights[i][j] = consecutive 1s above row i in column j (including row i). Then for each row, run the LRH algorithm on heights[i]. Same idea as Solution 1, but with explicit 2D precomputation instead of rolling update."),
-        N.h4("The Key Observation"),
-        N.para("Separating the precomputation from the histogram solving makes the DP structure explicit. heights[i][j] = heights[i-1][j]+1 if matrix[i][j]=='1' else 0. This is the same recurrence, made visible as a 2D table."),
+        N.para(
+            "For each top row, maintain col_ok[]. Extend bottom row downward, updating col_ok. "
+            "Scan right-to-left counting consecutive valid columns. Area = consec x height."
+        ),
     ]),
     N.h3("Code"),
     N.code(SOL3_CODE),
-    N.callout(
-        "This variant is useful for understanding: the 2D heights table is the explicit DP table. "
-        "Solution 1's rolling update is just space-optimized: since each row only needs the previous row's heights, we can use O(n) instead of O(mn).",
-        "💡", "blue_background"
-    ),
+    N.h3("Line by Line"),
+    N.para(N.rich([
+        ("col_ok = [True] * n", {"code": True}),
+        (" — Reset validity tracker for each new top row.", {}),
+    ])),
+    N.para(N.rich([
+        ("col_ok[j] = col_ok[j] and matrix[bot][j] == '1'", {"code": True}),
+        (" — Column j stays valid only if all cells from top to bot are '1'. Once False, stays False.", {}),
+    ])),
+    N.para(N.rich([
+        ("consec = consec+1 if col_ok[j] else 0", {"code": True}),
+        (" — Count rightward run of valid columns (right-to-left). Area = consec x (bot-top+1).", {}),
+    ])),
     N.divider(),
 ]
 
-# ── Complexity table ───────────────────────────────────────────────────
+# ── Complexity ──────────────────────────────────────────────────────
 blocks += [
     N.h2("Complexity"),
     N.table([
-        ["Solution", "Time", "Space", "Notes"],
-        ["DP Heights + Monotonic Stack", "O(m·n)", "O(n)", "Interview pick — optimal"],
-        ["Brute Force Row-Pair DP", "O(m²·n)", "O(n)", "Correct but TLEs on large input"],
-        ["Pure Brute Force", "O(m²·n²)", "O(1)", "Correct, only for tiny grids"],
+        ["Solution", "Time", "Space"],
+        ["DP Heights + Monotonic Stack (S1)", "O(m*n)", "O(n)"],
+        ["Explicit 2D Heights Table (S2)", "O(m*n)", "O(m*n)"],
+        ["Brute Force Row-Pair (S3)", "O(m^2*n)", "O(n)"],
     ]),
     N.divider(),
 ]
 
-# ── Pattern Classification ─────────────────────────────────────────────
+# ── Pattern Classification ──────────────────────────────────────────
 blocks += [
-    N.h2("🏷️ Pattern Classification"),
-    N.para(N.rich([("Main Pattern: ", {"bold": True}), "Dynamic Programming"])),
-    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), "Histogram per Row; Monotonic Stack (Previous Smaller)"])),
+    N.h2("Pattern Classification"),
+    N.para(N.rich([
+        ("Main Pattern: ", {"bold": True}),
+        ("Dynamic Programming", {}),
+    ])),
+    N.para(N.rich([
+        ("Sub-Pattern(s): ", {"bold": True}),
+        ("Histogram per Row | Monotonic Stack (Previous Smaller)", {}),
+    ])),
     N.callout(
-        "When to recognize this pattern:\n"
-        "• 'Largest rectangle in binary matrix' → histogram reduction\n"
-        "• 2D grid problem where each row can be treated as a 1D histogram base\n"
-        "• 'Monotonic stack for span/dominance' → each bar's maximal span\n"
-        "• Problem mentions DP + stack combination for 2D optimization",
+        "When to recognize this pattern: Binary matrix + 'find largest rectangle/square of 1s'. "
+        "The row-by-row histogram reduction is the canonical technique. "
+        "Any time you see LeetCode #84 as a subtask, think 2D grid extension. "
+        "Monotonic stack applies whenever you need the 'span of dominance' of each element.",
         "🔎", "green_background"
     ),
     N.divider(),
 ]
 
-# ── Related Problems ───────────────────────────────────────────────────
+# ── Related Problems ────────────────────────────────────────────────
 blocks += [
-    N.h2("🔗 Related Problems"),
-    N.para("Problems using the same technique (histogram DP / monotonic stack):"),
-    N.bullet(N.rich([("Largest Rectangle in Histogram", {"bold": True}), " (Hard) — The exact subproblem we solve per row. Master #84 before tackling #85."])),
-    N.bullet(N.rich([("Maximal Square", {"bold": True}), " (Medium) — Largest all-1s square in binary matrix. Pure 2D DP, no stack needed. (#221)"])),
-    N.bullet(N.rich([("Trapping Rain Water", {"bold": True}), " (Hard) — Monotonic stack for 'water trapped between bars'. Same pop-and-compute mechanics. (#42)"])),
-    N.bullet(N.rich([("Sum of Subarray Minimums", {"bold": True}), " (Medium) — Monotonic stack to find each element's span as the minimum. (#907)"])),
-    N.bullet(N.rich([("Maximum Width Ramp", {"bold": True}), " (Medium) — Monotonic stack for dominance/span problems. (#962)"])),
-    N.bullet(N.rich([("Count Submatrices With All Ones", {"bold": True}), " (Medium) — Extends histogram counting to number of rectangles. (#1504)"])),
-    N.para("These problems share the core technique: monotonic stack to efficiently compute for each bar the maximal span where it is the minimum/maximum."),
-    N.callout("📚 Reference: DSA_Patterns_and_SubPatterns_Guide.md — Section: Dynamic Programming → Histogram per Row; Section: Stack → Monotonic Stack (Previous Smaller)", "📚", "gray_background"),
+    N.h2("Related Problems"),
+    N.para("Problems using the same technique:"),
+    N.bullet(N.rich([
+        ("Largest Rectangle in Histogram", {"bold": True}),
+        (" (Hard) — Core subproblem #84. Master this first; Maximal Rectangle directly calls it.", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Maximal Square", {"bold": True}),
+        (" (Medium) — Same 2D binary matrix but squares only; uses pure 2D DP without monotonic stack (#221).", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Trapping Rain Water", {"bold": True}),
+        (" (Hard) — Monotonic stack for water trapped between bars (#42).", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Sum of Subarray Minimums", {"bold": True}),
+        (" (Medium) — Monotonic stack for span-of-dominance of each element (#907).", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Count Submatrices With All Ones", {"bold": True}),
+        (" (Medium) — Histogram approach counts rectangles vs finds the max (#1504).", {}),
+    ])),
+    N.bullet(N.rich([
+        ("Maximum Width Ramp", {"bold": True}),
+        (" (Medium) — Monotonic stack for span/dominance problems (#962).", {}),
+    ])),
+    N.para(
+        "These problems share the core technique: reduce 2D problem to repeated 1D "
+        "subproblems using DP state per column, solved via monotonic stack."
+    ),
+    N.callout(
+        "Reference: DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming). "
+        "Sub-Pattern: Histogram per Row. Source: Guide Section 18 + Analysis.",
+        "📚", "gray_background"
+    ),
 ]
 
-# ── Embed ──────────────────────────────────────────────────────────────
+# ── Visual Explainer ────────────────────────────────────────────────
 blocks += [
     N.divider(),
-    N.h2("🎯 Interactive Visual Explainer"),
+    N.h2("Interactive Visual Explainer"),
     N.embed(N.embed_url_for("maximal_rectangle")),
     N.para(N.rich([
         ("Step through the algorithm visually — use Next/Prev or arrow keys.",
-         {"italic": True, "color": "gray"})
+         {"italic": True, "color": "gray"}),
     ])),
 ]
 
-# ── Append all blocks ──────────────────────────────────────────────────
-print(f"Appending {len(blocks)} blocks to Notion page...")
+print(f"  -> total blocks: {len(blocks)}")
+print("Appending blocks to Notion page...")
 N.append_blocks(PAGE_ID, blocks)
-print("NOTION OK", PAGE_ID)
+print(f"NOTION OK {PAGE_ID}")

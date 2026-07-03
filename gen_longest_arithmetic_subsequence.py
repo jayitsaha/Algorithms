@@ -1,6 +1,6 @@
 """
-Notion regeneration script for: Longest Arithmetic Subsequence (LeetCode #1027)
-Run from /Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms/
+Notion update script for: Longest Arithmetic Subsequence (#1027)
+Run from: /Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms/
 """
 import sys
 sys.path.insert(0, '/Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms')

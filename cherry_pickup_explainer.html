@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#741 · Cherry Pickup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.75rem;letter-spacing:0.5px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--text)}
+.var-r1{color:var(--blue-mid);font-weight:600}
+.var-r2{color:var(--green-mid);font-weight:600}
+.var-r3{color:var(--purple-mid);font-weight:600}
+
+/* ── Grid Viz ── */
+.grid-container{display:flex;flex-direction:column;align-items:center;gap:4px;margin:1.5rem 0}
+.grid-row{display:flex;gap:4px}
+.grid-cell{
+  width:52px;height:52px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;position:relative;
+}
+.grid-cell.empty{background:var(--surface);color:var(--text2)}
+.grid-cell.cherry{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.grid-cell.thorn{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.grid-cell.p1{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.grid-cell.p2{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.grid-cell.both{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.grid-cell.picked{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.grid-cell.start{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.grid-cell.end{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.grid-col-labels{display:flex;gap:4px;margin-bottom:4px}
+.grid-col-label{width:52px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+.grid-row-label{width:20px;display:flex;align-items:center;font-size:10px;color:var(--text3);font-family:var(--mono);margin-right:4px}
+.grid-row-wrap{display:flex;align-items:center}
+
+/* ── State 3D Panel ── */
+.state-3d{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:1.25rem 0}
+.state-box{flex:1;min-width:130px;max-width:180px;background:var(--bg2);border-radius:var(--radius);padding:12px 14px;border:1.5px solid var(--border2);text-align:center}
+.state-box.active{border-color:var(--blue-border);background:var(--blue-bg)}
+.state-box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.state-box.active .state-box-label{color:var(--blue-mid)}
+.state-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text)}
+.state-box.active .state-val{color:var(--blue-text)}
+.state-changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.state-changed .state-box-label{color:var(--amber-mid)}
+.state-changed .state-val{color:var(--amber-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-fwd{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-dp{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-move{background:var(--amber-bg);color:var(--amber-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-cherry{background:var(--green-bg);border-color:var(--green-border)}
+.sw-thorn{background:var(--red-bg);border-color:var(--red-border)}
+.sw-p1{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-p2{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-both{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-picked{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #741</div>
+  <h1>🔴 Cherry Pickup</h1>
+  <p class="subtitle">Traverse an N×N grid twice (there and back) to collect the maximum cherries, avoiding thorns.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">3D DP Two Paths</span>
+    <span class="tag tag-complexity">Time: O(N³)</span>
+    <span class="tag tag-complexity">Space: O(N³)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an <strong>N×N grid</strong> where each cell is one of three values:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;line-height:2">
+      <li><code>0</code> — empty cell you can walk through</li>
+      <li><code>1</code> — cell with a cherry 🍒 (collected once walked on, then becomes 0)</li>
+      <li><code>-1</code> — thorn 🌵 (impassable)</li>
+    </ul>
+    <p>You start at <strong>(0,0)</strong> and want to reach <strong>(N-1, N-1)</strong>, then return to (0,0). Only moves allowed: right or down on the way there; left or up on the return. You want to <strong>maximize total cherries collected</strong>. Return 0 if no path exists.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight — The Two-Path Equivalence</div>
+      <p>A round trip (go + return) is <strong>mathematically equivalent to two people walking simultaneously from (0,0) to (N-1,N-1)</strong>. Both take steps at the same time — always moving right or down. If they land on the same cell, only <em>one cherry</em> is picked. This transforms a sequential problem into a <strong>simultaneous two-path problem</strong>.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naïve: Two greedy passes</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">
+          Greedily maximize first pass,<br>
+          then try to maximize second.<br>
+          <strong>FAILS</strong> — first greedy pick can block the second path from collecting more overall.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Correct: Simultaneous two paths</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          Consider both paths at once via DP.<br>
+          State = <strong>(step t, col of P1, col of P2)</strong>.<br>
+          Row of each person is derived: <code>r = t - c</code>.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> If (0,0) or (N-1,N-1) is a thorn → return 0. If any required path is fully blocked → return 0. A cell shared by both paths yields only 1 cherry.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 3D DP — Simultaneous Two-Path</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Instead of thinking about one path going forward and one returning, we model <strong>two people (P1 and P2) both starting at (0,0) and moving to (N-1,N-1) in synchrony</strong>. At each time step <code>t</code>, both move one step right or down.</p>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 State Definition &amp; Recurrence</div>
+      <div class="recurrence-formula">
+        State: <span class="var-r1">dp[t][c1][c2]</span> = max cherries collectible when P1 is at column <span class="var-r2">c1</span> and P2 is at column <span class="var-r2">c2</span> after <span class="var-r3">t</span> total steps<br><br>
+        Row of P1: <span class="var-r1">r1 = t - c1</span> &nbsp;&nbsp; Row of P2: <span class="var-r2">r2 = t - c2</span><br><br>
+        <span class="var-r1">dp[t][c1][c2]</span> = cherries_at(r1,c1) + cherries_at(r2,c2) [if c1≠c2 else once]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; + max over 4 previous (dc1, dc2) pairs of <span class="var-r1">dp[t-1][c1-dc1][c2-dc2]</span>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Symmetry trick:</strong> Enforce <code>c1 ≤ c2</code> always — by symmetry, if P2 is to the left of P1 just swap them. This halves the state space.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Validate cells:</strong> For a given (t, c1, c2), compute <code>r1 = t - c1</code> and <code>r2 = t - c2</code>. Skip if any row/col is out of bounds or the cell is a thorn (-1).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Count cherries:</strong> Add <code>grid[r1][c1]</code>. If <code>c1 ≠ c2</code>, also add <code>grid[r2][c2]</code> (distinct cells). If <code>c1 == c2</code>, both persons occupy the same cell — count only once.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Transition:</strong> Each person came from either the cell above (row-1, same col) or the cell to the left (same row, col-1). There are 4 combinations: (up,up), (up,left), (left,up), (left,left).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Answer:</strong> <code>max(0, dp[2*(N-1)][N-1][N-1])</code> — when both reach the bottom-right corner after 2*(N-1) steps. Return 0 if this is negative infinity (no path exists).</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why t Steps Implies r = t - c</div>
+      <p>Each step is either right (<code>c += 1</code>) or down (<code>r += 1</code>). So after <code>t</code> total steps, <code>r + c = t</code>, giving <code>r = t - c</code>. Both persons always have <em>the same total step count</em> — this is the synchronization invariant that reduces 4D state (t, r1, c1, r2, c2) to 3D (t, c1, c2).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant &amp; Proof</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every time step <code>t</code>, <strong>both persons have made exactly <code>t</code> total moves</strong> (right or down). This means row + col = t for each person at all times. The DP explores all possible column assignments for both persons at each step — this covers all valid pairs of paths simultaneously.</p>
+    </div>
+
+    <p><strong>Optimal Substructure:</strong> The maximum cherries collectible from (0,0) to (N-1,N-1) by two paths is fully determined by the maximum cherries at the previous step plus whatever each person picks today. No future step affects past decisions — once a cherry is picked, it's gone.</p>
+
+    <p style="margin-top:0.75rem"><strong>Overlapping Subproblems:</strong> Without memoization, the same (t, c1, c2) state is visited exponentially many times through different sequences of moves. The DP table stores each state once — <code>O(N³)</code> entries total.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Sequential Greedy Fails</div>
+      <p>Consider this 3×3 grid: path 1 greedily collects the center cherry, then path 2 is forced around it — possibly missing cherries that a joint optimization would have found. The first path's choice permanently alters the landscape for the second. Only considering both paths simultaneously captures the correct global optimum.</p>
+    </div>
+
+    <p><strong>Edge case handling:</strong> If a cell is a thorn, <code>dp[t][c1][c2] = -∞</code> (propagated as a sentinel). The final answer is <code>max(0, dp)</code> — returning 0 if the corner is unreachable.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def cherryPickup(grid):</span><span class="aann">// entry point</span></div>
+      <div class="ann-line"><span class="acode">    N = len(grid)</span><span class="aann">// grid is N×N</span></div>
+      <div class="ann-line"><span class="acode">    NEG_INF = float('-inf')</span><span class="aann">// sentinel for "no valid path reaches here"</span></div>
+      <div class="ann-line"><span class="acode">    # dp[c1][c2] for current step t (rolling 2D array)</span></div>
+      <div class="ann-line"><span class="acode">    dp = [[NEG_INF]*N for _ in range(N)]</span><span class="aann">// init all states as unreachable</span></div>
+      <div class="ann-line"><span class="acode">    dp[0][0] = grid[0][0]</span><span class="aann">// both start at (0,0); collect its cherry if any</span></div>
+      <div class="ann-line"><span class="acode">    for t in range(1, 2*N - 1):</span><span class="aann">// t goes from 1 to 2*(N-1) total steps</span></div>
+      <div class="ann-line"><span class="acode">        ndp = [[NEG_INF]*N for _ in range(N)]</span><span class="aann">// new layer for step t</span></div>
+      <div class="ann-line"><span class="acode">        for c1 in range(max(0,t-N+1), min(N,t+1)):</span><span class="aann">// valid col range for P1</span></div>
+      <div class="ann-line"><span class="acode">            for c2 in range(c1, min(N,t+1)):</span><span class="aann">// c2 >= c1 (symmetry; skip c2 < c1)</span></div>
+      <div class="ann-line"><span class="acode">                r1, r2 = t-c1, t-c2</span><span class="aann">// derive rows from t = r + c</span></div>
+      <div class="ann-line"><span class="acode">                if r1 >= N or r2 >= N: continue</span><span class="aann">// row out of bounds</span></div>
+      <div class="ann-line"><span class="acode">                if grid[r1][c1]==-1 or grid[r2][c2]==-1: continue</span><span class="aann">// thorn — skip</span></div>
+      <div class="ann-line"><span class="acode">                cherries = grid[r1][c1]</span><span class="aann">// P1's cherry at this step</span></div>
+      <div class="ann-line"><span class="acode">                if c1 != c2: cherries += grid[r2][c2]</span><span class="aann">// P2's cherry, only if different cell</span></div>
+      <div class="ann-line"><span class="acode">                best = NEG_INF</span></div>
+      <div class="ann-line"><span class="acode">                for dc1 in (0, 1):       # P1 came from up(0) or left(1)</span></div>
+      <div class="ann-line"><span class="acode">                    for dc2 in (0, 1):   # P2 came from up(0) or left(1)</span></div>
+      <div class="ann-line"><span class="acode">                        pc1, pc2 = c1-dc1, c2-dc2</span><span class="aann">// previous columns</span></div>
+      <div class="ann-line"><span class="acode">                        if 0<=pc1<=pc2<N:</span><span class="aann">// must be in bounds and pc1<=pc2</span></div>
+      <div class="ann-line"><span class="acode">                            best = max(best, dp[pc1][pc2])</span><span class="aann">// pick best previous state</span></div>
+      <div class="ann-line"><span class="acode">                if best != NEG_INF:</span><span class="aann">// at least one valid predecessor exists</span></div>
+      <div class="ann-line"><span class="acode">                    ndp[c1][c2] = best + cherries</span><span class="aann">// update with cherries collected this step</span></div>
+      <div class="ann-line"><span class="acode">        dp = ndp</span><span class="aann">// advance to next time step</span></div>
+      <div class="ann-line"><span class="acode">    return max(0, dp[N-1][N-1])</span><span class="aann">// 0 if unreachable; both must end at (N-1,N-1)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake — Forgetting the Symmetry Constraint</div>
+      <p>If you allow <code>c2 &lt; c1</code>, you duplicate every state (swapping P1 and P2 gives the same scenario). Always enforce <code>c1 ≤ c2</code>. When looking up predecessors, also enforce <code>pc1 ≤ pc2</code>.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📊 Complexity Analysis</div>
+      <p><strong>Time:</strong> O(N³) — outer loop is O(N) steps; inner two loops are O(N²) column pairs; inner 4 transitions are O(1). Total: O(N · N² · 4) = O(N³).<br>
+      <strong>Space:</strong> O(N²) with rolling array (shown above), or O(N³) if storing all t layers.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize Sequential → Simultaneous</div>
+        <p style="font-size:13.5px">The problem says "go then return" but the return path (bottom-right to top-left, moving left or up) is the same as a second forward path (top-left to bottom-right, moving right or down) traversed in reverse. Flip the return into a second forward path.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify Why Greedy Fails</div>
+        <p style="font-size:13.5px">Greedy pass 1 can "use up" cherries that, had they been saved, could have been combined with pass 2 for a better total. This interdependence means we need DP — we must consider all joint decisions.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Define the State</div>
+        <p style="font-size:13.5px">Both persons always move right or down, so after t steps each has r + c = t. Track (t, c1, c2) — 3D state. Row is implicit. This is the key dimensionality reduction from 4D to 3D.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Same-Cell Collision</div>
+        <p style="font-size:13.5px">When c1 == c2 (and r1 == r2), both persons are on the same cell — count cherry only once. This is a subtle but critical detail that distinguishes correct from incorrect solutions.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Exploit Symmetry</div>
+        <p style="font-size:13.5px">By always keeping c1 ≤ c2, you avoid computing mirror states. Halves work. This optimization also simplifies the predecessor lookup constraint.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The return path moving left/up is equivalent to a second person walking right/down from the start simultaneously. So I'll model this as two synchronized paths on the grid."<br><br>
+"My state is (t, c1, c2) where t is the step count and c1, c2 are the columns of person 1 and 2. Since both make exactly t moves total, row of person i is t minus their column."<br><br>
+"At each state I pick up cherries from both cells — counting only once if they're on the same cell. I transition from the 4 possible previous (dc1, dc2) combinations."<br><br>
+"Time complexity is O(N³), space O(N²) with a rolling array. The answer is dp[N-1][N-1] at step 2*(N-1)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 Pattern Recognition Signals</div>
+      <ul style="margin:0;padding-left:1.2rem;line-height:2">
+        <li>"Round trip" or "go and return" on a grid</li>
+        <li>Must maximize <em>combined</em> collection over two traversals</li>
+        <li>Items disappear once collected (shared resource between paths)</li>
+        <li>Only right/down moves (or their reversal equivalents)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="color:var(--text2);font-size:13.5px;margin-bottom:1rem">Trace through the 3×3 example grid. Both persons start at (0,0). Blue = P1, Purple = P2, Amber = both on same cell, Faded = already picked.</p>
+
+    <!-- Grid visualization -->
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;align-items:flex-start">
+      <div>
+        <p style="text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Grid State</p>
+        <div class="grid-col-labels">
+          <div style="width:24px"></div>
+          <div class="grid-col-label">c=0</div>
+          <div class="grid-col-label">c=1</div>
+          <div class="grid-col-label">c=2</div>
+        </div>
+        <div class="grid-row-wrap">
+          <div class="grid-row-label">r=0</div>
+          <div class="grid-row" id="grid-row-0">
+            <div class="grid-cell cherry" id="cell-0-0">1</div>
+            <div class="grid-cell empty" id="cell-0-1">0</div>
+            <div class="grid-cell cherry" id="cell-0-2">1</div>
+          </div>
+        </div>
+        <div class="grid-row-wrap">
+          <div class="grid-row-label">r=1</div>
+          <div class="grid-row" id="grid-row-1">
+            <div class="grid-cell empty" id="cell-1-0">0</div>
+            <div class="grid-cell cherry" id="cell-1-1">1</div>
+            <div class="grid-cell empty" id="cell-1-2">0</div>
+          </div>
+        </div>
+        <div class="grid-row-wrap">
+          <div class="grid-row-label">r=2</div>
+          <div class="grid-row" id="grid-row-2">
+            <div class="grid-cell cherry" id="cell-2-0">1</div>
+            <div class="grid-cell empty" id="cell-2-1">0</div>
+            <div class="grid-cell cherry" id="cell-2-2">1</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:220px">
+        <p style="text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">DP State at Step t</p>
+        <div class="state-3d" id="state-display">
+          <div class="state-box" id="sb-t">
+            <div class="state-box-label">Step t</div>
+            <div class="state-val" id="sv-t">0</div>
+          </div>
+          <div class="state-box" id="sb-c1">
+            <div class="state-box-label">c1 (P1 col)</div>
+            <div class="state-val" id="sv-c1">0</div>
+          </div>
+          <div class="state-box" id="sb-c2">
+            <div class="state-box-label">c2 (P2 col)</div>
+            <div class="state-val" id="sv-c2">0</div>
+          </div>
+          <div class="state-box" id="sb-dp">
+            <div class="state-box-label">dp[c1][c2]</div>
+            <div class="state-val" id="sv-dp">1</div>
+          </div>
+        </div>
+        <div class="var-tracker">
+          <div class="var-box" id="vb-r1">
+            <span class="var-name">r1</span>
+            <span class="var-val" id="vv-r1">0</span>
+          </div>
+          <div class="var-box" id="vb-r2">
+            <span class="var-name">r2</span>
+            <span class="var-val" id="vv-r2">0</span>
+          </div>
+          <div class="var-box" id="vb-ch">
+            <span class="var-name">cherries</span>
+            <span class="var-val" id="vv-ch">1</span>
+          </div>
+          <div class="var-box" id="vb-best">
+            <span class="var-name">best prev</span>
+            <span class="var-val" id="vv-best">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code panel -->
+    <div class="code-panel" id="code-panel">
+      <div class="code-line" id="cl-0">dp = [[NEG_INF]*N for _ in range(N)]</div>
+      <div class="code-line" id="cl-1">dp[0][0] = grid[0][0]   # = 1 (cherry at start)</div>
+      <div class="code-line" id="cl-2">for t in range(1, 2*N - 1):  # t = 1..4</div>
+      <div class="code-line" id="cl-3">    for c1 in valid_range(t):</div>
+      <div class="code-line" id="cl-4">        for c2 in range(c1, ...):</div>
+      <div class="code-line" id="cl-5">            r1, r2 = t - c1, t - c2</div>
+      <div class="code-line" id="cl-6">            if thorn(r1,c1) or thorn(r2,c2): continue</div>
+      <div class="code-line" id="cl-7">            cherries = grid[r1][c1] + (grid[r2][c2] if c1!=c2 else 0)</div>
+      <div class="code-line" id="cl-8">            best = max(dp[c1-dc1][c2-dc2] for 4 predecessors)</div>
+      <div class="code-line" id="cl-9">            ndp[c1][c2] = best + cherries</div>
+      <div class="code-line" id="cl-10">return max(0, dp[N-1][N-1])</div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div id="phase-badge" class="phase-badge phase-init">Init</div>
+      <div class="step-counter" id="step-counter">Step 1 / 12</div>
+      <div class="step-title" id="step-title">Initialize DP</div>
+      <div class="step-body" id="step-body">Both persons start at (0,0). Grid[0][0] = 1 (cherry). dp[0][0] = 1. All other states = -∞ (unreachable).</div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-cherry"></div>Cherry</div>
+      <div class="legend-item"><div class="legend-swatch sw-thorn"></div>Thorn</div>
+      <div class="legend-item"><div class="legend-swatch sw-p1"></div>P1 position</div>
+      <div class="legend-item"><div class="legend-swatch sw-p2"></div>P2 position</div>
+      <div class="legend-item"><div class="legend-swatch sw-both"></div>Both on same cell</div>
+      <div class="legend-item"><div class="legend-swatch sw-picked"></div>Cherry already picked</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A round trip = two simultaneous forward paths. The return path reversed is identical to a second forward path.</div>
+      <div class="takeaway">State (t, c1, c2) tracks step count and both persons' columns. Row is derived: r = t - c.</div>
+      <div class="takeaway">When both persons share a cell (c1 == c2 implies r1 == r2), count the cherry only once.</div>
+      <div class="takeaway">Enforce c1 ≤ c2 by symmetry — halves the state space and simplifies transitions.</div>
+      <div class="takeaway">A cell becoming a thorn (-1) propagates -∞ through the DP — any state depending on it remains unreachable.</div>
+      <div class="takeaway">Final answer: max(0, dp[N-1][N-1]) — 0 if bottom-right is unreachable from any valid two-path combo.</div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Correct?</th></tr></thead>
+      <tbody>
+        <tr><td>Two greedy passes</td><td>O(N²)</td><td>O(1)</td><td><span class="mark-bad">✗ No</span></td></tr>
+        <tr><td>Backtracking (brute force)</td><td>O(4^(2N))</td><td>O(N)</td><td><span class="mark-good">✓ Yes</span></td></tr>
+        <tr><td>3D DP + memoization</td><td>O(N³)</td><td>O(N³)</td><td><span class="mark-good">✓ Yes</span></td></tr>
+        <tr><td><strong>3D DP + rolling 2D (optimal)</strong></td><td><strong>O(N³)</strong></td><td><strong>O(N²)</strong></td><td><span class="mark-good">✓ Yes</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use "Two Simultaneous Paths" DP</div>
+      <ul style="margin:0;padding-left:1.2rem;line-height:2">
+        <li>Round-trip grid problems where items are consumed once collected</li>
+        <li>Any problem asking to maximize over <em>two coordinated paths</em> on a grid</li>
+        <li>When one path's choice affects the other's available resources</li>
+        <li>This pattern extends to <em>k simultaneous paths</em> with (k+1)-dimensional DP</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Cherry Pickup II</strong><span class="related-diff diff-hard">Hard</span> — Two robots starting from opposite top corners, same simultaneous 2-path DP pattern</div>
+      <div class="related-item"><strong>Minimum Path Sum</strong><span class="related-diff diff-med">Medium</span> — Single path DP on grid, foundational for understanding 2D grid DP</div>
+      <div class="related-item"><strong>Unique Paths II</strong><span class="related-diff diff-med">Medium</span> — Path counting with obstacles; row+col=t insight applies</div>
+      <div class="related-item"><strong>Dungeon Game</strong><span class="related-diff diff-hard">Hard</span> — Grid DP where path choice affects future viability</div>
+      <div class="related-item"><strong>Out of Boundary Paths</strong><span class="related-diff diff-med">Medium</span> — Step-indexed DP on a grid with boundary conditions</div>
+      <div class="related-item"><strong>Paint Fence / Paint House</strong><span class="related-diff diff-med">Medium</span> — State machine DP where adjacent decisions interact</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ─── Grid data for 3×3 example ───
+// Grid: [[1,0,1],[0,1,0],[1,0,1]]
+// cherries at (0,0),(0,2),(1,1),(2,0),(2,2) = 5 total
+// Optimal two paths collect all 5
+
+const GRID = [[1,0,1],[0,1,0],[1,0,1]];
+const N = 3;
+
+// Each step: {t, c1, c2, r1, r2, dp_val, best_prev, cherries, phase, phaseClass, activeLine, title, body, cells_p1, cells_p2, picked}
+// cells: array of {r,c} for P1, P2 positions
+const steps = [
+  {
+    t:0, c1:0, c2:0, r1:0, r2:0, dp_val:1, best_prev:'—', cherries:1,
+    phase:'Init', phaseClass:'phase-init', activeLine:1,
+    title:'Initialize: Both Start at (0,0)',
+    body:'dp[0][0] = grid[0][0] = 1. Both persons begin at row 0, col 0. The cherry at (0,0) is collected. All other dp entries are -∞ (unreachable). t=0 means 0 steps taken.',
+    p1:{r:0,c:0}, p2:{r:0,c:0}, picked:[]
+  },
+  {
+    t:1, c1:0, c2:1, r1:1, r2:0, dp_val:1, best_prev:1, cherries:0,
+    phase:'Step t=1', phaseClass:'phase-fwd', activeLine:5,
+    title:'t=1: Evaluate (c1=0, c2=1)',
+    body:'r1 = 1-0 = 1, r2 = 1-1 = 0. P1 at (1,0)=0, P2 at (0,1)=0. Both cells empty. cherries=0. Best predecessor: dp[0][0]=1. ndp[0][1] = 1+0 = 1.',
+    p1:{r:1,c:0}, p2:{r:0,c:1}, picked:[{r:0,c:0}]
+  },
+  {
+    t:1, c1:1, c2:1, r1:0, r2:0, dp_val:2, best_prev:1, cherries:1,
+    phase:'Step t=1', phaseClass:'phase-fwd', activeLine:7,
+    title:'t=1: Evaluate (c1=1, c2=1) — Same Cell!',
+    body:'r1 = r2 = 1-1 = 0. Both persons at (0,1)=0. c1==c2 so count cherry ONCE. cherries=0. Best predecessor: dp[0][0]=1. ndp[1][1] = 1+0 = 1. Note: Another state (c1=0,c2=0) has r1=1,c1=0→grid[1][0]=0 and P2 same — not shown.',
+    p1:{r:0,c:1}, p2:{r:0,c:1}, picked:[{r:0,c:0}]
+  },
+  {
+    t:2, c1:1, c2:1, r1:1, r2:1, dp_val:2, best_prev:1, cherries:1,
+    phase:'Step t=2', phaseClass:'phase-fwd', activeLine:8,
+    title:'t=2: Evaluate (c1=1, c2=1) — Center Cherry!',
+    body:'r1 = r2 = 2-1 = 1. Both at (1,1)=1 (cherry!). c1==c2 → count once. cherries=1. Best predecessor from dp[0][1], dp[1][1], dp[0][0], dp[1][0] at t=1 → best=1. ndp[1][1] = 1+1 = 2.',
+    p1:{r:1,c:1}, p2:{r:1,c:1}, picked:[{r:0,c:0}]
+  },
+  {
+    t:2, c1:0, c2:2, r1:2, r2:0, dp_val:3, best_prev:1, cherries:2,
+    phase:'Step t=2', phaseClass:'phase-fwd', activeLine:7,
+    title:'t=2: Evaluate (c1=0, c2=2) — Different Cells, Two Cherries!',
+    body:'r1=2-0=2→(2,0)=1 (cherry!). r2=2-2=0→(0,2)=1 (cherry!). c1≠c2 → count both. cherries=1+1=2. Best prev: dp[0][1]=1 from t=1. ndp[0][2] = 1+2 = 3! This state captures the two "wing" cherries simultaneously.',
+    p1:{r:2,c:0}, p2:{r:0,c:2}, picked:[{r:0,c:0}]
+  },
+  {
+    t:3, c1:1, c2:2, r1:2, r2:1, dp_val:4, best_prev:3, cherries:1,
+    phase:'Step t=3', phaseClass:'phase-dp', activeLine:9,
+    title:'t=3: Evaluate (c1=1, c2=2) — Building toward End',
+    body:'r1=3-1=2→(2,1)=0. r2=3-2=1→(1,2)=0. cherries=0. Best predecessor includes ndp[0][2]=3 from t=2. ndp[1][2] = 3+0 = 3. Meanwhile exploring other states at t=3...',
+    p1:{r:2,c:1}, p2:{r:1,c:2}, picked:[{r:0,c:0},{r:2,c:0},{r:0,c:2}]
+  },
+  {
+    t:3, c1:2, c2:2, r1:1, r2:1, dp_val:4, best_prev:2, cherries:0,
+    phase:'Step t=3', phaseClass:'phase-dp', activeLine:7,
+    title:'t=3: Evaluate (c1=2, c2=2) — Both at (1,2)',
+    body:'r1=r2=3-2=1→(1,2)=0. Same cell, empty. cherries=0. Best predecessor from states at t=2 including dp[1][1]=2 and dp[0][2]=3 (but pc1<=pc2 required). Best=2. ndp[2][2]=2+0=2.',
+    p1:{r:1,c:2}, p2:{r:1,c:2}, picked:[{r:0,c:0},{r:2,c:0},{r:0,c:2}]
+  },
+  {
+    t:4, c1:2, c2:2, r1:2, r2:2, dp_val:5, best_prev:3, cherries:1,
+    phase:'Step t=4', phaseClass:'phase-dp', activeLine:9,
+    title:'t=4: Both Reach (2,2) — Final Cherry!',
+    body:'r1=r2=4-2=2→(2,2)=1 (cherry!). Same cell→count once. cherries=1. Best predecessor: ndp[1][2]=3 from t=3. ndp[2][2] = 3+1 = 4. But also check state from path via dp[0][2] line...',
+    p1:{r:2,c:2}, p2:{r:2,c:2}, picked:[{r:0,c:0},{r:2,c:0},{r:0,c:2},{r:1,c:1}]
+  },
+  {
+    t:4, c1:2, c2:2, r1:2, r2:2, dp_val:5, best_prev:4, cherries:1,
+    phase:'Result', phaseClass:'phase-result', activeLine:10,
+    title:'Final Answer: max(0, dp[2][2]) = 5',
+    body:'After exploring all states at t=4, dp[2][2] = 5. The optimal two-path solution collects: (0,0)=1, (0,2)=1, (1,1)=1, (2,0)=1, (2,2)=1 = 5 cherries total! Path 1: (0,0)→(0,1)→(0,2)→(1,2)→(2,2). Path 2: (0,0)→(1,0)→(2,0)→(2,1)→(2,2).',
+    p1:{r:2,c:2}, p2:{r:2,c:2}, picked:[{r:0,c:0},{r:0,c:2},{r:1,c:1},{r:2,c:0}]
+  }
+];
+
+let cur = 0;
+
+function cellClass(r, c, step) {
+  const {p1, p2, picked} = step;
+  const isP1 = p1.r===r && p1.c===c;
+  const isP2 = p2.r===r && p2.c===c;
+  const isPicked = picked.some(p => p.r===r && p.c===c);
+  if (isPicked) return 'picked';
+  if (isP1 && isP2) return 'both';
+  if (isP1) return 'p1';
+  if (isP2) return 'p2';
+  if (GRID[r][c] === 1) return 'cherry';
+  if (GRID[r][c] === -1) return 'thorn';
+  return 'empty';
+}
+
+function render(s) {
+  // Update grid cells
+  for (let r=0;r<N;r++) {
+    for (let c=0;c<N;c++) {
+      const el = document.getElementById(`cell-${r}-${c}`);
+      const cls = cellClass(r, c, s);
+      el.className = `grid-cell ${cls}`;
+      if (cls === 'picked') el.textContent = '·';
+      else if (GRID[r][c] === 1) el.textContent = '🍒';
+      else if (GRID[r][c] === -1) el.textContent = '🌵';
+      else el.textContent = '0';
+    }
+  }
+
+  // State boxes
+  document.getElementById('sv-t').textContent = s.t;
+  document.getElementById('sv-c1').textContent = s.c1;
+  document.getElementById('sv-c2').textContent = s.c2;
+  document.getElementById('sv-dp').textContent = s.dp_val === null ? '—' : s.dp_val;
+
+  // Var tracker
+  document.getElementById('vv-r1').textContent = s.r1;
+  document.getElementById('vv-r2').textContent = s.r2;
+  document.getElementById('vv-ch').textContent = s.cherries;
+  document.getElementById('vv-best').textContent = s.best_prev;
+
+  // Code panel
+  for (let i=0;i<=10;i++) {
+    const el = document.getElementById(`cl-${i}`);
+    if (el) el.className = 'code-line' + (i === s.activeLine ? ' active' : '');
+  }
+
+  // Info card
+  document.getElementById('phase-badge').textContent = s.phase;
+  document.getElementById('phase-badge').className = `phase-badge ${s.phaseClass}`;
+  document.getElementById('step-counter').textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  steps.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===cur ? ' active' : i<cur ? ' visited' : '');
+    d.onclick = () => { cur=i; render(steps[cur]); updateBtns(); };
+    dots.appendChild(d);
+  });
+
+  updateBtns();
+}
+
+function updateBtns() {
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length-1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length-1, cur+dir));
+  render(steps[cur]);
+}
+
+function reset() { cur=0; render(steps[0]); }
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') go(1);
+  if (e.key==='ArrowLeft') go(-1);
+  if (e.key==='r'||e.key==='R') reset();
+});
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+render(steps[0]);
+</script>
+</body>
+</html>

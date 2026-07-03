@@ -1,82 +1,1148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Longest Common Subsequence — LC #1143</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1143 · Longest Common Subsequence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+p{margin-bottom:0.75rem}p:last-child{margin-bottom:0}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column Panels ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.5rem}
+.recurrence-formula{font-family:var(--mono);font-size:13.5px;line-height:2.4}
+.var-match{color:var(--blue-mid);font-weight:600}
+.var-nomatch{color:var(--purple-mid);font-weight:600}
+
+/* ── Static DP Table (diagram in Section 2) ── */
+.dp-diagram{overflow-x:auto;margin:1rem 0;text-align:center}
+.dp-static-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:0 auto}
+.dp-static-table th,.dp-static-table td{padding:9px 16px;text-align:center;border:1px solid var(--border2)}
+.dp-static-table th{background:var(--bg2);font-weight:600;color:var(--text2)}
+.dp-static-table td.base{background:var(--bg2);color:var(--text3)}
+.dp-static-table td.match-cell{background:var(--blue-bg);color:var(--blue-text);font-weight:700;border:2px solid var(--blue-border)}
+.dp-static-table td.final{background:var(--green-bg);color:var(--green-text);font-weight:700;border:2px solid var(--green-border)}
+.dp-static-table td.normal{color:var(--text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-fill{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-i{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-j{background:var(--green-bg);border-color:var(--green-border)}
+.sw-cur{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-match{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-final{background:var(--green-bg);border-color:var(--green-border)}
+.sw-base{background:var(--bg2);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Viz area (interactive walkthrough) ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.dp-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);text-align:center;margin-bottom:12px}
+
+/* ── String display rows ── */
+.str-display{display:flex;justify-content:center;gap:32px;margin-bottom:16px;flex-wrap:wrap}
+.str-block{display:flex;flex-direction:column;align-items:center;gap:4px}
+.str-block-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.str-chars{display:flex;gap:4px}
+.str-char-box{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:700;border-radius:6px;background:var(--surface);border:2px solid var(--border2);color:var(--text);transition:background 0.3s,border-color 0.3s,color 0.3s}
+.str-char-box.hi-i{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.str-char-box.hi-j{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.str-char-box.hi-match{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+
+/* ── Live DP table ── */
+.dp-table-wrap{overflow-x:auto;margin-bottom:1rem}
+.dp-live-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:0 auto}
+.dp-live-table th{background:var(--bg2);font-weight:600;color:var(--text2);font-size:12px;padding:9px 14px;border:1px solid var(--border2)}
+.dp-live-table td{padding:9px 14px;text-align:center;border:1px solid var(--border2);min-width:44px;transition:background 0.3s,border-color 0.3s,color 0.3s}
+.dp-live-table .row-hdr{background:var(--bg2);font-weight:700;color:var(--text2);font-size:12px}
+.dp-live-table td.cell-base{background:var(--bg2);color:var(--text3)}
+.dp-live-table td.cell-future{background:var(--bg2);color:var(--text3)}
+.dp-live-table td.cell-done{background:var(--surface);color:var(--text)}
+.dp-live-table td.cell-cur{background:var(--amber-bg);border:2px solid var(--amber-border);color:var(--amber-text);font-weight:700}
+.dp-live-table td.cell-match{background:var(--blue-bg);border:2px solid var(--blue-border);color:var(--blue-text);font-weight:700}
+.dp-live-table td.cell-final{background:var(--green-bg);border:2px solid var(--green-border);color:var(--green-text);font-weight:700}
+
+/* ── Decision Panel ── */
+.decision-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-top:1rem}
+.decision-header{margin-bottom:0.75rem}
+.dp-type-badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-right:8px}
+.dp-type-match{background:var(--blue-bg);color:var(--blue-mid)}
+.dp-type-nomatch{background:var(--purple-bg);color:var(--purple-mid)}
+.decision-q{font-size:13px;font-weight:600;color:var(--text);display:block;margin-top:4px}
+.decision-options{display:flex;gap:10px;margin-top:0.75rem;flex-wrap:wrap}
+.dec-opt{flex:1;min-width:130px;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border2);background:var(--bg2)}
+.dec-opt.selected{border-color:var(--green-border);background:var(--green-bg)}
+.dec-opt.rejected{opacity:0.5}
+.opt-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.dec-opt.selected .opt-label{color:var(--green-mid)}
+.opt-formula{font-family:var(--mono);font-size:12px;color:var(--text2);margin-bottom:4px}
+.opt-result{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)}
+.dec-opt.selected .opt-result{color:var(--green-mid)}
+.opt-chk{color:var(--green-mid);margin-right:3px}
+.opt-x{color:var(--red-mid);margin-right:3px}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Longest Common Subsequence</h1>
-<div class="subtitle">LeetCode #1143 &mdash; Classic 2D DP</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Dynamic Programming</span><span class="tag tag-pattern">Classic 2D DP</span><span class="tag tag-cx">O(m*n) Time &middot; O(min(m,n)) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1143</div>
+  <h1>Longest Common Subsequence</h1>
+  <p class="subtitle">Given two strings text1 and text2, return the length of their longest common subsequence. A subsequence is derived by deleting some elements without changing the order of the rest.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Classic 2D DP</span>
+    <span class="tag tag-complexity">Time: O(m·n)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: Understanding the Problem               -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A <strong>subsequence</strong> is <em>not</em> a substring. You can skip characters anywhere in the string — they just have to appear in the same left-to-right order. The characters you keep don't need to be adjacent.</p>
+
+    <p>For example, from <code>"abcde"</code> you can pull out <code>"ace"</code> by taking positions 0, 2, 4 — skipping <code>"b"</code> and <code>"d"</code>. That's a valid subsequence.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Think of LCS as independently "threading" characters from each string such that both threads spell the same word in the same order. The <strong>Longest Common Subsequence</strong> is the longest shared thread you can find.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Valid LCS: text1="abcde", text2="ace"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          text1: <strong>a</strong>b<strong>c</strong>d<strong>e</strong> (pick positions 0,2,4)<br>
+          text2: <strong>a</strong><strong>c</strong><strong>e</strong> (pick all three)<br>
+          LCS = "ace" → length <strong>3</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">⚠ Order matters: text1="abc", text2="cba"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          "abc" reversed is "cba" — but LCS<br>
+          isn't 3. You can't reverse order.<br>
+          LCS = 1 (just "a", "b", or "c")
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why is this hard?</strong> There are 2ᵐ possible subsequences of text1 and 2ⁿ of text2. Comparing every pair would be exponential. We need overlapping-subproblem structure to reduce this to polynomial time.</p>
+
+    <p><strong>Edge Cases:</strong> one or both empty (LCS = 0); identical strings (LCS = full length); completely different character sets (LCS = 0); one string is a subsequence of the other (LCS = shorter length).</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode problem statement.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]. If chars equal: dp[i-1][j-1]+1. Else: max(dp[i-1][j], dp[i][j-1]).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: 2D DP (LCS)</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: 2D DP (LCS)</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dp[0][j]=dp[i][0]=0</span></div><div class="step"><span class="snum">2</span><span class="stxt">For i,j: if text1[i-1]==text2[j-1]: dp[i][j]=dp[i-1][j-1]+1; else: max(dp[i-1][j],dp[i][j-1])</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant maintained at each step.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n)</strong> | Space: <strong>O(min(m,n))</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def longestCommonSubsequence(text1: str, text2: str) -> int:
-    m, n = len(text1), len(text2)
-    if m < n: text1, text2, m, n = text2, text1, n, m  # space optimization
-    prev = [0] * (n+1)
-    for c1 in text1:
-        curr = [0] * (n+1)
-        for j, c2 in enumerate(text2):
-            curr[j+1] = prev[j]+1 if c1==c2 else max(prev[j+1], curr[j])
-        prev = curr
-    return prev[n]</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Walk through the 2D DP (LCS) approach, state complexity, demonstrate on an example.</p></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>2D DP (LCS)</td><td>O(m*n)</td><td>O(min(m,n))</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">O</span><span class="pd dh">(</span> — m</li><li><span class="pn">R</span><span class="pd dh">e</span> — c</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Classic 2D DP</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Longest Common Subsequence"}, "title": "2D DP (LCS)", "desc": "See code for step-by-step.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: The Algorithm                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Classic 2D DP (Bottom-Up Tabulation)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We build a 2D table <code>dp[i][j]</code> where each cell answers: <em>"What is the LCS length of text1[0..i-1] and text2[0..j-1]?"</em> We fill it row by row using the recurrence below.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Create dp table:</strong> Allocate a (m+1)×(n+1) table, all zeros. The +1 leaves room for the empty-string base case: row 0 and column 0 are always 0.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Characters match?</strong> → <code>dp[i][j] = dp[i-1][j-1] + 1</code>. Both strings contributed the same character — the LCS can extend by 1 from the previous prefixes (the diagonal cell).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Characters don't match?</strong> → <code>dp[i][j] = max(dp[i-1][j], dp[i][j-1])</code>. We can't use both current characters. Take the best we get by skipping one or the other.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Read the answer:</strong> <code>dp[m][n]</code> — the bottom-right cell holds the LCS of the complete text1 and text2.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relations</div>
+      <div class="recurrence-formula">
+        if text1[i-1] == text2[j-1]:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="var-match">dp[i][j] = dp[i-1][j-1] + 1</span>&nbsp;&nbsp;&nbsp;← extend diagonal (match!)<br>
+        else:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="var-nomatch">dp[i][j] = max( dp[i-1][j], dp[i][j-1] )</span>&nbsp;&nbsp;← skip one char
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Filled DP table for text1="abcde", text2="ace":</strong></p>
+    <div class="dp-diagram">
+      <table class="dp-static-table">
+        <thead>
+          <tr>
+            <th>dp</th><th>""</th><th>a</th><th>c</th><th>e</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>""</th><td class="base">0</td><td class="base">0</td><td class="base">0</td><td class="base">0</td></tr>
+          <tr><th>a</th><td class="base">0</td><td class="match-cell">1</td><td class="normal">1</td><td class="normal">1</td></tr>
+          <tr><th>b</th><td class="base">0</td><td class="normal">1</td><td class="normal">1</td><td class="normal">1</td></tr>
+          <tr><th>c</th><td class="base">0</td><td class="normal">1</td><td class="match-cell">2</td><td class="normal">2</td></tr>
+          <tr><th>d</th><td class="base">0</td><td class="normal">1</td><td class="normal">2</td><td class="normal">2</td></tr>
+          <tr><th>e</th><td class="base">0</td><td class="normal">1</td><td class="normal">2</td><td class="final">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:6px">Blue = match (diagonal +1) · Green = final answer dp[5][3] = 3 · Gray = base case</p>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: Why It Works                            -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant &amp; Why This is DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The DP Invariant</div>
+      <p>At any point during the fill, <code>dp[i][j]</code> holds the <strong>exact LCS length for text1[0..i-1] and text2[0..j-1]</strong>. When we fill row by row left to right, every dependency (dp[i-1][j-1], dp[i-1][j], dp[i][j-1]) is already computed before we need it.</p>
+    </div>
+
+    <p><strong>Optimal Substructure:</strong> When both current characters match (text1[i-1] == text2[j-1]), we can extend ANY common subsequence of the shorter prefixes by appending this character. The LCS of the longer prefixes is exactly 1 more than the LCS of the shorter ones. When they don't match, the LCS of the longer prefixes is the best of the two options where we ignore one character.</p>
+
+    <p><strong>Overlapping Subproblems:</strong> A naive recursive approach to compute LCS("abc","ace") calls LCS("ab","ace") and LCS("abc","ac") — both of which call LCS("ab","ac"). The same sub-problem is recomputed exponentially many times. The DP table ensures each cell is computed exactly once in O(1) time.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Diagonal Only When Characters Match?</div>
+      <p>Some beginners write <code>max(dp[i-1][j-1]+1, dp[i-1][j], dp[i][j-1])</code> for the match case. This is correct but unnecessary. When characters match, <code>dp[i-1][j-1]+1</code> is always ≥ both neighbors: the LCS can only gain by matching, not by ignoring one of the matching characters. Trust the diagonal — it's strictly better in the match case.</p>
+    </div>
+
+    <p><strong>Space optimization:</strong> We only ever look at the current row and the previous row. We can keep just two 1D arrays (O(n) space) instead of the full table, with the same correctness.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: The Code (Annotated)                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — 2D Tabulation (Interview Pick, O(m·n) time &amp; space)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonSubsequence(text1: str, text2: str) -> int:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(text1), len(text2)                    </span><span class="aann">← store lengths; text1 has m chars, text2 has n</span></div>
+<div class="ann-line"><span class="acode">    dp = [[0]*(n+1) for _ in range(m+1)]             </span><span class="aann">← (m+1)×(n+1) table; extra row/col = empty-string base case</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, m+1):                          </span><span class="aann">← i is 1-indexed into dp; text1[i-1] is the character</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n+1):                      </span><span class="aann">← j is 1-indexed into dp; text2[j-1] is the character</span></div>
+<div class="ann-line"><span class="acode">            if text1[i-1] == text2[j-1]:             </span><span class="aann">← characters match!</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = dp[i-1][j-1] + 1         </span><span class="aann">← extend diagonal: LCS of shorter prefixes + 1</span></div>
+<div class="ann-line"><span class="acode">            else:                                    </span><span class="aann">← characters differ</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = max(dp[i-1][j], dp[i][j-1])  </span><span class="aann">← best of skipping text1[i] or skipping text2[j]</span></div>
+<div class="ann-line"><span class="acode">    return dp[m][n]                                  </span><span class="aann">← bottom-right cell = LCS of full strings</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Off-by-One: Why text1[i-1] not text1[i]?</div>
+      <p>The dp table has dimensions (m+1)×(n+1). Row <code>i</code> in dp represents the prefix of text1 of length <code>i</code>, which is text1[0..i-1]. When i=1 we're looking at text1[0]. The <code>-1</code> bridges dp indices to string indices. This is the most common mistake — draw the table and trace it by hand.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Space-Optimized (O(n) space — two rolling arrays)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonSubsequence(text1: str, text2: str) -> int:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(text1), len(text2)</span></div>
+<div class="ann-line"><span class="acode">    prev = [0] * (n+1)                   </span><span class="aann">← represents "previous row" of the 2D table</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, m+1):</span></div>
+<div class="ann-line"><span class="acode">        curr = [0] * (n+1)               </span><span class="aann">← build current row; starts with 0 for base case (j=0)</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n+1):</span></div>
+<div class="ann-line"><span class="acode">            if text1[i-1] == text2[j-1]:</span></div>
+<div class="ann-line"><span class="acode">                curr[j] = prev[j-1] + 1  </span><span class="aann">← prev[j-1] is the diagonal (row i-1, col j-1)</span></div>
+<div class="ann-line"><span class="acode">            else:</span></div>
+<div class="ann-line"><span class="acode">                curr[j] = max(prev[j], curr[j-1])  </span><span class="aann">← prev[j]=(i-1,j) is "above"; curr[j-1]=(i,j-1) is "left"</span></div>
+<div class="ann-line"><span class="acode">        prev = curr                      </span><span class="aann">← slide window: current becomes previous for next row</span></div>
+<div class="ann-line"><span class="acode">    return prev[n]</span></div>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 3 — Top-Down Memoization (natural from recursion)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestCommonSubsequence(text1: str, text2: str) -> int:</span></div>
+<div class="ann-line"><span class="acode">    from functools import lru_cache</span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)</span></div>
+<div class="ann-line"><span class="acode">    def dp(i, j):                         </span><span class="aann">← i = position in text1, j = position in text2</span></div>
+<div class="ann-line"><span class="acode">        if i == len(text1) or j == len(text2):  </span><span class="aann">← base case: one string exhausted</span></div>
+<div class="ann-line"><span class="acode">            return 0</span></div>
+<div class="ann-line"><span class="acode">        if text1[i] == text2[j]:          </span><span class="aann">← characters match — take both and advance both</span></div>
+<div class="ann-line"><span class="acode">            return 1 + dp(i+1, j+1)      </span><span class="aann">← +1 for the matched char, then recurse on the rest</span></div>
+<div class="ann-line"><span class="acode">        return max(dp(i+1, j), dp(i, j+1))  </span><span class="aann">← skip text1[i] or skip text2[j]; take the better</span></div>
+<div class="ann-line"><span class="acode">    return dp(0, 0)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>2D Tabulation:</strong> Time O(m·n), Space O(m·n) — clearest for interviews; fills entire table<br>
+        <strong>Space-Optimized:</strong> Time O(m·n), Space O(n) — best practical solution<br>
+        <strong>Top-Down Memo:</strong> Time O(m·n), Space O(m·n) — natural derivation from recursion
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 5: Interview Strategy                      -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Spot the DP Signals</div>
+        <p style="font-size:14px;color:var(--text)">"Two strings + find the <em>longest</em> common <em>subsequence</em>." Every word here is a signal. Two inputs that interact character by character → 2D DP. "Longest" → optimization → DP. "Subsequence" (not substring) → we can skip characters → the DP recurrence uses max, not just a counter. Clarify: subsequence means order preserved but not necessarily contiguous. Substring would be different.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the State Clearly</div>
+        <p style="font-size:14px;color:var(--text)">Say aloud: "I'll let dp[i][j] = the length of the LCS of text1[0..i-1] and text2[0..j-1]. The +1 indexing gives me a free zero-row and zero-column for base cases." Draw a 3×4 table for a tiny example to show you understand the shape.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the Recurrence by Cases</div>
+        <p style="font-size:14px;color:var(--text)">Two characters, two cases. "If text1[i-1] == text2[j-1]: both contribute to the LCS — extend the diagonal by 1. Else: we have to sacrifice one character — take the max of looking up (skip text1[i]) or looking left (skip text2[j])."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Mention Space Optimization</div>
+        <p style="font-size:14px;color:var(--text)">"Since each row only depends on the previous row, I can reduce space to O(n) with a rolling array. But O(m·n) space is cleaner to code and explain first."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Two strings, finding longest common subsequence — classic 2D DP.<br>
+State: dp[i][j] = LCS of text1[0..i-1] and text2[0..j-1]. Base: row 0 and col 0 are 0.<br>
+Recurrence: match → dp[i-1][j-1]+1. No match → max(dp[i-1][j], dp[i][j-1]).<br>
+Fill row by row. Answer at dp[m][n]. Time O(m·n), Space O(m·n), reducible to O(n)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Return the actual LCS string, not just the length?"</strong> → Backtrack the dp table from dp[m][n]: if chars matched, go diagonal; otherwise follow the larger neighbor.</li>
+        <li><strong>"Edit Distance between text1 and text2?"</strong> → Very similar 2D DP — costs for insert/delete/replace (#72)</li>
+        <li><strong>"Minimum deletions to make text1 == text2?"</strong> → m + n - 2·LCS (#583)</li>
+        <li><strong>"Reduce space from O(m·n) to O(n)?"</strong> → Rolling array (Solution 2 above)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 6: Interactive Walkthrough                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: text1="abcde", text2="ace"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+
+      <!-- String display -->
+      <div class="str-display">
+        <div class="str-block">
+          <div class="str-block-label">text1 (i-1 = current char)</div>
+          <div class="str-chars" id="str1-chars"></div>
+        </div>
+        <div class="str-block">
+          <div class="str-block-label">text2 (j-1 = current char)</div>
+          <div class="str-chars" id="str2-chars"></div>
+        </div>
+      </div>
+
+      <!-- Live DP Table -->
+      <div class="dp-label">dp[i][j] = LCS length of text1[0..i-1] and text2[0..j-1]</div>
+      <div class="dp-table-wrap">
+        <table class="dp-live-table" id="dp-live-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>""(j=0)</th>
+              <th>a(j=1)</th>
+              <th>c(j=2)</th>
+              <th>e(j=3)</th>
+            </tr>
+          </thead>
+          <tbody id="dp-live-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Decision Panel -->
+      <div class="decision-panel" id="decision-panel" style="display:none">
+        <div class="decision-header">
+          <span class="dp-type-badge" id="dp-type-badge">MATCH</span>
+          <span class="decision-q" id="dp-question">...</span>
+        </div>
+        <div class="decision-options" id="dp-options"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-j">
+          <span class="var-name">j</span>
+          <span class="var-val" id="vv-j">—</span>
+        </div>
+        <div class="var-box" id="vb-c1">
+          <span class="var-name">text1[i-1]</span>
+          <span class="var-val" id="vv-c1">—</span>
+        </div>
+        <div class="var-box" id="vb-c2">
+          <span class="var-name">text2[j-1]</span>
+          <span class="var-val" id="vv-c2">—</span>
+        </div>
+        <div class="var-box" id="vb-dpval">
+          <span class="var-name">dp[i][j]</span>
+          <span class="var-val" id="vv-dpval">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def longestCommonSubsequence(text1, text2):</div>
+      <div class="code-line" id="cl-1">    m, n = len(text1), len(text2)</div>
+      <div class="code-line" id="cl-2">    dp = [[0]*(n+1) for _ in range(m+1)]</div>
+      <div class="code-line" id="cl-3">    for i in range(1, m+1):</div>
+      <div class="code-line" id="cl-4">        for j in range(1, n+1):</div>
+      <div class="code-line" id="cl-5">            if text1[i-1] == text2[j-1]:  # characters match</div>
+      <div class="code-line" id="cl-6">                dp[i][j] = dp[i-1][j-1] + 1</div>
+      <div class="code-line" id="cl-7">            else:                         # characters differ</div>
+      <div class="code-line" id="cl-8">                dp[i][j] = max(dp[i-1][j], dp[i][j-1])</div>
+      <div class="code-line" id="cl-9">    return dp[m][n]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 22</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use ← → arrow keys to step through the DP table fill.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-i"></div> text1[i-1] (current row char)</div>
+      <div class="legend-item"><div class="legend-swatch sw-j"></div> text2[j-1] (current col char)</div>
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div> Cell being computed</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div> Match: diagonal+1</div>
+      <div class="legend-item"><div class="legend-swatch sw-final"></div> Final answer</div>
+      <div class="legend-item"><div class="legend-swatch sw-base"></div> Base case / future</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 7: Summary & Key Takeaways                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">LCS is 2D DP: dp[i][j] = LCS of text1[0..i-1] and text2[0..j-1]</div>
+      <div class="takeaway">Match → dp[i-1][j-1]+1 (diagonal). No match → max(up, left)</div>
+      <div class="takeaway">Base cases are zero for free: row 0 and column 0 are all 0 (empty-string LCS)</div>
+      <div class="takeaway">Space reduces from O(m·n) to O(n) by keeping only the previous row (rolling array)</div>
+      <div class="takeaway">Backtrack the table from dp[m][n] to reconstruct the actual LCS string</div>
+      <div class="takeaway">LCS underlies diff tools, Edit Distance, DNA sequence alignment, and patch generation</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force Recursion</td>
+          <td class="mark-bad">O(2ᵐ⁺ⁿ)</td>
+          <td>O(m+n)</td>
+          <td>Exponential — TLE on any real input</td>
+        </tr>
+        <tr>
+          <td><strong>2D DP Tabulation ✓</strong></td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Standard interview pick; clear table visualization</td>
+        </tr>
+        <tr>
+          <td>Space-Optimized DP</td>
+          <td class="mark-good">O(m·n)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Best practical; same complexity, less memory</td>
+        </tr>
+        <tr>
+          <td>Top-Down Memoization</td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Natural from recursion; adds call-stack overhead</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Classic 2D DP (LCS Pattern)</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Two sequences + "longest/shortest common X" → Classic 2D DP (LCS family)</li>
+        <li>"Subsequence" (skip allowed) vs "substring" (must be contiguous) → different recurrences</li>
+        <li>The match/no-match two-case structure appears in Edit Distance, Wildcard Match, Regex</li>
+        <li>Real-world: Unix diff, git blame, DNA sequence alignment, file versioning all use LCS</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Classic 2D DP / LCS)</div>
+      <div class="related-item"><strong>Edit Distance</strong><span class="related-diff diff-hard">Hard</span> — LCS extended with insert/delete/replace costs; same table shape (#72)</div>
+      <div class="related-item"><strong>Shortest Common Supersequence</strong><span class="related-diff diff-hard">Hard</span> — SCS length = m + n - LCS; backtrack table to reconstruct (#1092)</div>
+      <div class="related-item"><strong>Longest Palindromic Subsequence</strong><span class="related-diff diff-med">Medium</span> — LCS(s, reverse(s)); exactly the same DP (#516)</div>
+      <div class="related-item"><strong>Delete Operation for Two Strings</strong><span class="related-diff diff-med">Medium</span> — Min deletions = m + n - 2×LCS (#583)</div>
+      <div class="related-item"><strong>Uncrossed Lines</strong><span class="related-diff diff-med">Medium</span> — Word-for-word the same problem restated geometrically (#1035)</div>
+      <div class="related-item"><strong>Minimum ASCII Delete Sum</strong><span class="related-diff diff-med">Medium</span> — Weighted LCS where cost = ASCII value of deleted chars (#712)</div>
+      <div class="related-item"><strong>Longest Common Substring</strong><span class="related-diff diff-med">Medium</span> — Similar table; match resets to 0 instead of taking max (#718 variant)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18: Dynamic Programming → DP: LCS<br>
+      Sub-Pattern: <strong>Classic 2D DP (LCS)</strong> · Source: Guide Section 18 + Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ══════════════════════════════════════════════════════════════
+// PROBLEM DATA
+// ══════════════════════════════════════════════════════════════
+const TEXT1 = "abcde";
+const TEXT2 = "ace";
+const M = TEXT1.length; // 5
+const N = TEXT2.length; // 3
+
+// Pre-compute the full DP table
+const dpFull = [];
+for (let i = 0; i <= M; i++) dpFull.push(new Array(N+1).fill(0));
+for (let i = 1; i <= M; i++) {
+  for (let j = 1; j <= N; j++) {
+    if (TEXT1[i-1] === TEXT2[j-1]) {
+      dpFull[i][j] = dpFull[i-1][j-1] + 1;
+    } else {
+      dpFull[i][j] = Math.max(dpFull[i-1][j], dpFull[i][j-1]);
+    }
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+// ══════════════════════════════════════════════════════════════
+// STEPS — every meaningful state change is its own step
+// Each step: {phase, phaseLabel, phaseClass, i, j, activeLine,
+//             title, text, changed[], decision?}
+// ══════════════════════════════════════════════════════════════
+const steps = [
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    i:-1, j:-1, activeLine:2,
+    title:'Initialize the DP Table',
+    text:'Create a 6×4 table (m+1=6 rows, n+1=4 cols), all filled with 0. Row 0 and Column 0 are the base cases: the LCS of any string with an empty string is 0. These never change during the fill.',
+    changed:[], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:1, j:1, activeLine:5,
+    title:'i=1, j=1 → Compare text1[0]="a" vs text2[0]="a"',
+    text:'Outer loop: i=1 means we\'re considering text1 prefix "a". Inner loop: j=1 means text2 prefix "a". We compare text1[0]="a" with text2[0]="a". They match!',
+    changed:['i','j','c1','c2'], decision:null
+  },
+  {
+    phase:'match', phaseLabel:'MATCH', phaseClass:'phase-match',
+    i:1, j:1, activeLine:6,
+    title:'MATCH! dp[1][1] = dp[0][0] + 1 = 0 + 1 = 1',
+    text:'Characters match → take the diagonal (dp[0][0]) and add 1. dp[0][0]=0 because both empty prefixes have LCS=0. Adding "a" from both gives LCS "a" of length 1. This is the first building block of our answer.',
+    changed:['dpval'],
+    decision:{type:'match', q:'text1[0]="a" == text2[0]="a" → extend diagonal by 1',
+      opts:[{label:'diagonal+1', formula:'dp[0][0] + 1 = 0 + 1', result:1, sel:true}]}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:1, j:2, activeLine:5,
+    title:'i=1, j=2 → Compare text1[0]="a" vs text2[1]="c"',
+    text:'Still row i=1 (text1 prefix "a"). Now j=2 so text2 prefix is "ac". Compare text1[0]="a" vs text2[1]="c". They differ.',
+    changed:['j','c2'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:1, j:2, activeLine:8,
+    title:'No match: dp[1][2] = max(dp[0][2], dp[1][1]) = max(0,1) = 1',
+    text:'Characters differ → take max of skipping text1[i] (look up: dp[0][2]=0) or skipping text2[j] (look left: dp[1][1]=1). Max(0,1)=1. The LCS of "a" and "ac" is still just "a".',
+    changed:['dpval'],
+    decision:{type:'nomatch', q:'text1[0]="a" ≠ text2[1]="c" → skip one character',
+      opts:[
+        {label:'skip text1[i] (look up)', formula:'dp[0][2] = 0', result:0, sel:false},
+        {label:'skip text2[j] (look left)', formula:'dp[1][1] = 1', result:1, sel:true}
+      ]}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:1, j:3, activeLine:8,
+    title:'i=1, j=3: dp[1][3] = max(dp[0][3], dp[1][2]) = max(0,1) = 1',
+    text:'"a" vs "e" — no match. Up=dp[0][3]=0, Left=dp[1][2]=1. Max=1. LCS of "a" and "ace" is "a" (length 1). Row 1 complete.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:2, j:1, activeLine:5,
+    title:'i=2, j=1 → Compare text1[1]="b" vs text2[0]="a"',
+    text:'New row i=2: text1 prefix "ab". j=1: text2 prefix "a". Compare text1[1]="b" vs text2[0]="a". No match.',
+    changed:['i','j','c1','c2'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:2, j:1, activeLine:8,
+    title:'No match: dp[2][1] = max(dp[1][1], dp[2][0]) = max(1,0) = 1',
+    text:'"b" vs "a" — no match. Up=dp[1][1]=1, Left=dp[2][0]=0. Max=1. "b" didn\'t help us — LCS of "ab" and "a" is just "a".',
+    changed:['dpval'],
+    decision:{type:'nomatch', q:'text1[1]="b" ≠ text2[0]="a" → skip one character',
+      opts:[
+        {label:'skip text1[i] (look up)', formula:'dp[1][1] = 1', result:1, sel:true},
+        {label:'skip text2[j] (look left)', formula:'dp[2][0] = 0', result:0, sel:false}
+      ]}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:2, j:2, activeLine:8,
+    title:'i=2, j=2: dp[2][2] = max(dp[1][2], dp[2][1]) = max(1,1) = 1',
+    text:'"b" vs "c" — no match. Up=1, Left=1. Max=1. LCS of "ab" and "ac" = 1 ("a" is the only common character).',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:2, j:3, activeLine:8,
+    title:'i=2, j=3: dp[2][3] = max(dp[1][3], dp[2][2]) = max(1,1) = 1',
+    text:'"b" vs "e" — no match. Both neighbors=1. LCS of "ab" and "ace" = 1. Row 2 complete. "b" contributed nothing.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:3, j:1, activeLine:5,
+    title:'i=3, j=1 → Compare text1[2]="c" vs text2[0]="a"',
+    text:'Row i=3: text1 prefix "abc". j=1: text2 prefix "a". Compare "c" vs "a". No match.',
+    changed:['i','j','c1','c2'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:3, j:1, activeLine:8,
+    title:'No match: dp[3][1] = max(dp[2][1], dp[3][0]) = max(1,0) = 1',
+    text:'"c" vs "a" — no match. Up=1, Left=0. dp[3][1]=1.',
+    changed:['dpval'], decision:null
+  },
+  {
+    phase:'match', phaseLabel:'MATCH', phaseClass:'phase-match',
+    i:3, j:2, activeLine:6,
+    title:'MATCH! i=3, j=2: text1[2]="c" == text2[1]="c" → dp[3][2] = dp[2][1] + 1 = 2',
+    text:'text1[2]="c" matches text2[1]="c"! Take diagonal: dp[2][1]=1. dp[3][2] = 1+1 = 2. The LCS just grew! "ac" is now the common subsequence of "abc" and "ac" — length 2. We found the second shared character.',
+    changed:['j','c2','dpval'],
+    decision:{type:'match', q:'text1[2]="c" == text2[1]="c" → extend diagonal by 1',
+      opts:[{label:'diagonal+1', formula:'dp[2][1] + 1 = 1 + 1', result:2, sel:true}]}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:3, j:3, activeLine:8,
+    title:'i=3, j=3: dp[3][3] = max(dp[2][3], dp[3][2]) = max(1,2) = 2',
+    text:'"c" vs "e" — no match. Up=dp[2][3]=1, Left=dp[3][2]=2. Max=2. We preserve the length-2 LCS found so far.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:4, j:1, activeLine:5,
+    title:'i=4, j=1 → text1[3]="d" vs text2[0]="a" → No match',
+    text:'Row i=4: text1 prefix "abcd". j=1: text2 prefix "a". "d" vs "a" — no match. dp[4][1] = max(dp[3][1], dp[4][0]) = max(1,0) = 1.',
+    changed:['i','j','c1','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:4, j:2, activeLine:8,
+    title:'i=4, j=2: "d" vs "c" → No match → dp[4][2] = max(dp[3][2], dp[4][1]) = max(2,1) = 2',
+    text:'"d" vs "c" — no match. Up=dp[3][2]=2, Left=dp[4][1]=1. Max=2. The "d" added nothing new.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:4, j:3, activeLine:8,
+    title:'i=4, j=3: "d" vs "e" → No match → dp[4][3] = max(dp[3][3], dp[4][2]) = max(2,2) = 2',
+    text:'"d" vs "e" — no match. Both neighbors=2. LCS of "abcd" and "ace" = 2. Row 4 complete — "d" was a dead end.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:5, j:1, activeLine:5,
+    title:'i=5, j=1 → text1[4]="e" vs text2[0]="a" → No match',
+    text:'Last row i=5: text1 prefix "abcde". j=1: text2 prefix "a". "e" vs "a" — no match. dp[5][1] = max(dp[4][1], dp[5][0]) = max(1,0) = 1.',
+    changed:['i','j','c1','c2','dpval'], decision:null
+  },
+  {
+    phase:'fill', phaseLabel:'FILL', phaseClass:'phase-fill',
+    i:5, j:2, activeLine:8,
+    title:'i=5, j=2: "e" vs "c" → No match → dp[5][2] = max(dp[4][2], dp[5][1]) = max(2,1) = 2',
+    text:'"e" vs "c" — no match. Up=2, Left=1. dp[5][2]=2. LCS of "abcde" and "ac" = 2.',
+    changed:['j','c2','dpval'], decision:null
+  },
+  {
+    phase:'match', phaseLabel:'MATCH', phaseClass:'phase-match',
+    i:5, j:3, activeLine:6,
+    title:'FINAL MATCH! text1[4]="e" == text2[2]="e" → dp[5][3] = dp[4][2] + 1 = 3',
+    text:'text1[4]="e" matches text2[2]="e"! This is the bottom-right cell — the final answer. Diagonal: dp[4][2]=2. dp[5][3] = 2+1 = 3. The LCS of "abcde" and "ace" is "ace" with length 3. The three matched pairs were: a(i=1,j=1), c(i=3,j=2), e(i=5,j=3).',
+    changed:['j','c2','dpval'],
+    decision:{type:'match', q:'text1[4]="e" == text2[2]="e" → FINAL diagonal+1 = ANSWER!',
+      opts:[{label:'final match!', formula:'dp[4][2] + 1 = 2 + 1', result:3, sel:true}]}
+  },
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result',
+    i:5, j:3, activeLine:9,
+    title:'Return dp[5][3] = 3',
+    text:'dp[m][n] = dp[5][3] = 3. The Longest Common Subsequence of "abcde" and "ace" has length 3. The actual sequence is "ace": a at (0,0), c at (2,1), e at (4,2) — skipping b and d in text1, and nothing in text2.',
+    changed:[], decision:null
+  }
+];
+
+// ══════════════════════════════════════════════════════════════
+// BUILD DOM
+// ══════════════════════════════════════════════════════════════
+function buildStrChars() {
+  const r1 = document.getElementById('str1-chars');
+  const r2 = document.getElementById('str2-chars');
+  for (let k = 0; k < M; k++) {
+    const d = document.createElement('div');
+    d.className = 'str-char-box';
+    d.id = `s1c-${k}`;
+    d.textContent = TEXT1[k];
+    r1.appendChild(d);
+  }
+  for (let k = 0; k < N; k++) {
+    const d = document.createElement('div');
+    d.className = 'str-char-box';
+    d.id = `s2c-${k}`;
+    d.textContent = TEXT2[k];
+    r2.appendChild(d);
+  }
+}
+
+function buildDpTable() {
+  const tbody = document.getElementById('dp-live-tbody');
+  const rowLabels = ['""(i=0)', 'a(i=1)', 'b(i=2)', 'c(i=3)', 'd(i=4)', 'e(i=5)'];
+  tbody.innerHTML = '';
+  for (let i = 0; i <= M; i++) {
+    const tr = document.createElement('tr');
+    const rh = document.createElement('th');
+    rh.className = 'row-hdr';
+    rh.textContent = rowLabels[i];
+    tr.appendChild(rh);
+    for (let j = 0; j <= N; j++) {
+      const td = document.createElement('td');
+      td.id = `dpcell-${i}-${j}`;
+      td.className = 'cell-base';
+      td.textContent = '0';
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+}
+
+function buildDots() {
+  const c = document.getElementById('progress-dots');
+  c.innerHTML = '';
+  steps.forEach((_, idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.onclick = () => goTo(idx);
+    c.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER A STEP
+// ══════════════════════════════════════════════════════════════
+let cur = 0;
+
+function applyStep(s) {
+  // --- String char highlights ---
+  for (let k = 0; k < M; k++) {
+    const el = document.getElementById(`s1c-${k}`);
+    if (el) el.className = 'str-char-box';
+  }
+  for (let k = 0; k < N; k++) {
+    const el = document.getElementById(`s2c-${k}`);
+    if (el) el.className = 'str-char-box';
+  }
+  if (s.i > 0) {
+    const el = document.getElementById(`s1c-${s.i-1}`);
+    if (el) el.className = 'str-char-box ' + (s.phase === 'match' ? 'hi-match' : 'hi-i');
+  }
+  if (s.j > 0) {
+    const el = document.getElementById(`s2c-${s.j-1}`);
+    if (el) el.className = 'str-char-box ' + (s.phase === 'match' ? 'hi-match' : 'hi-j');
+  }
+
+  // --- DP table cells ---
+  for (let i = 0; i <= M; i++) {
+    for (let j = 0; j <= N; j++) {
+      const cell = document.getElementById(`dpcell-${i}-${j}`);
+      if (!cell) continue;
+
+      if (i === 0 || j === 0) {
+        cell.className = 'cell-base';
+        cell.textContent = '0';
+        continue;
+      }
+
+      // Determine cell state relative to current step
+      const curI = s.i, curJ = s.j;
+      let isComputed = false;
+      let isCurrent = false;
+
+      if (s.phase !== 'init') {
+        // Current cell: the one being filled at this step (only when 'dpval' is in changed)
+        if (i === curI && j === curJ && s.changed.includes('dpval')) {
+          isCurrent = true;
+          isComputed = true;
+        } else if (i < curI) {
+          isComputed = true;
+        } else if (i === curI && j < curJ) {
+          isComputed = true;
+        } else if (i === curI && j === curJ && !s.changed.includes('dpval')) {
+          // We're comparing but haven't written yet — show as future
+          isComputed = false;
+        }
+      }
+
+      if (isCurrent) {
+        if (s.phase === 'result') {
+          cell.className = 'cell-final';
+        } else if (s.phase === 'match') {
+          cell.className = 'cell-match';
+        } else {
+          cell.className = 'cell-cur';
+        }
+        cell.textContent = dpFull[i][j];
+      } else if (isComputed) {
+        cell.className = 'cell-done';
+        cell.textContent = dpFull[i][j];
+      } else {
+        cell.className = 'cell-future';
+        cell.textContent = '?';
+      }
+    }
+  }
+
+  // --- Code lines ---
+  for (let k = 0; k <= 9; k++) {
+    const el = document.getElementById(`cl-${k}`);
+    if (el) el.classList.remove('active');
+  }
+  const al = document.getElementById(`cl-${s.activeLine}`);
+  if (al) al.classList.add('active');
+
+  // --- Variable boxes ---
+  const varDefs = [
+    {boxId:'vb-i',   valId:'vv-i',     val: s.i < 0 ? '—' : String(s.i),           chg: s.changed.includes('i')},
+    {boxId:'vb-j',   valId:'vv-j',     val: s.j < 0 ? '—' : String(s.j),           chg: s.changed.includes('j')},
+    {boxId:'vb-c1',  valId:'vv-c1',    val: s.i > 0 ? `"${TEXT1[s.i-1]}"` : '—',  chg: s.changed.includes('c1')},
+    {boxId:'vb-c2',  valId:'vv-c2',    val: s.j > 0 ? `"${TEXT2[s.j-1]}"` : '—',  chg: s.changed.includes('c2')},
+    {boxId:'vb-dpval', valId:'vv-dpval',
+      val: (s.i > 0 && s.j > 0 && s.changed.includes('dpval')) ? String(dpFull[s.i][s.j]) : '—',
+      chg: s.changed.includes('dpval')},
+  ];
+  varDefs.forEach(v => {
+    const box = document.getElementById(v.boxId);
+    const val = document.getElementById(v.valId);
+    if (box && val) {
+      val.textContent = v.val;
+      box.classList.toggle('changed', v.chg);
+    }
+  });
+
+  // --- Decision panel ---
+  const dpanel = document.getElementById('decision-panel');
+  if (s.decision) {
+    dpanel.style.display = '';
+    const badge = document.getElementById('dp-type-badge');
+    badge.className = 'dp-type-badge ' + (s.decision.type === 'match' ? 'dp-type-match' : 'dp-type-nomatch');
+    badge.textContent = s.decision.type === 'match' ? 'MATCH' : 'NO MATCH';
+    document.getElementById('dp-question').textContent = s.decision.q;
+    const optsEl = document.getElementById('dp-options');
+    optsEl.innerHTML = '';
+    s.decision.opts.forEach(opt => {
+      const div = document.createElement('div');
+      div.className = 'dec-opt ' + (opt.sel ? 'selected' : 'rejected');
+      div.innerHTML = `<div class="opt-label">${opt.label}</div>
+        <div class="opt-formula">${opt.formula}</div>
+        <div class="opt-result">${opt.sel ? '<span class="opt-chk">✓</span>' : '<span class="opt-x">✗</span>'}${opt.result}</div>`;
+      optsEl.appendChild(div);
+    });
+  } else {
+    dpanel.style.display = 'none';
+  }
+
+  // --- Info card ---
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + s.phaseClass;
+  badge.textContent = s.phaseLabel;
+  document.getElementById('step-counter').textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // --- Progress dots ---
+  document.querySelectorAll('.dot').forEach((d, idx) => {
+    d.className = 'dot' + (idx === cur ? ' active' : idx < cur ? ' visited' : '');
+  });
+
+  // --- Controls ---
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === steps.length - 1;
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function go(dir) {
+  const next = cur + dir;
+  if (next < 0 || next >= steps.length) return;
+  cur = next;
+  applyStep(steps[cur]);
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  cur = idx;
+  applyStep(steps[cur]);
+}
+
+function reset() {
+  cur = 0;
+  applyStep(steps[0]);
+}
+
+// ══════════════════════════════════════════════════════════════
+// CARD COLLAPSE
+// ══════════════════════════════════════════════════════════════
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  const collapsed = content.classList.toggle('collapsed');
+  icon.style.transform = collapsed ? 'rotate(-90deg)' : '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// KEYBOARD NAVIGATION
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+buildStrChars();
+buildDpTable();
+buildDots();
+applyStep(steps[0]);
 </script>
-</body></html>
+</body>
+</html>

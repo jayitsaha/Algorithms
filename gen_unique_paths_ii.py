@@ -1,8 +1,11 @@
 """
-gen_unique_paths_ii.py — Notion update for Unique Paths II (LC #63)
-Run from: /Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms/
+gen_unique_paths_ii.py — Notion in-place update for Unique Paths II (LeetCode #63)
+Run from Algorithms/ directory: python3 gen_unique_paths_ii.py
 """
-import sys, os
+import sys
+sys.path.insert(0, '/Users/j0s0yz3/Documents/PersonalSkillUp/Algorithms')
+import notion_lib as N
+import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import notion_lib as N
 
