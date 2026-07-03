@@ -13,7 +13,7 @@ NUMBER = 847
 DIFFICULTY = "Hard"
 ICON = "🔴"
 PATTERN = "Dynamic Programming"
-SUBPATTERNS = ["BFS with (node, visited_mask)"]
+SUBPATTERNS = ["BFS with node and visited-mask"]
 TC = "O(2^n · n^2)"
 SC = "O(2^n · n)"
 KEY_INSIGHT = "BFS on augmented (node, bitmask) state space; multi-source seed enables any-start; n<=12 makes 2^n=4096 tractable."
@@ -283,13 +283,13 @@ blocks += [
 blocks += [
     N.h2("🔗 Related Problems"),
     N.para("Problems using the same BFS+Bitmask or Bitmask DP technique:"),
-    N.bullet(N.rich([("Campus Bikes II", {"bold": True}), " (Hard, LC 1066) — Bitmask DP on worker-bike minimum cost assignment; same n*2^n structure")])),
-    N.bullet(N.rich([("Fair Distribution of Cookies", {"bold": True}), " (Medium, LC 2305) — Bitmask DFS/DP to distribute cookie bags; subset enumeration")])),
-    N.bullet(N.rich([("Minimum Number of Work Sessions", {"bold": True}), " (Medium, LC 1986) — Bitmask DP over task subsets to minimize sessions")])),
-    N.bullet(N.rich([("Partition to K Equal Sum Subsets", {"bold": True}), " (Medium, LC 698) — Bitmask to track which elements are in which subset")])),
-    N.bullet(N.rich([("Shortest Path in Grid with Obstacles Elimination", {"bold": True}), " (Hard, LC 1293) — BFS with augmented state (pos, k-remaining); same pattern")])),
-    N.bullet(N.rich([("Find the Shortest Superstring", {"bold": True}), " (Hard, LC 943) — Bitmask DP + TSP on strings; visit all strings minimizing overlap cost")])),
-    N.bullet(N.rich([("Travelling Salesman Problem", {"bold": True}), " (NP-Hard, classic) — This problem is the unweighted, flexible-start variant of TSP")])),
+    N.bullet(N.rich([("Campus Bikes II", {"bold": True}), " (Hard, LC 1066) — Bitmask DP on worker-bike minimum cost assignment; same n*2^n structure"])),
+    N.bullet(N.rich([("Fair Distribution of Cookies", {"bold": True}), " (Medium, LC 2305) — Bitmask DFS/DP to distribute cookie bags; subset enumeration"])),
+    N.bullet(N.rich([("Minimum Number of Work Sessions", {"bold": True}), " (Medium, LC 1986) — Bitmask DP over task subsets to minimize sessions"])),
+    N.bullet(N.rich([("Partition to K Equal Sum Subsets", {"bold": True}), " (Medium, LC 698) — Bitmask to track which elements are in which subset"])),
+    N.bullet(N.rich([("Shortest Path in Grid with Obstacles Elimination", {"bold": True}), " (Hard, LC 1293) — BFS with augmented state (pos, k-remaining); same pattern"])),
+    N.bullet(N.rich([("Find the Shortest Superstring", {"bold": True}), " (Hard, LC 943) — Bitmask DP + TSP on strings; visit all strings minimizing overlap cost"])),
+    N.bullet(N.rich([("Travelling Salesman Problem", {"bold": True}), " (NP-Hard, classic) — This problem is the unweighted, flexible-start variant of TSP"])),
     N.para("These problems share the core technique: represent a subset of items as a bitmask, use it as part of the DP/BFS state to track progress toward a global goal."),
     N.callout("📚 Reference: DSA_Patterns_and_SubPatterns_Guide.md — Section on Dynamic Programming, Sub-Pattern: BFS with (node, visited_mask)", "📚", "gray_background"),
     N.divider(),

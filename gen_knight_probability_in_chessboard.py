@@ -12,7 +12,7 @@ N.set_properties(
     difficulty="Medium",
     number=688,
     pattern="Dynamic Programming",
-    subpatterns=["dp[step][x][y] probability"],
+    subpatterns=["dp[step][x][y] = probability"],
     tc="O(k·n²)",
     sc="O(n²)",
     key_insight="Track probability distribution dp[r][c] across board cells; spread /8 each step — off-board prob is lost; sum after k steps is the answer.",
@@ -166,7 +166,7 @@ blocks += [
 blocks += [
     N.h2("🏷️ Pattern Classification"),
     N.para(N.rich([("Main Pattern: ", {"bold": True}), "Dynamic Programming"])),
-    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), "dp[step][x][y] probability (Probability DP / Grid Random Walk DP)"])),
+    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), "dp[step][x][y] = probability (Probability DP / Grid Random Walk DP) — Guide Section 18.10"])),
     N.callout(
         "When to recognize this pattern: 'probability after k steps/moves', 'random walk on grid', 'fixed number of steps' — track a probability distribution over states, not individual paths. Spread each cell's probability to valid neighbors, divide by number of choices. Sum final distribution for total survival probability.",
         "🔎", "green_background"
