@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1411 · Number of Ways to Paint N × 3 Grid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:0.75rem}
+.recurrence-formula{font-family:var(--mono);font-size:13.5px;line-height:2.2;color:var(--text)}
+.var-t2{color:var(--blue-mid);font-weight:600}
+.var-t3{color:var(--green-mid);font-weight:600}
+
+/* ── Grid Visualization (Row Patterns) ── */
+.grid-viz{display:flex;flex-direction:column;gap:16px;margin:1rem 0}
+.grid-row-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+.row-patterns{display:flex;gap:10px;flex-wrap:wrap}
+.pattern-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);cursor:default;transition:border-color 0.2s}
+.pattern-card.type-2{border-color:var(--blue-border);background:var(--blue-bg)}
+.pattern-card.type-3{border-color:var(--green-border);background:var(--green-bg)}
+.pattern-cells{display:flex;gap:4px}
+.pcell{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid rgba(0,0,0,0.18)}
+.pcell-r{background:#fca5a5;color:#7f1d1d}
+.pcell-g{background:#86efac;color:#14532d}
+.pcell-b{background:#93c5fd;color:#1e3a8a}
+.pattern-label{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── DP Grid Table ── */
+.dp-table-wrap{overflow-x:auto;margin:1rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;min-width:100%}
+.dp-table th,.dp-table td{padding:10px 14px;text-align:center;border:1px solid var(--border)}
+.dp-table th{background:var(--bg2);font-weight:600}
+.dp-table td.t2-cell{background:var(--blue-bg);color:var(--blue-text)}
+.dp-table td.t3-cell{background:var(--green-bg);color:var(--green-text)}
+.dp-table td.total-cell{background:var(--purple-bg);color:var(--purple-text);font-weight:700}
+.dp-table td.current{outline:3px solid var(--amber-mid);outline-offset:-1px}
+.dp-table td.future{color:var(--text3)}
+
+/* ── State Machine ── */
+.state-machine{display:flex;justify-content:center;align-items:center;gap:30px;margin:1.5rem 0;flex-wrap:wrap}
+.state-node{width:170px;padding:18px 14px;border-radius:16px;border:3px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:8px;transition:background 0.3s,border-color 0.3s}
+.state-node.s-t2{border-color:var(--blue-border)}
+.state-node.s-t2.active{background:var(--blue-bg);border-color:var(--blue-mid)}
+.state-node.s-t3{border-color:var(--green-border)}
+.state-node.s-t3.active{background:var(--green-bg);border-color:var(--green-mid)}
+.state-icon{font-size:28px}
+.state-name{font-size:13px;font-weight:700}
+.state-node.s-t2 .state-name{color:var(--blue-mid)}
+.state-node.s-t3 .state-name{color:var(--green-mid)}
+.state-count{font-family:var(--mono);font-size:22px;font-weight:700}
+.state-node.s-t2 .state-count{color:var(--blue-text)}
+.state-node.s-t3 .state-count{color:var(--green-text)}
+.state-desc{font-size:11px;color:var(--text3);text-align:center;line-height:1.4}
+.arrow-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.arrow-lbl{font-size:11px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;color:var(--text2);white-space:nowrap}
+.arrow-symbol{font-size:22px;color:var(--text3)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── Row Grid Walkthrough ── */
+.wt-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;align-items:center}
+.wt-row{display:flex;gap:6px;align-items:center}
+.wt-row-label{font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);width:32px;text-align:right;flex-shrink:0}
+.wt-cell{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.wt-cell.col-r{background:#fca5a5;border-color:#ef4444;color:#7f1d1d}
+.wt-cell.col-g{background:#86efac;border-color:#22c55e;color:#14532d}
+.wt-cell.col-b{background:#93c5fd;border-color:#3b82f6;color:#1e3a8a}
+.wt-cell.cur-row{outline:3px solid var(--amber-mid);outline-offset:-1px}
+.wt-cell.empty{background:var(--bg2);border-style:dashed;color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-t2{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-t3{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-t2{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-t3{background:var(--green-bg);border-color:var(--green-border)}
+.sw-cur{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-total{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1411</div>
+  <h1>Number of Ways to Paint N × 3 Grid</h1>
+  <p class="subtitle">You have a grid of n rows and 3 columns. Color each cell with one of 3 colors such that no two adjacent cells (sharing a side) have the same color. Return the number of valid colorings modulo 10⁹ + 7.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Two-Color &amp; Three-Color Patterns</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a grid of <strong>n rows × 3 columns</strong>. Each cell must be painted with one of 3 colors (call them R, G, B) such that no two cells sharing a side have the same color. Return the total count of valid colorings, modulo 10⁹ + 7.</p>
+
+    <p style="margin-top:0.75rem">The adjacency constraint applies in <strong>two directions</strong>: horizontally (within the same row, left-right neighbors differ) and vertically (across rows, cells in the same column differ row-to-row). Diagonal neighbors may share a color.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A valid row of 3 cells with 3 colors, where adjacent cells differ, has exactly <strong>12 distinct color patterns</strong>. Of those 12, some use only 2 distinct colors (<em>two-color patterns</em>, e.g., R-G-R), and some use all 3 distinct colors (<em>three-color patterns</em>, e.g., R-G-B). These two types transition differently to valid next rows — and that's the only information we need per row!</p>
+    </div>
+
+    <!-- Static row-pattern diagram -->
+    <p style="margin-top:1rem;font-weight:600">The 12 valid row patterns, grouped by type:</p>
+    <div class="grid-viz">
+      <div>
+        <div class="grid-row-label">Two-Color Patterns (ABA form) — 6 total</div>
+        <div class="row-patterns">
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-r">R</div><div class="pcell pcell-g">G</div><div class="pcell pcell-r">R</div></div><div class="pattern-label">RGR</div></div>
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-r">R</div><div class="pcell pcell-b">B</div><div class="pcell pcell-r">R</div></div><div class="pattern-label">RBR</div></div>
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-g">G</div><div class="pcell pcell-r">R</div><div class="pcell pcell-g">G</div></div><div class="pattern-label">GRG</div></div>
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-g">G</div><div class="pcell pcell-b">B</div><div class="pcell pcell-g">G</div></div><div class="pattern-label">GBG</div></div>
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-b">B</div><div class="pcell pcell-r">R</div><div class="pcell pcell-b">B</div></div><div class="pattern-label">BRB</div></div>
+          <div class="pattern-card type-2"><div class="pattern-cells"><div class="pcell pcell-b">B</div><div class="pcell pcell-g">G</div><div class="pcell pcell-b">B</div></div><div class="pattern-label">BGB</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grid-row-label">Three-Color Patterns (ABC form) — 6 total</div>
+        <div class="row-patterns">
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-r">R</div><div class="pcell pcell-g">G</div><div class="pcell pcell-b">B</div></div><div class="pattern-label">RGB</div></div>
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-r">R</div><div class="pcell pcell-b">B</div><div class="pcell pcell-g">G</div></div><div class="pattern-label">RBG</div></div>
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-g">G</div><div class="pcell pcell-r">R</div><div class="pcell pcell-b">B</div></div><div class="pattern-label">GRB</div></div>
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-g">G</div><div class="pcell pcell-b">B</div><div class="pcell pcell-r">R</div></div><div class="pattern-label">GBR</div></div>
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-b">B</div><div class="pcell pcell-r">R</div><div class="pcell pcell-g">G</div></div><div class="pattern-label">BRG</div></div>
+          <div class="pattern-card type-3"><div class="pattern-cells"><div class="pcell pcell-b">B</div><div class="pcell pcell-g">G</div><div class="pcell pcell-r">R</div></div><div class="pattern-label">BGR</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Valid Adjacency (n=2)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          Row 1: R G R (two-color)<br>
+          Row 2: G R G (two-color)<br>
+          Vertical: R≠G, G≠R, R≠G ✓
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Invalid (column clash)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          Row 1: R G R (two-color)<br>
+          Row 2: R B R (two-color)<br>
+          Vertical: R=R col 0 ✗
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> n = 1 → only 12 valid rows → answer is 12. The answer grows quickly with n; modular arithmetic is essential for large n.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-State Row DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Instead of tracking which exact color pattern each row uses (which would require 12 states), we can abstract each row into just <strong>two states</strong>: whether it used 2 distinct colors or 3 distinct colors. The transition counts between these two types are fixed constants, independent of which specific colors are used.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Count valid patterns for row 1:</strong> There are 6 two-color patterns and 6 three-color patterns. Initialize <code>t2 = 6</code>, <code>t3 = 6</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Derive transition rules (key math):</strong> By exhaustive enumeration (done once), a two-color row generates 3 compatible two-color rows and 2 compatible three-color rows for the next row. A three-color row generates 2 compatible two-color rows and 2 compatible three-color rows.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Iterate n−1 times:</strong> For each subsequent row, compute new totals: <code>new_t2 = 3*t2 + 2*t3</code> and <code>new_t3 = 2*t2 + 2*t3</code>. Apply modulo 10⁹+7 to prevent overflow.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return total:</strong> <code>(t2 + t3) % MOD</code> is the answer — the total valid colorings across all pattern types for all n rows.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Fixed Transitions? (The Core Insight)</div>
+      <p>Consider any two-color row, say R-G-R. The valid next rows must differ in each column: col 0 ≠ R, col 1 ≠ G, col 2 ≠ R, AND col 0 ≠ col 1, col 1 ≠ col 2. Enumerating gives exactly 3 two-color and 2 three-color options. By symmetry of the 3 colors, <em>every</em> two-color row has exactly the same counts. So we can collapse 6 individual counts into one aggregate t2. Same logic for three-color rows.</p>
+    </div>
+
+    <!-- State Machine Diagram -->
+    <p style="margin-top:1rem;font-weight:600;font-size:14px">Row-to-Row State Machine:</p>
+    <div class="state-machine">
+      <div class="state-node s-t2">
+        <div class="state-icon">🔵</div>
+        <div class="state-name">Two-Color Row</div>
+        <div class="state-desc">ABA form<br>6 patterns</div>
+      </div>
+      <div class="arrow-wrap">
+        <div class="arrow-lbl">T2→T2: ×3</div>
+        <div class="arrow-symbol">⇄</div>
+        <div class="arrow-lbl">T3→T2: ×2</div>
+        <div style="margin-top:8px"></div>
+        <div class="arrow-lbl">T2→T3: ×2</div>
+        <div class="arrow-symbol">⇄</div>
+        <div class="arrow-lbl">T3→T3: ×2</div>
+      </div>
+      <div class="state-node s-t3">
+        <div class="state-icon">🟢</div>
+        <div class="state-name">Three-Color Row</div>
+        <div class="state-desc">ABC form<br>6 patterns</div>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relations</div>
+      <div class="recurrence-formula">
+        <span class="var-t2">t2[i]</span> = 3 × <span class="var-t2">t2[i-1]</span> + 2 × <span class="var-t3">t3[i-1]</span><br>
+        <span class="var-t3">t3[i]</span> = 2 × <span class="var-t2">t2[i-1]</span> + 2 × <span class="var-t3">t3[i-1]</span><br>
+        <br>
+        Base case: <span class="var-t2">t2[1]</span> = 6,  <span class="var-t3">t3[1]</span> = 6<br>
+        Answer: (<span class="var-t2">t2[n]</span> + <span class="var-t3">t3[n]</span>) mod 10⁹+7
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: DP, Invariant &amp; Correctness</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p style="margin-bottom:0.75rem"><strong>Why is this Dynamic Programming?</strong></p>
+    <p><strong>Optimal substructure:</strong> The number of valid colorings for an n-row grid depends only on the number of valid colorings for an (n−1)-row grid <em>in each pattern class</em>. Each row's valid transitions depend only on the current row's type (two-color or three-color), not on any of the rows before it.</p>
+    <p style="margin-top:0.5rem"><strong>Overlapping subproblems:</strong> A naive recursion would recompute the count for "how many valid 4-row grids end in a two-color row" many times from different branches. DP memoizes this as a single value t2[4].</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing row <em>i</em>, <strong>t2</strong> counts the total valid colorings of the first <em>i</em> rows where row <em>i</em> is any two-color pattern, and <strong>t3</strong> counts the same for any three-color pattern. Together, t2 + t3 = total valid colorings of a grid with <em>i</em> rows.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Proving the transition constants (enumerate for R-G-R):</strong></p>
+    <p>Given row pattern R-G-R, the next row must satisfy: cell[0] ≠ R, cell[1] ≠ G, cell[2] ≠ R, cell[0] ≠ cell[1], cell[1] ≠ cell[2]. Let's enumerate:</p>
+    <div class="ann-code" style="margin-top:0.5rem">
+<div class="ann-line"><span class="acode">Next rows compatible with R-G-R:</span></div>
+<div class="ann-line"><span class="acode">  G-R-G  ← two-color (ABA)</span></div>
+<div class="ann-line"><span class="acode">  G-B-G  ← two-color (ABA)</span></div>
+<div class="ann-line"><span class="acode">  B-R-B  ← two-color (ABA)</span></div>
+<div class="ann-line"><span class="acode">  G-R-B  ← three-color (ABC)</span></div>
+<div class="ann-line"><span class="acode">  B-R-G  ← three-color (ABC)</span></div>
+<div class="ann-line"><span class="acode">Total: 3 two-color + 2 three-color   (same for every two-color row by symmetry)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Thinking Transitions are 3+3</div>
+      <p>It's tempting to think a two-color row gives 3 two-color and 3 three-color options. But the third column of a two-color row (which equals column 0) severely constrains what column 2 of the next row can be. Work through the enumeration above carefully — the answer is 3 two-color and only 2 three-color.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why can we use just t2 and t3?</strong> By symmetry of the 3 colors, every two-color pattern (all 6 of them) generates <em>exactly</em> the same distribution of next-row types. We never need to track which specific color was used — just whether 2 or 3 colors were used. This collapses 12 state variables into 2.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — Two-State DP, Bottom-Up / Tabulation (Optimal, O(n) time, O(1) space)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def numOfWays(n: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">    MOD = 10**9 + 7                     </span><span class="aann">← Required modulus to prevent overflow</span></div>
+<div class="ann-line"><span class="acode">    t2, t3 = 6, 6                       </span><span class="aann">← Base case: row 1 has 6 two-color + 6 three-color patterns</span></div>
+<div class="ann-line"><span class="acode">    for _ in range(n - 1):              </span><span class="aann">← Process each additional row (n-1 transitions)</span></div>
+<div class="ann-line"><span class="acode">        t2, t3 = (3*t2 + 2*t3) % MOD,  </span><span class="aann">← New two-color: 3 per old t2 + 2 per old t3</span></div>
+<div class="ann-line"><span class="acode">                 (2*t2 + 2*t3) % MOD    </span><span class="aann">← New three-color: 2 per old t2 + 2 per old t3</span></div>
+<div class="ann-line"><span class="acode">    return (t2 + t3) % MOD             </span><span class="aann">← Total valid colorings for n rows</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Simultaneous Update Trick</div>
+      <p>Notice <code>t2, t3 = expr1, expr2</code> on one line. Python evaluates both right-hand sides using the OLD values of t2 and t3 before assigning. If you wrote <code>t2 = ...; t3 = ...</code> on two separate lines, the second line would use the newly updated t2 in computing t3 — giving a wrong answer. Always update both simultaneously.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Memoization / Top-Down (same complexity, illustrates DP structure)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">def numOfWays(n: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">    MOD = 10**9 + 7</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)            </span><span class="aann">← Cache results; state is (row, type)</span></div>
+<div class="ann-line"><span class="acode">    def dp(row, kind):                  </span><span class="aann">← row: which row; kind: 2=two-color, 3=three-color</span></div>
+<div class="ann-line"><span class="acode">        if row == 1:                    </span><span class="aann">← Base: 6 patterns of each type for first row</span></div>
+<div class="ann-line"><span class="acode">            return 6</span></div>
+<div class="ann-line"><span class="acode">        if kind == 2:                   </span><span class="aann">← Two-color row at this level</span></div>
+<div class="ann-line"><span class="acode">            return (3*dp(row-1, 2) + 2*dp(row-1, 3)) % MOD</span></div>
+<div class="ann-line"><span class="acode">        else:                           </span><span class="aann">← Three-color row at this level</span></div>
+<div class="ann-line"><span class="acode">            return (2*dp(row-1, 2) + 2*dp(row-1, 3)) % MOD</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    return (dp(n, 2) + dp(n, 3)) % MOD  </span><span class="aann">← Sum both types for the final row</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Tabulation (optimal):</strong> Time O(n), Space O(1) — two variables, updated in-place.<br>
+        <strong>Memoization:</strong> Time O(n), Space O(n) — cache stores 2 results per row: dp(row, 2) and dp(row, 3).<br>
+        Both are correct. The tabulation version is interview-preferred due to constant space.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Count Valid Single-Row Patterns</div>
+        <p style="font-size:14px;color:var(--text)">Start by asking: how many valid colorings exist for a single 3-cell row? With 3 colors and no adjacent same color: cell[0] has 3 choices, cell[1] has 2, cell[2] has 2 → 3×2×2 = 12. Show you can enumerate them systematically: 6 use exactly 2 colors (ABA), 6 use all 3 colors (ABC).</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the State (Key Reduction)</div>
+        <p style="font-size:14px;color:var(--text)">Ask: "Do I need to track exactly which colors were used, or just how many?" By the symmetry of 3 colors, every two-color row generates the same number of compatible next rows. So the <em>type</em> (2-color vs 3-color) is the sufficient state — not the specific colors. This reduces 12 states to 2.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Work Out Transitions on Paper</div>
+        <p style="font-size:14px;color:var(--text)">Pick one two-color pattern (e.g., R-G-R) and enumerate all valid next rows. You get 3 two-color and 2 three-color options. Pick one three-color (e.g., R-G-B) — you get 2 two-color and 2 three-color. These are the transition constants.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Write the Recurrence, Code it Up</div>
+        <p style="font-size:14px;color:var(--text)">Base case: t2 = t3 = 6. Each iteration: new_t2 = 3×t2 + 2×t3; new_t3 = 2×t2 + 2×t3. Run for n−1 iterations. Return (t2 + t3) % MOD. Verify with n=1 → 12, n=2 → 3×6+2×6 + 2×6+2×6 = 30+24 = 54. (Actual answer for n=2 is 54 ✓)</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"A 3-cell row with 3 colors gives 12 valid patterns — 6 using 2 colors, 6 using all 3.<br>
+By symmetry of colors, every two-color row generates the same count of valid next rows.<br>
+So I can track just two numbers: t2 and t3, the counts of valid grids ending in each type.<br>
+By enumeration, transitions are: new_t2 = 3*t2 + 2*t3; new_t3 = 2*t2 + 2*t3.<br>
+I run this for n-1 steps starting from t2=t3=6, taking mod 10^9+7 throughout.<br>
+Time O(n), Space O(1)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if it's N × 4 grid?"</strong> → More pattern types needed; profile count grows but DP structure is identical</li>
+        <li><strong>"What about K colors instead of 3?"</strong> → More complex counting, same DP idea</li>
+        <li><strong>"Can you solve it with matrix exponentiation?"</strong> → Yes — encode transitions as 2×2 matrix, use fast exponentiation for O(log n)</li>
+        <li><strong>"Why must we update t2 and t3 simultaneously?"</strong> → Because the recurrence uses old values of both; sequential update corrupts results</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n = 3 rows</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Grid Visual -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
+        <div class="wt-grid" id="wt-grid">
+          <!-- Rows built by JS -->
+        </div>
+      </div>
+
+      <!-- State Machine Live -->
+      <div class="state-machine" style="margin:0.75rem 0">
+        <div class="state-node s-t2" id="sm-t2">
+          <div class="state-icon">🔵</div>
+          <div class="state-name">Two-Color</div>
+          <div class="state-count" id="sm-t2-val">6</div>
+          <div class="state-desc">t2</div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--text3);line-height:2">
+          <div>T2→T2: ×3</div>
+          <div>T2→T3: ×2</div>
+          <div style="margin:4px 0">↕</div>
+          <div>T3→T2: ×2</div>
+          <div>T3→T3: ×2</div>
+        </div>
+        <div class="state-node s-t3" id="sm-t3">
+          <div class="state-icon">🟢</div>
+          <div class="state-name">Three-Color</div>
+          <div class="state-count" id="sm-t3-val">6</div>
+          <div class="state-desc">t3</div>
+        </div>
+      </div>
+
+      <!-- DP Table -->
+      <div class="dp-table-wrap">
+        <table class="dp-table" id="dp-table">
+          <thead>
+            <tr><th>Row</th><th>t2 (two-color)</th><th>t3 (three-color)</th><th>total</th></tr>
+          </thead>
+          <tbody id="dp-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-row">
+          <span class="var-name">row</span>
+          <span class="var-val" id="vv-row">1</span>
+        </div>
+        <div class="var-box" id="vb-t2">
+          <span class="var-name">t2</span>
+          <span class="var-val" id="vv-t2">6</span>
+        </div>
+        <div class="var-box" id="vb-t3">
+          <span class="var-name">t3</span>
+          <span class="var-val" id="vv-t3">6</span>
+        </div>
+        <div class="var-box" id="vb-total">
+          <span class="var-name">total</span>
+          <span class="var-val" id="vv-total">12</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def numOfWays(n: int) -> int:</div>
+      <div class="code-line" id="cl-1">    MOD = 10**9 + 7</div>
+      <div class="code-line" id="cl-2">    t2, t3 = 6, 6</div>
+      <div class="code-line" id="cl-3">    for _ in range(n - 1):</div>
+      <div class="code-line" id="cl-4">        t2, t3 = (3*t2 + 2*t3) % MOD,</div>
+      <div class="code-line" id="cl-5">                 (2*t2 + 2*t3) % MOD</div>
+      <div class="code-line" id="cl-6">    return (t2 + t3) % MOD</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 9</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-t2"></div> Two-color pattern (ABA)</div>
+      <div class="legend-item"><div class="legend-swatch sw-t3"></div> Three-color pattern (ABC)</div>
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div> Current row being processed</div>
+      <div class="legend-item"><div class="legend-swatch sw-total"></div> Total count (t2 + t3)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A 3-cell row with 3 colors yields exactly 12 valid patterns: 6 two-color (ABA) and 6 three-color (ABC)</div>
+      <div class="takeaway">By color symmetry, all patterns of the same type are interchangeable — track counts t2, t3, not specific colors</div>
+      <div class="takeaway">Fixed transition constants: T2→T2: ×3, T2→T3: ×2, T3→T2: ×2, T3→T3: ×2</div>
+      <div class="takeaway">Always update t2 and t3 simultaneously (Python tuple assignment) to avoid using stale values</div>
+      <div class="takeaway">Space O(1) — only two variables needed regardless of n; modulo applied every step</div>
+      <div class="takeaway">Can extend to O(log n) with 2×2 matrix exponentiation for the transition matrix</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Naive Backtracking</td>
+          <td class="mark-bad">O(12ⁿ)</td>
+          <td>O(n)</td>
+          <td>TLE for large n; correct but exponential</td>
+        </tr>
+        <tr>
+          <td>Full 12-State DP</td>
+          <td>O(n)</td>
+          <td>O(n)</td>
+          <td>Track each of 12 patterns explicitly</td>
+        </tr>
+        <tr>
+          <td><strong>Two-State DP (t2/t3) ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Optimal; uses color symmetry to collapse states</td>
+        </tr>
+        <tr>
+          <td>Matrix Exponentiation</td>
+          <td class="mark-good">O(log n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Best for very large n; advanced technique</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Two-Color / Three-Color DP Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Grid coloring with adjacency constraints and limited colors</li>
+        <li>The number of possible patterns per row is small and fixed</li>
+        <li>Symmetry between colors means you only care about the structure (how many distinct colors), not which specific colors</li>
+        <li>Answer depends only on the previous row's "type", not its full history</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same pattern family)</div>
+      <div class="related-item"><strong>Paint House</strong><span class="related-diff diff-med">Medium</span> — DP on row colors where adjacent houses differ (#256)</div>
+      <div class="related-item"><strong>Paint House II</strong><span class="related-diff diff-hard">Hard</span> — k colors, n houses; same row-to-row DP structure (#265)</div>
+      <div class="related-item"><strong>Paint Fence</strong><span class="related-diff diff-med">Medium</span> — Color n fence posts with k colors, no 3 consecutive same (#276)</div>
+      <div class="related-item"><strong>Number of Ways to Color a 3×3 Grid</strong><span class="related-diff diff-hard">Hard</span> — Similar grid coloring variant with fixed grid size</div>
+      <div class="related-item"><strong>Student Attendance Record II</strong><span class="related-diff diff-hard">Hard</span> — Count valid strings with state-based DP transitions (#552)</div>
+      <div class="related-item"><strong>Coloring a Border</strong><span class="related-diff diff-med">Medium</span> — Graph-based coloring with constraint propagation (#1034)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming)<br>
+      Problem entry: "Number of Ways to Paint N × 3 Grid" | State: (2-color, 3-color patterns)<br>
+      Sub-Pattern: <strong>Two-Color and Three-Color Patterns</strong> · Source: Guide Section 18 (Analysis)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Step Data ────────────────────────────────────────────────────────────────
+// We simulate n=3 (3 rows, 2 iterations after base case)
+// State: { row, t2, t3, activeLine, phaseLabel, phaseClass, title, text, changed }
+const steps = [
+  {
+    row: 0, t2: 0, t3: 0,
+    activeLine: 0,
+    phaseLabel: 'START', phaseClass: 'phase-init',
+    title: 'Initialize: n = 3',
+    text: 'We want to count valid colorings for a 3×3 grid (3 rows, 3 columns). Begin by setting MOD = 10⁹+7 to prevent integer overflow in large inputs.',
+    changed: []
+  },
+  {
+    row: 1, t2: 6, t3: 6,
+    activeLine: 2,
+    phaseLabel: 'BASE CASE', phaseClass: 'phase-init',
+    title: 'Base case: Row 1 has 6 + 6 = 12 valid patterns',
+    text: 'For a single row of 3 cells with 3 colors: 6 patterns use exactly 2 colors (ABA form: RGR, RBR, GRG, GBG, BRB, BGB) and 6 use all 3 colors (ABC form: RGB, RBG, GRB, GBR, BRG, BGR). Set t2 = 6, t3 = 6.',
+    changed: ['t2', 't3']
+  },
+  {
+    row: 1, t2: 6, t3: 6,
+    activeLine: 3,
+    phaseLabel: 'LOOP START', phaseClass: 'phase-t2',
+    title: 'Enter loop: n - 1 = 2 iterations needed',
+    text: 'We need 2 more rows. Each iteration processes one additional row by applying the fixed transition counts. The loop runs from row 1 to row n, so n−1 = 2 times for n=3.',
+    changed: []
+  },
+  {
+    row: 2, t2: 6, t3: 6,
+    activeLine: 4,
+    phaseLabel: 'ITER 1: T2', phaseClass: 'phase-t2',
+    title: 'Iteration 1: Compute new t2 for row 2',
+    text: 'New t2 = 3×t2_old + 2×t3_old = 3×6 + 2×6 = 18 + 12 = 30. Each of the 6 two-color rows generates 3 compatible two-color next rows, and each of the 6 three-color rows generates 2 compatible two-color next rows.',
+    changed: ['t2']
+  },
+  {
+    row: 2, t2: 30, t3: 6,
+    activeLine: 5,
+    phaseLabel: 'ITER 1: T3', phaseClass: 'phase-t3',
+    title: 'Iteration 1: Compute new t3 for row 2',
+    text: 'New t3 = 2×t2_old + 2×t3_old = 2×6 + 2×6 = 12 + 12 = 24. Each two-color row generates 2 compatible three-color next rows; each three-color row also generates 2 compatible three-color next rows. Note: we use the OLD t2=6, not the new 30 — simultaneous update!',
+    changed: ['t3']
+  },
+  {
+    row: 2, t2: 30, t3: 24,
+    activeLine: 3,
+    phaseLabel: 'AFTER ROW 2', phaseClass: 'phase-t2',
+    title: 'After row 2: t2=30, t3=24, total=54',
+    text: 'After processing row 2: there are 30 valid 2-row grids whose second row is a two-color pattern, and 24 whose second row is three-color. Total 2-row valid colorings = 30 + 24 = 54. (Verify: n=2 answer is 54 ✓)',
+    changed: []
+  },
+  {
+    row: 3, t2: 30, t3: 24,
+    activeLine: 4,
+    phaseLabel: 'ITER 2: T2', phaseClass: 'phase-t2',
+    title: 'Iteration 2: Compute new t2 for row 3',
+    text: 'New t2 = 3×30 + 2×24 = 90 + 48 = 138. Each of the 30 two-color row-2 endings generates 3 two-color row-3 continuations; each of the 24 three-color endings generates 2 two-color continuations.',
+    changed: ['t2']
+  },
+  {
+    row: 3, t2: 138, t3: 24,
+    activeLine: 5,
+    phaseLabel: 'ITER 2: T3', phaseClass: 'phase-t3',
+    title: 'Iteration 2: Compute new t3 for row 3',
+    text: 'New t3 = 2×30 + 2×24 = 60 + 48 = 108. Using OLD t2=30. After both updates: t2=138, t3=108.',
+    changed: ['t3']
+  },
+  {
+    row: 3, t2: 138, t3: 108,
+    activeLine: 6,
+    phaseLabel: 'RETURN', phaseClass: 'phase-result',
+    title: 'Return: (t2 + t3) % MOD = 246',
+    text: 'Final answer = (138 + 108) % (10⁹+7) = 246. There are 246 valid ways to paint a 3×3 grid with 3 colors such that no two adjacent cells share a color. ✓',
+    changed: ['t2', 't3']
+  }
+];
+
+// ── DP Table Values per step ─────────────────────────────────────────────────
+// For each step, which rows in the DP table are known?
+const dpRows = [
+  // step 0: nothing filled
+  [],
+  // step 1: row 1 filled
+  [{row:1, t2:6, t3:6, cur:false}],
+  // step 2: row 1 done, waiting for row 2
+  [{row:1, t2:6, t3:6, cur:false}],
+  // step 3: computing row 2 t2
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:'?', t3:'?', cur:true}],
+  // step 4: t2 just computed
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:30, t3:'?', cur:true}],
+  // step 5: both computed for row 2
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:30, t3:24, cur:false}],
+  // step 6: computing row 3 t2
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:30, t3:24, cur:false}, {row:3, t2:'?', t3:'?', cur:true}],
+  // step 7: t2 computed for row 3
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:30, t3:24, cur:false}, {row:3, t2:138, t3:'?', cur:true}],
+  // step 8: final
+  [{row:1, t2:6, t3:6, cur:false}, {row:2, t2:30, t3:24, cur:false}, {row:3, t2:138, t3:108, cur:false}]
+];
+
+// Representative grid patterns for visualization (n=3 rows)
+// We show one representative pattern per row as it's "solved"
+const GRID_COLORS = [
+  // Row 1: RGR (two-color)
+  ['r','g','r'],
+  // Row 2: GRG (two-color) — compatible with RGR
+  ['g','r','g'],
+  // Row 3: RGR → next compatible: B-G-B is three-color… let's use BGBfor variety... actually R-G-B
+  ['r','g','b']
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build grid visual (3 rows x 3 cols)
+  const grid = document.getElementById('wt-grid');
+  for (let r = 0; r < 3; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'wt-row';
+    const lbl = document.createElement('div');
+    lbl.className = 'wt-row-label'; lbl.id = 'rl-' + r;
+    lbl.textContent = 'R' + (r+1);
+    rowDiv.appendChild(lbl);
+    for (let c = 0; c < 3; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'wt-cell empty'; cell.id = 'gc-' + r + c;
+      cell.textContent = '?';
+      rowDiv.appendChild(cell);
+    }
+    grid.appendChild(rowDiv);
+  }
+
+  // Build DP table
+  const tbody = document.getElementById('dp-tbody');
+  for (let r = 1; r <= 3; r++) {
+    const tr = document.createElement('tr');
+    tr.id = 'dtr-' + r;
+    tr.innerHTML = `<td><strong>Row ${r}</strong></td><td id="dt2-${r}" class="future">?</td><td id="dt3-${r}" class="future">?</td><td id="dtot-${r}" class="future">?</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+  const rows = dpRows[current];
+
+  // ── Grid cells ──
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const cell = document.getElementById('gc-' + r + c);
+      const isCurrentRow = (r + 1 === step.row);
+      const isFilled = (r + 1 < step.row) || (r + 1 === step.row && step.activeLine >= 5 && !step.title.includes('?'));
+
+      if (step.activeLine === 6) {
+        // final — show all rows
+        const col = GRID_COLORS[r][c];
+        cell.className = 'wt-cell col-' + col;
+        cell.textContent = col.toUpperCase();
+      } else if (r + 1 < step.row) {
+        const col = GRID_COLORS[r][c];
+        cell.className = 'wt-cell col-' + col;
+        cell.textContent = col.toUpperCase();
+      } else if (r + 1 === step.row && current >= 3) {
+        cell.className = 'wt-cell cur-row empty';
+        cell.textContent = '?';
+      } else {
+        cell.className = 'wt-cell empty';
+        cell.textContent = '?';
+      }
+    }
+    // Label active row
+    const lbl = document.getElementById('rl-' + r);
+    if (r + 1 === step.row && current >= 3 && step.activeLine < 6) {
+      lbl.style.color = 'var(--amber-mid)';
+      lbl.style.fontWeight = '700';
+    } else if (r + 1 < step.row || step.activeLine === 6) {
+      lbl.style.color = 'var(--text3)';
+      lbl.style.fontWeight = '400';
+    } else {
+      lbl.style.color = 'var(--text3)';
+      lbl.style.fontWeight = '400';
+    }
+  }
+
+  // ── DP Table ──
+  for (let r = 1; r <= 3; r++) {
+    const rowData = rows.find(x => x.row === r);
+    const t2El = document.getElementById('dt2-' + r);
+    const t3El = document.getElementById('dt3-' + r);
+    const totEl = document.getElementById('dtot-' + r);
+
+    if (!rowData) {
+      t2El.className = 'future'; t2El.textContent = '?';
+      t3El.className = 'future'; t3El.textContent = '?';
+      totEl.className = 'future'; totEl.textContent = '?';
+    } else {
+      const isCur = rowData.cur;
+      const t2v = rowData.t2;
+      const t3v = rowData.t3;
+
+      t2El.className = 't2-cell' + (isCur ? ' current' : '');
+      t2El.textContent = t2v;
+      t3El.className = 't3-cell' + (isCur ? ' current' : '');
+      t3El.textContent = t3v;
+      if (typeof t2v === 'number' && typeof t3v === 'number') {
+        totEl.className = 'total-cell' + (isCur ? ' current' : '');
+        totEl.textContent = t2v + t3v;
+      } else {
+        totEl.className = 'future'; totEl.textContent = '?';
+      }
+    }
+  }
+
+  // ── State Machine ──
+  const smT2 = document.getElementById('sm-t2');
+  const smT3 = document.getElementById('sm-t3');
+  smT2.classList.toggle('active', step.phaseLabel === 'ITER 1: T2' || step.phaseLabel === 'ITER 2: T2' || step.phaseLabel === 'RETURN');
+  smT3.classList.toggle('active', step.phaseLabel === 'ITER 1: T3' || step.phaseLabel === 'ITER 2: T3' || step.phaseLabel === 'RETURN');
+  document.getElementById('sm-t2-val').textContent = step.t2;
+  document.getElementById('sm-t3-val').textContent = step.t3;
+
+  // ── Variable Tracker ──
+  const changed = step.changed;
+  document.getElementById('vv-row').textContent = step.row || '—';
+  document.getElementById('vv-t2').textContent = step.t2 || 0;
+  document.getElementById('vv-t3').textContent = step.t3 || 0;
+  document.getElementById('vv-total').textContent = (step.t2 || 0) + (step.t3 || 0);
+  document.getElementById('vb-t2').classList.toggle('changed', changed.includes('t2'));
+  document.getElementById('vb-t3').classList.toggle('changed', changed.includes('t3'));
+  document.getElementById('vb-total').classList.toggle('changed', step.activeLine === 6);
+  document.getElementById('vb-row').classList.toggle('changed', changed.length > 0);
+
+  // ── Code Panel ──
+  for (let i = 0; i <= 6; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info Card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress Dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

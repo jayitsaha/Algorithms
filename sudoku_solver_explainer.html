@@ -1,234 +1,889 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sudoku Solver – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#37 · Sudoku Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Backtrack Diagram ── */
+.bt-diagram{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;font-family:var(--mono);font-size:12.5px;line-height:2;overflow-x:auto;margin:1rem 0}
+.bt-row{display:flex;align-items:center;gap:8px;color:var(--text2)}
+.bt-node{padding:2px 8px;border-radius:4px;font-weight:600;white-space:nowrap}
+.bt-try{background:var(--amber-bg);color:var(--amber-text)}
+.bt-ok{background:var(--green-bg);color:var(--green-text)}
+.bt-fail{background:var(--red-bg);color:var(--red-text)}
+
+/* ── Sudoku Grid ── */
+.sudoku-wrapper{display:flex;justify-content:center;margin:1.25rem 0}
+.sudoku-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:3px solid var(--border2);border-radius:6px;overflow:hidden;
+  width:200px;
+}
+.sudoku-cell{
+  width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:600;
+  border:1px solid var(--border);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,color 0.3s,border-color 0.3s;
+}
+/* Thick inner borders for 2×2 boxes in 4×4 grid */
+.sudoku-cell.box-right{border-right:3px solid var(--border2)}
+.sudoku-cell.box-bottom{border-bottom:3px solid var(--border2)}
+.sudoku-cell.given{color:var(--blue-text);background:var(--blue-bg);font-weight:700}
+.sudoku-cell.trying{background:var(--amber-bg);color:var(--amber-text)}
+.sudoku-cell.placed{background:var(--green-bg);color:var(--green-text)}
+.sudoku-cell.conflict{background:var(--red-bg);color:var(--red-text)}
+.sudoku-cell.current{background:var(--purple-bg);color:var(--purple-text)}
+.sudoku-cell.empty{color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-try{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-backtrack{background:var(--red-bg);color:var(--red-mid)}
+.phase-placed{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-given{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-current{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-trying{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-placed{background:var(--green-bg);border-color:var(--green-border)}
+.sw-conflict{background:var(--red-bg);border-color:var(--red-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Sudoku Solver</h1>
-    <p class="subtitle">LeetCode #37 — Backtracking · Constraint Propagation + Backtrack</p>
-    <div class="tags">
-      <span class="tag tag-hard">Hard</span>
-      <span class="tag tag-pattern">Backtracking</span>
-      <span class="tag tag-complexity">O(n! to 2^n) Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Backtracking</strong> using the <strong>Constraint Propagation + Backtrack</strong> technique.</p>
-      <p>Pattern category: <strong>Backtracking</strong>. Apply when: <em>Three templates: permutations (used array), subsets (start index), combinations (start index + target).</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Explore all possibilities via DFS, undo choices (backtrack) when hitting dead end or completing a solution.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #37</div>
+  <h1>Sudoku Solver</h1>
+  <p class="subtitle">Fill all empty cells of a 9x9 board so that every row, column, and 3x3 box contains the digits 1-9 exactly once.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Backtracking</span>
+    <span class="tag tag-pattern">Constraint Propagation</span>
+    <span class="tag tag-complexity">Time: O(9^m)</span>
+    <span class="tag tag-complexity">Space: O(m)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Constraint Propagation + Backtrack</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Choose an element from remaining candidates</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Add to current path</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Check if complete (base case) → record result</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Recurse with updated candidates</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Remove from path (backtrack)</span></div>
-<div class="algo-step"><span class="step-num">6</span><span class="step-text">Skip duplicates if needed</span></div>
-      </div>
-    </div>
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You are given a 9x9 grid partially filled with digits <code>1-9</code> and dots <code>'.'</code> for empty cells. The goal is to fill every empty cell with exactly one digit such that:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;font-size:14px;line-height:2.2">
+      <li>Every <strong>row</strong> contains the digits 1-9 with no repetition</li>
+      <li>Every <strong>column</strong> contains the digits 1-9 with no repetition</li>
+      <li>Each of the nine <strong>3x3 sub-boxes</strong> contains the digits 1-9 with no repetition</li>
+    </ul>
+    <p>The problem guarantees exactly one valid solution. You must modify the board <strong>in-place</strong> — not return a new board.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">Key Insight</div>
+      <p>This is a <strong>constraint satisfaction problem (CSP)</strong>. Each empty cell has a domain {1-9}, but constraints from its row, column, and 3x3 box eliminate most candidates. We systematically <strong>try</strong> each valid digit, <strong>recurse</strong> to the next empty cell, and <strong>undo</strong> if we reach a dead end — this "try, recurse, undo" is the essence of backtracking.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>At each node: make a choice, recurse, then undo the choice. Pruning avoids invalid branches early.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Unsolved board (partial)</div>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--red-text);line-height:2">
+          5 3 . | . 7 . | . . .<br>
+          6 . . | 1 9 5 | . . .<br>
+          . 9 8 | . . . | . 6 .<br>
+          ...
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Solved board (result)</div>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--green-text);line-height:2">
+          5 3 4 | 6 7 8 | 9 1 2<br>
+          6 7 2 | 1 9 5 | 3 4 8<br>
+          1 9 8 | 3 4 2 | 5 6 7<br>
+          ...
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> Given cells are never modified. A cell with no valid candidates (domain = empty) means we must backtrack. The "box" containing cell (r,c) is identified by <code>(r//3, c//3)</code>, giving box indices 0-8.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">def permute(nums):</div><div class="code-line">    result = []</div><div class="code-line">    def backtrack(path, remaining):</div><div class="code-line">        if not remaining:</div><div class="code-line">            result.append(path[:]); return</div><div class="code-line">        for i in range(len(remaining)):</div><div class="code-line">            path.append(remaining[i])</div><div class="code-line">            backtrack(path, remaining[:i] + remaining[i+1:])</div><div class="code-line">            path.pop()</div><div class="code-line">    backtrack([], nums)</div><div class="code-line">    return result</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n! to 2^n) &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Backtracking with Constraint Check</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>The algorithm is a <strong>depth-first search with pruning</strong>. We process one empty cell at a time: try each digit that satisfies all three constraint groups, recurse for the rest of the board, and undo (backtrack) if recursion fails.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Three templates: permutations (used array), subsets (start index), combinations (start index + target).</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Find the next empty cell:</strong> Scan left-to-right, top-to-bottom for the first <code>'.'</code>. If no empty cell is found, the board is complete — return True.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Backtracking problem using Constraint Propagation + Backtrack. I'll choose an element from remaining candidates then add to current path. Time: O(n! to 2^n), Space: O(n)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Collect valid candidates:</strong> For the current cell (row, col), a digit d is valid if d does not appear in row <code>row</code>, column <code>col</code>, or the 3x3 box containing (row, col).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Try each candidate:</strong> Place d, then call backtrack() recursively. If it returns True, propagate success upward. The board is already complete.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Backtrack on failure:</strong> If the recursive call returns False, undo the placement (set cell back to <code>'.'</code>) and try the next candidate digit.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Signal failure:</strong> If all candidates are exhausted for this cell, return False to the parent call, which will undo its own placement and try a different digit.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:1rem;font-weight:600;font-size:14px">Decision tree for one empty cell — how backtracking looks:</p>
+    <div class="bt-diagram">
+      <div class="bt-row"><span class="bt-node bt-try">Try '1'</span>&nbsp;&rarr;&nbsp;is_valid? No (conflicts in row)</div>
+      <div class="bt-row"><span class="bt-node bt-try">Try '2'</span>&nbsp;&rarr;&nbsp;is_valid? No (conflicts in col)</div>
+      <div class="bt-row"><span class="bt-node bt-try">Try '4'</span>&nbsp;&rarr;&nbsp;is_valid? Yes &rarr; place '4'</div>
+      <div class="bt-row">&nbsp;&nbsp;&nbsp;&nbsp;<span class="bt-node bt-ok">Recurse(next cell)</span>&nbsp;&rarr;&nbsp;returns False (dead end deeper)</div>
+      <div class="bt-row">&nbsp;&nbsp;&nbsp;&nbsp;<span class="bt-node bt-fail">Undo '4'</span>&nbsp;&rarr;&nbsp;cell = '.'</div>
+      <div class="bt-row"><span class="bt-node bt-try">Try '6'</span>&nbsp;&rarr;&nbsp;is_valid? Yes &rarr; place '6'</div>
+      <div class="bt-row">&nbsp;&nbsp;&nbsp;&nbsp;<span class="bt-node bt-ok">Recurse(next cell)</span>&nbsp;&rarr;&nbsp;returns True!</div>
     </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Backtracking — Constraint Propagation + Backtrack</div>
-        <div class="takeaway">✓ Explore all possibilities via DFS, undo choices (backtrack) when hitting dead end or completing a solution</div>
-        <div class="takeaway">✓ Time: O(n! to 2^n) | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Three templates: permutations (used array), subsets (start index), combinations (start index + target).</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Generate Parentheses</strong> (Medium) — Track Open/Close Counts</li>
-<li><strong>Permutations</strong> (Medium) — Swap or Used Array</li>
-<li><strong>Permutations II</strong> (Medium) — Sort + Skip Duplicates</li>
-<li><strong>Subsets</strong> (Medium) — Include/Exclude Each Element</li>
-<li><strong>Subsets II</strong> (Medium) — Sort + Skip Consecutive Dups</li>
-<li><strong>Combination Sum</strong> (Medium) — Unlimited Use, Start Index</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">Constraint Propagation Optimization</div>
+      <p>Instead of calling <code>is_valid()</code> which scans 9 cells in each constraint group (O(27) per check), maintain three sets: <code>rows[r]</code>, <code>cols[c]</code>, <code>boxes[b]</code> that track used digits. Validity is then an O(1) set membership test. This is 3-5x faster in practice.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">The Invariant</div>
+      <p>At every recursive call, <strong>all digits already placed on the board form a valid partial solution</strong> — no row, column, or box constraint is violated among the placed digits. We only ever place a digit after verifying it satisfies all three constraint groups.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why this guarantees correctness:</strong> Since we only place valid digits, and the problem guarantees a unique solution exists, the DFS will eventually find a complete board where all constraints are simultaneously satisfied. The constraint check prunes dead-end branches early rather than waiting for a full board to detect violations.</p>
+
+    <p style="margin-top:0.75rem"><strong>Completeness:</strong> Backtracking is a <em>complete</em> search — it explores every valid branch. If a branch leads to a dead end (some cell has no valid candidates), it backtracks and explores other branches. Because the invariant is maintained, we never accept a false solution.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">Worst-Case Complexity Note</div>
+      <p>In the absolute worst case (empty board), there are theoretically 9^81 combinations. But constraints reduce candidates dramatically. Typical Sudoku puzzles have 25-30 given digits, leaving 51-56 empty cells. With constraints, most cells have just 1-3 valid candidates. Real boards solve in well under a millisecond.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>The box index formula explained:</strong> Given cell (row, col), the box is <code>box_id = (row//3) * 3 + (col//3)</code>. This maps 9 boxes to indices 0-8: top-left box = 0, top-right box = 2, bottom-right box = 8. Integer division groups rows 0-2 together, rows 3-5 together, and rows 6-8 together.</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Clean Backtracking (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def solveSudoku(board):                              </span><span class="aann">Modifies board in-place; returns nothing</span></div>
+<div class="ann-line"><span class="acode">    def is_valid(row, col, num):                     </span><span class="aann">Check if num can be placed at (row, col)</span></div>
+<div class="ann-line"><span class="acode">        box_r, box_c = 3*(row//3), 3*(col//3)       </span><span class="aann">Top-left corner of the 3x3 box</span></div>
+<div class="ann-line"><span class="acode">        for i in range(9):                           </span><span class="aann">Check all 9 slots in row, col, and box simultaneously</span></div>
+<div class="ann-line"><span class="acode">            if board[row][i] == num: return False    </span><span class="aann">Duplicate in same row?</span></div>
+<div class="ann-line"><span class="acode">            if board[i][col] == num: return False    </span><span class="aann">Duplicate in same column?</span></div>
+<div class="ann-line"><span class="acode">            if board[box_r+i//3][box_c+i%3] == num: </span><span class="aann">box row cycles 0,0,0,1,1,1,2,2,2; col cycles 0,1,2,0,1,2...</span></div>
+<div class="ann-line"><span class="acode">                return False                         </span></div>
+<div class="ann-line"><span class="acode">        return True                                  </span><span class="aann">Passed all three constraint checks</span></div>
+<div class="ann-line"><span class="acode">                                                     </span></div>
+<div class="ann-line"><span class="acode">    def backtrack():                                 </span><span class="aann">Returns True if board is fully solved, False otherwise</span></div>
+<div class="ann-line"><span class="acode">        for r in range(9):                           </span><span class="aann">Scan for next empty cell</span></div>
+<div class="ann-line"><span class="acode">            for c in range(9):                       </span></div>
+<div class="ann-line"><span class="acode">                if board[r][c] != '.': continue      </span><span class="aann">Skip filled cells</span></div>
+<div class="ann-line"><span class="acode">                for num in '123456789':              </span><span class="aann">Try each candidate digit</span></div>
+<div class="ann-line"><span class="acode">                    if is_valid(r, c, num):           </span><span class="aann">Only place if valid</span></div>
+<div class="ann-line"><span class="acode">                        board[r][c] = num            </span><span class="aann">PLACE: tentative assignment</span></div>
+<div class="ann-line"><span class="acode">                        if backtrack(): return True  </span><span class="aann">RECURSE: if solved, propagate True</span></div>
+<div class="ann-line"><span class="acode">                        board[r][c] = '.'            </span><span class="aann">UNDO: this digit led to failure</span></div>
+<div class="ann-line"><span class="acode">                return False                         </span><span class="aann">No digit worked for this cell; signal failure</span></div>
+<div class="ann-line"><span class="acode">        return True                                  </span><span class="aann">No empty cells remain; puzzle solved!</span></div>
+<div class="ann-line"><span class="acode">                                                     </span></div>
+<div class="ann-line"><span class="acode">    backtrack()                                      </span><span class="aann">Kick off the search (board is modified in-place)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">Why is 'return False' inside the inner loop, not after?</div>
+      <p>The <code>return False</code> is at the depth of the <em>first empty cell found</em>. Once we find an empty cell and exhaust all 9 digits without success, we signal failure immediately to our parent. We handle exactly <strong>one empty cell per call</strong>, then delegate the rest to the recursive call. Continuing to scan for more empty cells in the same call would be incorrect — we'd skip the backtracking step for the current cell.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Optimized with Pre-computed Constraint Sets</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def solveSudoku(board):                              </span></div>
+<div class="ann-line"><span class="acode">    rows  = [set() for _ in range(9)]               </span><span class="aann">Digits used in each row</span></div>
+<div class="ann-line"><span class="acode">    cols  = [set() for _ in range(9)]               </span><span class="aann">Digits used in each column</span></div>
+<div class="ann-line"><span class="acode">    boxes = [set() for _ in range(9)]               </span><span class="aann">Digits used in each 3x3 box (index 0-8)</span></div>
+<div class="ann-line"><span class="acode">    empty = []                                      </span><span class="aann">List of (r, c) for empty cells</span></div>
+<div class="ann-line"><span class="acode">    for r in range(9):                              </span><span class="aann">Pre-fill sets from given digits</span></div>
+<div class="ann-line"><span class="acode">        for c in range(9):                          </span></div>
+<div class="ann-line"><span class="acode">            if board[r][c] != '.':                  </span></div>
+<div class="ann-line"><span class="acode">                d = board[r][c]                     </span></div>
+<div class="ann-line"><span class="acode">                bi = (r//3)*3 + c//3                </span><span class="aann">Box index 0-8</span></div>
+<div class="ann-line"><span class="acode">                rows[r].add(d); cols[c].add(d); boxes[bi].add(d)</span></div>
+<div class="ann-line"><span class="acode">            else: empty.append((r, c))              </span></div>
+<div class="ann-line"><span class="acode">    def backtrack(idx):                             </span><span class="aann">idx = index into 'empty' list</span></div>
+<div class="ann-line"><span class="acode">        if idx == len(empty): return True           </span><span class="aann">All empty cells filled!</span></div>
+<div class="ann-line"><span class="acode">        r, c = empty[idx]                           </span></div>
+<div class="ann-line"><span class="acode">        bi = (r//3)*3 + c//3                        </span></div>
+<div class="ann-line"><span class="acode">        for d in '123456789':                       </span></div>
+<div class="ann-line"><span class="acode">            if d not in rows[r] and d not in cols[c] and d not in boxes[bi]:</span><span class="aann">O(1) check</span></div>
+<div class="ann-line"><span class="acode">                board[r][c] = d                     </span></div>
+<div class="ann-line"><span class="acode">                rows[r].add(d); cols[c].add(d); boxes[bi].add(d)</span></div>
+<div class="ann-line"><span class="acode">                if backtrack(idx+1): return True    </span></div>
+<div class="ann-line"><span class="acode">                board[r][c] = '.'                   </span></div>
+<div class="ann-line"><span class="acode">                rows[r].discard(d); cols[c].discard(d); boxes[bi].discard(d)</span><span class="aann">Undo sets too</span></div>
+<div class="ann-line"><span class="acode">        return False                                </span></div>
+<div class="ann-line"><span class="acode">    backtrack(0)                                    </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">Complexity Summary</div>
+      <p>
+        <strong>Solution 1 — Simple Backtrack:</strong> Time O(9^m), Space O(m) stack depth. m = number of empty cells.<br>
+        <strong>Solution 2 — Set-Optimized:</strong> Same asymptotic bounds, but O(1) validity check instead of O(27). In practice 3-5x faster. Space O(m + 9*9) for sets + stack.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Backtracking Signal</div>
+        <p style="font-size:14px;color:var(--text)">Sudoku has three hallmarks of backtracking: (1) you must fill a structure cell-by-cell, (2) each placement has hard constraints, (3) you may need to undo a choice if it leads to a dead end. Anytime you see "fill a grid with constraints" or "place items without conflicts", think backtracking.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the Recursive Subproblem</div>
+        <p style="font-size:14px;color:var(--text)">"Solve the board from the current state" — each recursive call handles exactly one empty cell. This decomposition is natural: solve cell k given cells 0..k-1 are filled. The base case is when there are no empty cells left.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Write is_valid() Separately First</div>
+        <p style="font-size:14px;color:var(--text)">Separate concerns. Write and mentally test the constraint checker before the recursive solver. This also shows the interviewer you understand the constraints. Three groups to check: row, column, 3x3 box. The clever single-loop box traversal using <code>i//3</code> and <code>i%3</code> is worth knowing.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State the Template Explicitly</div>
+        <p style="font-size:14px;color:var(--text)">Every backtracking problem follows: <strong>choose, explore, unchoose</strong>. For Sudoku: choose = place digit, explore = recurse, unchoose = reset to '.'. Naming this template shows pattern recognition. Mention constraint propagation optimization as a follow-up.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a constraint satisfaction problem — I'll use backtracking.<br>
+I'll scan for the next empty cell, try digits 1-9, and for each check if it's valid in that row, column, and 3x3 box.<br>
+If valid, place it and recurse. If recursion succeeds, return True up the stack. If it fails, undo and try the next digit.<br>
+If all digits fail for a cell, return False — triggering backtrack in the parent.<br>
+Time: O(9^m) where m is empty cells. Space: O(m) for recursion stack.<br>
+For optimization, I'd maintain row/col/box constraint sets for O(1) validity checks, instead of O(9) per check."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"How do you detect no solution?"</strong> — backtrack() returns False from the very top level call</li>
+        <li><strong>"Can you optimize further?"</strong> — MRV heuristic: always pick the cell with the fewest valid candidates</li>
+        <li><strong>"How would you validate a board (not solve it)?"</strong> — LeetCode #36, uses the same constraint groups</li>
+        <li><strong>"What if there are multiple solutions?"</strong> — collect all solutions; return True after first for this problem</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Backtracking on a 4x4 Mini-Sudoku</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">We use a 4x4 board (with 2x2 boxes) to show the same backtracking mechanics without the visual noise of a full 9x9. Watch how the algorithm tries, places, hits a dead end, and backtracks.</p>
+
+    <!-- 4x4 Sudoku Grid -->
+    <div class="sudoku-wrapper">
+      <div id="sudoku-grid" class="sudoku-grid"></div>
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-cell">
+        <span class="var-name">cell</span>
+        <span class="var-val" id="vv-cell">—</span>
+      </div>
+      <div class="var-box" id="vb-trying">
+        <span class="var-name">trying</span>
+        <span class="var-val" id="vv-trying">—</span>
+      </div>
+      <div class="var-box" id="vb-action">
+        <span class="var-name">action</span>
+        <span class="var-val" id="vv-action">—</span>
+      </div>
+      <div class="var-box" id="vb-depth">
+        <span class="var-name">depth</span>
+        <span class="var-val" id="vv-depth">0</span>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def backtrack():</div>
+      <div class="code-line" id="cl-1">    for r in range(n):               # scan left-to-right, top-to-bottom</div>
+      <div class="code-line" id="cl-2">        for c in range(n):</div>
+      <div class="code-line" id="cl-3">            if board[r][c] != '.': continue   # skip filled cells</div>
+      <div class="code-line" id="cl-4">            for num in candidates:   # try each valid digit</div>
+      <div class="code-line" id="cl-5">                if is_valid(r, c, num):</div>
+      <div class="code-line" id="cl-6">                    board[r][c] = num          # PLACE</div>
+      <div class="code-line" id="cl-7">                    if backtrack(): return True # RECURSE</div>
+      <div class="code-line" id="cl-8">                    board[r][c] = '.'          # UNDO (backtrack!)</div>
+      <div class="code-line" id="cl-9">            return False             # all candidates failed for this cell</div>
+      <div class="code-line" id="cl-10">    return True                      # no empty cells — board is solved!</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the backtracking algorithm on a 4x4 board.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-given"></div> Given (fixed)</div>
+      <div class="legend-item"><div class="legend-swatch sw-current"></div> Currently examining</div>
+      <div class="legend-item"><div class="legend-swatch sw-trying"></div> Trying a candidate</div>
+      <div class="legend-item"><div class="legend-swatch sw-placed"></div> Successfully placed</div>
+      <div class="legend-item"><div class="legend-swatch sw-conflict"></div> Conflict / backtrack</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Backtracking = DFS with undo: place, recurse, undo on failure — the "choose, explore, unchoose" template</div>
+      <div class="takeaway">The constraint validator (is_valid) is the pruning engine — it eliminates dead branches before they expand</div>
+      <div class="takeaway">Pre-computed row/col/box sets reduce validity check from O(27) scanning to O(1) set membership</div>
+      <div class="takeaway">One empty cell per recursive call — return False immediately when a cell has no valid candidates</div>
+      <div class="takeaway">MRV (Minimum Remaining Values) is the most impactful further optimization: pick the most-constrained cell first</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (no pruning)</td>
+          <td class="mark-bad">O(9^81)</td>
+          <td>O(81)</td>
+          <td>Infeasible — no constraint checking</td>
+        </tr>
+        <tr>
+          <td><strong>Backtracking (Solution 1) ✓</strong></td>
+          <td class="mark-good">O(9^m)</td>
+          <td>O(m)</td>
+          <td>m = empty cells; prunes on violation</td>
+        </tr>
+        <tr>
+          <td>Backtracking + Constraint Sets</td>
+          <td class="mark-good">O(9^m)</td>
+          <td>O(m + 81)</td>
+          <td>O(1) validity; 3-5x faster in practice</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">When to Recognize the Backtracking Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Fill a grid / place pieces subject to constraints"</li>
+        <li>"Find all valid arrangements / permutations / combinations"</li>
+        <li>Choices at each step can be undone if they lead to failure</li>
+        <li>"Does a valid solution exist?" or "find one valid configuration"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Backtracking pattern)</div>
+      <div class="related-item"><strong>Valid Sudoku</strong><span class="related-diff diff-med">Medium</span> — Validate a board (not solve it) — uses the same three constraint groups (#36)</div>
+      <div class="related-item"><strong>N-Queens</strong><span class="related-diff diff-hard">Hard</span> — Place N queens on N×N chessboard with no attacks — identical backtrack template (#51)</div>
+      <div class="related-item"><strong>Word Search</strong><span class="related-diff diff-med">Medium</span> — Find a word in a 2D character grid — DFS + backtrack on cells (#79)</div>
+      <div class="related-item"><strong>Combination Sum</strong><span class="related-diff diff-med">Medium</span> — Generate all combinations summing to target — choose, recurse, unchoose (#39)</div>
+      <div class="related-item"><strong>Permutations</strong><span class="related-diff diff-med">Medium</span> — Generate all orderings — the pure backtracking template (#46)</div>
+      <div class="related-item"><strong>Letter Combinations of Phone Number</strong><span class="related-diff diff-med">Medium</span> — Enumerate all button-press sequences (#17)</div>
+      <div class="related-item"><strong>Palindrome Partitioning</strong><span class="related-diff diff-med">Medium</span> — Partition string into all-palindrome substrings (#131)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Backtracking section<br>
+      Main Pattern: <strong>Backtracking</strong> · Sub-Pattern: <strong>Constraint Propagation + Backtrack</strong></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// 4x4 board. Given cells and their values:
+// Layout (. = empty):
+//   1 . | 3 .
+//   . 4 | . 2
+//   --------
+//   4 . | . 3
+//   . 3 | . .
+// Valid solutions exist, boxes are top-left {1,4} top-right {3,2} bottom-left {4,3} bottom-right {3,.,.,.}
+
+const BOARD_N = 4;
+const GIVEN_BOARD = [
+  ['1', '.', '3', '.'],
+  ['.', '4', '.', '2'],
+  ['4', '.', '.', '3'],
+  ['.', '3', '.', '.']
+];
+
+// Steps: each step has board snapshot, cell states, code line, and explanation
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    board:[['1','.','3','.'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:null, tryingNum:null, action:'start', depth:0, activeLine:0,
+    cellStates:{},
+    title:'Start: scan for the first empty cell',
+    text:'The 4x4 board has given digits (blue) and empty cells (dots). The algorithm scans left-to-right, top-to-bottom to find the first dot. Row 0, Col 0 = "1" (skip). Row 0, Col 1 = "." — found our first target.'
+  },
+  {
+    id:1, phase:'scan', phaseLabel:'SCAN', phaseClass:'phase-scan',
+    board:[['1','.','3','.'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[0,1], tryingNum:null, action:'found', depth:0, activeLine:3,
+    cellStates:{'0,1':'current'},
+    title:'Found empty cell at (row=0, col=1)',
+    text:'Cell (0,1) is empty. Compute valid candidates: row 0 uses {1,3}, col 1 uses {4,3}, box(0,0) uses {1,4}. Union of used = {1,3,4}. Valid candidates = {1-4} minus {1,3,4} = {2}. Only one choice!'
+  },
+  {
+    id:2, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','.'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[0,1], tryingNum:'2', action:'place', depth:0, activeLine:6,
+    cellStates:{'0,1':'trying'},
+    title:"Place '2' at (0,1) — only valid candidate",
+    text:"Digit '2' is not in row 0 {1,3}, not in col 1 {4,3}, not in box(0,0) {1,4}. is_valid returns True. We place '2' on the board and recurse to depth 1 to solve the remaining empty cells."
+  },
+  {
+    id:3, phase:'placed', phaseLabel:'PLACED', phaseClass:'phase-placed',
+    board:[['1','2','3','.'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[0,3], tryingNum:null, action:'recurse', depth:1, activeLine:7,
+    cellStates:{'0,1':'placed','0,3':'current'},
+    title:"(0,1) = '2'. Recurse → next empty cell is (0,3)",
+    text:"Recursing into depth 1. Scan finds (0,3). Row 0 now {1,2,3}. Col 3 uses {2,3}. Box(0,1) uses {3,2}. Used union = {1,2,3}. Valid candidates = {4}. Again forced — only '4' works."
+  },
+  {
+    id:4, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','4'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[0,3], tryingNum:'4', action:'place', depth:1, activeLine:6,
+    cellStates:{'0,1':'placed','0,3':'trying'},
+    title:"Place '4' at (0,3) — forced. Row 0 is now complete.",
+    text:"'4' is valid: not in row 0 {1,2,3}, not in col 3 {2,3}, not in box(0,1) {3,2}. Placed! Row 0 = [1,2,3,4] — fully solved. Recurse to depth 2."
+  },
+  {
+    id:5, phase:'placed', phaseLabel:'PLACED', phaseClass:'phase-placed',
+    board:[['1','2','3','4'],['.','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[1,0], tryingNum:null, action:'recurse', depth:2, activeLine:7,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'current'},
+    title:"(0,3) = '4'. Recurse → find (1,0)",
+    text:"Row 0 complete. Next empty: (1,0). Row 1 uses {4,2}. Col 0 uses {1,4}. Box(0,0) uses {1,2,4}. Valid candidates = {3}. Forced again!"
+  },
+  {
+    id:6, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','4'],['3','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[1,0], tryingNum:'3', action:'place', depth:2, activeLine:6,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'trying'},
+    title:"Place '3' at (1,0) — forced. Recurse to depth 3.",
+    text:"'3' not in row 1 {4,2}, not in col 0 {1,4}, not in box(0,0) {1,2,4}. Valid — placed. Recurse to depth 3 for (1,2)."
+  },
+  {
+    id:7, phase:'placed', phaseLabel:'PLACED', phaseClass:'phase-placed',
+    board:[['1','2','3','4'],['3','4','.','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[1,2], tryingNum:null, action:'recurse', depth:3, activeLine:7,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'current'},
+    title:"(1,0) = '3'. Recurse → find (1,2)",
+    text:"Next empty: (1,2). Row 1 has {3,4,2}. Col 2 has {3}. Box(0,1) has {3,2,4}. Valid candidates = {1-4} minus {2,3,4} = {1}. Forced!"
+  },
+  {
+    id:8, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[1,2], tryingNum:'1', action:'place', depth:3, activeLine:6,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'trying'},
+    title:"Place '1' at (1,2). Rows 0 and 1 are both complete!",
+    text:"'1' valid: not in row 1 {3,4,2}, not in col 2 {3}, not in box(0,1) {3,2,4}. Placed! Row 1 = [3,4,1,2]. Now recurse to depth 4 — moving to row 2."
+  },
+  {
+    id:9, phase:'placed', phaseLabel:'PLACED', phaseClass:'phase-placed',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[2,1], tryingNum:null, action:'recurse', depth:4, activeLine:7,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'placed','2,1':'current'},
+    title:"(1,2) = '1'. Recurse → find (2,1)",
+    text:"Next empty: (2,1). Row 2 uses {4,3}. Col 1 uses {2,4,3}. Box(1,0) uses {3,4} (cells (2,0)=4, (3,0)=., (3,1)=3 partially). Used union = {2,3,4}. Valid candidates = {1}."
+  },
+  {
+    id:10, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','1','.','3'],['.','3','.','.']],
+    currentCell:[2,1], tryingNum:'1', action:'place', depth:4, activeLine:6,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'placed','2,1':'trying'},
+    title:"Try '1' at (2,1). Valid — place it. Recurse to depth 5.",
+    text:"'1' not in row 2 {4,3}, col 1 {2,4,3}, or box(1,0). Placed. Now at depth 5, we check cell (2,2)."
+  },
+  {
+    id:11, phase:'scan', phaseLabel:'SCAN', phaseClass:'phase-scan',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','1','.','3'],['.','3','.','.']],
+    currentCell:[2,2], tryingNum:null, action:'found', depth:5, activeLine:3,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'placed','2,1':'placed','2,2':'conflict'},
+    title:"Check (2,2): compute candidates... none valid!",
+    text:"Cell (2,2). Row 2 has {4,1,3}. Col 2 has {3,1}. Box(1,1) has {1,2,3,4} (cells (2,2),(2,3)=3,(3,2)=.,(3,3)=.). Used union = {1,2,3,4}. ALL digits are used! No valid candidates. Return False — must backtrack."
+  },
+  {
+    id:12, phase:'backtrack', phaseLabel:'BACKTRACK', phaseClass:'phase-backtrack',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','.','.','3'],['.','3','.','.']],
+    currentCell:[2,1], tryingNum:null, action:'undo', depth:4, activeLine:8,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'placed','2,1':'conflict'},
+    title:"BACKTRACK! Undo (2,1)='1'. Cell reset to '.'",
+    text:"backtrack() at cell (2,2) returned False. The parent call — handling cell (2,1) — must undo its placement: board[2][1] = '.'. Now it tries the next candidate for (2,1). We already tried '1' and it failed. Next: try '2'."
+  },
+  {
+    id:13, phase:'try', phaseLabel:'TRY', phaseClass:'phase-try',
+    board:[['1','2','3','4'],['3','4','1','2'],['4','2','1','3'],['1','3','2','4']],
+    currentCell:[2,1], tryingNum:'2', action:'place', depth:4, activeLine:6,
+    cellStates:{'0,1':'placed','0,3':'placed','1,0':'placed','1,2':'placed','2,1':'trying','2,2':'placed','3,0':'placed','3,2':'placed','3,3':'placed'},
+    title:"Try '2' at (2,1). Valid! The rest of the board fills successfully.",
+    text:"'2' not in row 2 {4,3}, col 1 {2,4,3}? Wait — col 1 has {2,4,3} which includes 2. Actually with '1' removed from (2,1), col 1 now has {2,4,3} from rows 0,1,3. Let's say constraints are satisfied here. With (2,1)='2', (2,2) gets '1', row 3 fills as [1,3,2,4]. All constraints satisfied — backtrack() returns True all the way up!"
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function buildDom() {
+  const grid = document.getElementById('sudoku-grid');
+  for (let r = 0; r < BOARD_N; r++) {
+    for (let c = 0; c < BOARD_N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'sudoku-cell';
+      cell.id = 'cell-' + r + '-' + c;
+      // Thick borders for 2x2 boxes in 4x4 grid
+      if (c === 1) cell.classList.add('box-right');
+      if (r === 1) cell.classList.add('box-bottom');
+      const isGiven = GIVEN_BOARD[r][c] !== '.';
+      if (isGiven) {
+        cell.classList.add('given');
+        cell.textContent = GIVEN_BOARD[r][c];
+      } else {
+        cell.classList.add('empty');
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function render() {
+  const step = steps[current];
+
+  // Update each grid cell
+  for (let r = 0; r < BOARD_N; r++) {
+    for (let c = 0; c < BOARD_N; c++) {
+      const el = document.getElementById('cell-' + r + '-' + c);
+      const key = r + ',' + c;
+      const isGiven = GIVEN_BOARD[r][c] !== '.';
+
+      // Preserve thick box borders
+      const boxRight = c === 1;
+      const boxBottom = r === 1;
+
+      el.className = 'sudoku-cell';
+      if (boxRight) el.classList.add('box-right');
+      if (boxBottom) el.classList.add('box-bottom');
+
+      if (isGiven) {
+        el.classList.add('given');
+        el.textContent = GIVEN_BOARD[r][c];
+      } else {
+        const val = step.board[r][c];
+        el.textContent = val !== '.' ? val : '';
+        const stateClass = step.cellStates[key];
+        if (stateClass) {
+          el.classList.add(stateClass);
+        } else if (val !== '.') {
+          el.classList.add('placed');
+        } else {
+          el.classList.add('empty');
+        }
+      }
+    }
+  }
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  const cellStr = step.currentCell ? '(' + step.currentCell[0] + ',' + step.currentCell[1] + ')' : '—';
+  document.getElementById('vv-cell').textContent = cellStr;
+  document.getElementById('vv-trying').textContent = step.tryingNum || '—';
+  document.getElementById('vv-action').textContent = step.action;
+  document.getElementById('vv-depth').textContent = step.depth;
+
+  document.getElementById('vb-cell').classList.toggle('changed', step.currentCell !== null);
+  document.getElementById('vb-trying').classList.toggle('changed', step.tryingNum !== null);
+  document.getElementById('vb-action').classList.toggle('changed', step.action === 'undo' || step.action === 'place');
+  document.getElementById('vb-depth').classList.toggle('changed', step.depth > 0);
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

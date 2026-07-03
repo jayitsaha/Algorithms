@@ -1,233 +1,859 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LRU Cache – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#146 · LRU Cache</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:1px 0}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:40px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-get{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-put{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-evict{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:13.5px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+
+/* ── LRU Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0;overflow-x:auto}
+.viz-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin:1rem 0 0.5rem 0}
+.viz-op-label{font-family:var(--mono);font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:5px 14px;display:inline-block;margin-bottom:0.75rem}
+
+/* DLL */
+.dll-container{display:flex;align-items:center;justify-content:flex-start;gap:0;min-height:96px;overflow-x:auto;padding:4px 0}
+.dll-sentinel{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+.sentinel-box{width:52px;height:52px;border-radius:8px;background:var(--bg2);border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--text3);font-weight:700;text-align:center;line-height:1.3}
+.sentinel-label{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.dll-node{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+.node-box{width:62px;height:58px;border-radius:10px;border:2.5px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.35s;position:relative}
+.node-key{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text3);line-height:1}
+.node-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);line-height:1.2}
+.node-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.node-box.recent{background:var(--green-bg);border-color:var(--green-border)}
+.node-box.recent .node-key{color:var(--green-mid)}
+.node-box.recent .node-val{color:var(--green-text)}
+.node-box.accessed{background:var(--blue-bg);border-color:var(--blue-border)}
+.node-box.accessed .node-key{color:var(--blue-mid)}
+.node-box.accessed .node-val{color:var(--blue-text)}
+.node-box.evicting{background:var(--red-bg);border-color:var(--red-border)}
+.node-box.evicting .node-key{color:var(--red-mid)}
+.node-box.evicting .node-val{color:var(--red-text)}
+.node-box.inserting{background:var(--amber-bg);border-color:var(--amber-border)}
+.node-box.inserting .node-key{color:var(--amber-mid)}
+.node-box.inserting .node-val{color:var(--amber-text)}
+.dll-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;width:26px;flex-shrink:0;gap:1px}
+.arr-fwd{color:var(--blue-mid);font-size:11px}
+.arr-bwd{color:var(--green-mid);font-size:11px}
+
+/* HashMap */
+.hashmap-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:0.25rem;min-height:56px}
+.hmap-entry{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:8px 12px;text-align:center;transition:all 0.3s;min-width:88px}
+.hmap-entry.active{background:var(--blue-bg);border-color:var(--blue-border)}
+.hmap-entry.new-entry{background:var(--amber-bg);border-color:var(--amber-border)}
+.hmap-entry.removed{background:var(--red-bg);border-color:var(--red-border);opacity:0.5}
+.hmap-key{font-family:var(--mono);font-size:11px;color:var(--text3);font-weight:600}
+.hmap-arrow-sym{font-size:10px;color:var(--text3);margin:2px 0}
+.hmap-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-text)}
+.hmap-entry.active .hmap-key{color:var(--blue-mid)}
+.hmap-entry.active .hmap-val{color:var(--blue-text)}
+.hmap-entry.new-entry .hmap-key{color:var(--amber-mid)}
+.hmap-entry.new-entry .hmap-val{color:var(--amber-text)}
+.hmap-entry.removed .hmap-key{color:var(--red-mid)}
+.hmap-entry.removed .hmap-val{color:var(--red-text)}
+
+/* Comparison table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Design boxes */
+.design-diagram{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.design-box{border-radius:var(--radius);border:2px solid var(--border2);padding:12px 16px;font-size:13.5px}
+.design-box.hash{background:var(--blue-bg);border-color:var(--blue-border)}
+.design-box.dll{background:var(--green-bg);border-color:var(--green-border)}
+.design-box.combo{background:var(--purple-bg);border-color:var(--purple-border)}
+.design-box-title{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.design-box.hash .design-box-title{color:var(--blue-mid)}
+.design-box.dll .design-box-title{color:var(--green-mid)}
+.design-box.combo .design-box-title{color:var(--purple-mid)}
+
+/* Takeaways */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>LRU Cache</h1>
-    <p class="subtitle">LeetCode #146 — Data Structure Design · Hash Map + Doubly Linked List</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Design</span>
-      <span class="tag tag-complexity">Varies by design Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Data Structure Design</strong> using the <strong>Hash Map + Doubly Linked List</strong> technique.</p>
-      <p>Pattern category: <strong>Design</strong>. Apply when: <em>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Combine data structures to achieve target complexities. LRU = hash map + doubly linked list for O(1) get/put.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #146</div>
+  <h1>LRU Cache</h1>
+  <p class="subtitle">Design a data structure that follows the Least Recently Used (LRU) cache eviction policy with O(1) <code>get</code> and <code>put</code>.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Hash Map + Doubly Linked List</span>
+    <span class="tag tag-complexity">Time: O(1)</span>
+    <span class="tag tag-complexity">Space: O(capacity)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Hash Map + Doubly Linked List</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Identify all required operations and their target complexities</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Choose primary data structure for main storage</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Add auxiliary structure(s) to speed up slow operations</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Implement each operation using both structures</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Keep structures in sync on every mutation</span></div>
-      </div>
-    </div>
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>An <strong>LRU Cache</strong> is a fixed-capacity store. When it's full and you insert something new, the item that was used <em>least recently</em> — either read or written — gets evicted. "Recently used" is refreshed on every <code>get</code> and every <code>put</code>.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We need <strong>two capabilities simultaneously</strong>: O(1) lookup by key (a hash map gives that), and O(1) reordering by recency (a doubly-linked list gives that, given a node pointer). Combining them: the hash map <em>stores pointers to the DLL nodes</em>, so we can find any node instantly and reorder in O(1). Neither structure alone can do both.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Data structure design: identify all operations needed, their frequency, target complexity. Choose structures accordingly.</p>
+
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">✓ What we need</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          get(key) → O(1) lookup<br>
+          put(key,val) → O(1) insert<br>
+          evict LRU → O(1) removal<br>
+          refresh recency → O(1) reorder
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Why naive fails</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          Array: O(n) shift to reorder<br>
+          Singly linked: O(n) to unlink<br>
+          Dict only: no ordering info<br>
+          Sorted: O(log n) reorder
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Concrete example (capacity=2):</strong></p>
+    <p style="margin-top:0.4rem;font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:12px;border-radius:var(--radius);line-height:2">
+      put(1,1) → cache: {1}<br>
+      put(2,2) → cache: {1,2}<br>
+      get(1)   → returns 1; key 1 is now MRU<br>
+      put(3,3) → cache full! LRU = key 2 (not touched since put). Evict 2. cache: {1,3}<br>
+      get(2)   → returns -1 (was evicted!)<br>
+      get(3)   → returns 3
+    </p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> <code>get</code> on missing key → -1. <code>put</code> on existing key → update value AND refresh recency (don't duplicate!). Capacity 1 evicts on every new key insert.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">class LRUCache:</div><div class="code-line">    def __init__(self, capacity):</div><div class="code-line">        from collections import OrderedDict</div><div class="code-line">        self.cap, self.cache = capacity, OrderedDict()</div><div class="code-line">    def get(self, key):</div><div class="code-line">        if key not in self.cache: return -1</div><div class="code-line">        self.cache.move_to_end(key); return self.cache[key]</div><div class="code-line">    def put(self, key, value):</div><div class="code-line">        if key in self.cache: self.cache.move_to_end(key)</div><div class="code-line">        self.cache[key] = value</div><div class="code-line">        if len(self.cache) > self.cap: self.cache.popitem(last=False)</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: Varies by design &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Hash Map + Doubly Linked List</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Two data structures working together. The <strong>doubly-linked list (DLL)</strong> keeps nodes ordered by recency — head side is MRU (most recently used), tail side is LRU. The <strong>hash map</strong> maps each key to its DLL node for direct O(1) access.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
+    <div class="design-diagram">
+      <div class="design-box hash">
+        <div class="design-box-title">Hash Map: key → Node pointer</div>
+        <p>O(1) jump to any node by key. Without this, finding a node in the DLL by key is O(n).</p>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Design problem using Hash Map + Doubly Linked List. I'll identify all required operations and their target complexities then choose primary data structure for main storage. Time: Varies by design, Space: O(n)."</div>
+      <div class="design-box dll">
+        <div class="design-box-title">Doubly-Linked List: MRU ←[head]…[tail]→ LRU</div>
+        <p>Two <strong>dummy sentinel nodes</strong> (head, tail) eliminate all null-check edge cases. Move-to-front and remove-from-back are always O(1) with direct node pointers.</p>
+      </div>
+      <div class="design-box combo">
+        <div class="design-box-title">Combined: O(1) everything</div>
+        <p>Map gives the node pointer → DLL splices it in O(1). Eviction: <code>tail.prev</code> is always the LRU node. Delete from DLL + delete from map = O(1) eviction.</p>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Init:</strong> Create sentinel <code>head</code> ↔ <code>tail</code>. Empty hash map. <code>head.next = tail</code>, <code>tail.prev = head</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>get(key):</strong> If not in map → -1. Else: get node, <code>_remove(node)</code>, <code>_add_head(node)</code> (mark MRU), return <code>node.val</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>put(key, val) — existing key:</strong> Get node, update <code>node.val</code>, <code>_remove</code>, <code>_add_head</code>. No size change.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>put(key, val) — new key:</strong> Create node. <code>map[key] = node</code>. <code>_add_head(node)</code>. If <code>len(map) &gt; cap</code>: <code>lru = tail.prev</code>, <code>_remove(lru)</code>, <code>del map[lru.key]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>_remove(node):</strong> <code>node.prev.next = node.next</code>; <code>node.next.prev = node.prev</code>. Two pointer updates. O(1) because we have direct prev/next.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text"><strong>_add_head(node):</strong> Wire node between <code>head</code> and <code>head.next</code>. Four pointer updates. Always O(1) thanks to sentinels — same code regardless of list size.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Design — Hash Map + Doubly Linked List</div>
-        <div class="takeaway">✓ Combine data structures to achieve target complexities</div>
-        <div class="takeaway">✓ Time: Varies by design | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Logger Rate Limiter</strong> (Easy) — Hash Map Timestamp</li>
-<li><strong>Implement Queue using Stacks</strong> (Easy) — Two Stacks</li>
-<li><strong>Implement Stack using Queues</strong> (Easy) — One Queue, Rotate</li>
-<li><strong>Design Circular Queue</strong> (Medium) — Array with Head/Tail</li>
-<li><strong>Design Circular Deque</strong> (Medium) — Array + Modulo</li>
-<li><strong>Design Hit Counter</strong> (Medium) — Circular Buffer</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why sentinel nodes?</div>
+      <p><code>head.next</code> is ALWAYS the MRU node. <code>tail.prev</code> is ALWAYS the LRU node. Insertions and deletions are the same few pointer assignments for EVERY node — no "is this the first element?" special cases. The sentinels anchor the list and make the code clean.</p>
     </div>
   </div>
 </div>
 
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every moment: <strong>the DLL is ordered from MRU (head.next) to LRU (tail.prev)</strong>. The hash map and DLL are always in sync — every live key appears in both exactly once. DLL size == map size == number of cached items.</p>
+    </div>
+
+    <p><strong>Why move-to-front guarantees correct eviction:</strong> Every access (get or put) moves the touched node to the front. The node that goes the longest without being touched drifts to the back. When we need to evict, <code>tail.prev</code> is exactly the correct victim — no scanning required.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why this is O(1) and not amortized:</strong> Every individual operation does a fixed number of pointer updates (≤ 4 for DLL ops) plus one hash map lookup/insert/delete (O(1) average). No loops, no sorting, no scanning. Truly O(1) per call.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Update must ALSO refresh recency</div>
+      <p>When <code>put</code> is called for an existing key, most beginners update the value but forget to call <code>_remove + _add_head</code>. The spec says "put" counts as an access — the node must move to MRU position. Missing this gives wrong eviction order for subsequent operations.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why store key inside the Node?</strong> When evicting <code>tail.prev</code>, we need to delete it from the hash map too. The node must tell us its own key: <code>del map[lru.key]</code>. If we only stored the value, we'd have no way to find the map entry to delete.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Clean Python implementation using a custom Node class and dict:</p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">class Node:</span></div>
+      <div class="ann-line"><span class="acode">    def __init__(self, k=0, v=0):</span><span class="aann">← default args let us create sentinels with Node()</span></div>
+      <div class="ann-line"><span class="acode">        self.key = k</span><span class="aann">← store key so evicted node can remove itself from map</span></div>
+      <div class="ann-line"><span class="acode">        self.val = v</span></div>
+      <div class="ann-line"><span class="acode">        self.prev = self.next = None</span></div>
+      <div class="ann-line"><span class="acode"></span></div>
+      <div class="ann-line"><span class="acode">class LRUCache:</span></div>
+      <div class="ann-line"><span class="acode">    def __init__(self, capacity: int):</span></div>
+      <div class="ann-line"><span class="acode">        self.cap = capacity</span></div>
+      <div class="ann-line"><span class="acode">        self.map = {}               </span><span class="aann">← key → Node</span></div>
+      <div class="ann-line"><span class="acode">        self.head = Node()          </span><span class="aann">← MRU sentinel</span></div>
+      <div class="ann-line"><span class="acode">        self.tail = Node()          </span><span class="aann">← LRU sentinel</span></div>
+      <div class="ann-line"><span class="acode">        self.head.next = self.tail</span></div>
+      <div class="ann-line"><span class="acode">        self.tail.prev = self.head  </span><span class="aann">← wire sentinels together</span></div>
+      <div class="ann-line"><span class="acode"></span></div>
+      <div class="ann-line"><span class="acode">    def _remove(self, node):        </span><span class="aann">← splice node out of DLL</span></div>
+      <div class="ann-line"><span class="acode">        node.prev.next = node.next  </span><span class="aann">← predecessor skips over node</span></div>
+      <div class="ann-line"><span class="acode">        node.next.prev = node.prev  </span><span class="aann">← successor skips back over node</span></div>
+      <div class="ann-line"><span class="acode"></span></div>
+      <div class="ann-line"><span class="acode">    def _add_head(self, node):      </span><span class="aann">← insert right after head sentinel (= MRU position)</span></div>
+      <div class="ann-line"><span class="acode">        node.next = self.head.next  </span><span class="aann">← node now points to the old first real node</span></div>
+      <div class="ann-line"><span class="acode">        node.prev = self.head       </span><span class="aann">← node points back to head sentinel</span></div>
+      <div class="ann-line"><span class="acode">        self.head.next.prev = node  </span><span class="aann">← old first node now points back to new node</span></div>
+      <div class="ann-line"><span class="acode">        self.head.next = node       </span><span class="aann">← head now points forward to new node (do this LAST)</span></div>
+      <div class="ann-line"><span class="acode"></span></div>
+      <div class="ann-line"><span class="acode">    def get(self, key: int) -> int:</span></div>
+      <div class="ann-line"><span class="acode">        if key not in self.map:     </span><span class="aann">← cache miss</span></div>
+      <div class="ann-line"><span class="acode">            return -1</span></div>
+      <div class="ann-line"><span class="acode">        node = self.map[key]        </span><span class="aann">← O(1) lookup</span></div>
+      <div class="ann-line"><span class="acode">        self._remove(node)          </span><span class="aann">← detach from current position</span></div>
+      <div class="ann-line"><span class="acode">        self._add_head(node)        </span><span class="aann">← re-insert as MRU</span></div>
+      <div class="ann-line"><span class="acode">        return node.val</span></div>
+      <div class="ann-line"><span class="acode"></span></div>
+      <div class="ann-line"><span class="acode">    def put(self, key: int, value: int) -> None:</span></div>
+      <div class="ann-line"><span class="acode">        if key in self.map:         </span><span class="aann">← update existing: change val + refresh recency</span></div>
+      <div class="ann-line"><span class="acode">            node = self.map[key]</span></div>
+      <div class="ann-line"><span class="acode">            node.val = value</span></div>
+      <div class="ann-line"><span class="acode">            self._remove(node)</span></div>
+      <div class="ann-line"><span class="acode">            self._add_head(node)</span></div>
+      <div class="ann-line"><span class="acode">            return</span></div>
+      <div class="ann-line"><span class="acode">        node = Node(key, value)     </span><span class="aann">← new node, key stored inside for eviction</span></div>
+      <div class="ann-line"><span class="acode">        self.map[key] = node</span></div>
+      <div class="ann-line"><span class="acode">        self._add_head(node)        </span><span class="aann">← insert as MRU</span></div>
+      <div class="ann-line"><span class="acode">        if len(self.map) > self.cap:</span><span class="aann">← over capacity</span></div>
+      <div class="ann-line"><span class="acode">            lru = self.tail.prev    </span><span class="aann">← LRU is always just before tail sentinel</span></div>
+      <div class="ann-line"><span class="acode">            self._remove(lru)       </span><span class="aann">← evict from DLL</span></div>
+      <div class="ann-line"><span class="acode">            del self.map[lru.key]   </span><span class="aann">← evict from map using key stored in node</span></div>
+    </div>
+
+    <div class="concept-box danger">
+      <div class="concept-box-title">🚫 Bug: Wrong order in _add_head</div>
+      <p>The four lines in <code>_add_head</code> must execute in order. If you set <code>self.head.next = node</code> <em>before</em> setting <code>self.head.next.prev = node</code>, you've lost the reference to the old first node — its <code>.prev</code> never gets updated. Always update the node's own pointers first, then update the surrounding nodes.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Alternative: Python OrderedDict</div>
+      <p><code>from collections import OrderedDict</code> gives you a dict that tracks insertion order. <code>cache.move_to_end(key, last=False)</code> moves to MRU. <code>cache.popitem(last=True)</code> evicts LRU. This hides the DLL internally — always mention both approaches in interviews, but be ready to implement from scratch.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify Constraints</div>
+        <p>"Both get and put must be O(1). That's the whole challenge — two different O(1) requirements at once. Hash map handles lookup. What handles the ordering?"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Eliminate Alternatives</div>
+        <p>"A simple array/list doesn't work — moving an element to the front after a get is O(n). A singly-linked list is O(n) to unlink an arbitrary node (need to find its predecessor). A doubly-linked list with direct node pointers: O(1) to unlink, O(1) to insert at front."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: State the Design</div>
+        <p>"Two structures: a dict mapping key to the DLL node, and a doubly-linked list ordered MRU to LRU. I'll use sentinel head and tail nodes so insertions and deletions never have null checks. The map stores node pointers so every get/put is O(1)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Trace an Example</div>
+        <p>"Let me trace capacity=2: put(1,1) → [1]; put(2,2) → [2,1]; get(1) → move 1 to front → [1,2]; put(3,3) → evict 2 (LRU) → [3,1]; get(2) → -1. This validates eviction order before I code."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Code the Helpers First</div>
+        <p>"I'll write _remove and _add_head first, then get and put in terms of them. The helpers are the hard part — once those are right, get and put are just compositions of them."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">
+"O(1) get and put means hash map for lookup plus a structure that can reorder in O(1).<br>
+I need to move any node to the front of an ordered sequence in O(1) — that's a doubly-linked list.<br>
+I'll combine them: the dict maps keys to DLL node pointers.<br>
+Sentinel head and tail eliminate edge cases.<br>
+Let me trace capacity=2 quickly... [trace] ...looks correct.<br>
+I'll code _remove and _add_head first, then get and put."
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Follow-up questions:</strong></p>
+    <ul style="margin-left:1.5rem;line-height:2;margin-top:0.5rem;font-size:14px">
+      <li>Use <code>OrderedDict</code> instead? Yes — mention it, implement from scratch if asked.</li>
+      <li>Thread-safe version? Wrap with <code>threading.RLock</code> in get and put.</li>
+      <li>LFU Cache (LC 460)? Much harder — freq buckets + nested doubly linked lists.</li>
+      <li>Bounded time guarantee? Python dict has amortized O(1) — worst case rare.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Capacity = <strong>2</strong>. Trace: <code>put(1,1)</code> → <code>put(2,2)</code> → <code>get(1)</code> → <code>put(3,3)</code> → <code>get(2)</code> → <code>get(3)</code></p>
+
+    <div class="viz-area">
+      <div id="op-label" class="viz-op-label">Initializing…</div>
+
+      <div class="viz-section-label">Doubly-Linked List — HEAD (MRU) ←→ TAIL (LRU)</div>
+      <div id="dll-vis" class="dll-container"></div>
+
+      <div class="viz-section-label">Hash Map {key → node}</div>
+      <div id="hmap-vis" class="hashmap-grid"></div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-size">
+          <span class="var-name">Cache Size</span>
+          <span class="var-val" id="vv-size">0</span>
+        </div>
+        <div class="var-box" id="vb-cap">
+          <span class="var-name">Capacity</span>
+          <span class="var-val" id="vv-cap">2</span>
+        </div>
+        <div class="var-box" id="vb-ret">
+          <span class="var-name">Return</span>
+          <span class="var-val" id="vv-ret">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-line" id="cl0">def get(self, key):</div>
+      <div class="code-line" id="cl1">    if key not in self.map: return -1</div>
+      <div class="code-line" id="cl2">    node = self.map[key]</div>
+      <div class="code-line" id="cl3">    self._remove(node)</div>
+      <div class="code-line" id="cl4">    self._add_head(node)</div>
+      <div class="code-line" id="cl5">    return node.val</div>
+      <div class="code-line" id="cl6">def put(self, key, value):</div>
+      <div class="code-line" id="cl7">    if key in self.map:  # update existing</div>
+      <div class="code-line" id="cl8">        node.val = value; _remove(node); _add_head(node); return</div>
+      <div class="code-line" id="cl9">    node = Node(key, value); self.map[key] = node</div>
+      <div class="code-line" id="cl10">    self._add_head(node)</div>
+      <div class="code-line" id="cl11">    if len(self.map) > self.cap:</div>
+      <div class="code-line" id="cl12">        lru = self.tail.prev</div>
+      <div class="code-line" id="cl13">        self._remove(lru); del self.map[lru.key]</div>
+    </div>
+
+    <div class="info-card">
+      <div id="phase-badge" class="phase-badge phase-init">Init</div>
+      <div id="step-counter" class="step-counter">Step 1 of 12</div>
+      <div id="step-title" class="step-title">Setting up the cache</div>
+      <div id="step-body" class="step-body">We create two sentinel nodes: HEAD (MRU side) and TAIL (LRU side) linked together. Hash map is empty. Capacity = 2. Ready to accept operations.</div>
+    </div>
+
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green-bg);border-color:var(--green-border)"></div>Just inserted / MRU</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-bg);border-color:var(--blue-border)"></div>Just accessed (get)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-bg);border-color:var(--amber-border)"></div>Being inserted</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--red-bg);border-color:var(--red-border)"></div>Being evicted</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--bg2);border-color:var(--border2)"></div>Normal / Sentinel</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Hash map gives O(1) lookup. Doubly-linked list gives O(1) insert/remove at any position given a pointer.</div>
+      <div class="takeaway">Sentinel (dummy) head and tail nodes eliminate every null-check edge case in pointer manipulation.</div>
+      <div class="takeaway">Nodes MUST store their own key — the evicted node needs its key to remove itself from the hash map.</div>
+      <div class="takeaway">Every get AND every put must move the touched node to the MRU position (head side).</div>
+      <div class="takeaway">Time: O(1) all operations. Space: O(capacity) for DLL + hash map combined.</div>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th><th>Key sub-operations</th></tr>
+      <tr><td>get(key)</td><td class="mark-good">O(1)</td><td>O(1)</td><td>map lookup → _remove → _add_head</td></tr>
+      <tr><td>put — update existing</td><td class="mark-good">O(1)</td><td>O(1)</td><td>map lookup → update val → _remove → _add_head</td></tr>
+      <tr><td>put — new key, no evict</td><td class="mark-good">O(1)</td><td>O(1) amort.</td><td>create node → map insert → _add_head</td></tr>
+      <tr><td>put — new key + evict</td><td class="mark-good">O(1)</td><td>O(1)</td><td>above + _remove(tail.prev) + del map[lru.key]</td></tr>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1.25rem;line-height:2;margin-top:0.4rem;font-size:14px">
+        <li>Any cache with O(1) access + O(1) eviction (LRU, MRU, LFU variant)</li>
+        <li>When you need O(1) ordered access AND O(1) key lookup simultaneously</li>
+        <li>Real-world: browser cache, CPU instruction cache, database buffer pool, CDN edge caches</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>LFU Cache</strong><span class="related-diff diff-hard">Hard</span> — Evict least-frequently-used; needs freq buckets + nested DLLs</div>
+      <div class="related-item"><strong>Design Twitter</strong><span class="related-diff diff-med">Medium</span> — Ordered feed with recency; "keep most recent k" pattern</div>
+      <div class="related-item"><strong>All O(1) Data Structure</strong><span class="related-diff diff-hard">Hard</span> — Insert/delete/getRandom all O(1); hash map + array trick</div>
+      <div class="related-item"><strong>Sliding Window Maximum</strong><span class="related-diff diff-hard">Hard</span> — Monotonic deque for O(1) ordered window; similar ordering idea</div>
+      <div class="related-item"><strong>Design HashMap</strong><span class="related-diff diff-easy">Easy</span> — Foundational: build hash map from scratch with chaining</div>
+      <div class="related-item"><strong>Min Stack</strong><span class="related-diff diff-med">Medium</span> — Design with O(1) auxiliary ops; same "pair every node with extra state" idea</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
 <script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
+// ── Step data ──
+// Trace: capacity=2; put(1,1), put(2,2), get(1), put(3,3), get(2), get(3)
+const steps = [
+  {
+    op: "INIT",
+    phase: "init", phaseLabel: "Initialize",
+    dll: [],
+    map: {}, mapHL: {},
+    size: 0, ret: "—", activeLine: -1,
+    title: "Initialize LRU Cache (capacity = 2)",
+    body: "Two sentinel nodes created: HEAD (MRU sentinel) ↔ TAIL (LRU sentinel). Hash map is empty. No real data yet. Capacity = 2 — we can hold at most 2 key-value pairs."
+  },
+  {
+    op: "put(1, 1) — new insert",
+    phase: "put", phaseLabel: "put(1, 1)",
+    dll: [{ k: 1, v: 1, state: "recent" }],
+    map: { 1: 1 }, mapHL: { 1: "new-entry" },
+    size: 1, ret: "—", activeLine: 9,
+    title: "put(1, 1) — Insert new node",
+    body: "Key 1 not in map → new insert. Create Node(key=1, val=1). map[1] = node. _add_head(node): wire between HEAD and TAIL (was empty). DLL: HEAD ↔ [k=1,v=1] ↔ TAIL. Size=1, under capacity."
+  },
+  {
+    op: "put(2, 2) — new insert",
+    phase: "put", phaseLabel: "put(2, 2)",
+    dll: [{ k: 2, v: 2, state: "recent" }, { k: 1, v: 1, state: "" }],
+    map: { 1: 1, 2: 2 }, mapHL: { 2: "new-entry" },
+    size: 2, ret: "—", activeLine: 9,
+    title: "put(2, 2) — Insert, now at capacity",
+    body: "Key 2 new. Create Node(2,2). _add_head inserts between HEAD and the existing [1] node. DLL: HEAD ↔ [k=2,v=2] ↔ [k=1,v=1] ↔ TAIL. Key 2 is MRU. Key 1 is LRU. Size = 2 = capacity."
+  },
+  {
+    op: "get(1) — lookup",
+    phase: "get", phaseLabel: "get(1)",
+    dll: [{ k: 2, v: 2, state: "" }, { k: 1, v: 1, state: "accessed" }],
+    map: { 1: 1, 2: 2 }, mapHL: { 1: "active" },
+    size: 2, ret: "—", activeLine: 2,
+    title: "get(1) — Cache hit! Found in map",
+    body: "Key 1 is in map. node = map[1] → O(1) lookup. Now call _remove(node): node.prev.next = node.next (HEAD→[2]), node.next.prev = node.prev ([2]→HEAD). Node [1] is detached. Next: _add_head."
+  },
+  {
+    op: "get(1) — move to MRU",
+    phase: "get", phaseLabel: "get(1) → MRU",
+    dll: [{ k: 1, v: 1, state: "accessed" }, { k: 2, v: 2, state: "" }],
+    map: { 1: 1, 2: 2 }, mapHL: { 1: "active" },
+    size: 2, ret: "1", activeLine: 4,
+    title: "get(1) — _add_head: node [1] is now MRU",
+    body: "_add_head(node): insert [1] right after HEAD. DLL: HEAD ↔ [k=1,v=1] ↔ [k=2,v=2] ↔ TAIL. Key 1 is now MRU. Key 2 slides back to LRU position. Return 1. If we evict next, key 2 goes — not key 1."
+  },
+  {
+    op: "put(3, 3) — insert",
+    phase: "put", phaseLabel: "put(3, 3)",
+    dll: [{ k: 3, v: 3, state: "inserting" }, { k: 1, v: 1, state: "" }, { k: 2, v: 2, state: "" }],
+    map: { 1: 1, 2: 2, 3: 3 }, mapHL: { 3: "new-entry" },
+    size: 3, ret: "—", activeLine: 9,
+    title: "put(3, 3) — Insert new node, temporarily over capacity",
+    body: "Key 3 new. Create Node(3,3), add to map, _add_head. DLL temporarily: HEAD ↔ [3] ↔ [1] ↔ [2] ↔ TAIL. Size=3 > capacity=2. Must evict! Check: len(map) > cap → True."
+  },
+  {
+    op: "put(3, 3) — EVICT LRU",
+    phase: "evict", phaseLabel: "Evict LRU",
+    dll: [{ k: 3, v: 3, state: "recent" }, { k: 1, v: 1, state: "" }, { k: 2, v: 2, state: "evicting" }],
+    map: { 1: 1, 3: 3 }, mapHL: { 2: "removed" },
+    size: 2, ret: "—", activeLine: 12,
+    title: "Evict LRU = tail.prev = node[2]",
+    body: "lru = tail.prev → node with key=2. _remove(lru): surgically detaches [2] from DLL. del map[lru.key]: removes key 2 from hash map. We need lru.key for this — that's why nodes store their key! Size back to 2."
+  },
+  {
+    op: "put(3, 3) done",
+    phase: "put", phaseLabel: "put(3, 3) done",
+    dll: [{ k: 3, v: 3, state: "recent" }, { k: 1, v: 1, state: "" }],
+    map: { 1: 1, 3: 3 }, mapHL: {},
+    size: 2, ret: "—", activeLine: 13,
+    title: "put(3, 3) complete — key 2 evicted",
+    body: "Final state: HEAD ↔ [k=3,v=3] ↔ [k=1,v=1] ↔ TAIL. Key 3 is MRU (just inserted). Key 1 is LRU (accessed before key 3 was inserted). Key 2 is gone — it was least recently used. Map: {1:node, 3:node}."
+  },
+  {
+    op: "get(2) — MISS",
+    phase: "get", phaseLabel: "get(2)",
+    dll: [{ k: 3, v: 3, state: "" }, { k: 1, v: 1, state: "" }],
+    map: { 1: 1, 3: 3 }, mapHL: {},
+    size: 2, ret: "-1", activeLine: 1,
+    title: "get(2) — Cache MISS → return -1",
+    body: "Key 2 not in map (was evicted in previous step). Return -1 immediately. No DLL changes. This proves the eviction policy worked: get(1) made key 1 MRU, so key 2 became LRU and got evicted when key 3 was inserted."
+  },
+  {
+    op: "get(3) — HIT",
+    phase: "get", phaseLabel: "get(3)",
+    dll: [{ k: 3, v: 3, state: "accessed" }, { k: 1, v: 1, state: "" }],
+    map: { 1: 1, 3: 3 }, mapHL: { 3: "active" },
+    size: 2, ret: "3", activeLine: 2,
+    title: "get(3) — Cache HIT, already MRU",
+    body: "Key 3 is in map. _remove(node[3]) — detach. _add_head(node[3]) — re-insert at head. Position unchanged (was already at head). But the operation is still correct — same code, same O(1), regardless. Return 3."
+  },
+  {
+    op: "get(3) done",
+    phase: "result", phaseLabel: "Final State",
+    dll: [{ k: 3, v: 3, state: "recent" }, { k: 1, v: 1, state: "" }],
+    map: { 1: 1, 3: 3 }, mapHL: {},
+    size: 2, ret: "3", activeLine: 5,
+    title: "Final state: HEAD ↔ [3] ↔ [1] ↔ TAIL",
+    body: "Complete trace done. Key 3 = MRU. Key 1 = LRU. Key 2 was correctly evicted. If we now call put(4,4): key 1 would be evicted (LRU). The invariant always holds: tail.prev is the correct eviction target."
+  }
 ];
+
 let cur = 0;
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
-  }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+function makeSentinel(label, role) {
+  const wrap = document.createElement('div');
+  wrap.className = 'dll-sentinel';
+  const box = document.createElement('div');
+  box.className = 'sentinel-box';
+  box.textContent = label;
+  const lbl = document.createElement('div');
+  lbl.className = 'sentinel-label';
+  lbl.textContent = role;
+  wrap.appendChild(box);
+  wrap.appendChild(lbl);
+  return wrap;
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function makeArrow() {
+  const a = document.createElement('div');
+  a.className = 'dll-arrow';
+  a.innerHTML = '<span class="arr-fwd">→</span><span class="arr-bwd">←</span>';
+  return a;
+}
+
+function renderDLL(dll) {
+  const el = document.getElementById('dll-vis');
+  el.innerHTML = '';
+  el.appendChild(makeSentinel('HEAD', 'MRU side'));
+
+  dll.forEach((node, i) => {
+    el.appendChild(makeArrow());
+
+    const wrap = document.createElement('div');
+    wrap.className = 'dll-node';
+
+    const box = document.createElement('div');
+    box.className = 'node-box ' + (node.state || '');
+
+    const kDiv = document.createElement('div');
+    kDiv.className = 'node-key';
+    kDiv.textContent = 'key=' + node.k;
+
+    const vDiv = document.createElement('div');
+    vDiv.className = 'node-val';
+    vDiv.textContent = node.v;
+
+    box.appendChild(kDiv);
+    box.appendChild(vDiv);
+    wrap.appendChild(box);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'node-label';
+    lbl.textContent = i === 0 ? 'MRU' : i === dll.length - 1 ? 'LRU' : '';
+    wrap.appendChild(lbl);
+
+    el.appendChild(wrap);
+  });
+
+  el.appendChild(makeArrow());
+  el.appendChild(makeSentinel('TAIL', 'LRU side'));
+}
+
+function renderMap(map, mapHL) {
+  const el = document.getElementById('hmap-vis');
+  el.innerHTML = '';
+  const keys = Object.keys(map);
+  if (keys.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:13px;font-style:italic;padding:8px">empty</span>';
+    return;
+  }
+  keys.forEach(k => {
+    const entry = document.createElement('div');
+    entry.className = 'hmap-entry ' + (mapHL[k] || '');
+    entry.innerHTML = `<div class="hmap-key">key = ${k}</div><div class="hmap-arrow-sym">↓ node</div><div class="hmap-val">${map[k]}</div>`;
+    el.appendChild(entry);
+  });
+}
+
+function setCode(al) {
+  for (let i = 0; i <= 13; i++) {
+    const el = document.getElementById('cl' + i);
+    if (el) el.classList.toggle('active', i === al);
+  }
+}
+
+function render() {
+  const s = steps[cur];
+  document.getElementById('op-label').textContent = s.op;
+  renderDLL(s.dll);
+  renderMap(s.map, s.mapHL);
+  document.getElementById('vv-size').textContent = s.size;
+  document.getElementById('vv-ret').textContent = s.ret;
+  setCode(s.activeLine);
+
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge phase-' + s.phase;
+  badge.textContent = s.phaseLabel;
+
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+}
+
+function go(d) { cur = Math.max(0, Math.min(steps.length - 1, cur + d)); render(); }
+function reset() { cur = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  const collapsed = content.classList.toggle('collapsed');
+  icon.style.transform = collapsed ? 'rotate(-90deg)' : '';
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
 render();
 </script>
 </body>

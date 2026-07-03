@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#2296 · Design a Text Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Text Editor Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Two Stacks Layout */
+.stacks-container{display:flex;align-items:flex-end;justify-content:center;gap:2rem;margin-bottom:1.5rem}
+.stack-group{display:flex;flex-direction:column;align-items:center;gap:6px}
+.stack-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:4px}
+.stack-cells{display:flex;flex-direction:column;gap:4px;min-height:180px;justify-content:flex-end}
+.stack-cell{
+  width:52px;height:42px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:600;
+  border:2px solid;
+  transition:background 0.3s,border-color 0.3s,opacity 0.3s;
+}
+.stack-cell.left-char{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.stack-cell.right-char{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.stack-cell.new-char{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.stack-cell.removed{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text);opacity:0.5}
+.stack-cell.empty-slot{background:var(--bg);border-color:var(--border);color:var(--text3);opacity:0.4;font-size:12px}
+
+.cursor-indicator{display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;padding-bottom:4px}
+.cursor-line{width:4px;height:120px;background:var(--red-mid);border-radius:2px;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.cursor-tag{font-size:10px;font-weight:700;color:var(--red-mid);text-transform:uppercase;letter-spacing:0.5px}
+
+/* Text display */
+.text-display{
+  background:var(--surface);border:2px solid var(--border2);border-radius:var(--radius);
+  padding:12px 16px;font-family:var(--mono);font-size:16px;
+  margin:1rem 0;min-height:50px;display:flex;align-items:center;
+  position:relative;
+}
+.text-left{color:var(--blue-mid);font-weight:600}
+.text-cursor{display:inline-block;width:2px;height:22px;background:var(--red-mid);vertical-align:middle;margin:0 1px;animation:blink 1s step-end infinite}
+.text-right{color:var(--purple-mid);font-weight:600}
+.text-display-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);position:absolute;top:-10px;left:12px;background:var(--surface);padding:0 4px}
+
+/* Cursor label display */
+.cursor-info{text-align:center;margin-bottom:1rem}
+.cursor-info-box{display:inline-flex;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 20px}
+.cinfo-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.cinfo-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.cinfo-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)}
+
+/* Operation badge */
+.op-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.op-add{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.op-del{background:var(--red-bg);color:var(--red-mid);border:1px solid var(--red-border)}
+.op-move-l{background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border)}
+.op-move-r{background:var(--purple-bg);color:var(--purple-mid);border:1px solid var(--purple-border)}
+.op-init{background:var(--amber-bg);color:var(--amber-mid);border:1px solid var(--amber-border)}
+.op-display{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-add{background:var(--green-bg);color:var(--green-mid)}
+.phase-del{background:var(--red-bg);color:var(--red-mid)}
+.phase-move-l{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-move-r{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-display{background:var(--cyan-bg);color:var(--cyan-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-left{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-right{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-new{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-removed{background:var(--red-bg);border-color:var(--red-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── State machine diagram ── */
+.state-diagram{display:flex;align-items:center;justify-content:center;gap:0;margin:1.5rem 0;flex-wrap:wrap}
+.state-box{display:flex;flex-direction:column;align-items:center;padding:12px 16px;border-radius:var(--radius);border:2px solid;min-width:120px;text-align:center}
+.state-box.left-stack{background:var(--blue-bg);border-color:var(--blue-border)}
+.state-box.right-stack{background:var(--purple-bg);border-color:var(--purple-border)}
+.state-box.cursor-box{background:var(--red-bg);border-color:var(--red-border);padding:8px 10px;min-width:60px}
+.state-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.state-box.left-stack .state-label{color:var(--blue-mid)}
+.state-box.right-stack .state-label{color:var(--purple-mid)}
+.state-box.cursor-box .state-label{color:var(--red-mid)}
+.state-content{font-family:var(--mono);font-size:13px;color:var(--text);line-height:1.6}
+.state-arrow{display:flex;flex-direction:column;align-items:center;padding:0 8px;gap:6px}
+.arrow-op{font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap;text-align:center;padding:3px 6px;background:var(--bg2);border-radius:4px}
+.arrow-sym{font-size:18px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #2296</div>
+  <h1>Design a Text Editor</h1>
+  <p class="subtitle">Design a text editor with a movable cursor that can add/delete characters and return the last k characters to the left of the cursor.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Two Stacks</span>
+    <span class="tag tag-complexity">Time: O(k) per op</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You need to build a simplified text editor from scratch — one that supports a <strong>movable cursor</strong>. The cursor sits at some position in a string of characters. You must implement four operations:</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">A</span>
+        <span class="step-text"><code>addText(text)</code> — Insert <code>text</code> at the cursor position, moving the cursor to the end of the inserted text.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">D</span>
+        <span class="step-text"><code>deleteText(k)</code> — Delete up to <code>k</code> characters immediately to the <strong>left</strong> of the cursor. Return the actual number deleted.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">←</span>
+        <span class="step-text"><code>cursorLeft(k)</code> — Move the cursor <code>k</code> positions to the left. Return the last 10 characters to the left of the cursor.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">→</span>
+        <span class="step-text"><code>cursorRight(k)</code> — Move the cursor <code>k</code> positions to the right. Return the last 10 characters to the left of the cursor.</span>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Everything that matters happens <strong>around the cursor</strong>. Characters to the left are added/deleted. The cursor moves left/right. If we split the text at the cursor into two pieces — "what's to the left" and "what's to the right" — every operation becomes a simple push/pop on two stacks.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="panel-box neutral">
+        <div class="panel-title">Example: Text = "abc|de"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--blue-text);line-height:1.8">
+          Left stack: ['a','b','c'] (top='c')<br>
+          Cursor: | (between c and d)<br>
+          Right stack: ['e','d'] (top='d')<br>
+          <br>
+          addText("x") → "abcx|de"<br>
+          deleteText(2) → "a|de" (deleted b,c)<br>
+          cursorLeft(1) → cursor before c<br>
+          Last 10 left: "abc" → returns "abc"
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naive Approach: Plain String</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Store as string + cursor index<br>
+          addText: insert at idx → O(n) shift<br>
+          deleteText: slice → O(n) copy<br>
+          cursorLeft/Right: O(1) move, O(k) slice<br>
+          <br>
+          Too slow for large strings!
+        </p>
+      </div>
+    </div>
+
+    <p><strong>Edge Cases:</strong> cursor at start (can't move left further), cursor at end, deleting more than available chars, <code>k</code> larger than text length, empty editor.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Stack Cursor Split</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Split the text at the cursor into two stacks. The cursor lives between them. Every operation is O(k) — no O(n) shifts needed.</p>
+
+    <!-- State diagram -->
+    <div class="state-diagram">
+      <div class="state-box left-stack">
+        <div class="state-label">Left Stack</div>
+        <div class="state-content">chars before cursor<br>top = char just left<br>of cursor</div>
+      </div>
+      <div class="state-arrow">
+        <div class="arrow-op">addText → push</div>
+        <div class="arrow-sym">⇄</div>
+        <div class="arrow-op">deleteText → pop</div>
+      </div>
+      <div class="state-box cursor-box">
+        <div class="state-label">|</div>
+        <div class="state-content">cursor<br>here</div>
+      </div>
+      <div class="state-arrow">
+        <div class="arrow-op">cursorLeft → pop→push</div>
+        <div class="arrow-sym">⇄</div>
+        <div class="arrow-op">cursorRight → pop→push</div>
+      </div>
+      <div class="state-box right-stack">
+        <div class="state-label">Right Stack</div>
+        <div class="state-content">chars after cursor<br>top = char just right<br>of cursor</div>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>addText(text):</strong> Push each character of <code>text</code> onto the LEFT stack. After inserting, the cursor is at the end of the new text — left stack holds all chars up to (and including) the new text, right stack unchanged.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>deleteText(k):</strong> Pop up to <code>k</code> characters from the LEFT stack (stop if empty). Count actual deletions and return it. Since left stack's top is the character immediately left of cursor, this correctly deletes leftward.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>cursorLeft(k):</strong> Pop up to <code>k</code> characters from LEFT stack, push each onto RIGHT stack. The cursor moves left. Then return the last min(10, len(left)) characters from the left stack (joined).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>cursorRight(k):</strong> Pop up to <code>k</code> characters from RIGHT stack, push each onto LEFT stack. The cursor moves right. Return the last 10 characters from the left stack.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why The Right Stack Stores Characters in Reverse</div>
+      <p>The right stack stores characters in <strong>reverse order</strong> of how they appear in the text. The character immediately to the right of the cursor is at the <em>top</em> of the right stack. When we pop from right and push to left (cursor moves right), the character that was just to the right becomes the character just to the left — exactly correct! No reversal needed at any point.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times: <strong>left stack (bottom-to-top) + right stack (top-to-bottom) = the full text, left-to-right</strong>. The cursor position is implicitly defined by the sizes of the two stacks. <code>len(left)</code> = cursor index. This invariant is preserved by every single operation.</p>
+    </div>
+
+    <p><strong>Proof for each operation:</strong></p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;font-size:14px;line-height:2.2">
+      <li><strong>addText:</strong> Pushes to left → left grows, right unchanged. Full text = left+right still holds. Cursor moved right by |text| positions.</li>
+      <li><strong>deleteText:</strong> Pops from left → left shrinks. The deleted character is simply removed from the concatenation. ✓</li>
+      <li><strong>cursorLeft:</strong> Pop from left, push to right. One char moves from the end of left to the beginning of right. The full text (left+right) is unchanged, but cursor moved one left. ✓</li>
+      <li><strong>cursorRight:</strong> Pop from right, push to left. One char moves from the beginning of right to the end of left. Full text unchanged, cursor moved one right. ✓</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Trap: Boundary Conditions</div>
+      <p>When moving left and already at the start (<code>len(left) == 0</code>), you cannot pop further — the cursor is already at position 0. Similarly for right. Always clamp with <code>min(k, len(stack))</code> iterations. The problem says "move min(k, available)" which the loop naturally handles by checking <code>if left</code> (truthy when non-empty).</p>
+    </div>
+
+    <p><strong>Why returning last 10 from the left is correct:</strong> After any cursor movement, the left stack holds all characters to the left of the new cursor position (bottom-to-top). The <strong>last (rightmost)</strong> of these are at the <em>top</em> of the left stack. So we read <code>left[-min(10,len(left)):]</code> which gives us exactly the 10 characters immediately preceding the cursor, in correct left-to-right order.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Two Stacks (Optimal, O(k) per operation)</strong> — Interview Pick ✓</p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TextEditor:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.left = []    </span><span class="aann">← chars before cursor, top = immediately left of cursor</span></div>
+<div class="ann-line"><span class="acode">        self.right = []   </span><span class="aann">← chars after cursor, top = immediately right of cursor</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def addText(self, text: str) -> None:</span></div>
+<div class="ann-line"><span class="acode">        for ch in text:           </span><span class="aann">← each char is pushed left-to-right</span></div>
+<div class="ann-line"><span class="acode">            self.left.append(ch)  </span><span class="aann">← push onto left stack; cursor advances after each char</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def deleteText(self, k: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">        deleted = 0               </span><span class="aann">← count actual deletions (may be less than k)</span></div>
+<div class="ann-line"><span class="acode">        while self.left and k > 0:</span></div>
+<div class="ann-line"><span class="acode">            self.left.pop()       </span><span class="aann">← remove char immediately left of cursor</span></div>
+<div class="ann-line"><span class="acode">            deleted += 1          </span></div>
+<div class="ann-line"><span class="acode">            k -= 1</span></div>
+<div class="ann-line"><span class="acode">        return deleted</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def cursorLeft(self, k: int) -> str:</span></div>
+<div class="ann-line"><span class="acode">        while self.left and k > 0:</span></div>
+<div class="ann-line"><span class="acode">            self.right.append(self.left.pop()) </span><span class="aann">← char moves: left-of-cursor → right-of-cursor</span></div>
+<div class="ann-line"><span class="acode">            k -= 1</span></div>
+<div class="ann-line"><span class="acode">        return ''.join(self.left[-10:])  </span><span class="aann">← last 10 chars of left = 10 before new cursor pos</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def cursorRight(self, k: int) -> str:</span></div>
+<div class="ann-line"><span class="acode">        while self.right and k > 0:</span></div>
+<div class="ann-line"><span class="acode">            self.left.append(self.right.pop()) </span><span class="aann">← char moves: right-of-cursor → left-of-cursor</span></div>
+<div class="ann-line"><span class="acode">            k -= 1</span></div>
+<div class="ann-line"><span class="acode">        return ''.join(self.left[-10:])  </span><span class="aann">← same: last 10 of left after moving right</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why self.left[-10:] works correctly</div>
+      <p>Python list slicing with <code>[-10:]</code> returns the last (up to) 10 elements. If the left stack has fewer than 10 elements, it simply returns all of them — no IndexError, no special-casing needed. The join converts them to a string in the correct left-to-right order since they're stored bottom-to-top (which is left-to-right for our text).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Doubly Linked List (Alternative Approach)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TextEditor:</span><span class="aann">  ← DLL approach: O(k) moves, O(1) add/delete at cursor</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.text = []  </span><span class="aann">← use list as DLL simulation (simpler in Python)</span></div>
+<div class="ann-line"><span class="acode">        self.pos = 0    </span><span class="aann">← cursor position: index into text</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def addText(self, text: str) -> None:</span></div>
+<div class="ann-line"><span class="acode">        for ch in text:</span></div>
+<div class="ann-line"><span class="acode">            self.text.insert(self.pos, ch)  </span><span class="aann">← O(n) insert — fine for interviews, not for production</span></div>
+<div class="ann-line"><span class="acode">            self.pos += 1</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def _get_left(self) -> str:</span></div>
+<div class="ann-line"><span class="acode">        start = max(0, self.pos - 10)</span></div>
+<div class="ann-line"><span class="acode">        return ''.join(self.text[start:self.pos])</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Comparison</div>
+      <p>
+        <strong>Two Stacks:</strong> O(k) per cursorLeft/Right (each step is a pop+push), O(|text|) for addText, O(k) for deleteText, O(10) = O(1) for get-last-10.<br>
+        <strong>Array with index:</strong> O(n) for addText/deleteText (shifting), O(k) for cursor moves. Much worse for frequent insertions.<br>
+        <strong>Rope data structure:</strong> O(log n) all operations — used in real editors (VSCode uses a Piece Tree variant). Beyond interview scope.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Design Problem Type</div>
+        <p style="font-size:14px;color:var(--text)">"This is a <em>data structure design</em> problem. My first question: what operations need to be fast?" Insert/delete/move all happen relative to the cursor. The cursor is the central abstraction — everything is defined relative to it.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Naive, Identify Bottleneck</div>
+        <p style="font-size:14px;color:var(--text)">"A naive approach: store text as a string with a cursor index. addText needs to shift O(n) characters rightward. That's the bottleneck." Now think: "what if I don't store text as one contiguous piece? What if I split at the cursor?"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: The Two-Stack Insight</div>
+        <p style="font-size:14px;color:var(--text)">"I split at the cursor into TWO pieces. Left piece: chars before cursor. Right piece: chars after cursor. Now: add = append to left (O(1)), delete = pop from left (O(1)), move left = pop from left, push to right (O(k)), move right = reverse. No shifting!"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Map Each Operation</div>
+        <p style="font-size:14px;color:var(--text)">Walk through each of the 4 operations with the two-stack model. Verify correctness with a small example. "Let me trace: start empty, addText('ab') → left=['a','b'], cursorLeft(1) → pop 'b' from left, push to right → left=['a'], right=['b']. Returns 'a'. Correct!"</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key observation is that the cursor splits the text into two independent halves.<br>
+I'll use two stacks: left holds chars before cursor (top = char just left of cursor),<br>
+right holds chars after cursor in reverse (top = char just right of cursor).<br>
+addText pushes each character onto left — O(|text|) total.<br>
+deleteText pops from left — O(k).<br>
+cursorLeft/Right transfers chars between stacks — O(k).<br>
+Returning last 10: slice the top of left stack — O(10) = O(1).<br>
+This gives O(k) per operation, O(n) space total."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What's the real-world equivalent?"</strong> → Gap buffer data structure — used in Emacs, classic text editors. Two stacks is functionally a gap buffer.</li>
+        <li><strong>"Can you support undo/redo?"</strong> → Add a history stack. Before each mutation, push current state (or the inverse operation) onto an undo stack.</li>
+        <li><strong>"Can you make cursor movement O(1)?"</strong> → Rope / Piece Table. O(log n) insert/delete, O(log n) movement. VSCode uses a variant.</li>
+        <li><strong>"What if text has Unicode (multi-byte chars)?"</strong> → Work at the grapheme cluster level, not byte level. Python handles this naturally with str indexing.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="color:var(--text2);font-size:13px;margin-bottom:1rem">Tracing: addText("abc"), deleteText(1), addText("x"), cursorLeft(2), cursorRight(1), deleteText(1), addText("yz")</p>
+
+    <div class="viz-area">
+      <!-- Text Display -->
+      <div style="position:relative;margin-bottom:1.5rem">
+        <div class="text-display">
+          <div class="text-display-label">Full Text (with cursor)</div>
+          <div id="text-display-content" style="display:flex;align-items:center;font-size:16px;font-family:var(--mono)">
+            <span class="text-left" id="td-left"></span>
+            <span class="text-cursor" id="td-cursor">|</span>
+            <span class="text-right" id="td-right"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Stacks Visualization -->
+      <div class="stacks-container">
+        <!-- Left Stack (grows upward = top is last element) -->
+        <div class="stack-group">
+          <div class="stack-label" style="color:var(--blue-mid)">Left Stack</div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">← top (near cursor)</div>
+          <div class="stack-cells" id="left-stack-cells">
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px">bottom →</div>
+        </div>
+
+        <!-- Cursor -->
+        <div class="cursor-indicator">
+          <div class="cursor-tag">cursor</div>
+          <div class="cursor-line"></div>
+        </div>
+
+        <!-- Right Stack (top is near cursor) -->
+        <div class="stack-group">
+          <div class="stack-label" style="color:var(--purple-mid)">Right Stack</div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:4px">top (near cursor) →</div>
+          <div class="stack-cells" id="right-stack-cells">
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+            <div class="stack-cell empty-slot">·</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px">← bottom</div>
+        </div>
+      </div>
+
+      <!-- Cursor info -->
+      <div class="cursor-info">
+        <div class="cursor-info-box">
+          <div class="cinfo-item">
+            <div class="cinfo-label">Cursor Pos</div>
+            <div class="cinfo-val" id="ci-pos">0</div>
+          </div>
+          <div class="cinfo-item">
+            <div class="cinfo-label">Left Size</div>
+            <div class="cinfo-val" id="ci-lsize">0</div>
+          </div>
+          <div class="cinfo-item">
+            <div class="cinfo-label">Right Size</div>
+            <div class="cinfo-val" id="ci-rsize">0</div>
+          </div>
+          <div class="cinfo-item">
+            <div class="cinfo-label">Last 10 Left</div>
+            <div class="cinfo-val" id="ci-last10" style="font-size:13px;max-width:120px;overflow:hidden;text-overflow:ellipsis">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-op">
+          <span class="var-name">Operation</span>
+          <span class="var-val" id="vv-op">—</span>
+        </div>
+        <div class="var-box" id="vb-return">
+          <span class="var-name">Returns</span>
+          <span class="var-val" id="vv-return">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">class TextEditor:</div>
+      <div class="code-line" id="cl-1">    def __init__(self):</div>
+      <div class="code-line" id="cl-2">        self.left, self.right = [], []</div>
+      <div class="code-line" id="cl-3">    def addText(self, text):</div>
+      <div class="code-line" id="cl-4">        for ch in text: self.left.append(ch)</div>
+      <div class="code-line" id="cl-5">    def deleteText(self, k):</div>
+      <div class="code-line" id="cl-6">        d = 0</div>
+      <div class="code-line" id="cl-7">        while self.left and k > 0: self.left.pop(); d+=1; k-=1</div>
+      <div class="code-line" id="cl-8">        return d</div>
+      <div class="code-line" id="cl-9">    def cursorLeft(self, k):</div>
+      <div class="code-line" id="cl-10">        while self.left and k > 0: self.right.append(self.left.pop()); k-=1</div>
+      <div class="code-line" id="cl-11">        return ''.join(self.left[-10:])</div>
+      <div class="code-line" id="cl-12">    def cursorRight(self, k):</div>
+      <div class="code-line" id="cl-13">        while self.right and k > 0: self.left.append(self.right.pop()); k-=1</div>
+      <div class="code-line" id="cl-14">        return ''.join(self.left[-10:])</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 16</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-left"></div> Left stack (before cursor)</div>
+      <div class="legend-item"><div class="legend-swatch sw-right"></div> Right stack (after cursor)</div>
+      <div class="legend-item"><div class="legend-swatch sw-new"></div> Newly added/moved char</div>
+      <div class="legend-item"><div class="legend-swatch sw-removed"></div> Being deleted</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">The cursor naturally splits text into two halves — model them as two stacks</div>
+      <div class="takeaway">Left stack top = character immediately left of cursor (delete target, display source)</div>
+      <div class="takeaway">Right stack top = character immediately right of cursor (reversed storage)</div>
+      <div class="takeaway">Moving cursor k left/right = k stack transfers — O(k), not O(n)</div>
+      <div class="takeaway">Returning last 10 left = slice top 10 of left stack = O(1) — no traversal needed</div>
+      <div class="takeaway">This is the "Gap Buffer" data structure — classic text editor foundation</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>addText</th><th>deleteText</th><th>cursorLeft/Right</th><th>Space</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Plain String + Index</td>
+          <td class="mark-bad">O(n)</td>
+          <td class="mark-bad">O(n)</td>
+          <td>O(k)</td>
+          <td>O(n)</td>
+        </tr>
+        <tr>
+          <td><strong>Two Stacks (Gap Buffer) ✓</strong></td>
+          <td class="mark-good">O(|text|)</td>
+          <td class="mark-good">O(k)</td>
+          <td class="mark-good">O(k)</td>
+          <td>O(n)</td>
+        </tr>
+        <tr>
+          <td>Rope / Piece Table</td>
+          <td>O(log n)</td>
+          <td>O(log n)</td>
+          <td>O(log n)</td>
+          <td>O(n)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Two-Stack / Gap-Buffer Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Design a data structure with a cursor/pointer that moves through a sequence"</li>
+        <li>Operations happen at or near a specific position — not random access</li>
+        <li>Need to efficiently insert/delete at the current position</li>
+        <li>The split-at-cursor insight: "what if I model left and right of position separately?"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Two Stacks / Design)</div>
+      <div class="related-item"><strong>Min Stack</strong><span class="related-diff diff-med">Medium</span> — Auxiliary stack tracking running minimum; two stacks for augmented state (#155)</div>
+      <div class="related-item"><strong>Implement Queue using Stacks</strong><span class="related-diff diff-easy">Easy</span> — Two stacks simulate FIFO by reversing order on demand (#232)</div>
+      <div class="related-item"><strong>Basic Calculator</strong><span class="related-diff diff-hard">Hard</span> — Stack-based expression evaluation, push/pop for operator precedence (#224)</div>
+      <div class="related-item"><strong>LRU Cache</strong><span class="related-diff diff-med">Medium</span> — Design problem with doubly linked list + hash map; position-aware access (#146)</div>
+      <div class="related-item"><strong>Design Browser History</strong><span class="related-diff diff-med">Medium</span> — Two stacks (back/forward) for navigation — structurally identical to this problem (#1472)</div>
+      <div class="related-item"><strong>Design Circular Deque</strong><span class="related-diff diff-med">Medium</span> — Design problem with insert/delete at both ends (#641)</div>
+      <div class="related-item"><strong>All One Data Structure</strong><span class="related-diff diff-hard">Hard</span> — Design with O(1) increment/decrement/min/max; uses doubly linked list (#432)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>Pattern: Design · Sub-Pattern: Two Stacks (Gap Buffer) — Analysis-based classification.<br>
+      Real-world connection: GNU Emacs uses a gap buffer as its primary text storage, allocating a "gap" at the cursor position and expanding it during edits.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Steps: tracing addText("abc"), deleteText(1), addText("x"), cursorLeft(2), cursorRight(1), deleteText(1), addText("yz")
+const steps = [
+  {
+    id: 0, phaseLabel: 'INIT', phaseClass: 'phase-init', activeLine: 1,
+    left: [], right: [],
+    op: '__init__()', ret: '—',
+    title: 'Initialize TextEditor',
+    text: 'Create two empty stacks: self.left = [] and self.right = []. The cursor is at position 0. No text has been added yet. The full text (left + right) is empty.'
+  },
+  {
+    id: 1, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 3,
+    left: [], right: [],
+    op: 'addText("abc")', ret: 'None',
+    title: 'addText("abc") — Starting to iterate',
+    text: 'Calling addText("abc"). We iterate over each character of "abc" and push onto the left stack. Starting with empty left stack.'
+  },
+  {
+    id: 2, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a'], right: [], newLeft: 'a',
+    op: 'addText("abc")', ret: 'None',
+    title: 'Push "a" → left stack',
+    text: 'self.left.append("a"). Left stack = ["a"]. The cursor is now after "a". Full text: "a|" (cursor at end).'
+  },
+  {
+    id: 3, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a', 'b'], right: [], newLeft: 'b',
+    op: 'addText("abc")', ret: 'None',
+    title: 'Push "b" → left stack',
+    text: 'self.left.append("b"). Left stack = ["a", "b"]. Cursor advances. Full text: "ab|".'
+  },
+  {
+    id: 4, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a', 'b', 'c'], right: [], newLeft: 'c',
+    op: 'addText("abc")', ret: 'None',
+    title: 'Push "c" → left stack. addText done.',
+    text: 'self.left.append("c"). Left stack = ["a","b","c"]. Right stack still empty. Full text: "abc|". Cursor is at position 3, right after "c".'
+  },
+  {
+    id: 5, phaseLabel: 'DELETE', phaseClass: 'phase-del', activeLine: 5,
+    left: ['a', 'b', 'c'], right: [], delChar: 'c',
+    op: 'deleteText(1)', ret: '1',
+    title: 'deleteText(1) — Pop "c" from left',
+    text: 'k=1. Loop: self.left is non-empty and k>0. Pop "c" from left stack. deleted=1, k=0. Loop ends. Return 1. Left stack now = ["a","b"]. Full text: "ab|".'
+  },
+  {
+    id: 6, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 3,
+    left: ['a', 'b'], right: [], newLeft: null,
+    op: 'addText("x")', ret: 'None',
+    title: 'addText("x") — Push "x" to left',
+    text: 'Left stack = ["a","b"]. Calling addText("x") — one character. Push "x" onto left stack.'
+  },
+  {
+    id: 7, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a', 'b', 'x'], right: [], newLeft: 'x',
+    op: 'addText("x")', ret: 'None',
+    title: 'Push "x" → left stack. addText done.',
+    text: 'Left stack = ["a","b","x"]. Right stack still []. Full text: "abx|". Cursor at position 3.'
+  },
+  {
+    id: 8, phaseLabel: 'CURSOR ←', phaseClass: 'phase-move-l', activeLine: 9,
+    left: ['a', 'b', 'x'], right: [], moveChar: 'x',
+    op: 'cursorLeft(2)', ret: '"ab"',
+    title: 'cursorLeft(2) — Move 1: Pop "x" from left → right',
+    text: 'k=2. Iteration 1: Pop "x" from left stack, push to right stack. self.right = ["x"]. Cursor moved one step left. Left = ["a","b"], Right = ["x"]. Full text: "ab|x".'
+  },
+  {
+    id: 9, phaseLabel: 'CURSOR ←', phaseClass: 'phase-move-l', activeLine: 10,
+    left: ['a'], right: ['x', 'b'], moveChar: 'b',
+    op: 'cursorLeft(2)', ret: '"a"',
+    title: 'cursorLeft(2) — Move 2: Pop "b" from left → right',
+    text: 'k=1. Iteration 2: Pop "b" from left stack, push to right stack. self.right = ["x","b"] (b is on top). Left = ["a"]. Cursor moved another step left. Full text: "a|bx". Return last 10 of left: "a".'
+  },
+  {
+    id: 10, phaseLabel: 'CURSOR ←', phaseClass: 'phase-move-l', activeLine: 11,
+    left: ['a'], right: ['x', 'b'],
+    op: 'cursorLeft(2)', ret: '"a"',
+    title: 'cursorLeft(2) returns "a"',
+    text: 'join(self.left[-10:]) = join(["a"]) = "a". The function returns "a" — the last (only) character to the left of the cursor. Right stack is ["x","b"] with "b" on top (= char just right of cursor).'
+  },
+  {
+    id: 11, phaseLabel: 'CURSOR →', phaseClass: 'phase-move-r', activeLine: 12,
+    left: ['a'], right: ['x', 'b'], moveChar: 'b',
+    op: 'cursorRight(1)', ret: '"ab"',
+    title: 'cursorRight(1) — Pop "b" from right → left',
+    text: 'k=1. Iteration 1: Pop "b" from right stack (top = "b"), push to left stack. Left = ["a","b"]. Right = ["x"]. Cursor moved one step right. Full text: "ab|x". Return last 10 of left: "ab".'
+  },
+  {
+    id: 12, phaseLabel: 'CURSOR →', phaseClass: 'phase-move-r', activeLine: 14,
+    left: ['a', 'b'], right: ['x'],
+    op: 'cursorRight(1)', ret: '"ab"',
+    title: 'cursorRight(1) returns "ab"',
+    text: 'join(self.left[-10:]) = join(["a","b"]) = "ab". Returns "ab". The cursor is now at position 2 — after "a" and "b", before "x". Right stack = ["x"].'
+  },
+  {
+    id: 13, phaseLabel: 'DELETE', phaseClass: 'phase-del', activeLine: 5,
+    left: ['a', 'b'], right: ['x'], delChar: 'b',
+    op: 'deleteText(1)', ret: '1',
+    title: 'deleteText(1) — Pop "b" from left',
+    text: 'k=1. Left is non-empty. Pop "b" from left stack. deleted=1, k=0. Loop ends. Return 1. Left = ["a"]. Full text: "a|x". The character just left of the cursor ("b") was deleted.'
+  },
+  {
+    id: 14, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a', 'y'], right: ['x'], newLeft: 'y',
+    op: 'addText("yz")', ret: 'None',
+    title: 'addText("yz") — Push "y" then "z"',
+    text: 'After deleteText, left=["a"], right=["x"]. addText("yz"): push "y" → left=["a","y"]. Then push "z" → left=["a","y","z"]. Cursor after "z". Full text: "ayz|x". Right stack unchanged = ["x"].'
+  },
+  {
+    id: 15, phaseLabel: 'ADD TEXT', phaseClass: 'phase-add', activeLine: 4,
+    left: ['a', 'y', 'z'], right: ['x'], newLeft: 'z',
+    op: 'addText("yz")', ret: 'None',
+    title: 'addText("yz") complete. Final state.',
+    text: 'Left stack = ["a","y","z"] (bottom to top). Right stack = ["x"] (one char after cursor). Full text = "ayz|x". Cursor at position 3. The two-stack invariant holds: reading left bottom-to-top + right top-to-bottom gives "a","y","z","x" = "ayzx".'
+  }
+];
+
+let current = 0;
+
+const MAX_STACK_DISPLAY = 5;
+
+function renderStacks(left, right, newLeft, delChar, moveChar) {
+  const leftEl = document.getElementById('left-stack-cells');
+  const rightEl = document.getElementById('right-stack-cells');
+
+  // Build left stack display (show bottom-to-top, up to MAX)
+  leftEl.innerHTML = '';
+  const leftPad = Math.max(0, MAX_STACK_DISPLAY - left.length);
+  for (let i = 0; i < leftPad; i++) {
+    const d = document.createElement('div');
+    d.className = 'stack-cell empty-slot'; d.textContent = '·';
+    leftEl.appendChild(d);
+  }
+  for (let i = 0; i < left.length && i < MAX_STACK_DISPLAY; i++) {
+    const actualIdx = left.length > MAX_STACK_DISPLAY ? i + (left.length - MAX_STACK_DISPLAY) : i;
+    const ch = left[actualIdx] || '';
+    const d = document.createElement('div');
+    const isTop = (actualIdx === left.length - 1);
+    const isNew = isTop && newLeft === ch;
+    const isDel = isTop && delChar === ch;
+    d.className = 'stack-cell ' + (isDel ? 'removed' : isNew ? 'new-char' : 'left-char');
+    d.textContent = ch;
+    leftEl.appendChild(d);
+  }
+
+  // Build right stack display (show top-to-bottom, i.e., reversed for display)
+  rightEl.innerHTML = '';
+  const rightDisplay = right.slice().reverse(); // reversed for visual: top on left
+  const rightPad = Math.max(0, MAX_STACK_DISPLAY - rightDisplay.length);
+  for (let i = 0; i < rightPad; i++) {
+    const d = document.createElement('div');
+    d.className = 'stack-cell empty-slot'; d.textContent = '·';
+    rightEl.appendChild(d);
+  }
+  for (let i = 0; i < rightDisplay.length && i < MAX_STACK_DISPLAY; i++) {
+    const ch = rightDisplay[i];
+    const isNew = (i === 0) && moveChar === ch;
+    const d = document.createElement('div');
+    d.className = 'stack-cell ' + (isNew ? 'new-char' : 'right-char');
+    d.textContent = ch;
+    rightEl.appendChild(d);
+  }
+}
+
+function getTextFromStacks(left, right) {
+  const leftStr = left.join('');
+  const rightStr = right.slice().reverse().join('');
+  return { leftStr, rightStr };
+}
+
+function getLast10(left) {
+  return left.slice(-10).join('') || '""';
+}
+
+function render() {
+  const step = steps[current];
+  const left = step.left;
+  const right = step.right;
+
+  renderStacks(left, right, step.newLeft || null, step.delChar || null, step.moveChar || null);
+
+  const { leftStr, rightStr } = getTextFromStacks(left, right);
+  document.getElementById('td-left').textContent = leftStr;
+  document.getElementById('td-right').textContent = rightStr;
+
+  // Cursor info
+  document.getElementById('ci-pos').textContent = left.length;
+  document.getElementById('ci-lsize').textContent = left.length;
+  document.getElementById('ci-rsize').textContent = right.length;
+  const last10 = left.length > 0 ? '"' + getLast10(left) + '"' : '""';
+  document.getElementById('ci-last10').textContent = last10;
+
+  // Variable tracker
+  document.getElementById('vv-op').textContent = step.op;
+  document.getElementById('vv-return').textContent = step.ret || '—';
+
+  const opChanged = current > 0 && steps[current].op !== steps[current - 1].op;
+  document.getElementById('vb-op').classList.toggle('changed', opChanged);
+  document.getElementById('vb-return').classList.toggle('changed', step.ret && step.ret !== '—' && step.ret !== 'None');
+
+  // Code panel
+  for (let i = 0; i <= 14; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('visited', i < current);
+    }
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

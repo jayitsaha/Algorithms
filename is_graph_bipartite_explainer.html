@@ -1,84 +1,931 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Is Graph Bipartite? — LC #785</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#785 · Is Graph Bipartite?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Graph Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Graph SVG node styling via JS-assigned classes */
+.graph-svg{display:block;margin:0 auto;overflow:visible}
+
+/* Queue display */
+.queue-display{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:0.75rem;justify-content:center}
+.queue-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);flex-shrink:0}
+.queue-item{padding:4px 12px;border-radius:6px;font-family:var(--mono);font-size:13px;font-weight:600;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.3s}
+.queue-item.q-head{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.queue-empty{font-size:13px;color:var(--text3);font-style:italic}
+
+/* State machine diagram */
+.state-machine-row{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;margin:1.25rem 0}
+.sm-node{display:flex;flex-direction:column;align-items:center;justify-content:center;width:130px;height:90px;border-radius:14px;border:3px solid;padding:10px;text-align:center;gap:4px}
+.sm-node.sm-unvis{border-color:var(--border2);background:var(--bg2)}
+.sm-node.sm-a{border-color:var(--blue-border);background:var(--blue-bg)}
+.sm-node.sm-b{border-color:var(--green-border);background:var(--green-bg)}
+.sm-node.sm-conflict{border-color:var(--red-border);background:var(--red-bg)}
+.sm-label{font-size:12px;font-weight:700;color:var(--text)}
+.sm-desc{font-size:10px;color:var(--text2);line-height:1.3}
+.sm-arrow{font-size:12px;color:var(--text3);text-align:center}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:30px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-visit{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-color{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-check{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-done{background:var(--green-bg);color:var(--green-mid)}
+.phase-conflict{background:var(--red-bg);color:var(--red-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:50%;border:2px solid}
+.sw-a{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-b{background:var(--green-bg);border-color:var(--green-border)}
+.sw-unvis{background:var(--surface);border-color:var(--border2)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-conflict{background:var(--red-bg);border-color:var(--red-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Is Graph Bipartite?</h1>
-<div class="subtitle">LeetCode #785 &mdash; DFS 2-Coloring</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">DFS 2-Coloring</span><span class="tag tag-cx">O(V+E) Time &middot; O(V) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #785</div>
+  <h1>Is Graph Bipartite?</h1>
+  <p class="subtitle">Given an undirected graph, determine if the graph is bipartite — i.e., can its nodes be split into two groups such that every edge connects nodes from different groups?</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">DFS 2-Coloring</span>
+    <span class="tag tag-complexity">Time: O(V + E)</span>
+    <span class="tag tag-complexity">Space: O(V)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're given an undirected graph as an adjacency list: <code>graph[i]</code> lists every node directly connected to node <code>i</code>. The graph has <code>n</code> nodes (labeled <code>0</code> to <code>n-1</code>). The graph may not be connected (it can have multiple disconnected components).</p>
+
+    <p style="margin-top:0.75rem">A graph is <strong>bipartite</strong> if its nodes can be split into exactly two sets (call them Group A and Group B) such that <em>every single edge</em> connects one node from Group A to one node from Group B. No edge may connect two nodes within the same group.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Bipartiteness is equivalent to <strong>2-colorability</strong>: can we paint every node red or blue so no two connected nodes share the same color? This is also equivalent to the graph having <strong>no odd-length cycles</strong>. A triangle (3 nodes all connected to each other) is the simplest example that kills bipartiteness — you'd need 3 colors to properly color it.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Bipartite: graph = [[1,3],[0,2],[1,3],[0,2]]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          Edges: 0-1, 0-3, 1-2, 2-3 (a 4-cycle)<br>
+          Group A (blue) = {0, 2}<br>
+          Group B (green) = {1, 3}<br>
+          Every edge crosses groups → <strong>True</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Not bipartite: graph = [[1,2,3],[0,2],[0,1,3],[0,2]]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          0-1, 0-2, 0-3, 1-2 (includes triangle 0-1-2)<br>
+          Triangle = odd cycle (length 3)<br>
+          Can't 2-color without conflict → <strong>False</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> A graph with no edges is always bipartite (each node can be in Group A). Isolated nodes (no edges) don't affect bipartiteness. A disconnected graph is bipartite only if <em>every</em> component is bipartite — so we must check all of them. The problem guarantees no self-loops or parallel edges.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Assign colors 0/1. DFS: assign current node color. For each neighbor: if same color, not bipartite. If uncolored, assign opposite color and recurse.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: BFS/DFS 2-Coloring</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: BFS/DFS 2-Coloring</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">color=[-1]*n</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each uncolored node: DFS/BFS to 2-color</span></div><div class="step"><span class="snum">3</span><span class="stxt">If conflict: return False</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(V+E)</strong> | Space: <strong>O(V)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import deque
-def isBipartite(graph):
-    n=len(graph);color=[-1]*n
-    for start in range(n):
-        if color[start]!=-1: continue
-        q=deque([start]);color[start]=0
-        while q:
-            u=q.popleft()
-            for v in graph[u]:
-                if color[v]==-1: color[v]=1-color[u];q.append(v)
-                elif color[v]==color[u]: return False
-    return True</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">BFS or DFS both work for 2-coloring</span></div><div class="step"><span class="snum">2</span><span class="stxt">Multiple components: iterate over all starting nodes</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>BFS/DFS 2-Coloring</td><td>O(V+E)</td><td>O(V)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Possible Bipartition</span><span class="pd dm">Medium</span> — Build graph then check bipartite</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>DFS 2-Coloring</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Is Graph Bipartite?"}, "title": "BFS/DFS 2-Coloring", "desc": "See code for walkthrough.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: DFS 2-Coloring</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We attempt to color the graph with two colors (0 and 1) using DFS. We assign a color to a node, then force all its neighbors to take the <em>opposite</em> color. If a neighbor is already colored with the <em>same</em> color as the current node, we've detected an odd cycle — the graph is not bipartite.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> Create <code>color = [-1] * n</code> where <code>-1</code> = unvisited. Colors 0 and 1 represent Group A and Group B respectively.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Loop over all nodes:</strong> For each node not yet visited (<code>color[i] == -1</code>), start a DFS from it with color 0. This handles disconnected components — we never skip an unvisited component.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>DFS: Color and propagate:</strong> Assign current node color <code>c</code>. For each neighbor: if it has the <em>same</em> color <code>c</code>, return False (conflict!). If unvisited, assign color <code>1-c</code> and recurse.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>All done:</strong> If all components are colored with no conflict, return True.</span>
+      </div>
+    </div>
+
+    <!-- State machine diagram -->
+    <p style="margin-top:1.5rem;font-weight:600;font-size:14px">Node state transitions during DFS:</p>
+    <div class="state-machine-row">
+      <div class="sm-node sm-unvis">
+        <div class="sm-label">UNVISITED</div>
+        <div class="sm-desc">color = -1<br>Not yet reached</div>
+      </div>
+      <div class="sm-arrow">→ assign color →</div>
+      <div class="sm-node sm-a">
+        <div class="sm-label">COLOR A (0)</div>
+        <div class="sm-desc">Group A<br>DFS started here</div>
+      </div>
+      <div class="sm-arrow">↔ opposite →</div>
+      <div class="sm-node sm-b">
+        <div class="sm-label">COLOR B (1)</div>
+        <div class="sm-desc">Group B<br>Neighbor of A</div>
+      </div>
+      <div class="sm-arrow">→ same color →</div>
+      <div class="sm-node sm-conflict">
+        <div class="sm-label">CONFLICT!</div>
+        <div class="sm-desc">Odd cycle found<br>Return False</div>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 BFS Alternative</div>
+      <p>BFS works identically — process nodes level by level, assigning alternating colors to each level. BFS is often easier to reason about because each BFS "level" naturally corresponds to one color group. Both DFS and BFS run in O(V + E). In interviews, BFS is slightly more common for 2-coloring because the level structure makes the color-flip intuitive.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After DFS colors a connected component: every visited node <code>u</code> has been assigned a color in {0, 1}, and for every edge <code>(u, v)</code> within that component, <code>color[u] ≠ color[v]</code>. If this invariant ever cannot be maintained (a visited neighbor forces a contradiction), the component is not bipartite.</p>
+    </div>
+
+    <p><strong>Why does a conflict prove non-bipartiteness?</strong> If during DFS we find an edge <code>(u, v)</code> where <code>color[u] == color[v]</code>, then following the DFS path from the component's root to <code>u</code> and from the root to <code>v</code>, we have two paths of different parity (one even-length, one odd-length). The edge <code>u-v</code> closes a cycle of odd length. No 2-coloring can resolve an odd cycle — it's mathematically impossible.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why iterate over all nodes (not just start from node 0)?</strong> The graph may be disconnected. A graph like <code>[[],[],[0,3],[2]]</code> has two components: {0} and {1} and {2,3} — node 0 and 1 are isolated, the DFS from them is trivial. But component {2,3} must also be checked. Skipping unvisited nodes means silently missing entire components.</p>
+
+    <p style="margin-top:0.75rem"><strong>Odd cycle theorem:</strong> A graph is 2-colorable ↔ it contains no odd cycle. This is proven by the König-Egerváry theorem (1916) and is a foundational result in graph theory. Our DFS 2-coloring is essentially a constructive proof: it either builds a valid 2-coloring (True) or identifies the contradicting edge in an odd cycle (False).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Classic Mistake: Skipping Unvisited Components</div>
+      <p>Only starting DFS from node 0 is wrong. A graph like <code>[[1],[0],[3],[2]]</code> has two completely disconnected edges: {0-1} and {2-3}. Both are bipartite individually. But if you only start DFS from node 0, you'd visit {0,1} and call it True — missing {2,3} entirely. Always loop through every unvisited node and start a new DFS from it.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — DFS 2-Coloring (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isBipartite(graph):                         </span><span class="aann">← graph[i] = neighbors of node i</span></div>
+<div class="ann-line"><span class="acode">    n = len(graph)                              </span><span class="aann">← number of nodes</span></div>
+<div class="ann-line"><span class="acode">    color = [-1] * n                            </span><span class="aann">← -1 = unvisited, 0 = Group A, 1 = Group B</span></div>
+<div class="ann-line"><span class="acode">                                                </span></div>
+<div class="ann-line"><span class="acode">    def dfs(node, c):                           </span><span class="aann">← Try coloring node with color c</span></div>
+<div class="ann-line"><span class="acode">        color[node] = c                         </span><span class="aann">← Assign this color to the current node</span></div>
+<div class="ann-line"><span class="acode">        for nei in graph[node]:                 </span><span class="aann">← Check every neighbor</span></div>
+<div class="ann-line"><span class="acode">            if color[nei] == c:                 </span><span class="aann">← Same color as us → odd cycle → fail</span></div>
+<div class="ann-line"><span class="acode">                return False                    </span></div>
+<div class="ann-line"><span class="acode">            if color[nei] == -1:                </span><span class="aann">← Unvisited? Assign opposite color and recurse</span></div>
+<div class="ann-line"><span class="acode">                if not dfs(nei, 1 - c):         </span><span class="aann">← 1-0=1, 1-1=0: flips the color</span></div>
+<div class="ann-line"><span class="acode">                    return False                </span><span class="aann">← Propagate failure up the call stack</span></div>
+<div class="ann-line"><span class="acode">        return True                             </span><span class="aann">← No conflict found in this subtree</span></div>
+<div class="ann-line"><span class="acode">                                                </span></div>
+<div class="ann-line"><span class="acode">    for i in range(n):                          </span><span class="aann">← Handle ALL components (not just node 0)</span></div>
+<div class="ann-line"><span class="acode">        if color[i] == -1:                      </span><span class="aann">← Only start DFS from unvisited nodes</span></div>
+<div class="ann-line"><span class="acode">            if not dfs(i, 0):                   </span><span class="aann">← Color this component starting with color 0</span></div>
+<div class="ann-line"><span class="acode">                return False                    </span><span class="aann">← Any component fails → whole graph fails</span></div>
+<div class="ann-line"><span class="acode">    return True                                 </span><span class="aann">← All components are bipartite</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why check color[nei] == c BEFORE color[nei] == -1?</div>
+      <p>Order matters here. If we check <code>color[nei] == -1</code> first and recurse, a later check of <code>color[nei] == c</code> would never fire for that neighbor. We want to catch the conflict first: if a neighbor already has our same color, we know immediately there's an odd cycle. Only if the neighbor is <em>unvisited</em> (-1) do we continue the DFS. (If a neighbor has the opposite color already, we can safely skip it — no conflict.)</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — BFS 2-Coloring (iterative, avoids recursion depth issues)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import deque                   </span></div>
+<div class="ann-line"><span class="acode">def isBipartite(graph):                         </span></div>
+<div class="ann-line"><span class="acode">    n = len(graph)                              </span></div>
+<div class="ann-line"><span class="acode">    color = [-1] * n                            </span></div>
+<div class="ann-line"><span class="acode">    for start in range(n):                      </span><span class="aann">← Handle all components</span></div>
+<div class="ann-line"><span class="acode">        if color[start] != -1:                  </span></div>
+<div class="ann-line"><span class="acode">            continue                            </span><span class="aann">← Skip already-visited nodes</span></div>
+<div class="ann-line"><span class="acode">        color[start] = 0                        </span><span class="aann">← Seed this component with color 0</span></div>
+<div class="ann-line"><span class="acode">        q = deque([start])                      </span><span class="aann">← BFS queue</span></div>
+<div class="ann-line"><span class="acode">        while q:                                </span></div>
+<div class="ann-line"><span class="acode">            u = q.popleft()                     </span><span class="aann">← Process next node</span></div>
+<div class="ann-line"><span class="acode">            for v in graph[u]:                  </span><span class="aann">← Examine neighbors</span></div>
+<div class="ann-line"><span class="acode">                if color[v] == -1:              </span><span class="aann">← Unvisited: color opposite and enqueue</span></div>
+<div class="ann-line"><span class="acode">                    color[v] = 1 - color[u]     </span></div>
+<div class="ann-line"><span class="acode">                    q.append(v)                 </span></div>
+<div class="ann-line"><span class="acode">                elif color[v] == color[u]:      </span><span class="aann">← Same color → conflict → not bipartite</span></div>
+<div class="ann-line"><span class="acode">                    return False                </span></div>
+<div class="ann-line"><span class="acode">    return True                                 </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>DFS:</strong> Time O(V + E), Space O(V) for the color array + recursion stack (up to O(V) deep).<br>
+        <strong>BFS:</strong> Time O(V + E), Space O(V) for the color array + the deque (holds at most O(V) nodes at once).<br>
+        Both visit every node and every edge at most twice (once in each direction). The color array is the only extra space needed beyond the recursion/queue.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p style="font-size:14px;color:var(--text)">Keywords: "can we split nodes into two groups," "no two adjacent nodes same group." This immediately signals 2-coloring / bipartite check. The constraint that the graph is undirected is crucial — directed graphs have a different bipartite concept.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Reformulate as Graph Coloring</div>
+        <p style="font-size:14px;color:var(--text)">Restate: "Can I color each node 0 or 1 such that every edge connects nodes with different colors?" This is a constraint propagation problem — once you pick a color for one node, all its neighbors are forced, and their neighbors are forced, and so on.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Choose DFS or BFS (either is fine)</div>
+        <p style="font-size:14px;color:var(--text)">Both work. DFS is slightly more compact with recursion. BFS is iterative (avoids stack overflow on large inputs). State explicitly: "I'll use DFS for brevity, but BFS would work identically." This shows you know both.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Disconnected Graphs</div>
+        <p style="font-size:14px;color:var(--text)">"The graph may be disconnected. I need to start DFS/BFS from every unvisited node, not just node 0." Mentioning this proactively signals that you understand the edge case — many candidates miss this.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a bipartite check — can we 2-color the graph so no two neighbors share a color?<br>
+I'll use DFS: start from each unvisited node, assign it color 0,<br>
+then DFS: assign neighbors color 1-c. If a neighbor already has the same color, return False.<br>
+I need to iterate over all nodes to handle disconnected components.<br>
+Time is O(V+E) — we visit each node and edge at most once. Space is O(V) for the color array."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do it without recursion?"</strong> → Yes, use BFS (iterative queue-based approach).</li>
+        <li><strong>"What if the graph is directed?"</strong> → Different problem. Bipartite typically applies to undirected graphs. For directed, you'd check SCC or transitive closure properties.</li>
+        <li><strong>"Possible Bipartition (LC 886)?"</strong> → Almost identical: build a graph from the "dislike" pairs, then check if it's bipartite.</li>
+        <li><strong>"What's the connection to odd cycles?"</strong> → A graph is bipartite iff it contains no odd-length cycle. 2-coloring fails exactly when an odd cycle is encountered.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: graph = [[1,3],[0,2],[1,3],[0,2]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:0.75rem">Example: 4-node cycle. Edges: 0↔1, 1↔2, 2↔3, 3↔0. Expected result: <strong>True</strong> (bipartite).</p>
+
+    <div class="viz-area">
+      <!-- SVG Graph -->
+      <svg class="graph-svg" id="graph-svg" viewBox="0 0 380 240" style="max-width:400px;height:240px">
+        <!-- Edges (drawn first, behind nodes) -->
+        <line id="edge-01" x1="100" y1="60" x2="280" y2="60" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="edge-12" x1="280" y1="60" x2="280" y2="180" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="edge-23" x1="280" y1="180" x2="100" y2="180" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="edge-30" x1="100" y1="180" x2="100" y2="60" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Nodes -->
+        <g id="node-0">
+          <circle id="nc-0" cx="100" cy="60" r="26" stroke-width="2.5"/>
+          <text id="nt-0" x="100" y="60" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700">0</text>
+          <text x="100" y="96" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif" font-size="11" fill="var(--text3)">node 0</text>
+        </g>
+        <g id="node-1">
+          <circle id="nc-1" cx="280" cy="60" r="26" stroke-width="2.5"/>
+          <text id="nt-1" x="280" y="60" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700">1</text>
+          <text x="280" y="96" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif" font-size="11" fill="var(--text3)">node 1</text>
+        </g>
+        <g id="node-2">
+          <circle id="nc-2" cx="280" cy="180" r="26" stroke-width="2.5"/>
+          <text id="nt-2" x="280" y="180" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700">2</text>
+          <text x="280" y="216" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif" font-size="11" fill="var(--text3)">node 2</text>
+        </g>
+        <g id="node-3">
+          <circle id="nc-3" cx="100" cy="180" r="26" stroke-width="2.5"/>
+          <text id="nt-3" x="100" y="180" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700">3</text>
+          <text x="100" y="216" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif" font-size="11" fill="var(--text3)">node 3</text>
+        </g>
+      </svg>
+
+      <!-- DFS Stack display -->
+      <div class="queue-display" id="dfs-stack-display">
+        <span class="queue-label">DFS Stack:</span>
+        <span class="queue-empty" id="stack-empty">empty</span>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-node">
+          <span class="var-name">current</span>
+          <span class="var-val" id="vv-node">—</span>
+        </div>
+        <div class="var-box" id="vb-c0">
+          <span class="var-name">color[0]</span>
+          <span class="var-val" id="vv-c0">-1</span>
+        </div>
+        <div class="var-box" id="vb-c1">
+          <span class="var-name">color[1]</span>
+          <span class="var-val" id="vv-c1">-1</span>
+        </div>
+        <div class="var-box" id="vb-c2">
+          <span class="var-name">color[2]</span>
+          <span class="var-val" id="vv-c2">-1</span>
+        </div>
+        <div class="var-box" id="vb-c3">
+          <span class="var-name">color[3]</span>
+          <span class="var-val" id="vv-c3">-1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def isBipartite(graph):</div>
+      <div class="code-line" id="cl-1">    n = len(graph)          # n = 4</div>
+      <div class="code-line" id="cl-2">    color = [-1] * n        # [-1, -1, -1, -1]</div>
+      <div class="code-line" id="cl-3">    def dfs(node, c):</div>
+      <div class="code-line" id="cl-4">        color[node] = c</div>
+      <div class="code-line" id="cl-5">        for nei in graph[node]:</div>
+      <div class="code-line" id="cl-6">            if color[nei] == c:</div>
+      <div class="code-line" id="cl-7">                return False</div>
+      <div class="code-line" id="cl-8">            if color[nei] == -1:</div>
+      <div class="code-line" id="cl-9">                if not dfs(nei, 1 - c):</div>
+      <div class="code-line" id="cl-10">                    return False</div>
+      <div class="code-line" id="cl-11">        return True</div>
+      <div class="code-line" id="cl-12">    for i in range(n):</div>
+      <div class="code-line" id="cl-13">        if color[i] == -1:</div>
+      <div class="code-line" id="cl-14">            if not dfs(i, 0):</div>
+      <div class="code-line" id="cl-15">                return False</div>
+      <div class="code-line" id="cl-16">    return True</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 12</div>
+      <div class="step-title" id="step-title">Ready to begin DFS 2-coloring</div>
+      <div class="step-body" id="step-body">We have a 4-node cycle: 0↔1↔2↔3↔0. We initialize color = [-1, -1, -1, -1]. We will start DFS from node 0 and try to 2-color the graph.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>◀ Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next ▶</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-unvis"></div>Unvisited (color -1)</div>
+      <div class="legend-item"><div class="legend-swatch sw-a"></div>Group A (color 0, blue)</div>
+      <div class="legend-item"><div class="legend-swatch sw-b"></div>Group B (color 1, green)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div>Currently visiting</div>
+      <div class="legend-item"><div class="legend-swatch sw-conflict"></div>Conflict (same color)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A graph is bipartite iff it can be 2-colored with no adjacent nodes sharing a color</div>
+      <div class="takeaway">DFS 2-coloring: assign color 0 to start node, force neighbors to color 1, detect same-color conflicts</div>
+      <div class="takeaway">Must iterate over ALL nodes, not just node 0 — disconnected components must all be checked</div>
+      <div class="takeaway">Both DFS (recursive) and BFS (iterative) work — O(V + E) time, O(V) space</div>
+      <div class="takeaway">A conflict (same-color edge) proves an odd-length cycle exists → not bipartite</div>
+      <div class="takeaway">Trees are always bipartite (no cycles at all). Even-length cycles are fine. Odd-length cycles break bipartiteness.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Problem asks to divide nodes into two groups based on edge constraints</li>
+        <li>"Can we color this graph with 2 colors?" (general k-coloring for k ≥ 3 is NP-hard, but k=2 is polynomial)</li>
+        <li>Detecting if a relationship graph (dislikes, conflicts) has a consistent 2-partition</li>
+        <li>Checking if a scheduling or assignment problem can be resolved without contradictions</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:1rem;font-weight:600">Complexity Summary:</p>
+    <table class="cmp-table">
+      <tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      <tr><td>DFS 2-Coloring</td><td class="mark-good">O(V + E)</td><td>O(V)</td><td>Elegant recursive; may hit recursion limit on huge inputs</td></tr>
+      <tr><td>BFS 2-Coloring</td><td class="mark-good">O(V + E)</td><td>O(V)</td><td>Iterative; safer for production; slightly more code</td></tr>
+    </table>
+
+    <div class="related-list" style="margin-top:1.25rem">
+      <p style="font-weight:600;margin-bottom:0.5rem">Related Problems (same DFS/BFS 2-coloring pattern):</p>
+      <div class="related-item"><strong>Possible Bipartition</strong><span class="related-diff diff-med">Medium</span> — LC 886. Build graph from "dislikes" pairs, then check bipartite. Identical algorithm.</div>
+      <div class="related-item"><strong>Number of Islands</strong><span class="related-diff diff-med">Medium</span> — LC 200. DFS/BFS graph traversal to count connected components. Same exploration pattern.</div>
+      <div class="related-item"><strong>Course Schedule</strong><span class="related-diff diff-med">Medium</span> — LC 207. DFS cycle detection in directed graph. Related: both use DFS on graphs for structural analysis.</div>
+      <div class="related-item"><strong>Graph Valid Tree</strong><span class="related-diff diff-med">Medium</span> — LC 261. Check connectivity + no cycles. DFS graph traversal, checks structural properties.</div>
+      <div class="related-item"><strong>Find if Path Exists in Graph</strong><span class="related-diff diff-easy">Easy</span> — LC 1971. Basic BFS/DFS reachability — good warm-up before bipartite.</div>
+      <div class="related-item"><strong>All Paths from Source to Target</strong><span class="related-diff diff-med">Medium</span> — LC 797. DFS backtracking on DAG. Builds DFS graph intuition.</div>
+      <div class="related-item"><strong>Number of Connected Components</strong><span class="related-diff diff-med">Medium</span> — LC 323. Count components using DFS/BFS — same "iterate over all unvisited nodes" pattern.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+/* ────────────── Collapsible Sections ────────────── */
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  const isCollapsed = content.classList.contains('collapsed');
+  content.classList.toggle('collapsed', !isCollapsed);
+  icon.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+/* ────────────── Graph Visualization ────────────── */
+// Node color styling
+const NODE_STYLES = {
+  '-1':  { fill: 'var(--surface)',  stroke: 'var(--border2)', textFill: 'var(--text3)' },
+  '0':   { fill: 'var(--blue-bg)', stroke: 'var(--blue-border)', textFill: 'var(--blue-text)' },
+  '1':   { fill: 'var(--green-bg)', stroke: 'var(--green-border)', textFill: 'var(--green-text)' },
+  'active': { fill: 'var(--amber-bg)', stroke: 'var(--amber-border)', textFill: 'var(--amber-text)', strokeWidth: '3.5' },
+  'conflict': { fill: 'var(--red-bg)', stroke: 'var(--red-border)', textFill: 'var(--red-text)', strokeWidth: '3.5' }
+};
+
+const EDGE_STYLES = {
+  'default': { stroke: 'var(--border2)', strokeWidth: '2' },
+  'tree':    { stroke: 'var(--blue-border)', strokeWidth: '2.5' },
+  'valid':   { stroke: 'var(--green-border)', strokeWidth: '2.5' },
+  'conflict':{ stroke: 'var(--red-border)', strokeWidth: '3', strokeDasharray: '6,3' }
+};
+
+function styleNode(id, styleKey) {
+  const s = NODE_STYLES[styleKey] || NODE_STYLES['-1'];
+  const circle = document.getElementById('nc-' + id);
+  const text = document.getElementById('nt-' + id);
+  if (!circle || !text) return;
+  circle.style.fill = s.fill;
+  circle.style.stroke = s.stroke;
+  circle.style.strokeWidth = s.strokeWidth || '2.5';
+  text.style.fill = s.textFill;
+}
+
+function styleEdge(edgeId, styleKey) {
+  const e = document.getElementById(edgeId);
+  if (!e) return;
+  const s = EDGE_STYLES[styleKey] || EDGE_STYLES['default'];
+  e.setAttribute('stroke', s.stroke);
+  e.setAttribute('stroke-width', s.strokeWidth);
+  if (s.strokeDasharray) e.setAttribute('stroke-dasharray', s.strokeDasharray);
+  else e.removeAttribute('stroke-dasharray');
+}
+
+function applyNodeColors(colors, activeNode, conflictNode) {
+  for (let i = 0; i < 4; i++) {
+    if (i === conflictNode) styleNode(i, 'conflict');
+    else if (i === activeNode) styleNode(i, 'active');
+    else styleNode(i, String(colors[i]));
+  }
+}
+
+function applyEdgeStyles(edgeStyles) {
+  ['edge-01','edge-12','edge-23','edge-30'].forEach(e => styleEdge(e, 'default'));
+  if (edgeStyles) edgeStyles.forEach(([e, s]) => styleEdge(e, s));
+}
+
+function updateStack(stack) {
+  const container = document.getElementById('dfs-stack-display');
+  const emptyEl = document.getElementById('stack-empty');
+  // Remove old items (keep label and empty span)
+  Array.from(container.querySelectorAll('.queue-item')).forEach(el => el.remove());
+
+  if (!stack || stack.length === 0) {
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+  // Stack: show bottom→top, head (top) is highlighted
+  stack.forEach((item, idx) => {
+    const el = document.createElement('span');
+    el.className = 'queue-item' + (idx === stack.length - 1 ? ' q-head' : '');
+    el.textContent = 'dfs(' + item.node + ',' + item.c + ')';
+    container.appendChild(el);
+  });
+}
+
+function updateVars(colors, activeNode, changed) {
+  const nodeEl = document.getElementById('vv-node');
+  if (nodeEl) nodeEl.textContent = activeNode !== null ? activeNode : '—';
+
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById('vv-c' + i);
+    const box = document.getElementById('vb-c' + i);
+    if (!el || !box) continue;
+    el.textContent = colors[i];
+    box.classList.toggle('changed', changed && changed.includes(i));
+  }
+}
+
+/* ────────────── Step Data ────────────── */
+const steps = [
+  {
+    phase: 'phase-init', phaseText: 'INIT',
+    activeLine: 2,
+    colors: [-1,-1,-1,-1], activeNode: null, conflictNode: null,
+    edges: [],
+    stack: [],
+    changed: [],
+    title: 'Initialize color array',
+    body: 'We set color = [-1, -1, -1, -1]. Every node starts as "unvisited" (-1). We will try to 2-color the graph: color 0 = Group A (blue), color 1 = Group B (green).'
+  },
+  {
+    phase: 'phase-visit', phaseText: 'OUTER LOOP',
+    activeLine: 13,
+    colors: [-1,-1,-1,-1], activeNode: 0, conflictNode: null,
+    edges: [],
+    stack: [],
+    changed: [],
+    title: 'Start outer loop: i = 0',
+    body: 'We check node 0: color[0] == -1, so it is unvisited. We begin DFS from node 0 with color 0 (Group A / blue).'
+  },
+  {
+    phase: 'phase-color', phaseText: 'DFS CALL',
+    activeLine: 4,
+    colors: [0,-1,-1,-1], activeNode: 0, conflictNode: null,
+    edges: [],
+    stack: [{node:0, c:0}],
+    changed: [0],
+    title: 'dfs(0, 0): Color node 0 with color 0 (Group A)',
+    body: 'color[0] = 0 (blue). Node 0 is now in Group A. We begin examining its neighbors: [1, 3].'
+  },
+  {
+    phase: 'phase-check', phaseText: 'CHECK NEIGHBOR',
+    activeLine: 8,
+    colors: [0,-1,-1,-1], activeNode: 1, conflictNode: null,
+    edges: [['edge-01','tree']],
+    stack: [{node:0, c:0}],
+    changed: [],
+    title: 'dfs(0, 0): Check neighbor 1 — color[1] == -1 (unvisited)',
+    body: 'Neighbor 1 is unvisited (color -1). We must color it with the opposite color: 1 - 0 = 1 (Group B / green). We call dfs(1, 1).'
+  },
+  {
+    phase: 'phase-color', phaseText: 'DFS CALL',
+    activeLine: 4,
+    colors: [0,1,-1,-1], activeNode: 1, conflictNode: null,
+    edges: [['edge-01','tree']],
+    stack: [{node:0, c:0},{node:1, c:1}],
+    changed: [1],
+    title: 'dfs(1, 1): Color node 1 with color 1 (Group B)',
+    body: 'color[1] = 1 (green). Node 1 is now in Group B. We examine its neighbors: [0, 2]. Neighbor 0 already has color 0 ≠ 1, so no conflict.'
+  },
+  {
+    phase: 'phase-check', phaseText: 'CHECK NEIGHBOR',
+    activeLine: 8,
+    colors: [0,1,-1,-1], activeNode: 2, conflictNode: null,
+    edges: [['edge-01','tree'],['edge-12','tree']],
+    stack: [{node:0, c:0},{node:1, c:1}],
+    changed: [],
+    title: 'dfs(1, 1): Check neighbor 2 — color[2] == -1 (unvisited)',
+    body: 'Neighbor 2 is unvisited. We assign it color 1 - 1 = 0 (Group A / blue). We call dfs(2, 0).'
+  },
+  {
+    phase: 'phase-color', phaseText: 'DFS CALL',
+    activeLine: 4,
+    colors: [0,1,0,-1], activeNode: 2, conflictNode: null,
+    edges: [['edge-01','tree'],['edge-12','tree']],
+    stack: [{node:0, c:0},{node:1, c:1},{node:2, c:0}],
+    changed: [2],
+    title: 'dfs(2, 0): Color node 2 with color 0 (Group A)',
+    body: 'color[2] = 0 (blue). Node 2 is now in Group A — same as node 0! This is fine because nodes 0 and 2 are not connected. We examine neighbors: [1, 3].'
+  },
+  {
+    phase: 'phase-check', phaseText: 'CHECK NEIGHBOR',
+    activeLine: 6,
+    colors: [0,1,0,-1], activeNode: 2, conflictNode: null,
+    edges: [['edge-01','tree'],['edge-12','tree'],['edge-23','valid']],
+    stack: [{node:0, c:0},{node:1, c:1},{node:2, c:0}],
+    changed: [],
+    title: 'dfs(2, 0): Neighbor 1 has color 1 ≠ 0 — no conflict',
+    body: 'color[1] = 1, which is different from our color 0. Good! The edge 2-1 connects different groups. Next we check neighbor 3.'
+  },
+  {
+    phase: 'phase-check', phaseText: 'CHECK NEIGHBOR',
+    activeLine: 8,
+    colors: [0,1,0,-1], activeNode: 3, conflictNode: null,
+    edges: [['edge-01','tree'],['edge-12','tree'],['edge-23','tree']],
+    stack: [{node:0, c:0},{node:1, c:1},{node:2, c:0}],
+    changed: [],
+    title: 'dfs(2, 0): Neighbor 3 is unvisited — assign color 1',
+    body: 'Neighbor 3 is unvisited (color -1). We assign color 1 - 0 = 1 (Group B / green). We call dfs(3, 1).'
+  },
+  {
+    phase: 'phase-color', phaseText: 'DFS CALL',
+    activeLine: 4,
+    colors: [0,1,0,1], activeNode: 3, conflictNode: null,
+    edges: [['edge-01','tree'],['edge-12','tree'],['edge-23','tree']],
+    stack: [{node:0, c:0},{node:1, c:1},{node:2, c:0},{node:3, c:1}],
+    changed: [3],
+    title: 'dfs(3, 1): Color node 3 with color 1 (Group B)',
+    body: 'color[3] = 1 (green). Node 3 joins Group B. Examining neighbors: [0, 2]. Neighbor 0 has color 0 ≠ 1 — OK. Neighbor 2 has color 0 ≠ 1 — OK. No conflicts found!'
+  },
+  {
+    phase: 'phase-check', phaseText: 'VERIFY EDGES',
+    activeLine: 6,
+    colors: [0,1,0,1], activeNode: null, conflictNode: null,
+    edges: [['edge-01','valid'],['edge-12','valid'],['edge-23','valid'],['edge-30','valid']],
+    stack: [],
+    changed: [],
+    title: 'All neighbors of node 3 checked — propagating back up',
+    body: 'dfs(3,1) returns True. dfs(2,0) returns True. dfs(1,1) checks neighbor 0: color[0]=0 ≠ 1 — OK. Returns True. dfs(0,0) checks neighbor 3: color[3]=1 ≠ 0 — OK. Returns True.'
+  },
+  {
+    phase: 'phase-done', phaseText: 'DONE',
+    activeLine: 16,
+    colors: [0,1,0,1], activeNode: null, conflictNode: null,
+    edges: [['edge-01','valid'],['edge-12','valid'],['edge-23','valid'],['edge-30','valid']],
+    stack: [],
+    changed: [],
+    title: 'Result: True — Graph is bipartite! ✓',
+    body: 'All nodes colored successfully. Group A (blue) = {0, 2}, Group B (green) = {1, 3}. Every edge connects a blue node to a green node. No two adjacent nodes share a color. The 4-cycle is bipartite — all even-length cycles are!'
+  }
+];
+
+let currentStep = 0;
+
+function renderStep(idx) {
+  const s = steps[idx];
+  const prev = idx > 0 ? steps[idx - 1] : null;
+
+  // Apply node visuals
+  applyNodeColors(s.colors, s.activeNode, s.conflictNode);
+  applyEdgeStyles(s.edges);
+
+  // Update DFS stack
+  updateStack(s.stack);
+
+  // Update variable tracker
+  const changed = prev ? s.colors.reduce((acc, c, i) => { if (c !== prev.colors[i]) acc.push(i); return acc; }, []) : [];
+  updateVars(s.colors, s.activeNode, changed);
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const cl = document.getElementById('cl-' + s.activeLine);
+  if (cl) cl.classList.add('active');
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + s.phase;
+  badge.textContent = s.phaseText;
+  document.getElementById('step-counter').textContent = 'Step ' + (idx + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = steps.map((_, i) =>
+    `<div class="dot ${i < idx ? 'visited' : ''} ${i === idx ? 'active' : ''}" onclick="goTo(${i})"></div>`
+  ).join('');
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === steps.length - 1;
+}
+
+function go(dir) {
+  const next = currentStep + dir;
+  if (next >= 0 && next < steps.length) {
+    currentStep = next;
+    renderStep(currentStep);
+  }
+}
+
+function goTo(idx) {
+  currentStep = idx;
+  renderStep(currentStep);
+}
+
+function reset() {
+  currentStep = 0;
+  renderStep(0);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Init
+renderStep(0);
 </script>
-</body></html>
+</body>
+</html>

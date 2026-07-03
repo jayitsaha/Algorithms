@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#879 · Profitable Schemes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:0.75rem}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2}
+.var-i{color:var(--blue-mid);font-weight:600}
+.var-j{color:var(--green-mid);font-weight:600}
+.var-k{color:var(--purple-mid);font-weight:600}
+
+/* ── DP Table ── */
+.dp-table-wrap{overflow-x:auto;margin:1rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:12px;min-width:100%}
+.dp-table th,.dp-table td{padding:8px 12px;text-align:center;border:1px solid var(--border)}
+.dp-table th{background:var(--bg2);font-weight:600;font-size:11px}
+.dp-table .cell-computed{background:var(--blue-bg);color:var(--blue-text);font-weight:600}
+.dp-table .cell-active{background:var(--purple-bg);color:var(--purple-text);font-weight:700;border:2px solid var(--purple-border)}
+.dp-table .cell-future{color:var(--text3)}
+.dp-table .row-label{background:var(--bg2);font-weight:700;color:var(--text2);font-size:11px}
+
+/* ── Scheme Cards ── */
+.schemes-grid{display:flex;gap:10px;flex-wrap:wrap;margin:1rem 0}
+.scheme-card{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);border:1.5px solid var(--border2);font-size:13px;line-height:1.6;flex:1;min-width:140px}
+.scheme-card.valid{border-color:var(--green-border);background:var(--green-bg)}
+.scheme-card.invalid{border-color:var(--red-border);background:var(--red-bg);opacity:0.7}
+.scheme-card.active{border-color:var(--purple-border);background:var(--purple-bg)}
+.scheme-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;color:var(--text3)}
+.scheme-card.valid .scheme-label{color:var(--green-mid)}
+.scheme-card.invalid .scheme-label{color:var(--red-mid)}
+.scheme-card.active .scheme-label{color:var(--purple-mid)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── 3D DP Grid ── */
+.dp3d-section{margin-bottom:1.5rem}
+.dp3d-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.dp3d-grid{display:inline-flex;flex-direction:column;gap:4px}
+.dp3d-row{display:flex;gap:4px;align-items:center}
+.dp3d-cell{
+  width:46px;height:36px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.dp3d-cell.computed{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.dp3d-cell.active{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);font-weight:700}
+.dp3d-cell.dep{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.dp3d-cell.future{background:var(--surface);color:var(--text3);opacity:0.5}
+.dp3d-row-lbl{width:36px;font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);text-align:right;padding-right:6px;flex-shrink:0}
+.dp3d-col-hdrs{display:flex;gap:4px;margin-bottom:2px;padding-left:42px}
+.dp3d-col-hdr{width:46px;text-align:center;font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+
+/* ── Scheme Info ── */
+.scheme-info-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:1rem}
+.sib-box{padding:8px 14px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);font-size:13px;display:flex;gap:8px;align-items:center}
+.sib-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3)}
+.sib-val{font-family:var(--mono);font-weight:700;color:var(--text)}
+.sib-box.highlight{border-color:var(--purple-border);background:var(--purple-bg)}
+.sib-box.highlight .sib-val{color:var(--purple-mid)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-scheme{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-computed{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-active{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-dep{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-future{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #879</div>
+  <h1>Profitable Schemes</h1>
+  <p class="subtitle">Count subsets of crimes that can be committed using at most <code>n</code> members and generate at least <code>minProfit</code> total profit. Return the count modulo 10⁹+7.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">3D DP — 0/1 Knapsack</span>
+    <span class="tag tag-complexity">Time: O(k·n·minProfit)</span>
+    <span class="tag tag-complexity">Space: O(n·minProfit)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're running a gang with <code>n</code> members. There are <code>k</code> crimes (called "schemes"), each requiring a certain number of members and generating a fixed profit. You want to count <strong>how many different subsets of schemes you can pick such that</strong>:</p>
+
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;font-size:14.5px;line-height:2.2">
+      <li>The total <strong>members needed ≤ n</strong> (you don't have unlimited crew)</li>
+      <li>The total <strong>profit ≥ minProfit</strong> (the scheme must be worth it)</li>
+    </ul>
+
+    <p>The answer can be huge, so return it <strong>modulo 10⁹ + 7</strong>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is a <strong>two-constraint counting problem</strong>: you must simultaneously track how many members you've used (<em>at most n</em>) AND how much profit you've accumulated (<em>at least minProfit</em>). This forces a <strong>3-dimensional DP state</strong>: (crime index, members used, profit so far).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Concrete example:</strong> <code>n=5, minProfit=3, group=[2,2], profit=[2,3]</code></p>
+
+    <div class="schemes-grid">
+      <div class="scheme-card invalid">
+        <div class="scheme-label">∅ empty set</div>
+        0 profit &lt; 3<br><small>profit too low</small>
+      </div>
+      <div class="scheme-card invalid">
+        <div class="scheme-label">scheme 0 only</div>
+        2 members, 2 profit<br><small>profit too low</small>
+      </div>
+      <div class="scheme-card valid">
+        <div class="scheme-label">✓ scheme 1 only</div>
+        2 members, 3 profit<br><small>OK!</small>
+      </div>
+      <div class="scheme-card valid">
+        <div class="scheme-label">✓ both schemes</div>
+        4 members, 5 profit<br><small>OK!</small>
+      </div>
+    </div>
+
+    <p style="margin-top:0.5rem">Answer = 2. The key subtlety: we count <em>subsets of crimes</em>, not distinct crews. The same crime committed with different members doesn't matter — only which crimes you pick.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Tricky: Profit is a Lower Bound, Members is an Upper Bound</div>
+      <p>Member constraint is <strong>≤ n</strong> (don't exceed gang size). Profit constraint is <strong>≥ minProfit</strong> (must meet target). These asymmetric directions require careful handling in the recurrence. For profit, we must count all profit levels ≥ minProfit in our final answer.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> minProfit=0 (every subset valid, just check member count), a single crime exceeding n members (skip it), crimes with 0 members (can always take them).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm (Why 3D DP)           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 3D Knapsack DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>This problem is a <strong>0/1 Knapsack</strong> variant with <em>two knapsack dimensions</em>: member capacity and profit target. Each crime is an "item" you either include or exclude (0/1). The three dimensions of our DP table are:</p>
+
+    <div class="two-col" style="margin:1rem 0">
+      <div class="panel-box neutral">
+        <div class="panel-title">State Dimensions</div>
+        <p style="font-family:var(--mono);font-size:12px;line-height:2.1;color:var(--blue-text)">
+          <strong>i</strong> = crime index (0 to k-1)<br>
+          <strong>j</strong> = members used (0 to n)<br>
+          <strong>p</strong> = profit so far (0 to minProfit)
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">dp[j][p] = count of ways</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          "After considering some crimes, how many subsets use exactly <strong>j members</strong> and generate at least (capped to) <strong>p profit</strong>?"
+        </p>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>dp[0][0] = 1</code> — there is exactly 1 way to use 0 members and earn 0 profit: pick no crimes at all.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Process each crime</strong> one by one. For crime <code>i</code> with <code>g = group[i]</code> members and <code>p = profit[i]</code>: try adding it to every existing subset.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Skip or take:</strong> For each state <code>(j, p)</code>, we can either skip this crime (state unchanged) or take it (move to <code>j + g</code> members and <code>min(p + profit_i, minProfit)</code> profit).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Profit clamping (key trick!):</strong> We cap profit at <code>minProfit</code> because any profit ≥ minProfit is equally "good." This collapses infinite profit states into one bucket, keeping the DP tractable.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Collect answer:</strong> Sum <code>dp[j][minProfit]</code> for all j from 0 to n. These are subsets that used ≤ n members and achieved profit ≥ minProfit (stored at the clamped bucket).</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relation</div>
+      <div class="recurrence-formula">
+        For each crime <span class="var-i">i</span> with members <code>g</code>, profit <code>p</code>:<br>
+        <span class="var-j">dp'[j][profit]</span> = <span class="var-j">dp[j][profit]</span> + <span class="var-k">dp[j-g][max(0, profit-p)]</span><br><br>
+        where <span class="var-j">dp'</span> is the updated table after considering crime <span class="var-i">i</span>,<br>
+        profit index is clamped: <code>profit = min(profit + p, minProfit)</code>,<br>
+        and we iterate <span class="var-j">j</span> from <code>n down to g</code> (in-place update, like 0/1 knapsack).
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Iterate j Backwards?</div>
+      <p>Just like classic 0/1 knapsack, we iterate the member dimension <strong>from n down to g</strong> when updating in-place. This ensures we don't "use the same crime twice" — if we updated <code>dp[j+g]</code> before <code>dp[j]</code>, the crime might get counted again when we later process <code>dp[j]</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — The DP Pillars       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Optimal Substructure &amp; Overlapping Subproblems</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Optimal Substructure</div>
+      <p>The count of profitable subsets from crimes <code>[0..i]</code> using j members with profit p can be computed from the count for crimes <code>[0..i-1]</code>. Each new crime either: (a) is not included — count comes directly from <code>dp[j][p]</code>, or (b) is included — count comes from <code>dp[j - group[i]][p - profit[i]]</code>. These two sub-counts add up correctly because the subsets are disjoint (one without crime i, one with crime i).</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Overlapping Subproblems</div>
+      <p>In a naive recursive approach, we'd compute "how many ways to achieve profit p with j members from crimes [0..i]" repeatedly from different call sites. For example, whether we're deciding to include crime 5 or crime 7, we might both need the sub-answer for "crimes [0..4] with 3 members, 2 profit." Memoization or tabulation avoids this redundancy.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>The Clamping Invariant:</strong> At all times, <code>dp[j][p]</code> = number of subsets of crimes considered so far that use exactly <code>j</code> members and have profit in the "clamped bucket" <code>p</code>. A profit ≥ minProfit is stored at index <code>minProfit</code>. This invariant holds throughout the DP iteration because:</p>
+
+    <ul style="margin:0.75rem 0 0 1.5rem;font-size:14px;line-height:2.2">
+      <li>Base case: 1 way to use 0 members, 0 profit → <code>dp[0][0] = 1</code> ✓</li>
+      <li>Transition: adding crime i to any valid subset gives a new valid subset → count adds correctly ✓</li>
+      <li>Clamping: if <code>prev_profit + crime_profit ≥ minProfit</code>, clamped to <code>minProfit</code> — the "at least minProfit" bucket accumulates ✓</li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Clamping Works (Mathematical Argument)</div>
+      <p>We want to count subsets with profit ≥ minProfit. Any profit value above minProfit is "equally good" for our binary threshold. So instead of maintaining distinct profit levels 0, 1, 2, ..., ∞, we collapse everything ≥ minProfit into one level. The DP remains exact: <code>dp[j][minProfit]</code> = count of subsets using j members with profit ≥ minProfit.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Bottom-Up Tabulation (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def profitableSchemes(n, minProfit, group, profit):          </span></div>
+<div class="ann-line"><span class="acode">    MOD = 10**9 + 7                                          </span><span class="aann">← modulus for all arithmetic</span></div>
+<div class="ann-line"><span class="acode">    # dp[j][p] = # subsets using exactly j members, profit clamped to p</span></div>
+<div class="ann-line"><span class="acode">    dp = [[0] * (minProfit + 1) for _ in range(n + 1)]      </span><span class="aann">← (n+1) × (minProfit+1) table</span></div>
+<div class="ann-line"><span class="acode">    dp[0][0] = 1                                             </span><span class="aann">← base case: empty set, 0 members, 0 profit</span></div>
+<div class="ann-line"><span class="acode">    for g, p in zip(group, profit):                          </span><span class="aann">← iterate over each crime</span></div>
+<div class="ann-line"><span class="acode">        for j in range(n, g - 1, -1):                       </span><span class="aann">← members: n down to g (0/1 knapsack trick)</span></div>
+<div class="ann-line"><span class="acode">            for k in range(minProfit, -1, -1):               </span><span class="aann">← profit: minProfit down to 0</span></div>
+<div class="ann-line"><span class="acode">                new_k = min(k + p, minProfit)                </span><span class="aann">← clamp profit: don't exceed minProfit index</span></div>
+<div class="ann-line"><span class="acode">                dp[j][new_k] = (dp[j][new_k] + dp[j-g][k]) % MOD </span><span class="aann">← add ways: skip + take</span></div>
+<div class="ann-line"><span class="acode">    return sum(dp[j][minProfit] for j in range(n + 1)) % MOD </span><span class="aann">← sum over all valid member counts</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why iterate k (profit) downward too?</div>
+      <p>The profit dimension is also updated in-place. If we iterated k upward, a state <code>dp[j][k]</code> that was just updated (with crime i included) could "feed into" <code>dp[j][k + p]</code>, potentially counting crime i twice. Iterating downward prevents this — when we compute <code>dp[j][k]</code>, its source <code>dp[j-g][k-p]</code> (conceptually) hasn't been touched yet in this crime's iteration pass.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Top-Down Memoization (Recursive, same complexity)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache                              </span></div>
+<div class="ann-line"><span class="acode">def profitableSchemes(n, minProfit, group, profit):          </span></div>
+<div class="ann-line"><span class="acode">    MOD = 10**9 + 7                                          </span></div>
+<div class="ann-line"><span class="acode">    k = len(group)                                           </span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)                                 </span><span class="aann">← memo cache; auto-handles repeated subproblems</span></div>
+<div class="ann-line"><span class="acode">    def dp(i, members, prof):                                </span><span class="aann">← i=crime idx, members=used so far, prof=clamped profit</span></div>
+<div class="ann-line"><span class="acode">        if i == k:                                           </span><span class="aann">← base case: all crimes processed</span></div>
+<div class="ann-line"><span class="acode">            return 1 if prof >= minProfit else 0             </span><span class="aann">← count this subset if profit reached target</span></div>
+<div class="ann-line"><span class="acode">        # Option A: skip crime i                             </span></div>
+<div class="ann-line"><span class="acode">        ways = dp(i + 1, members, prof)                      </span><span class="aann">← don't take crime i</span></div>
+<div class="ann-line"><span class="acode">        # Option B: take crime i (if enough members remain)  </span></div>
+<div class="ann-line"><span class="acode">        if members + group[i] <= n:                          </span><span class="aann">← capacity check</span></div>
+<div class="ann-line"><span class="acode">            new_p = min(prof + profit[i], minProfit)         </span><span class="aann">← clamp profit for memo key</span></div>
+<div class="ann-line"><span class="acode">            ways += dp(i + 1, members + group[i], new_p)     </span><span class="aann">← take crime i</span></div>
+<div class="ann-line"><span class="acode">        return ways % MOD                                    </span></div>
+<div class="ann-line"><span class="acode">    return dp(0, 0, 0)                                       </span><span class="aann">← start: no crimes seen, 0 members, 0 profit</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Tabulation vs Memoization for This Problem</div>
+      <p>
+        <strong>Tabulation (bottom-up):</strong> Fills table iteratively; space O(n · minProfit) with in-place update. Preferred in interviews — no recursion stack, easier to optimize.<br><br>
+        <strong>Memoization (top-down):</strong> Easier to derive from the recurrence; auto-prunes branches where <code>members &gt; n</code> early. Python's LRU cache handles it cleanly.<br><br>
+        Both are O(k · n · minProfit) time and O(n · minProfit) space (after the i dimension is optimized away).
+      </p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Brute Force — Enumerate All Subsets (Too Slow)</div>
+      <p>Generate all 2ᵏ subsets of crimes, check each: sum(members) ≤ n and sum(profit) ≥ minProfit. Time O(2ᵏ · k) — exponential. Fails for k=100 instantly. DP compresses this to polynomial by recognizing that only the (members, profit) state matters, not which specific previous crimes were chosen.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the "Count Subsets" + "Two Constraints" Pattern</div>
+        <p style="font-size:14px;color:var(--text)">"We're counting subsets (not finding one optimal subset). We have two simultaneous constraints: member cap (≤ n) and profit threshold (≥ minProfit). This signals a multi-dimensional DP, not greedy — greedy can't optimize for a count."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the 0/1 Knapsack Structure</div>
+        <p style="font-size:14px;color:var(--text)">"Each crime is either taken or not (0/1). The member constraint is exactly the knapsack capacity. But we have a second dimension — profit — because we need to also track that. Classic knapsack tracks one weight; this tracks two, giving us a 2D table (after the 'items' dimension is compressed away via in-place updates)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Define States and Transitions</div>
+        <p style="font-size:14px;color:var(--text)">"dp[j][p] = number of ways to use exactly j members and have clamped profit p. For each crime (g members, q profit), we update: dp[j][min(p+q, minProfit)] += dp[j-g][p]. Iterate j downward to enforce 0/1 property."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Profit Lower Bound with Clamping</div>
+        <p style="font-size:14px;color:var(--text)">"Profit is a lower bound (≥ minProfit), not exact. So any profit above minProfit is 'equivalent.' We cap the profit index at minProfit throughout — this collapses the table to a finite size. At the end, sum dp[j][minProfit] for all j."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This looks like a 0/1 knapsack counting problem with two constraints.<br>
+State: dp[j][p] = number of crime subsets using exactly j members with clamped profit p.<br>
+For each crime: iterate j from n down to group[i], and p from minProfit down to 0.<br>
+Update: dp[j][min(p + profit[i], minProfit)] += dp[j - group[i]][p].<br>
+Base case: dp[0][0] = 1 (empty set).<br>
+Answer: sum(dp[j][minProfit] for j in 0..n) mod 10^9+7."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do this in O(1) space?"</strong> → Not easily; the 2D table is necessary. You CAN optimize the i-dimension (already done by in-place update), giving O(n·minProfit) space.</li>
+        <li><strong>"What if crimes could be repeated?"</strong> → Unbounded knapsack: iterate j upward instead of downward.</li>
+        <li><strong>"What if minProfit=0?"</strong> → Answer is the count of all subsets with ≤ n members = sum over j of dp[j][0] after the DP.</li>
+        <li><strong>"Why not greedy — take most profitable first?"</strong> → Greedy fails to count; it can't enumerate all valid subsets.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=5, minProfit=3, group=[2,2], profit=[2,3]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="viz-area">
+      <!-- Scheme Info Bar -->
+      <div class="scheme-info-bar">
+        <div class="sib-box" id="sib-crime">
+          <span class="sib-label">Crime</span>
+          <span class="sib-val" id="sv-crime">—</span>
+        </div>
+        <div class="sib-box" id="sib-members">
+          <span class="sib-label">Members Needed (g)</span>
+          <span class="sib-val" id="sv-g">—</span>
+        </div>
+        <div class="sib-box" id="sib-profit">
+          <span class="sib-label">Crime Profit (p)</span>
+          <span class="sib-val" id="sv-p">—</span>
+        </div>
+        <div class="sib-box highlight" id="sib-total">
+          <span class="sib-label">Total Schemes Found</span>
+          <span class="sib-val" id="sv-total">0</span>
+        </div>
+      </div>
+
+      <!-- DP Table Visualization -->
+      <div class="dp3d-section">
+        <div class="dp3d-label">dp[members 0..5][profit 0..3]  (minProfit=3, so profit capped at 3)</div>
+        <div class="dp3d-col-hdrs" id="dp-col-hdrs"></div>
+        <div id="dp-grid"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-j">
+          <span class="var-name">j (members)</span>
+          <span class="var-val" id="vv-j">—</span>
+        </div>
+        <div class="var-box" id="vb-k">
+          <span class="var-name">k (profit)</span>
+          <span class="var-val" id="vv-k">—</span>
+        </div>
+        <div class="var-box" id="vb-newk">
+          <span class="var-name">new_k</span>
+          <span class="var-val" id="vv-newk">—</span>
+        </div>
+        <div class="var-box" id="vb-add">
+          <span class="var-name">ways added</span>
+          <span class="var-val" id="vv-add">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def profitableSchemes(n, minProfit, group, profit):</div>
+      <div class="code-line" id="cl-1">    MOD = 10**9 + 7</div>
+      <div class="code-line" id="cl-2">    dp = [[0]*(minProfit+1) for _ in range(n+1)]</div>
+      <div class="code-line" id="cl-3">    dp[0][0] = 1</div>
+      <div class="code-line" id="cl-4">    for g, p in zip(group, profit):</div>
+      <div class="code-line" id="cl-5">        for j in range(n, g - 1, -1):</div>
+      <div class="code-line" id="cl-6">            for k in range(minProfit, -1, -1):</div>
+      <div class="code-line" id="cl-7">                new_k = min(k + p, minProfit)</div>
+      <div class="code-line" id="cl-8">                dp[j][new_k] = (dp[j][new_k] + dp[j-g][k]) % MOD</div>
+      <div class="code-line" id="cl-9">    return sum(dp[j][minProfit] for j in range(n+1)) % MOD</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 20</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to walk through the 3D DP for Profitable Schemes.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-computed"></div> Computed (stable)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Being updated now</div>
+      <div class="legend-item"><div class="legend-swatch sw-dep"></div> Source (dp[j-g][k])</div>
+      <div class="legend-item"><div class="legend-swatch sw-future"></div> Not yet reached</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">3D DP (crime × members × profit) collapses to 2D via in-place iteration (0/1 knapsack trick)</div>
+      <div class="takeaway">Profit is clamped at minProfit — the "at least" threshold collapses infinite profit into one bucket</div>
+      <div class="takeaway">Iterate member dimension downward to enforce each crime used at most once</div>
+      <div class="takeaway">Base case dp[0][0]=1 represents the empty subset (always valid, just may not meet profit target)</div>
+      <div class="takeaway">Final answer: sum all dp[j][minProfit] for j in 0..n — every valid member count with profit achieved</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (enumerate subsets)</td>
+          <td class="mark-bad">O(2ᵏ · k)</td>
+          <td>O(k)</td>
+          <td>Exponential; fails for k=100</td>
+        </tr>
+        <tr>
+          <td>Memoization (top-down DP)</td>
+          <td class="mark-good">O(k·n·P)</td>
+          <td>O(k·n·P)</td>
+          <td>Easier to derive; recursion overhead</td>
+        </tr>
+        <tr>
+          <td><strong>Tabulation (bottom-up) ✓</strong></td>
+          <td class="mark-good">O(k·n·P)</td>
+          <td class="mark-good">O(n·P)</td>
+          <td>Optimal; i-dim compressed by in-place update</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text3);margin-top:4px">k = number of crimes, P = minProfit</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Multi-Dimensional Knapsack</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Count subsets satisfying TWO simultaneous constraints" → 2D DP table</li>
+        <li>One constraint is an upper bound (capacity), another is a lower bound (target) → clamp the lower bound</li>
+        <li>"Each item used at most once" → iterate capacity dimension downward</li>
+        <li>"Unlimited use" → iterate upward (unbounded knapsack)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: 3D DP / Multi-Dimensional Knapsack)</div>
+      <div class="related-item"><strong>Partition Equal Subset Sum</strong><span class="related-diff diff-med">Medium</span> — Classic 0/1 knapsack: can we pick subset summing to target? (#416)</div>
+      <div class="related-item"><strong>Count of Subsets with Sum K</strong><span class="related-diff diff-med">Medium</span> — Count 0/1 knapsack subsets; same DP, counting variant</div>
+      <div class="related-item"><strong>Ones and Zeroes</strong><span class="related-diff diff-med">Medium</span> — 0/1 knapsack with TWO capacity constraints (0s and 1s); same 2D DP pattern (#474)</div>
+      <div class="related-item"><strong>Target Sum</strong><span class="related-diff diff-med">Medium</span> — Count ways to assign +/- to reach target; same counting knapsack (#494)</div>
+      <div class="related-item"><strong>Last Stone Weight II</strong><span class="related-diff diff-med">Medium</span> — Reduce to partition knapsack; close cousin (#1049)</div>
+      <div class="related-item"><strong>Number of Ways to Earn Points</strong><span class="related-diff diff-hard">Hard</span> — Bounded multi-item counting DP; same 3D structure (#2585)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming → 0/1 Knapsack)<br>
+      Sub-Pattern: <strong>3D DP Member and Profit</strong> · Source: Analysis (problem-specific variant of 0/1 Knapsack with two constraints)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── Problem Data ───
+const N = 5, MIN_PROFIT = 3;
+const GROUPS = [2, 2], PROFITS = [2, 3];
+const ROWS = N + 1; // 0..5
+const COLS = MIN_PROFIT + 1; // 0..3
+
+// ─── Build initial DP table ───
+function makeTable() {
+  const t = [];
+  for (let j = 0; j <= N; j++) {
+    t.push(new Array(MIN_PROFIT + 1).fill(0));
+  }
+  return t;
+}
+
+// ─── Steps Definition ───
+// Each step: { phase, phaseLabel, phaseClass, activeLine,
+//              crime, g, p, j, k, newK, add, dp (snapshot), activeCell, depCell,
+//              title, text, total }
+const steps = [];
+
+// Helper: deep copy DP table
+function copyDP(dp) { return dp.map(r => [...r]); }
+
+// Build steps programmatically
+(function buildSteps() {
+  let dp = makeTable();
+  dp[0][0] = 1;
+
+  // Step 0: Init
+  steps.push({
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:3,
+    crime:'—', g:'—', p:'—', j:'—', k:'—', newK:'—', add:'—',
+    dp: copyDP(dp), activeCell:null, depCell:null, total:0,
+    title:'Initialize',
+    text:'n=5, minProfit=3, crimes=[(g=2,p=2), (g=2,p=3)]. Create dp[6][4] (6 member counts × 4 profit buckets 0..3). Set dp[0][0]=1: there is exactly 1 way to commit zero crimes — the empty subset uses 0 members and earns 0 profit.'
+  });
+
+  // Process crime 0: g=2, p=2
+  let g0=2, p0=2, crimeLabel0='Crime 0 (g=2, p=2)';
+  steps.push({
+    phase:'build', phaseLabel:'CRIME 0', phaseClass:'phase-build', activeLine:4,
+    crime:crimeLabel0, g:g0, p:p0, j:'—', k:'—', newK:'—', add:'—',
+    dp: copyDP(dp), activeCell:null, depCell:null, total:0,
+    title:'Processing Crime 0: group=2, profit=2',
+    text:'Begin outer loop for crime 0. It needs 2 members (g=2) and yields 2 profit (p=2). We will iterate j from 5 down to 2, and for each j, iterate k from 3 down to 0.'
+  });
+
+  // Crime 0 inner iterations (j=5..2, k=3..0)
+  for (let j = N; j >= g0; j--) {
+    for (let k = MIN_PROFIT; k >= 0; k--) {
+      const src = dp[j - g0][k];
+      if (src === 0) continue; // skip boring zero additions
+      const newK = Math.min(k + p0, MIN_PROFIT);
+      const before = dp[j][newK];
+      dp[j][newK] = (dp[j][newK] + src);
+      steps.push({
+        phase:'build', phaseLabel:'CRIME 0', phaseClass:'phase-build', activeLine:8,
+        crime:crimeLabel0, g:g0, p:p0, j:j, k:k, newK:newK, add:src,
+        dp: copyDP(dp), activeCell:[j,newK], depCell:[j-g0,k], total:0,
+        title:`j=${j}, k=${k}: dp[${j}][${newK}] += dp[${j-g0}][${k}] = ${src}`,
+        text:`new_k = min(k + p, minProfit) = min(${k} + ${p0}, 3) = ${newK}. Source dp[${j-g0}][${k}] = ${src}. dp[${j}][${newK}]: ${before} → ${dp[j][newK]}. Adding ${src} way(s) to the state "j=${j} members, clamped profit=${newK}".`
+      });
+    }
+  }
+
+  // After crime 0
+  steps.push({
+    phase:'build', phaseLabel:'AFTER CRIME 0', phaseClass:'phase-build', activeLine:4,
+    crime:'Crime 0 done', g:g0, p:p0, j:'done', k:'done', newK:'done', add:'—',
+    dp: copyDP(dp), activeCell:null, depCell:null, total:0,
+    title:'Crime 0 fully processed',
+    text:'After processing crime 0: dp[2][2]=1 means there is 1 way to use 2 members and earn exactly 2 profit (just pick crime 0). All other states remain 0 (crime 0 needs 2 members, so j<2 states are untouched). Crime 1 comes next.'
+  });
+
+  // Process crime 1: g=2, p=3
+  let g1=2, p1=3, crimeLabel1='Crime 1 (g=2, p=3)';
+  steps.push({
+    phase:'scheme', phaseLabel:'CRIME 1', phaseClass:'phase-scheme', activeLine:4,
+    crime:crimeLabel1, g:g1, p:p1, j:'—', k:'—', newK:'—', add:'—',
+    dp: copyDP(dp), activeCell:null, depCell:null, total:0,
+    title:'Processing Crime 1: group=2, profit=3',
+    text:'Begin crime 1. It also needs 2 members (g=2) but yields 3 profit (p=3). We iterate j from 5 down to 2, k from 3 down to 0. This crime will create "profit ≥ 3" states.'
+  });
+
+  // Crime 1 inner iterations
+  for (let j = N; j >= g1; j--) {
+    for (let k = MIN_PROFIT; k >= 0; k--) {
+      const src = dp[j - g1][k];
+      if (src === 0) continue;
+      const newK = Math.min(k + p1, MIN_PROFIT);
+      const before = dp[j][newK];
+      dp[j][newK] = (dp[j][newK] + src);
+      steps.push({
+        phase:'scheme', phaseLabel:'CRIME 1', phaseClass:'phase-scheme', activeLine:8,
+        crime:crimeLabel1, g:g1, p:p1, j:j, k:k, newK:newK, add:src,
+        dp: copyDP(dp), activeCell:[j,newK], depCell:[j-g1,k], total:0,
+        title:`j=${j}, k=${k}: dp[${j}][${newK}] += dp[${j-g1}][${k}] = ${src}`,
+        text:`new_k = min(k + p, minProfit) = min(${k} + ${p1}, 3) = ${newK}. Source dp[${j-g1}][${k}] = ${src}. dp[${j}][${newK}]: ${before} → ${dp[j][newK]}. ${newK===MIN_PROFIT ? '⭐ This hits the minProfit bucket — a profitable scheme!' : ''}`
+      });
+    }
+  }
+
+  // Final result
+  let total = 0;
+  for (let j = 0; j <= N; j++) total += dp[j][MIN_PROFIT];
+  steps.push({
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:9,
+    crime:'All crimes done', g:'—', p:'—', j:'—', k:'—', newK:'—', add:'—',
+    dp: copyDP(dp), activeCell:null, depCell:null, total:total,
+    title:`Answer = sum(dp[j][3] for j in 0..5) = ${total}`,
+    text:`Sum all dp[j][minProfit=3] for j=0..5: dp[2][3]=1 (crime 1 alone: 2 members, 3 profit ≥ 3 ✓) + dp[4][3]=1 (both crimes: 4 members, 5 profit clamped to 3 ✓) = 2. Answer = 2 (mod 10⁹+7). These are the two profitable schemes: {crime1} and {crime0, crime1}.`
+  });
+})();
+
+// ─── DOM ───
+let cur = 0;
+const N_STEPS = steps.length;
+
+function buildGrid() {
+  // Column headers
+  const hdrs = document.getElementById('dp-col-hdrs');
+  hdrs.innerHTML = '';
+  for (let p = 0; p <= MIN_PROFIT; p++) {
+    const d = document.createElement('div');
+    d.className = 'dp3d-col-hdr';
+    d.textContent = 'p=' + p;
+    hdrs.appendChild(d);
+  }
+  // Grid
+  const grid = document.getElementById('dp-grid');
+  grid.innerHTML = '';
+  for (let j = 0; j <= N; j++) {
+    const row = document.createElement('div');
+    row.className = 'dp3d-row';
+    const lbl = document.createElement('div');
+    lbl.className = 'dp3d-row-lbl';
+    lbl.textContent = 'j=' + j;
+    row.appendChild(lbl);
+    for (let p = 0; p <= MIN_PROFIT; p++) {
+      const cell = document.createElement('div');
+      cell.className = 'dp3d-cell future';
+      cell.id = `dp-${j}-${p}`;
+      cell.textContent = '0';
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+}
+
+function renderStep(s) {
+  // Update DP grid
+  for (let j = 0; j <= N; j++) {
+    for (let p = 0; p <= MIN_PROFIT; p++) {
+      const cell = document.getElementById(`dp-${j}-${p}`);
+      const val = s.dp[j][p];
+      cell.textContent = val;
+      cell.className = 'dp3d-cell';
+      if (s.activeCell && s.activeCell[0]===j && s.activeCell[1]===p) {
+        cell.classList.add('active');
+      } else if (s.depCell && s.depCell[0]===j && s.depCell[1]===p) {
+        cell.classList.add('dep');
+      } else if (val > 0) {
+        cell.classList.add('computed');
+      } else if (j === 0 && p === 0) {
+        // base case always computed
+        cell.classList.add('computed');
+      } else {
+        cell.classList.add('future');
+      }
+    }
+  }
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phaseLabel;
+  badge.className = 'phase-badge ' + s.phaseClass;
+
+  // Step counter
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} / ${N_STEPS}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // Scheme info
+  document.getElementById('sv-crime').textContent = s.crime;
+  document.getElementById('sv-g').textContent = s.g;
+  document.getElementById('sv-p').textContent = s.p;
+  document.getElementById('sv-total').textContent = s.total > 0 ? s.total : (s.phase === 'result' ? s.total : '…');
+
+  // Var tracker
+  function setVar(id, val, changed) {
+    const box = document.getElementById('vb-' + id);
+    const valEl = document.getElementById('vv-' + id);
+    valEl.textContent = val;
+    box.classList.toggle('changed', changed);
+  }
+  setVar('j', s.j, s.j !== '—');
+  setVar('k', s.k, s.k !== '—');
+  setVar('newk', s.newK, s.newK !== '—');
+  setVar('add', s.add, s.add !== '—' && s.add !== 0);
+
+  // Code highlight
+  for (let i = 0; i <= 9; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.classList.toggle('active', i === s.activeLine);
+  }
+
+  // Dots
+  const dots = document.getElementById('progress-dots');
+  [...dots.children].forEach((d, i) => {
+    d.classList.toggle('active', i === cur);
+    d.classList.toggle('visited', i < cur);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === N_STEPS - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(N_STEPS - 1, cur + dir));
+  renderStep(steps[cur]);
+}
+
+function reset() {
+  cur = 0;
+  renderStep(steps[cur]);
+}
+
+// Init
+buildGrid();
+const dots = document.getElementById('progress-dots');
+for (let i = 0; i < N_STEPS; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.onclick = () => { cur = i; renderStep(steps[i]); };
+  dots.appendChild(d);
+}
+renderStep(steps[0]);
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Collapsible sections
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+</script>
+</body>
+</html>

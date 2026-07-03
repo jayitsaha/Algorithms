@@ -1,231 +1,891 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Pick with Weight – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#528 · Random Pick with Weight</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Number line / segment visualization ── */
+.numline-wrap{overflow-x:auto;margin:1rem 0;padding:8px 0}
+.numline{display:flex;align-items:flex-end;gap:2px}
+.nl-seg{display:flex;flex-direction:column;align-items:center}
+.nl-bar{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;border-radius:6px 6px 0 0;min-width:20px;transition:opacity 0.3s}
+.nl-seg-label{font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono);white-space:nowrap}
+.nl-bar.seg0{background:var(--blue-mid)}
+.nl-bar.seg1{background:var(--purple-mid)}
+.nl-bar.seg2{background:var(--cyan-mid)}
+
+/* ── Prefix/Weight cell row ── */
+.cell-row{display:flex;gap:6px;flex-wrap:wrap;margin:0.5rem 0;align-items:center}
+.row-label{font-size:12px;font-weight:600;color:var(--text3);min-width:90px;text-transform:uppercase;letter-spacing:0.4px}
+.pcell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:60px;height:58px;border-radius:8px;border:2px solid var(--border2);
+  background:var(--surface);font-family:var(--mono);font-size:18px;font-weight:700;
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+}
+.pcell .idx{font-size:10px;color:var(--text3);margin-top:3px;font-weight:400}
+.pcell.weight{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.pcell.prefix{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.pcell.search-lo,.pcell.search-hi,.pcell.in-range{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.pcell.mid-cell{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.pcell.found{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.pcell.eliminated{opacity:0.35}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-search{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-weight{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-prefix{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-search{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-mid{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Viz area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Random Pick with Weight</h1>
-    <p class="subtitle">LeetCode #528 — Binary Search · Prefix Sum + Binary Search</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Binary Search</span>
-      <span class="tag tag-complexity">O(log n) Time</span>
-      <span class="tag tag-complexity">O(1) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Binary Search</strong> using the <strong>Prefix Sum + Binary Search</strong> technique.</p>
-      <p>Pattern category: <strong>Binary Search</strong>. Apply when: <em>Template: lo=0,hi=n-1,while lo<=hi,mid=(lo+hi)//2. For 'first true': lo=0,hi=n,while lo<hi.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Halve search space each step → O(log n). Works on sorted arrays AND on answer spaces (binary search on answer).</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #528</div>
+  <h1>Random Pick with Weight</h1>
+  <p class="subtitle">Implement pickIndex() to return a random index proportional to its weight — heavier weights must be chosen more often.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Binary Search</span>
+    <span class="tag tag-pattern">Prefix Sum</span>
+    <span class="tag tag-complexity">Time: O(log n) per pick</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Prefix Sum + Binary Search</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Initialize lo=0, hi=n-1</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Compute mid=(lo+hi)//2</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Compare target with nums[mid]</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">If equal: found. If too small: lo=mid+1. If too large: hi=mid-1</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Return -1 if not found</span></div>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You are given an array <code>w</code> where <code>w[i]</code> is the <strong>weight</strong> of index <code>i</code>. Implement a class with two methods: <code>__init__(w)</code> and <code>pickIndex()</code>. Each call to <code>pickIndex()</code> must return a random index such that the probability of returning index <code>i</code> equals exactly <code>w[i] / sum(w)</code>.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>lo..hi always contains the answer. mid partitions into 'too small' and 'big enough' halves.</p>
-      </div>
-    </div>
-  </div>
+    <p style="margin-top:0.75rem">Example: <code>w = [1, 3, 2]</code> — total is 6. Call pickIndex() many times and you should see index 0 about 1/6 of the time, index 1 about 3/6 = 50% of the time, and index 2 about 2/6 of the time. Heavier = more likely.</p>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Think of each weight as a <strong>segment on a number line from 0 to total_weight</strong>. Pick a random point anywhere on that line. Whichever segment the point lands in — return that index. The probability of landing in segment <code>i</code> equals exactly <code>w[i] / total</code> by uniform distribution. Prefix sums give us the boundaries; binary search finds the segment in O(log n).</p>
     </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">def binary_search(nums, target):</div><div class="code-line">    lo, hi = 0, len(nums) - 1</div><div class="code-line">    while lo <= hi:</div><div class="code-line">        mid = (lo + hi) // 2</div><div class="code-line">        if   nums[mid] == target:  return mid</div><div class="code-line">        elif nums[mid] <  target:  lo = mid + 1</div><div class="code-line">        else:                      hi = mid - 1</div><div class="code-line">    return -1</div><div class="code-line"></div><div class="code-line">def lower_bound(nums, target):        # first position >= target</div><div class="code-line">    lo, hi = 0, len(nums)</div><div class="code-line">    while lo < hi:</div><div class="code-line">        mid = (lo + hi) // 2</div><div class="code-line">        if nums[mid] < target: lo = mid + 1</div><div class="code-line">        else:                  hi = mid</div><div class="code-line">    return lo</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(log n) &nbsp;|&nbsp; Space: O(1)</p>
-    </div>
-  </div>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Template: lo=0,hi=n-1,while lo<=hi,mid=(lo+hi)//2. For 'first true': lo=0,hi=n,while lo<hi.</p>
-      </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Binary Search problem using Prefix Sum + Binary Search. I'll initialize lo=0, hi=n-1 then compute mid=(lo+hi)//2. Time: O(log n), Space: O(1)."</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
+    <!-- Conceptual number line diagram -->
+    <p style="margin-top:1rem"><strong>Number line for w = [1, 3, 2], total = 6:</strong></p>
+    <div class="numline-wrap">
+      <div class="numline">
+        <div class="nl-seg">
+          <div class="nl-bar seg0" style="width:52px;height:40px">idx 0</div>
+          <div class="nl-seg-label">0 ── 1</div>
         </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+        <div class="nl-seg">
+          <div class="nl-bar seg1" style="width:156px;height:40px">idx 1  (3x wider)</div>
+          <div class="nl-seg-label">1 ──────── 4</div>
         </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+        <div class="nl-seg">
+          <div class="nl-bar seg2" style="width:104px;height:40px">idx 2</div>
+          <div class="nl-seg-label">4 ────── 6</div>
+        </div>
       </div>
     </div>
-  </div>
+    <p style="font-size:13px;color:var(--text2);margin-top:6px">Segment widths equal each index's weight. A uniformly random point on [0, 6) falls into each segment proportionally.</p>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Correct: prefix sum approach</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          prefix = [1, 4, 6]<br>
+          random(0,6)=2.8 → lands in idx 1<br>
+          bisect_right([1,4,6], 2.8) = 1 ✓
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Wrong: random.choice([0,1,2])</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          Each index gets 1/3 chance<br>
+          Ignores weights entirely<br>
+          Wrong probabilities!
+        </p>
+      </div>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Binary Search — Prefix Sum + Binary Search</div>
-        <div class="takeaway">✓ Halve search space each step → O(log n)</div>
-        <div class="takeaway">✓ Time: O(log n) | Space: O(1)</div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> Single element (always return 0 — prefix=[w[0]], target always in only segment), all weights equal (uniform random), very large weights (prefix sum fine in Python), one weight much larger than others.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Prefix Sum + Binary Search</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A two-phase approach: build the "weighted ruler" <strong>once</strong> in <code>__init__</code>, then use binary search <strong>every time</strong> <code>pickIndex</code> is called. Construction is O(n); each pick is O(log n).</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build prefix sums (constructor):</strong> Convert <code>w = [1, 3, 2]</code> to running totals <code>prefix = [1, 4, 6]</code>. Each value is the <em>right boundary</em> of that index's segment. After this, <code>prefix[i] = w[0] + w[1] + ... + w[i]</code>.</span>
       </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Template: lo=0,hi=n-1,while lo<=hi,mid=(lo+hi)//2. For 'first true': lo=0,hi=n,while lo<hi.</p>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Pick a random target:</strong> <code>target = random.uniform(0, prefix[-1])</code>. This generates a uniformly random real number in <code>[0, total_weight)</code> — a random point on the weighted number line.</span>
       </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Binary Search</strong> (Easy) — Classic lo, hi, mid</li>
-<li><strong>First Bad Version</strong> (Easy) — Lower Bound</li>
-<li><strong>Valid Perfect Square</strong> (Easy) — Binary Search on Answer</li>
-<li><strong>Search Insert Position</strong> (Easy) — Lower Bound</li>
-<li><strong>Guess Number Higher or Lower</strong> (Easy) — Classic Binary Search</li>
-<li><strong>Find Smallest Letter Greater Than Target</strong> (Easy) — Upper Bound</li></ul>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Binary search for the segment:</strong> Find the <em>leftmost</em> index where <code>prefix[i] &gt; target</code>. Since prefix sums are strictly increasing (all weights are ≥ 1), this is a standard lower-bound binary search. The answer is the first index whose cumulative sum exceeds the target.</span>
       </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return the index:</strong> The leftmost index where <code>prefix[i] &gt; target</code> is the segment the random point fell into. Return that index. This is equivalent to <code>bisect.bisect_right(prefix, target)</code> in Python.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 bisect_right vs bisect_left</div>
+      <p>We use <code>bisect_right(prefix, target)</code> which returns the insertion point <em>after</em> any equal elements. This means if <code>target == prefix[i]</code>, we return <code>i+1</code> — the next segment's start. This is correct: segment <code>i</code> covers the half-open interval <code>(prefix[i-1], prefix[i]]</code>, so an exact hit on the upper boundary belongs to segment <code>i</code>. With <code>random.uniform</code>, exact integer hits have probability zero, so both variants work in practice. <code>bisect_right</code> is the safe, idiomatic choice.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[1,3,5,7,9,11,13],lo:0,hi:6,mid:3,target:7,msg:"lo=0,hi=6,mid=3 → arr[3]=7",phase:"INIT"},
-  {arr:[1,3,5,7,9,11,13],lo:0,hi:6,mid:3,target:7,msg:"arr[3]=7 == target → FOUND!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Binary Search Invariant</div>
+      <p>At every iteration, the correct answer (the index of the segment containing <code>target</code>) lies within <code>[lo, hi]</code>. We halve the search space each step by asking: "Does <code>prefix[mid]</code> exceed the target?" If yes, the answer is at <code>mid</code> or to its left. If no, the answer is strictly to the right. When <code>lo == hi</code>, we have found it.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Probability correctness — proof sketch:</strong> Index <code>i</code> is returned when the random target falls in the interval <code>(prefix[i-1], prefix[i]]</code> (define <code>prefix[-1] = 0</code>). The length of this interval is exactly <code>w[i]</code>. Since <code>target</code> is uniform on <code>[0, prefix[-1])</code>, the probability of returning index <code>i</code> is <code>w[i] / sum(w)</code>. All intervals are disjoint and tile the full range — the probabilities sum to 1.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why the prefix array is always sorted:</strong> All weights are positive integers (w[i] ≥ 1 by constraint). So each prefix sum is strictly greater than the previous one. A sorted array is required for binary search to work correctly — verified by the constraints.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Using random.randint vs random.uniform</div>
+      <p>Both work, but with different boundary handling. If using <code>random.randint(1, total)</code> (integer target), use <code>bisect_left(prefix, target)</code> — because segment boundaries are integers and we want the leftmost prefix that is ≥ target. If using <code>random.uniform(0, total)</code> (float target), use <code>bisect_right(prefix, target)</code> — to find the first prefix strictly greater than the float target. Mixing these up causes off-by-one errors on exact boundaries.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Prefix Sum + bisect_right (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import random, bisect                              </span></div>
+<div class="ann-line"><span class="acode">class Solution:                                    </span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, w: list[int]):              </span><span class="aann">← Called once; amortized cost spreads over all picks</span></div>
+<div class="ann-line"><span class="acode">        self.prefix = []                           </span><span class="aann">← Cumulative sum array; will be strictly increasing</span></div>
+<div class="ann-line"><span class="acode">        total = 0                                  </span><span class="aann">← Running sum tracks right boundary of current segment</span></div>
+<div class="ann-line"><span class="acode">        for wt in w:                               </span><span class="aann">← One pass through weights — O(n)</span></div>
+<div class="ann-line"><span class="acode">            total += wt                            </span><span class="aann">← Advance the right boundary by this weight</span></div>
+<div class="ann-line"><span class="acode">            self.prefix.append(total)              </span><span class="aann">← prefix[i] = sum of w[0..i], the right edge of segment i</span></div>
+<div class="ann-line"><span class="acode">    def pickIndex(self) -> int:                    </span><span class="aann">← Called many times; must be O(log n) per call</span></div>
+<div class="ann-line"><span class="acode">        target = random.uniform(0, self.prefix[-1])</span><span class="aann">← Uniformly random real in [0, total_weight)</span></div>
+<div class="ann-line"><span class="acode">        return bisect.bisect_right(self.prefix, target)</span><span class="aann">← First prefix > target = segment we landed in</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why bisect_right not bisect_left here?</div>
+      <p><code>bisect_right(arr, target)</code> finds the position after any value equal to target. Since our target is a float from <code>random.uniform</code> and prefix values are integers, equality almost never happens — both work in practice. But <code>bisect_right</code> is the correct choice: if somehow <code>target == prefix[i]</code>, it returns <code>i+1</code>, placing the boundary point in the next segment. The interval for index <code>i</code> is <code>(prefix[i-1], prefix[i]]</code> — closed on the right — so the boundary belongs to <code>i</code>, not <code>i+1</code>. However, with <code>random.uniform(0, total)</code> this scenario has probability zero. Stick with <code>bisect_right</code>.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Expand to flat list (Brute Force, for contrast)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class Solution:                                    </span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, w):                         </span></div>
+<div class="ann-line"><span class="acode">        self.pool = []                             </span><span class="aann">← Expand each index by its weight count</span></div>
+<div class="ann-line"><span class="acode">        for i, wt in enumerate(w):                 </span></div>
+<div class="ann-line"><span class="acode">            self.pool.extend([i] * wt)             </span><span class="aann">← e.g., w=[1,3,2] → pool=[0,1,1,1,2,2]</span></div>
+<div class="ann-line"><span class="acode">    def pickIndex(self) -> int:                    </span></div>
+<div class="ann-line"><span class="acode">        return random.choice(self.pool)            </span><span class="aann">← O(1) pick, but O(sum(w)) space — BAD for large weights</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Prefix Sum + bisect_right:</strong> Init O(n), pickIndex O(log n), Space O(n)<br>
+        <strong>Expand to flat list:</strong> Init O(n + sum(w)), pickIndex O(1), Space O(sum(w)) — breaks when weights reach 10⁵<br>
+        <strong>Alias Method (advanced):</strong> Init O(n), pickIndex O(1), Space O(n) — used in production ML systems; harder to implement<br>
+        <strong>Interview answer:</strong> Prefix Sum + Binary Search. Handles any weight values, clean to implement.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognise the weighted random sampling pattern</div>
+        <p style="font-size:14px;color:var(--text)">Key signals: "pick randomly" + "probability proportional to weight". This is a classic pattern. The mental model is: assign each index a segment of a number line proportional to its weight, then throw a dart at the line uniformly at random.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose the brute force — expand to flat array</div>
+        <p style="font-size:14px;color:var(--text)">"Simplest approach: expand index i into the pool w[i] times. Use random.choice. O(1) picks, but space is O(sum(w)). If weights are up to 10⁵, the pool could have 10⁸ entries. Too slow to build, too much memory."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the optimisation via number-line insight</div>
+        <p style="font-size:14px;color:var(--text)">"Instead of materialising the expanded pool, I represent the segments using prefix sums — compact O(n) structure. To find which segment a random point falls in, binary search the sorted prefix array. O(n) build, O(log n) per pick."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Code and verify on the example</div>
+        <p style="font-size:14px;color:var(--text)">"w=[1,3,2] → prefix=[1,4,6]. target=2.8. bisect_right([1,4,6], 2.8)=1. Return index 1. Check: 2.8 is in (1,4], which is index 1's segment of width 3/6 — correct probability 50%."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll model this as a weighted number line. Each index gets a segment of width equal to its weight.<br>
+In __init__, I build a prefix sum array — O(n) time and space.<br>
+In pickIndex, I generate target = random.uniform(0, total_weight), then binary search the prefix<br>
+array for the leftmost entry exceeding target. That's my answer. O(log n) per pick.<br>
+Python's bisect.bisect_right handles this exactly. Let me code it up..."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if weights are updated after construction?"</strong> → Use a Fenwick tree (BIT) for O(log n) updates + O(log n) prefix queries</li>
+        <li><strong>"Can you achieve O(1) picks?"</strong> → Yes: Vose's Alias Method — O(n) init, O(1) pick, same O(n) space</li>
+        <li><strong>"How would you unit-test this?"</strong> → Run N picks, compare empirical frequency to expected w[i]/total with a chi-squared test</li>
+        <li><strong>"What does Python's random.choices do internally?"</strong> → Exactly prefix sums + bisect — same algorithm!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: w=[1,3,2], target=2.8</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Weight row -->
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px">Array Visualization</div>
+        <div class="cell-row">
+          <div class="row-label">w (weights)</div>
+          <div id="weight-cells" style="display:flex;gap:6px"></div>
+        </div>
+        <div class="cell-row" style="margin-top:10px">
+          <div class="row-label">prefix sums</div>
+          <div id="prefix-cells" style="display:flex;gap:6px"></div>
+        </div>
+        <div class="cell-row" style="margin-top:10px">
+          <div class="row-label">binary search</div>
+          <div id="bs-cells" style="display:flex;gap:6px"></div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-phase">
+          <span class="var-name">phase</span>
+          <span class="var-val" id="vv-phase">—</span>
+        </div>
+        <div class="var-box" id="vb-target">
+          <span class="var-name">target</span>
+          <span class="var-val" id="vv-target">—</span>
+        </div>
+        <div class="var-box" id="vb-lo">
+          <span class="var-name">lo</span>
+          <span class="var-val" id="vv-lo">—</span>
+        </div>
+        <div class="var-box" id="vb-hi">
+          <span class="var-name">hi</span>
+          <span class="var-val" id="vv-hi">—</span>
+        </div>
+        <div class="var-box" id="vb-mid">
+          <span class="var-name">mid</span>
+          <span class="var-val" id="vv-mid">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def __init__(self, w):</div>
+      <div class="code-line" id="cl-1">    self.prefix = []; total = 0</div>
+      <div class="code-line" id="cl-2">    for wt in w:</div>
+      <div class="code-line" id="cl-3">        total += wt</div>
+      <div class="code-line" id="cl-4">        self.prefix.append(total)    # prefix[i] = sum of w[0..i]</div>
+      <div class="code-line" id="cl-5"> </div>
+      <div class="code-line" id="cl-6">def pickIndex(self) -> int:</div>
+      <div class="code-line" id="cl-7">    target = random.uniform(0, self.prefix[-1])</div>
+      <div class="code-line" id="cl-8">    lo, hi = 0, len(self.prefix) - 1</div>
+      <div class="code-line" id="cl-9">    while lo &lt; hi:</div>
+      <div class="code-line" id="cl-10">        mid = (lo + hi) // 2</div>
+      <div class="code-line" id="cl-11">        if self.prefix[mid] &lt;= target:   lo = mid + 1</div>
+      <div class="code-line" id="cl-12">        else:                              hi = mid</div>
+      <div class="code-line" id="cl-13">    return lo  # first index where prefix[i] > target</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 12</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-weight"></div> Original weight</div>
+      <div class="legend-item"><div class="legend-swatch sw-prefix"></div> Prefix sum (built)</div>
+      <div class="legend-item"><div class="legend-swatch sw-search"></div> In search range</div>
+      <div class="legend-item"><div class="legend-swatch sw-mid"></div> Current mid</div>
+      <div class="legend-item"><div class="legend-swatch sw-found"></div> Answer found</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Convert weights to prefix sums once in __init__ — this builds the "weighted number line" in O(n)</div>
+      <div class="takeaway">A random float in [0, total) falls into segment i with probability w[i]/total — correct by uniform distribution</div>
+      <div class="takeaway">Binary search on the sorted prefix array locates the correct segment in O(log n) per call</div>
+      <div class="takeaway">Python's bisect.bisect_right is the one-liner that handles all boundary cases cleanly</div>
+      <div class="takeaway">For dynamic weights (updates between picks), upgrade to a Fenwick tree for O(log n) updates</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Init</th><th>pickIndex</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Expand to flat pool</td>
+          <td class="mark-bad">O(n+sum(w))</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-bad">O(sum(w))</td>
+          <td>Breaks for large weights (10⁵)</td>
+        </tr>
+        <tr>
+          <td><strong>Prefix Sum + bisect ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(log n)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Optimal; interview answer</td>
+        </tr>
+        <tr>
+          <td>Alias Method</td>
+          <td>O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Best for millions of picks; complex</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Prefix Sum + Binary Search Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Select randomly with probability proportional to weight" → Prefix sum + binary search on cumulative array</li>
+        <li>"Map a value to a range defined by running totals" → Build prefix sums, bisect to find bucket</li>
+        <li>Any problem where you need O(log n) range-boundary lookups after O(n) setup</li>
+        <li>Weighted random → also appears in load balancing, A/B testing frameworks, reservoir sampling</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Prefix Sum + Binary Search)</div>
+      <div class="related-item"><strong>Koko Eating Bananas</strong><span class="related-diff diff-med">Medium</span> — Binary search on the answer space (eating speed), not an array index (#875)</div>
+      <div class="related-item"><strong>Capacity to Ship Packages Within D Days</strong><span class="related-diff diff-med">Medium</span> — Binary search on capacity; prefix sums used to verify feasibility (#1011)</div>
+      <div class="related-item"><strong>Find First and Last Position of Element in Sorted Array</strong><span class="related-diff diff-med">Medium</span> — Two binary searches on a sorted array for left/right bounds (#34)</div>
+      <div class="related-item"><strong>Range Sum Query - Immutable</strong><span class="related-diff diff-easy">Easy</span> — Build prefix sums once, answer range queries in O(1) (#303)</div>
+      <div class="related-item"><strong>Subarray Sum Equals K</strong><span class="related-diff diff-med">Medium</span> — Prefix sums + hash map to count qualifying subarrays in O(n) (#560)</div>
+      <div class="related-item"><strong>K Closest Elements</strong><span class="related-diff diff-med">Medium</span> — Binary search to find optimal left bound, then expand window (#658)</div>
+      <div class="related-item"><strong>Random Pick Index</strong><span class="related-diff diff-med">Medium</span> — Weighted pick variant using reservoir sampling for equal-weight duplicates (#398)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 9 (Binary Search)<br>
+      Sub-Pattern: <strong>Prefix Sum + Binary Search</strong> · Source: Guide Section 9</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+const WEIGHTS = [1, 3, 2];
+const PREFIX  = [1, 4, 6];
+const TARGET  = 2.8;  // fixed for deterministic walkthrough
+
+// prefixBuilt = how many prefix cells are visible yet
+// bsState = {lo, hi, mid} or null
+// eliminated = array indices excluded from search range
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    activeLine:0,
+    prefixBuilt:0,
+    lo:null, hi:null, mid:null,
+    target:null, result:null,
+    title:'Start: w = [1, 3, 2]',
+    text:'We have weights w=[1,3,2]. Total weight = 6. Index 0 should be returned 1/6 of the time, index 1 should appear 3/6 = 50% of the time, index 2 should appear 2/6 of the time. We need a data structure for efficient weighted random picks.',
+    changed:[]
+  },
+  {
+    id:1, phase:'build', phaseLabel:'BUILD PREFIX', phaseClass:'phase-build',
+    activeLine:1,
+    prefixBuilt:0,
+    lo:null, hi:null, mid:null,
+    target:null, result:null,
+    title:'Initialize: prefix = [], total = 0',
+    text:'Create an empty prefix array and a running total counter at 0. We will scan through each weight and append the cumulative sum. The resulting prefix array encodes the right boundary of each index\'s segment on the weighted number line.',
+    changed:['prefix','total']
+  },
+  {
+    id:2, phase:'build', phaseLabel:'BUILD PREFIX', phaseClass:'phase-build',
+    activeLine:3,
+    prefixBuilt:1,
+    lo:null, hi:null, mid:null,
+    target:null, result:null,
+    title:'w[0]=1: total = 0+1 = 1 → prefix = [1]',
+    text:'First weight is 1. total becomes 1. Append 1 to prefix. This encodes: index 0 owns the segment (0, 1] on the number line. Any random point in (0, 1] should return index 0 — that\'s a 1/6 share, matching weight 1 out of total 6.',
+    changed:['total','prefix']
+  },
+  {
+    id:3, phase:'build', phaseLabel:'BUILD PREFIX', phaseClass:'phase-build',
+    activeLine:3,
+    prefixBuilt:2,
+    lo:null, hi:null, mid:null,
+    target:null, result:null,
+    title:'w[1]=3: total = 1+3 = 4 → prefix = [1, 4]',
+    text:'Second weight is 3. total becomes 4. Append 4. Index 1 owns (1, 4] — a width-3 segment, three times wider than index 0. Any random point in (1, 4] returns index 1 — a 3/6 = 50% chance, exactly as required.',
+    changed:['total','prefix']
+  },
+  {
+    id:4, phase:'build', phaseLabel:'BUILD PREFIX', phaseClass:'phase-build',
+    activeLine:3,
+    prefixBuilt:3,
+    lo:null, hi:null, mid:null,
+    target:null, result:null,
+    title:'w[2]=2: total = 4+2 = 6 → prefix = [1, 4, 6]',
+    text:'Third weight is 2. total becomes 6. Append 6. Index 2 owns (4, 6] — width 2. Prefix sum construction complete: [1, 4, 6]. All three segments tile (0, 6] without gaps or overlaps. __init__ is done.',
+    changed:['total','prefix']
+  },
+  {
+    id:5, phase:'search', phaseLabel:'PICK INDEX', phaseClass:'phase-search',
+    activeLine:7,
+    prefixBuilt:3,
+    lo:null, hi:null, mid:null,
+    target:2.8, result:null,
+    title:'pickIndex(): target = random.uniform(0, 6) = 2.8',
+    text:'Someone calls pickIndex(). We generate a uniformly random float in [0, 6). Our demo fixes target = 2.8. On the number line: 2.8 falls in (1, 4] — that is index 1\'s segment. We need binary search to find this programmatically from the prefix array.',
+    changed:['target']
+  },
+  {
+    id:6, phase:'search', phaseLabel:'BINARY SEARCH', phaseClass:'phase-search',
+    activeLine:8,
+    prefixBuilt:3,
+    lo:0, hi:2, mid:null,
+    target:2.8, result:null,
+    title:'Initialize: lo = 0, hi = 2 (len(prefix) - 1)',
+    text:'Start binary search on prefix = [1, 4, 6]. Search range covers all 3 indices (lo=0 to hi=2). We want the leftmost index where prefix[i] > 2.8. The answer must exist because prefix[-1]=6 > 2.8.',
+    changed:['lo','hi']
+  },
+  {
+    id:7, phase:'search', phaseLabel:'BINARY SEARCH', phaseClass:'phase-search',
+    activeLine:10,
+    prefixBuilt:3,
+    lo:0, hi:2, mid:1,
+    target:2.8, result:null,
+    title:'Iteration 1: mid = (0 + 2) // 2 = 1',
+    text:'Compute mid = (0 + 2) // 2 = 1. Examine prefix[1] = 4. Is 4 <= 2.8? No — 4 is greater than our target. So the boundary we seek is at mid or to the left. Eliminate the right half: set hi = mid = 1.',
+    changed:['mid']
+  },
+  {
+    id:8, phase:'search', phaseLabel:'BINARY SEARCH', phaseClass:'phase-search',
+    activeLine:12,
+    prefixBuilt:3,
+    lo:0, hi:1, mid:1,
+    target:2.8, result:null,
+    title:'prefix[1]=4 > 2.8 → hi = mid = 1',
+    text:'Since prefix[mid]=4 > target=2.8, the answer is at index mid=1 or earlier. Set hi=1. Now search range is [0, 1]. Index 2 is eliminated — we already know prefix[2]=6 > 2.8, but index 1 also satisfies this and is earlier.',
+    changed:['hi']
+  },
+  {
+    id:9, phase:'search', phaseLabel:'BINARY SEARCH', phaseClass:'phase-search',
+    activeLine:10,
+    prefixBuilt:3,
+    lo:0, hi:1, mid:0,
+    target:2.8, result:null,
+    title:'Iteration 2: mid = (0 + 1) // 2 = 0',
+    text:'lo=0, hi=1. Compute mid = 0. Examine prefix[0] = 1. Is 1 <= 2.8? Yes! So the answer is strictly to the right of mid. Set lo = mid + 1 = 1.',
+    changed:['mid']
+  },
+  {
+    id:10, phase:'search', phaseLabel:'BINARY SEARCH', phaseClass:'phase-search',
+    activeLine:11,
+    prefixBuilt:3,
+    lo:1, hi:1, mid:0,
+    target:2.8, result:null,
+    title:'prefix[0]=1 ≤ 2.8 → lo = mid+1 = 1',
+    text:'prefix[0]=1 ≤ 2.8 means index 0\'s segment ends at 1 — our target 2.8 is not in that segment. Advance lo to 1. Now lo == hi == 1. Loop condition (lo < hi) is false. Exit.',
+    changed:['lo']
+  },
+  {
+    id:11, phase:'result', phaseLabel:'RETURN', phaseClass:'phase-result',
+    activeLine:13,
+    prefixBuilt:3,
+    lo:1, hi:1, mid:0,
+    target:2.8, result:1,
+    title:'Return lo = 1 ✓',
+    text:'lo = hi = 1. Return index 1. Correct! target=2.8 falls in (1, 4], which is index 1\'s segment of width 3. Index 1 has weight 3/6 = 50%, and its segment covers exactly 3 out of 6 units on the number line — the probability is correct by construction.',
+    changed:['result']
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function buildDom() {
+  // Weight cells (static)
+  const wc = document.getElementById('weight-cells');
+  WEIGHTS.forEach((w, i) => {
+    const c = document.createElement('div');
+    c.className = 'pcell weight'; c.id = 'wc-' + i;
+    c.innerHTML = `<span>${w}</span><span class="idx">w[${i}]</span>`;
+    wc.appendChild(c);
+  });
+
+  // Prefix cells (revealed progressively)
+  const pc = document.getElementById('prefix-cells');
+  PREFIX.forEach((p, i) => {
+    const c = document.createElement('div');
+    c.className = 'pcell'; c.id = 'pc-' + i;
+    c.innerHTML = `<span id="pv-${i}">?</span><span class="idx">pfx[${i}]</span>`;
+    pc.appendChild(c);
+  });
+
+  // Binary search cells (mirrors prefix, but with search state coloring)
+  const bs = document.getElementById('bs-cells');
+  PREFIX.forEach((p, i) => {
+    const c = document.createElement('div');
+    c.className = 'pcell'; c.id = 'bsc-' + i;
+    c.innerHTML = `<span>${p}</span><span class="idx">pfx[${i}]</span>`;
+    bs.appendChild(c);
+  });
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function render() {
+  const step = steps[current];
+
+  // ── Prefix cells (reveal as built) ──
+  PREFIX.forEach((p, i) => {
+    const cell = document.getElementById('pc-' + i);
+    const val  = document.getElementById('pv-' + i);
+    cell.className = 'pcell';
+    if (i < step.prefixBuilt) {
+      cell.classList.add('prefix');
+      val.textContent = PREFIX[i];
+    } else {
+      val.textContent = '?';
+    }
+  });
+
+  // ── Binary search cells ──
+  PREFIX.forEach((p, i) => {
+    const cell = document.getElementById('bsc-' + i);
+    cell.className = 'pcell';
+    if (step.phase === 'result' && i === step.result) {
+      cell.classList.add('found');
+    } else if (step.lo !== null && step.mid === i) {
+      cell.classList.add('mid-cell');
+    } else if (step.lo !== null && i >= step.lo && i <= step.hi) {
+      cell.classList.add('in-range');
+    } else if (step.lo !== null) {
+      cell.classList.add('eliminated');
+    }
+  });
+
+  // ── Code panel ──
+  for (let i = 0; i <= 13; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  function setVar(id, val, changed) {
+    const box = document.getElementById('vb-' + id);
+    const vv  = document.getElementById('vv-' + id);
+    if (box) box.classList.toggle('changed', changed);
+    if (vv)  vv.textContent = (val === null || val === undefined) ? '—' : String(val);
+  }
+
+  const phaseLabel = {init:'init', build:'build', search:'search', result:'done'}[step.phase] || step.phase;
+  setVar('phase',  phaseLabel,  false);
+  setVar('target', step.target !== null ? TARGET : null, step.changed.includes('target'));
+  setVar('lo',     step.lo,     step.changed.includes('lo'));
+  setVar('hi',     step.hi,     step.changed.includes('hi'));
+  setVar('mid',    step.mid,    step.changed.includes('mid'));
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

@@ -1,234 +1,898 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Implement Trie (Prefix Tree) – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#208 · Implement Trie (Prefix Tree)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two columns */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* Interview strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Variable tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Interactive code panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-insert{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-search{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:14px;height:14px;border-radius:50%;border:2px solid}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-mid)}
+.sw-inserted{background:var(--green-bg);border-color:var(--green-border)}
+.sw-word{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-search{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+.sw-notfound{background:var(--red-bg);border-color:var(--red-border)}
+
+/* Comparison table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* Viz area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Implement Trie (Prefix Tree)</h1>
-    <p class="subtitle">LeetCode #208 — Tries · Node with Children Array/Map</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Tries</span>
-      <span class="tag tag-complexity">O(m) per op Time</span>
-      <span class="tag tag-complexity">O(total chars) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Tries</strong> using the <strong>Node with Children Array/Map</strong> technique.</p>
-      <p>Pattern category: <strong>Tries</strong>. Apply when: <em>Insert/Search/StartsWith all O(m). Use for autocomplete, spell check, IP routing.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Prefix tree for O(m) string lookup where m=length. Each path from root to end-marked node = a word.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #208</div>
+  <h1>Implement Trie (Prefix Tree)</h1>
+  <p class="subtitle">Design a data structure supporting insert, search, and startsWith operations on strings, exploiting shared prefixes for O(m) lookup time.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Tries</span>
+    <span class="tag tag-pattern">Node with Children Map</span>
+    <span class="tag tag-complexity">insert: O(m)</span>
+    <span class="tag tag-complexity">search: O(m)</span>
+    <span class="tag tag-complexity">Space: O(ALPHA·n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Node with Children Array/Map</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Start at root node</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each character in word/prefix</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Go to or create child node for that character</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Mark end_of_word=True after last char (for insert)</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Return found/not-found (for search)</span></div>
-      </div>
-    </div>
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>A <strong>Trie</strong> (from re<em>trie</em>val, rhymes with "try") is a tree in which every path from the root to a marked node spells out a stored word. Each node branches into children — one per character that can follow — and all words sharing a prefix travel the same initial path. This structural sharing is what makes prefix queries blazing fast.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:0.75rem">We need three operations:</p>
+    <ul style="margin:0.5rem 0 0.75rem 1.5rem;line-height:2">
+      <li><code>insert(word)</code> — Walk from root, creating nodes as needed, one per character. Mark the final node <code>is_end = True</code>.</li>
+      <li><code>search(word)</code> — Walk the path. Return <code>True</code> only if every character's node exists <em>and</em> the final node has <code>is_end = True</code>.</li>
+      <li><code>startsWith(prefix)</code> — Walk the path. Return <code>True</code> if every character exists — the final node's <code>is_end</code> doesn't matter.</li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The difference between <code>search</code> and <code>startsWith</code> is exactly <strong>one flag</strong>: <code>is_end</code>. Both do the same walk. Search demands <code>node.is_end == True</code> at the end. Prefix check returns <code>True</code> regardless of that flag, as long as the path exists at all.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Each node represents a character. Path from root = prefix of stored words. end_of_word marks complete words.</p>
+
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Why Tries Beat Hash Sets for Prefix Queries</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          <code>startsWith("ap")</code> → O(2). Done.<br>
+          Completely independent of #words stored.<br>
+          Shared prefix = shared nodes = shared computation.
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Hash Set Cannot Answer Prefix Queries in O(m)</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">
+          Exact lookup <code>word in s</code> is O(m). Fine.<br>
+          But "any word starting with X?" needs scanning every stored word. O(total chars).<br>
+          No structural sharing — no prefix leverage.
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:0.5rem"><strong>Example Trie</strong> after inserting "app", "apple", "ape":</p>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;font-family:var(--mono);font-size:12.5px;line-height:1.9;margin:0.75rem 0;overflow-x:auto">
+<pre style="color:var(--text2);margin:0">root
+ └─ a
+     └─ p
+         ├─ p [is_end=True]  ← "app"
+         │   └─ l
+         │       └─ e [is_end=True]  ← "apple"
+         └─ e [is_end=True]  ← "ape"
+
+search("app")   → walk a→p→p, check is_end=True  → True
+search("ap")    → walk a→p,   check is_end=False → False
+startsWith("ap")→ walk a→p,   path exists        → True
+search("apt")   → walk a→p, no 't' child         → False</pre>
+    </div>
+
+    <p><strong>Edge cases:</strong> Inserting the same word twice is harmless — <code>is_end</code> just stays True. A node can simultaneously be a word-end (<code>is_end=True</code>) and have children, e.g. the second 'p' in "app" also leads to 'l' for "apple". The empty string: walks zero steps, returns root's <code>is_end</code> (which is False unless explicitly inserted).</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">class TrieNode:</div><div class="code-line">    def __init__(self): self.children, self.end = {}, False</div><div class="code-line"></div><div class="code-line">class Trie:</div><div class="code-line">    def __init__(self): self.root = TrieNode()</div><div class="code-line"></div><div class="code-line">    def insert(self, word):</div><div class="code-line">        node = self.root</div><div class="code-line">        for ch in word:</div><div class="code-line">            if ch not in node.children: node.children[ch] = TrieNode()</div><div class="code-line">            node = node.children[ch]</div><div class="code-line">        node.end = True</div><div class="code-line"></div><div class="code-line">    def search(self, word):</div><div class="code-line">        node = self.root</div><div class="code-line">        for ch in word:</div><div class="code-line">            if ch not in node.children: return False</div><div class="code-line">            node = node.children[ch]</div><div class="code-line">        return node.end</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(m) per op &nbsp;|&nbsp; Space: O(total chars)</p>
-    </div>
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: TrieNode + Walk Pattern</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Every Trie node stores two things: a <strong>children map</strong> (character → TrieNode) and a boolean <strong>is_end</strong> flag. The Trie itself holds only the root — an empty anchor node. Every operation is a <em>walk</em> from root, one character at a time.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Insert/Search/StartsWith all O(m). Use for autocomplete, spell check, IP routing.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>TrieNode:</strong> <code>children = {}</code> (grows lazily) + <code>is_end = False</code>. Alternative for ASCII-only: <code>children = [None] * 26</code> indexed by <code>ord(c) - ord('a')</code>. Dict is safer for Unicode.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Tries problem using Node with Children Array/Map. I'll start at root node then for each character in word/prefix. Time: O(m) per op, Space: O(total chars)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>insert(word):</strong> node = root. For each char <code>c</code>: if <code>c</code> not in node.children, create new TrieNode. Descend: <code>node = node.children[c]</code>. After loop: <code>node.is_end = True</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>search(word):</strong> node = root. For each <code>c</code>: if <code>c</code> not in children, return <code>False</code>. Descend. After loop: return <code>node.is_end</code> — not <code>True</code>! This is the critical distinction.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>startsWith(prefix):</strong> Identical to search except the final return is <code>True</code> (not <code>node.is_end</code>). If we consumed all prefix characters without falling off, some stored word starts with this prefix.</span>
       </div>
     </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Unify with a _walk() Helper</div>
+      <p>All three operations share the same "follow the path, bail if missing" logic. Extract:<br>
+      <code>def _walk(self, s) -&gt; TrieNode | None</code> — returns the node at end of path, or None if path missing.<br>
+      Then: <code>search</code> returns <code>node is not None and node.is_end</code>. <code>startsWith</code> returns <code>node is not None</code>. Cleaner and fewer bugs.</p>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Operation</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      <tr><td><code>insert(word)</code></td><td class="mark-good">O(m)</td><td>O(m)</td><td>m = word length; O(m) new nodes worst case</td></tr>
+      <tr><td><code>search(word)</code></td><td class="mark-good">O(m)</td><td>O(1)</td><td>Read-only traversal</td></tr>
+      <tr><td><code>startsWith(p)</code></td><td class="mark-good">O(m)</td><td>O(1)</td><td>m = prefix length</td></tr>
+      <tr><td>Total space</td><td>—</td><td>O(ALPHA × N)</td><td>ALPHA=26 (dict), N=total chars inserted</td></tr>
+    </table>
   </div>
+</div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
   </div>
-
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At any node <em>N</em> reachable from root by the path of characters <em>c₁c₂…cₖ</em>, the substring <em>c₁c₂…cₖ</em> is a common prefix of every word stored in the subtree rooted at <em>N</em>. Equivalently: the Trie stores every inserted word's prefix exactly once, shared across all words that begin with it.</p>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Tries — Node with Children Array/Map</div>
-        <div class="takeaway">✓ Prefix tree for O(m) string lookup where m=length</div>
-        <div class="takeaway">✓ Time: O(m) per op | Space: O(total chars)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Insert/Search/StartsWith all O(m). Use for autocomplete, spell check, IP routing.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Design Add and Search Words Data Structure</strong> (Medium) — Trie + DFS for Wildcards</li>
-<li><strong>Search Suggestions System</strong> (Medium) — Trie + DFS Top 3</li>
-<li><strong>Longest Word in Dictionary</strong> (Medium) — Trie + BFS Valid Words</li>
-<li><strong>Replace Words</strong> (Medium) — Trie for Root Lookup</li>
-<li><strong>Maximum XOR of Two Numbers in an Array</strong> (Medium) — Bit Trie</li>
-<li><strong>Remove Sub-Folders from the Filesystem</strong> (Medium) — Trie or Sort + Skip</li></ul>
-      </div>
+
+    <p>This invariant is established trivially during insert: we create a child node for character <code>c</code> only when it doesn't exist yet. We never reorganize. The tree's shape is always exactly the set of all prefixes of all inserted words, with shared prefixes sharing nodes.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why search is correct:</strong> If word <em>W</em> was inserted, every character in <em>W</em> was either found (already existed from a shared prefix) or created. The path must exist. <code>is_end = True</code> at the final node was set during insert, so we know a complete word ends there — not just a prefix of something longer.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why startsWith is correct:</strong> If every character of prefix <em>P</em> is traversable from root, then at some point during a prior insert, a word beginning with <em>P</em> was processed (it created or reused those nodes). That word is still in the Trie. So a word starting with <em>P</em> exists.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The is_end Flag Is Non-Negotiable</div>
+      <p>Without <code>is_end</code>, you can't distinguish between "app" as a word and "app" as merely the prefix of "apple". If you insert only "apple" then call <code>search("app")</code>, the walk a→p→p succeeds (the path exists), but the node at the second 'p' was <em>not</em> marked is_end — correctly returning False. Removing <code>is_end</code> would make search indistinguishable from startsWith.</p>
+    </div>
+
+    <p><strong>Dual-role nodes:</strong> A node can have <code>is_end = True</code> AND have children simultaneously. For example, after inserting "app" and "apple", the node for the second 'p' in "app" has <code>is_end = True</code> (word "app") and also has child 'l' (continuing to "apple"). Both properties are independent and coexist perfectly.</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TrieNode:</span>                         <span class="aann">← one node in the tree</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.children = {}    </span>            <span class="aann">← char → TrieNode; grows on demand</span></div>
+<div class="ann-line"><span class="acode">        self.is_end   = False </span>            <span class="aann">← True only if a word ends exactly here</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class Trie:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.root = TrieNode()</span>             <span class="aann">← universal anchor; no letter of its own</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def insert(self, word: str) -> None:</span></div>
+<div class="ann-line"><span class="acode">        node = self.root</span>                    <span class="aann">← start every walk from root</span></div>
+<div class="ann-line"><span class="acode">        for c in word:</span>                     <span class="aann">← one edge per character</span></div>
+<div class="ann-line"><span class="acode">            if c not in node.children:</span>     <span class="aann">← path missing? create it</span></div>
+<div class="ann-line"><span class="acode">                node.children[c] = TrieNode()</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[c]</span>        <span class="aann">← descend (whether new or existing)</span></div>
+<div class="ann-line"><span class="acode">        node.is_end = True</span>                 <span class="aann">← mark: a complete word ends here</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def search(self, word: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">        node = self.root</span></div>
+<div class="ann-line"><span class="acode">        for c in word:</span></div>
+<div class="ann-line"><span class="acode">            if c not in node.children:</span>     <span class="aann">← fell off the tree → word was never inserted</span></div>
+<div class="ann-line"><span class="acode">                return False</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[c]</span></div>
+<div class="ann-line"><span class="acode">        return node.is_end</span>                 <span class="aann">← path exists — but is it a real word?</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def startsWith(self, prefix: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">        node = self.root</span></div>
+<div class="ann-line"><span class="acode">        for c in prefix:</span></div>
+<div class="ann-line"><span class="acode">            if c not in node.children:</span></div>
+<div class="ann-line"><span class="acode">                return False</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[c]</span></div>
+<div class="ann-line"><span class="acode">        return True</span>                        <span class="aann">← path exists → some word has this prefix</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Classic Bug: return True in search()</div>
+      <p>Returning <code>True</code> (not <code>node.is_end</code>) at the end of <code>search</code> is the #1 mistake. Example: insert "apple", then <code>search("app")</code> — the walk succeeds because "app" is a valid prefix path, but "app" was never a word. Returning <code>True</code> would give wrong answer. Always return <code>node.is_end</code>.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Array-based Children (26 slots)</div>
+      <p>For lowercase a–z only: <code>self.children = [None]*26</code>. Access by <code>self.children[ord(c)-ord('a')]</code>. Faster cache access, no hashing — but wastes 26 pointers per node regardless of how sparse the branching is. Dict is more memory-efficient for sparse alphabets or Unicode.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify the Pattern</div>
+        <p style="font-size:13.5px">The problem says "prefix" and gives you <code>startsWith</code> as an operation. Any time prefix lookup is a first-class requirement, Trie is the answer. The signal: O(m) prefix queries that a hash set can't provide without O(total) scanning. Name the data structure explicitly: "This is a classic Trie problem."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the Node Structure</div>
+        <p style="font-size:13.5px">Say: "Each node needs to know which characters can follow it — I'll use a dict — and a boolean to record whether a complete word ends here." Clarify: "Lowercase English only? Then I could use a 26-element array. For safety/Unicode I'll use a dict." This shows you know both options.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Explain the Unified Walk</div>
+        <p style="font-size:13.5px">All three methods are the same pattern: walk from root character-by-character, return early if a child is missing. The only difference is the final return value. Articulate this: "Insert creates nodes; search returns node.is_end; startsWith returns True." This is the crux.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Complexity and Trade-offs</div>
+        <p style="font-size:13.5px">Time: O(m) per operation, independent of number of stored words. Space: O(ALPHA × total_characters_inserted) worst case. Mention the array-vs-dict trade-off. If asked about memory: "A compressed Trie (Patricia) merges single-child chains into one node."</p>
+      </div>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
-  }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I see we need prefix-based lookups, so a Trie is the right structure.<br>
+Each TrieNode holds a children dict and an is_end flag.<br>
+All three methods share the same walk: start at root, one step per character.<br>
+insert creates missing nodes and sets is_end=True on the last node.<br>
+search does the same walk but returns node.is_end — not True — at the end.<br>
+startsWith is identical to search but returns True regardless of is_end.<br>
+Time is O(m) per op; space is O(ALPHA times total characters inserted)."
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Likely Follow-Up Questions</div>
+      <ul style="margin-top:0.5rem;line-height:2.1;margin-left:1.25rem">
+        <li><strong>Delete a word:</strong> Walk to end, unset <code>is_end</code>. Optionally prune orphaned leaf nodes bottom-up (DFS).</li>
+        <li><strong>Count words with prefix:</strong> Store a <code>count</code> at each node, increment on insert, check at prefix end.</li>
+        <li><strong>Autocomplete top-k:</strong> DFS from node at prefix end, collect all is_end paths. Use a heap for top-k by frequency.</li>
+        <li><strong>Word Search II (Boggle):</strong> Build Trie from word list, then DFS on grid guided by Trie to prune early.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="color:var(--text2);font-size:13.5px;margin-bottom:1rem">Step through inserting "app", "apple", and "ape", then searching "app" and "ap". Watch how nodes are created or shared, how is_end marks word boundaries, and why search("ap") returns False even though the path exists.</p>
+
+    <div class="viz-area">
+      <div style="text-align:center;font-family:var(--mono);font-size:13px;color:var(--text2);margin-bottom:10px" id="opLabel">
+        <span id="opWord">—</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:0.5rem;overflow-x:auto">
+        <svg id="trieSvg" width="560" height="240" viewBox="0 0 560 240" style="overflow:visible;transition:height 0.4s">
+          <g id="edgesG"></g>
+          <g id="nodesG"></g>
+          <g id="labelsG"></g>
+        </svg>
+      </div>
+
+      <div class="var-tracker" id="varTracker">
+        <div class="var-box" id="vbOp"><span class="var-name">Operation</span><span class="var-val" id="vvOp">—</span></div>
+        <div class="var-box" id="vbChar"><span class="var-name">Cur Char</span><span class="var-val" id="vvChar">—</span></div>
+        <div class="var-box" id="vbIsEnd"><span class="var-name">is_end (node)</span><span class="var-val" id="vvIsEnd">—</span></div>
+        <div class="var-box" id="vbResult"><span class="var-name">Return</span><span class="var-val" id="vvResult">—</span></div>
+      </div>
+
+      <div class="code-panel" id="codePanel">
+        <div class="code-line" id="cl0">def insert(self, word):         </div>
+        <div class="code-line" id="cl1">    node = self.root             </div>
+        <div class="code-line" id="cl2">    for c in word:               </div>
+        <div class="code-line" id="cl3">        if c not in node.children:</div>
+        <div class="code-line" id="cl4">            node.children[c] = TrieNode()</div>
+        <div class="code-line" id="cl5">        node = node.children[c]  </div>
+        <div class="code-line" id="cl6">    node.is_end = True           </div>
+        <div class="code-line" id="cl7">def search(self, word):         </div>
+        <div class="code-line" id="cl8">    node = self.root             </div>
+        <div class="code-line" id="cl9">    for c in word:               </div>
+        <div class="code-line" id="cl10">        if c not in node.children: return False</div>
+        <div class="code-line" id="cl11">        node = node.children[c]  </div>
+        <div class="code-line" id="cl12">    return node.is_end           </div>
+      </div>
+
+      <div class="info-card" id="infoCard">
+        <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+        <div class="step-counter" id="stepCounter">Step 0 of 13</div>
+        <div class="step-title" id="stepTitle">Empty Trie</div>
+        <div class="step-body" id="stepBody">We start with an empty Trie. The root node is created — it has no character of its own, just an empty children map and is_end=False. It is the universal anchor from which all walks begin.</div>
+      </div>
+    </div>
+
+    <div class="progress-dots" id="progressDots"></div>
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div>Existing node</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div>Active (traversing)</div>
+      <div class="legend-item"><div class="legend-swatch sw-inserted"></div>Newly created</div>
+      <div class="legend-item"><div class="legend-swatch sw-word"></div>is_end=True (word)</div>
+      <div class="legend-item"><div class="legend-swatch sw-search"></div>Searching path</div>
+      <div class="legend-item"><div class="legend-swatch sw-found"></div>Found / True</div>
+      <div class="legend-item"><div class="legend-swatch sw-notfound"></div>Not found / False</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A Trie encodes words as root-to-leaf paths. Shared prefixes share nodes — this is the core space and time benefit.</div>
+      <div class="takeaway">Every operation (insert, search, startsWith) is the same pattern: walk from root one character at a time, bail early if a child is missing.</div>
+      <div class="takeaway"><code>is_end</code> flag distinguishes a complete word from a mere prefix. Search checks it; startsWith ignores it.</div>
+      <div class="takeaway">insert creates nodes that don't exist; search and startsWith are purely read operations with O(1) extra space.</div>
+      <div class="takeaway">All three operations are O(m) time where m = word/prefix length, <em>independent</em> of how many words are stored.</div>
+      <div class="takeaway">Use a dict for sparse/Unicode alphabets; use a 26-element array for dense lowercase-ASCII workloads.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Reach for a Trie</div>
+      <ul style="margin-top:0.5rem;line-height:2;margin-left:1.25rem">
+        <li>You need O(m) "does any word start with X?" queries (hash sets can't)</li>
+        <li>Autocomplete / typeahead — DFS from prefix end to collect completions</li>
+        <li>Word search on a grid (Boggle / Word Search II) — Trie prunes DFS branches early</li>
+        <li>Spell checkers — validate prefixes while typing, word-by-word</li>
+        <li>IP routing — longest prefix match via a binary Trie on bit representation</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <h4 style="margin-bottom:0.5rem;font-size:14px;color:var(--text2)">Related Problems</h4>
+      <div class="related-item"><strong>Design Add and Search Words Data Structure</strong><span class="related-diff diff-med">Medium</span> — Trie + DFS for wildcard '.' character matching</div>
+      <div class="related-item"><strong>Word Search II</strong><span class="related-diff diff-hard">Hard</span> — Trie + DFS backtracking on grid; prune via Trie to avoid redundant paths</div>
+      <div class="related-item"><strong>Replace Words</strong><span class="related-diff diff-med">Medium</span> — Trie to find the shortest stored root/prefix for each word in a sentence</div>
+      <div class="related-item"><strong>Longest Word in Dictionary</strong><span class="related-diff diff-med">Medium</span> — BFS on Trie visiting only is_end nodes (word built character by character)</div>
+      <div class="related-item"><strong>Map Sum Pairs</strong><span class="related-diff diff-med">Medium</span> — Trie storing integer values; sum all values in prefix subtree</div>
+      <div class="related-item"><strong>Search Suggestions System</strong><span class="related-diff diff-med">Medium</span> — Trie autocomplete returning up to 3 lexicographically smallest words per prefix</div>
+      <div class="related-item"><strong>Maximum XOR of Two Numbers</strong><span class="related-diff diff-med">Medium</span> — Binary Trie (on bit representation); greedy XOR maximization bit by bit</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Collapse toggles ──────────────────────────────
+function toggle(hdr){
+  const c=hdr.nextElementSibling;
+  const ic=hdr.querySelector('.collapse-icon');
+  c.classList.toggle('collapsed');
+  ic.style.transform=c.classList.contains('collapsed')?'rotate(-90deg)':'rotate(0)';
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
-document.addEventListener('keydown', e => {
+// ── Trie Step Data ────────────────────────────────
+// Each step: {phase, phaseClass, op, char, isEnd, result, activeLine, title, body, nodes, edges, changedVars}
+// nodes: [{id, char, x, y, parentId, state, isEnd}]
+// states: 'root'|'normal'|'active'|'inserted'|'word-end'|'searching'|'found'|'not-found'
+// edges: [{from, to, state}] state: 'normal'|'active'|'inserted'|'searching'
+
+const STEPS = [
+  {
+    phase:'INIT', phaseClass:'phase-init', op:'—', char:'—', isEnd:'—', result:'—', activeLine:-1,
+    title:'Empty Trie',
+    body:'We start with a single root node — no character, no is_end, no children. Every insert, search, and startsWith walk begins here.',
+    nodes:[{id:'root',char:'·',x:280,y:40,state:'root',isEnd:false}],
+    edges:[], changedVars:[]
+  },
+  // --- insert("app") ---
+  {
+    phase:'INSERT "app"', phaseClass:'phase-insert', op:'insert("app")', char:'a', isEnd:'False', result:'—', activeLine:3,
+    title:'insert("app") — step "a"',
+    body:'"a" is not in root.children. We create a new TrieNode for "a" and descend into it (line 4 creates, line 5 descends). Path so far: root→a.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'inserted',isEnd:false}
+    ],
+    edges:[{from:'root',to:'a',state:'inserted'}],
+    changedVars:['op','char']
+  },
+  {
+    phase:'INSERT "app"', phaseClass:'phase-insert', op:'insert("app")', char:'p', isEnd:'False', result:'—', activeLine:3,
+    title:'insert("app") — step "p" (first)',
+    body:'"p" not in a.children. Create new TrieNode "p", descend. Path: root→a→p₁.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'inserted',isEnd:false}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'inserted'}],
+    changedVars:['char']
+  },
+  {
+    phase:'INSERT "app"', phaseClass:'phase-insert', op:'insert("app")', char:'p', isEnd:'True', result:'—', activeLine:6,
+    title:'insert("app") — step "p" (second) + mark is_end',
+    body:'"p" not in p₁.children. Create TrieNode p₂, descend. Loop ends. Set node.is_end = True. "app" is now stored! The purple dot marks this node as a complete word.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:280,y:310,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'inserted'}],
+    changedVars:['char','isEnd']
+  },
+  // --- insert("apple") ---
+  {
+    phase:'INSERT "apple"', phaseClass:'phase-insert', op:'insert("apple")', char:'a', isEnd:'False', result:'—', activeLine:2,
+    title:'insert("apple") — "a" already exists!',
+    body:'Starting insert("apple"). At root, "a" IS in children. No new node created — we reuse the existing "a" node and descend. This is prefix sharing: "app" and "apple" share their "a" node.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'active',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:280,y:310,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'active'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'}],
+    changedVars:['op','char']
+  },
+  {
+    phase:'INSERT "apple"', phaseClass:'phase-insert', op:'insert("apple")', char:'p,p', isEnd:'True', result:'—', activeLine:5,
+    title:'insert("apple") — "p","p" both reused; then "l","e" created',
+    body:'Both "p" nodes already exist — reused. We arrive at p₂ (which has is_end=True from "app"). From p₂ we create new nodes for "l" and "e". After "e", set is_end=True. p₂ now has dual role: word-end for "app" AND has child "l" for "apple".',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:200,y:310,state:'word-end',isEnd:true},
+      {id:'l',char:'l',x:200,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:200,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p2',to:'l',state:'inserted'},{from:'l',to:'e2',state:'inserted'}],
+    changedVars:['char','isEnd']
+  },
+  // --- insert("ape") ---
+  {
+    phase:'INSERT "ape"', phaseClass:'phase-insert', op:'insert("ape")', char:'a,p,e', isEnd:'True', result:'—', activeLine:4,
+    title:'insert("ape") — "a","p" reused; new "e" branch from p₁',
+    body:'"a" and the first "p" (p₁) are shared with "app"/"apple". From p₁, there\'s no "e" child yet — only "p". Create new node "e" branching off p₁. Set is_end=True. Now p₁ has two children: p₂ and this new "e".',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'word-end',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'inserted',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'inserted'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['op','char','isEnd']
+  },
+  // --- search("app") ---
+  {
+    phase:'SEARCH "app"', phaseClass:'phase-search', op:'search("app")', char:'a', isEnd:'False', result:'…', activeLine:9,
+    title:'search("app") — walk "a"',
+    body:'search("app"): node=root. "a" IS in root.children. Descend to "a" node. Continue loop.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'searching',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'word-end',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'normal',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'searching'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['op','char']
+  },
+  {
+    phase:'SEARCH "app"', phaseClass:'phase-search', op:'search("app")', char:'p', isEnd:'True', result:'…', activeLine:11,
+    title:'search("app") — walk "p","p"; arrive at p₂',
+    body:'Both "p" nodes exist. We traverse p₁ then p₂. Loop ends. We\'re at p₂, which has is_end=True (set when we inserted "app"). Now execute: return node.is_end.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'searching',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'normal',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'searching'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['char','isEnd']
+  },
+  {
+    phase:'SEARCH "app"', phaseClass:'phase-result', op:'search("app")', char:'p', isEnd:'True', result:'True', activeLine:12,
+    title:'search("app") → True',
+    body:'return node.is_end = True. "app" was inserted as a complete word, so its final node has is_end=True. Result: True ✓',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'found',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'normal',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['result']
+  },
+  // --- search("ap") ---
+  {
+    phase:'SEARCH "ap"', phaseClass:'phase-search', op:'search("ap")', char:'a,p', isEnd:'False', result:'…', activeLine:11,
+    title:'search("ap") — walk "a","p"; arrive at p₁',
+    body:'search("ap"): "a" and first "p" both exist. After consuming all characters, we\'re at p₁. Loop ends. Execute: return node.is_end. What is is_end at p₁?',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'searching',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'word-end',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'normal',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'searching'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['op','char','isEnd']
+  },
+  {
+    phase:'SEARCH "ap"', phaseClass:'phase-result', op:'search("ap")', char:'p', isEnd:'False', result:'False', activeLine:12,
+    title:'search("ap") → False (is_end=False at p₁)',
+    body:'return node.is_end = False. p₁ is NOT a word-end — "ap" was never inserted. The path exists, but no word stops here. This is exactly why is_end matters: path-existence alone is not enough for search(). Result: False.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'not-found',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'word-end',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'normal',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:['result','isEnd']
+  },
+  {
+    phase:'FINAL STATE', phaseClass:'phase-result', op:'done', char:'—', isEnd:'—', result:'—', activeLine:-1,
+    title:'Final Trie — 3 words, shared prefix structure',
+    body:'The Trie stores "app", "apple", and "ape". Three words share the root→a→p path. Nodes with purple dots are word-ends (is_end=True). startsWith("ap") → True (path exists). search("ap") → False (p₁ has no is_end). This sharing is the core advantage of Tries over hash sets for prefix queries.',
+    nodes:[
+      {id:'root',char:'·',x:280,y:40,state:'root',isEnd:false},
+      {id:'a',char:'a',x:280,y:130,state:'normal',isEnd:false},
+      {id:'p1',char:'p',x:280,y:220,state:'normal',isEnd:false},
+      {id:'p2',char:'p',x:180,y:310,state:'word-end',isEnd:true},
+      {id:'e_ape',char:'e',x:380,y:310,state:'word-end',isEnd:true},
+      {id:'l',char:'l',x:180,y:400,state:'normal',isEnd:false},
+      {id:'e2',char:'e',x:180,y:490,state:'word-end',isEnd:true}
+    ],
+    edges:[{from:'root',to:'a',state:'normal'},{from:'a',to:'p1',state:'normal'},{from:'p1',to:'p2',state:'normal'},{from:'p1',to:'e_ape',state:'normal'},{from:'p2',to:'l',state:'normal'},{from:'l',to:'e2',state:'normal'}],
+    changedVars:[]
+  }
+];
+
+const TOTAL = STEPS.length;
+let cur = 0;
+
+// SVG helpers
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs){
+  const el = document.createElementNS(SVG_NS,tag);
+  for(const [k,v] of Object.entries(attrs)) el.setAttribute(k,v);
+  return el;
+}
+
+const NODE_STYLE = {
+  'root':      {fill:'#f0efe9',      stroke:'rgba(0,0,0,0.22)',  tc:'#9c9a92'},
+  'normal':    {fill:'#ffffff',      stroke:'rgba(0,0,0,0.22)',  tc:'#1a1a18'},
+  'active':    {fill:'#E6F1FB',      stroke:'#185FA5',           tc:'#042C53'},
+  'inserted':  {fill:'#EAF3DE',      stroke:'#97C459',           tc:'#173404'},
+  'word-end':  {fill:'#EEEDFE',      stroke:'#AFA9EC',           tc:'#26215C'},
+  'searching': {fill:'#FAEEDA',      stroke:'#EF9F27',           tc:'#412402'},
+  'found':     {fill:'#EAF3DE',      stroke:'#97C459',           tc:'#173404'},
+  'not-found': {fill:'#FCEBEB',      stroke:'#F09595',           tc:'#501313'}
+};
+const EDGE_STYLE = {
+  'normal':   {stroke:'rgba(0,0,0,0.22)', dash:'none',  width:2},
+  'active':   {stroke:'#185FA5',          dash:'none',  width:2.5},
+  'inserted': {stroke:'#3B6D11',          dash:'5,3',   width:2.5},
+  'searching':{stroke:'#854F0B',          dash:'none',  width:2.5}
+};
+
+function renderStep(idx){
+  const s = STEPS[idx];
+  const nMap = {};
+  (s.nodes||[]).forEach(n => nMap[n.id]=n);
+
+  const svg = document.getElementById('trieSvg');
+  const eG = document.getElementById('edgesG');
+  const nG = document.getElementById('nodesG');
+  const lG = document.getElementById('labelsG');
+  eG.innerHTML=''; nG.innerHTML=''; lG.innerHTML='';
+
+  // Auto-height
+  let maxY = 80;
+  (s.nodes||[]).forEach(n => { if(n.y+30>maxY) maxY=n.y+30; });
+  svg.setAttribute('height', maxY+10);
+  svg.setAttribute('viewBox', `0 0 560 ${maxY+10}`);
+
+  // Edges
+  (s.edges||[]).forEach(e => {
+    const f=nMap[e.from], t=nMap[e.to];
+    if(!f||!t) return;
+    const st = EDGE_STYLE[e.state]||EDGE_STYLE.normal;
+    const el = svgEl('line',{
+      x1:f.x, y1:f.y+22, x2:t.x, y2:t.y-22,
+      stroke:st.stroke, 'stroke-width':st.width,
+      'stroke-dasharray':st.dash==='none'?undefined:st.dash
+    });
+    if(st.dash!=='none') el.setAttribute('stroke-dasharray',st.dash);
+    eG.appendChild(el);
+  });
+
+  // Nodes
+  (s.nodes||[]).forEach(n => {
+    const st = NODE_STYLE[n.state]||NODE_STYLE.normal;
+    const r = n.state==='root' ? 16 : 20;
+    const sw = n.isEnd ? 3 : 2;
+
+    const circ = svgEl('circle',{cx:n.x,cy:n.y,r,fill:st.fill,stroke:st.stroke,'stroke-width':sw});
+    nG.appendChild(circ);
+
+    // is_end dot
+    if(n.isEnd){
+      const dot = svgEl('circle',{cx:n.x+r-5,cy:n.y-r+5,r:4,fill:'#534AB7'});
+      nG.appendChild(dot);
+    }
+
+    // Char label
+    const lbl = svgEl('text',{x:n.x,y:n.y+1,'text-anchor':'middle','dominant-baseline':'middle',
+      fill:st.tc,'font-family':"'JetBrains Mono',monospace",
+      'font-size':n.state==='root'?'10':'14','font-weight':'700'});
+    lbl.textContent = n.char;
+    lG.appendChild(lbl);
+  });
+
+  // Info card
+  document.getElementById('phaseBadge').textContent = s.phase;
+  document.getElementById('phaseBadge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('stepCounter').textContent = `Step ${idx} of ${TOTAL-1}`;
+  document.getElementById('stepTitle').textContent = s.title;
+  document.getElementById('stepBody').textContent = s.body;
+  document.getElementById('opWord').textContent = s.op;
+
+  // Var tracker
+  const varDefs = [
+    {boxId:'vbOp',  valId:'vvOp',  key:'op',    val:s.op},
+    {boxId:'vbChar',valId:'vvChar',key:'char',  val:s.char},
+    {boxId:'vbIsEnd',valId:'vvIsEnd',key:'isEnd',val:s.isEnd},
+    {boxId:'vbResult',valId:'vvResult',key:'result',val:s.result}
+  ];
+  varDefs.forEach(v => {
+    document.getElementById(v.valId).textContent = v.val;
+    document.getElementById(v.boxId).classList.toggle('changed', s.changedVars.includes(v.key));
+  });
+
+  // Code panel
+  for(let i=0;i<=12;i++){
+    document.getElementById('cl'+i).classList.toggle('active', s.activeLine===i);
+  }
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.classList.toggle('active', i===idx);
+    d.classList.toggle('visited', i<idx);
+  });
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = idx===0;
+  document.getElementById('btnNext').disabled = idx===TOTAL-1;
+}
+
+function go(d){ const n=cur+d; if(n>=0&&n<TOTAL){cur=n;renderStep(cur);} }
+function reset(){ cur=0; renderStep(0); }
+
+// Build dots
+const dotsEl = document.getElementById('progressDots');
+STEPS.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>{ cur=i; renderStep(i); };
+  dotsEl.appendChild(d);
+});
+
+// Keyboard nav
+document.addEventListener('keydown', e=>{
   if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
+  if(e.key==='ArrowLeft') go(-1);
   if(e.key==='r'||e.key==='R') reset();
 });
-render();
+
+renderStep(0);
 </script>
 </body>
 </html>

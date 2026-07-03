@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#642 · Design Search Autocomplete System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Trie Visualization ── */
+.trie-container{background:var(--bg2);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0;overflow-x:auto}
+.trie-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);text-align:center;margin-bottom:1rem}
+.trie-svg{width:100%;max-width:700px;margin:0 auto;display:block}
+
+/* ── Search Bar Simulation ── */
+.search-sim{background:var(--surface);border:2px solid var(--blue-border);border-radius:var(--radius);padding:0.75rem 1rem;margin:1.25rem 0;font-family:var(--mono);font-size:14px;display:flex;align-items:center;gap:8px}
+.search-icon{color:var(--text3);font-size:16px}
+.search-text{color:var(--text);font-weight:600;flex:1}
+.search-cursor{display:inline-block;width:2px;height:16px;background:var(--blue-mid);margin-left:1px;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.suggestions{border:1px solid var(--border2);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden;font-family:var(--mono);font-size:13px}
+.suggestion-row{padding:8px 1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.suggestion-row.active{background:var(--blue-bg)}
+.suggestion-rank{width:20px;height:20px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.suggestion-text{color:var(--text);font-weight:500}
+.suggestion-hot{font-size:10px;color:var(--text3);margin-left:auto}
+
+/* ── Trie Node Display ── */
+.trie-node-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0.5rem 0}
+.trie-node{width:44px;height:44px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.trie-node.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.trie-node.current{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.trie-node.traversed{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.trie-node.endpoint{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.trie-node.result{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.trie-edge-label{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:32px;text-align:center;word-break:break-all}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-insert{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-search{background:var(--green-bg);color:var(--green-mid)}
+.phase-complete{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── Live Suggestion Panel ── */
+.live-suggestions{margin-top:1rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.live-sugg-header{padding:6px 12px;background:var(--bg2);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+.live-sugg-row{padding:8px 14px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border)}
+.live-sugg-row:first-of-type{border-top:none}
+.sugg-num{width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sugg-1{background:var(--amber-bg);color:var(--amber-mid)}
+.sugg-2{background:var(--blue-bg);color:var(--blue-mid)}
+.sugg-3{background:var(--purple-bg);color:var(--purple-mid)}
+.sugg-text{font-family:var(--mono);font-size:12.5px;color:var(--text);font-weight:500}
+.sugg-hot{font-size:11px;color:var(--text3);margin-left:auto}
+.sugg-empty{padding:10px 14px;font-size:12.5px;color:var(--text3);font-style:italic}
+
+/* ── Priority Queue Display ── */
+.pq-display{display:flex;gap:8px;flex-wrap:wrap;margin:0.75rem 0}
+.pq-item{padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border)}
+.pq-item.top3{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border)}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-current{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-traversed{background:var(--green-bg);border-color:var(--green-border)}
+.sw-endpoint{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-result{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Design Diagram ── */
+.design-diagram{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin:1rem 0}
+.design-box{padding:1rem;border-radius:var(--radius);text-align:center}
+.design-box.input-box{background:var(--blue-bg);border:1.5px solid var(--blue-border)}
+.design-box.trie-box{background:var(--purple-bg);border:1.5px solid var(--purple-border)}
+.design-box.output-box{background:var(--green-bg);border:1.5px solid var(--green-border)}
+.design-arrow{font-size:24px;color:var(--text3);text-align:center}
+.design-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.design-box.input-box .design-box-title{color:var(--blue-mid)}
+.design-box.trie-box .design-box-title{color:var(--purple-mid)}
+.design-box.output-box .design-box-title{color:var(--green-mid)}
+.design-box p{font-size:13px;color:var(--text2)}
+
+/* ── Heap Viz ── */
+.heap-viz{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0.75rem 0}
+.heap-item{padding:5px 12px;border-radius:20px;font-family:var(--mono);font-size:12px;font-weight:600}
+.heap-item.top{background:var(--amber-bg);color:var(--amber-mid);border:1.5px solid var(--amber-border)}
+.heap-item.rest{background:var(--bg2);color:var(--text2);border:1.5px solid var(--border2)}
+.heap-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #642</div>
+  <h1>Design Search Autocomplete System</h1>
+  <p class="subtitle">Design a search autocomplete system that returns the top 3 historical hot sentences matching the typed prefix, ranked by frequency then lexicographically.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Trie</span>
+    <span class="tag tag-pattern">Priority Queue</span>
+    <span class="tag tag-complexity">Input: O(L²) per char</span>
+    <span class="tag tag-complexity">Space: O(N·L)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're building the autocomplete dropdown you see in every search bar — when you type "i l", it suggests "i love you", "i love leetcode", etc. The system must be <strong>stateful</strong>: it remembers what sentences you've typed before (with frequency counts) and offers the top 3 completions <em>live</em>, one character at a time.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This problem combines <strong>two data structures working together</strong>: a <strong>Trie</strong> to efficiently find all sentences matching a typed prefix, and a <strong>Min-Heap (priority queue)</strong> to efficiently extract the top 3 by (frequency, lexicographic order) from potentially many candidates. The trie routes the query; the heap ranks the results.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>The two operations we must support:</strong></p>
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">input(c) — one character at a time</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          If c ≠ '#': append c to current prefix, return top 3 matching sentences<br>
+          If c = '#': user pressed Enter — save current prefix as a sentence, increment its frequency, reset prefix to ""
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Initialization</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">
+          Seed the system with <em>sentences</em> array and <em>times</em> array — each sentence[i] has been searched times[i] times historically. We must preload all of them into the trie.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Ranking rule:</strong> Top 3 sentences that: (1) share the typed prefix, (2) sorted by frequency descending, (3) ties broken by lexicographic (alphabetical) order ascending.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Stateful Session Design</div>
+      <p>Between consecutive <code>input()</code> calls (before a '#'), the system is <em>mid-session</em> — building up a prefix character by character. The '#' character ends the session: we record the completed sentence and start fresh. Every character typed triggers a full prefix lookup returning up to 3 results.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Example walkthrough:</strong></p>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:1rem;font-family:var(--mono);font-size:12.5px;line-height:2;margin-top:0.5rem">
+      <strong>Init:</strong> ["i love you", "island", "ironman", "i love leetcode"] with times [5, 3, 2, 2]<br>
+      <strong>input('i')</strong> → prefix="i" → ["i love you"(5), "island"(3), "ironman"(2)]<br>
+      <strong>input(' ')</strong> → prefix="i " → ["i love you"(5), "i love leetcode"(2)]<br>
+      <strong>input('a')</strong> → prefix="i a" → [] (no sentence starts with "i a")<br>
+      <strong>input('#')</strong> → save "i a" with freq=1, reset prefix → []
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Trie + Priority Queue</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The solution breaks into two independent concerns: <strong>prefix lookup</strong> (handled by Trie) and <strong>top-K extraction</strong> (handled by a min-heap). Understanding each piece separately makes the design clear.</p>
+
+    <div class="design-diagram">
+      <div class="design-box input-box">
+        <div class="design-box-title">User Input</div>
+        <p>Character stream 'i', ' ', 'l', 'o', ...<br>Each char triggers a lookup</p>
+      </div>
+      <div class="design-arrow">→</div>
+      <div class="design-box trie-box">
+        <div class="design-box-title">Trie</div>
+        <p>Navigate to prefix node, collect ALL descendant sentences in O(subtree size)</p>
+      </div>
+      <div class="design-arrow">→</div>
+      <div class="design-box output-box">
+        <div class="design-box-title">Min-Heap</div>
+        <p>From all candidates, extract top 3 by (freq↓, lex↑)</p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>How the Trie is structured:</strong> Each node has up to 27 children (a–z plus space). When a complete sentence is stored, its terminal node holds the sentence text and its frequency count. During insertion, we walk character by character, creating nodes as needed.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build the Trie:</strong> For each (sentence, count) pair from initialization, insert the sentence into the trie. At the terminal node, store the sentence string and its frequency.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>On input(c) where c ≠ '#':</strong> Append c to the current prefix. Navigate the trie from root to the node representing the full current prefix. If no such path exists, return []. Otherwise, do a DFS from that node to collect all sentences in the subtree.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Rank with a Min-Heap:</strong> Push all collected (freq, sentence) pairs into a min-heap of size 3. The heap compares by (-freq, sentence) so the "minimum" element is actually the least desirable — it gets evicted when we have more than 3 candidates.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>On input('#'):</strong> The current prefix is now a completed sentence. Insert it (or increment its count) in the trie. Reset the prefix to "".</span>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why a Min-Heap (not Max-Heap) for Top-K?</div>
+      <p>Counterintuitively, a <strong>min-heap of size K</strong> gives you the top K efficiently. We store (-freq, sentence) so the smallest heap element is the least desirable. As we process candidates, if a new candidate beats the heap's minimum, we replace it. At the end, the heap holds exactly the top K. Max-heap would work too but requires different eviction logic.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Trie node definition:</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TrieNode:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.children = {}      </span><span class="aann">← dict: char → TrieNode (sparse, up to 27 children)</span></div>
+<div class="ann-line"><span class="acode">        self.sentence = ""      </span><span class="aann">← non-empty only at terminal nodes (end of a sentence)</span></div>
+<div class="ann-line"><span class="acode">        self.freq = 0           </span><span class="aann">← how many times this sentence has been searched</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Trie Invariant</div>
+      <p>In a Trie, <strong>every node on the path from root to a terminal represents a prefix of the stored sentence</strong>. Therefore, all sentences in the subtree rooted at node N share the prefix path that leads to N. This is exactly what we need: navigate to the prefix node, collect the subtree, get all matching sentences.</p>
+    </div>
+
+    <p><strong>Why DFS from prefix node gives all matches:</strong> Every terminal node in the subtree of the prefix node represents a sentence that starts with our typed prefix. There is no way a matching sentence could exist outside this subtree — its first characters would have to travel the same trie path as the prefix, landing exactly at or below the prefix node.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why the heap correctly extracts top 3:</strong> We use Python's <code>heapq</code> which is a <em>min-heap</em>. We store tuples <code>(-freq, sentence)</code>. When two sentences have the same frequency, Python compares the second element — the sentence string — lexicographically. Smaller lexicographic value = smaller tuple = min-heap keeps it over the larger one. By maintaining only 3 items in the heap, we efficiently discard less desirable candidates.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Tie-Breaking Trick</div>
+      <p>We negate the frequency because min-heap pops the smallest, but we want the largest frequency. For ties, Python's string comparison is already lexicographic — <code>"a" &lt; "b"</code> — which matches our requirement of sorting by lexicographic order when frequencies are equal. No extra comparison logic needed!</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Edge Cases</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2">
+        <li><strong>Prefix not in trie:</strong> Navigate returns None — return [] immediately</li>
+        <li><strong>Fewer than 3 matches:</strong> Return all that exist (no need to pad)</li>
+        <li><strong>New sentence via '#':</strong> Insert with freq=1 (may already exist with freq=N → bump to N+1)</li>
+        <li><strong>Space character:</strong> Treated as a regular character in trie children (use a dict, not array, to avoid wasting 26 slots)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Trie + Min-Heap (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class TrieNode:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.children = {}         </span><span class="aann">← char → TrieNode (dict handles spaces + letters)</span></div>
+<div class="ann-line"><span class="acode">        self.sentence = ""         </span><span class="aann">← non-empty marks this as a terminal node</span></div>
+<div class="ann-line"><span class="acode">        self.freq = 0              </span><span class="aann">← search frequency for this sentence</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class AutocompleteSystem:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, sentences, times):</span></div>
+<div class="ann-line"><span class="acode">        self.root = TrieNode()     </span><span class="aann">← root of the trie (represents empty prefix)</span></div>
+<div class="ann-line"><span class="acode">        self.prefix = ""           </span><span class="aann">← accumulates typed chars between '#' resets</span></div>
+<div class="ann-line"><span class="acode">        for s, t in zip(sentences, times):</span></div>
+<div class="ann-line"><span class="acode">            self._insert(s, t)     </span><span class="aann">← seed the trie with historical data</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def _insert(self, sentence, freq):</span></div>
+<div class="ann-line"><span class="acode">        node = self.root</span></div>
+<div class="ann-line"><span class="acode">        for c in sentence:         </span><span class="aann">← walk each character</span></div>
+<div class="ann-line"><span class="acode">            if c not in node.children:</span></div>
+<div class="ann-line"><span class="acode">                node.children[c] = TrieNode()   </span><span class="aann">← create missing nodes</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[c]</span></div>
+<div class="ann-line"><span class="acode">        node.sentence = sentence   </span><span class="aann">← mark terminal with full sentence</span></div>
+<div class="ann-line"><span class="acode">        node.freq += freq          </span><span class="aann">← += handles re-inserting an existing sentence</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def _dfs(self, node, results):  </span><span class="aann">← collect all sentences in subtree</span></div>
+<div class="ann-line"><span class="acode">        if node.sentence:          </span><span class="aann">← this node is a terminal</span></div>
+<div class="ann-line"><span class="acode">            results.append((-node.freq, node.sentence))  </span><span class="aann">← negate for min-heap trick</span></div>
+<div class="ann-line"><span class="acode">        for child in node.children.values():</span></div>
+<div class="ann-line"><span class="acode">            self._dfs(child, results)  </span><span class="aann">← recurse into all children</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def input(self, c):</span></div>
+<div class="ann-line"><span class="acode">        if c == '#':               </span><span class="aann">← sentence completion signal</span></div>
+<div class="ann-line"><span class="acode">            self._insert(self.prefix, 1)  </span><span class="aann">← save/increment this sentence</span></div>
+<div class="ann-line"><span class="acode">            self.prefix = ""       </span><span class="aann">← reset for next session</span></div>
+<div class="ann-line"><span class="acode">            return []</span></div>
+<div class="ann-line"><span class="acode">        self.prefix += c           </span><span class="aann">← extend the current prefix</span></div>
+<div class="ann-line"><span class="acode">        node = self.root           </span><span class="aann">← navigate to prefix node</span></div>
+<div class="ann-line"><span class="acode">        for ch in self.prefix:</span></div>
+<div class="ann-line"><span class="acode">            if ch not in node.children:</span></div>
+<div class="ann-line"><span class="acode">                return []          </span><span class="aann">← prefix path broken → no matches</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[ch]</span></div>
+<div class="ann-line"><span class="acode">        results = []</span></div>
+<div class="ann-line"><span class="acode">        self._dfs(node, results)   </span><span class="aann">← collect all sentences in subtree</span></div>
+<div class="ann-line"><span class="acode">        return [s for _, s in heapq.nsmallest(3, results)]  </span><span class="aann">← top 3: smallest(-freq,lex)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why heapq.nsmallest(3, results) and not sorted(results)[:3]?</div>
+      <p><code>heapq.nsmallest(k, iterable)</code> runs in <strong>O(N log k)</strong> time — much better than <code>sorted</code>'s O(N log N) when k (=3) is much smaller than N. For autocomplete with many potential matches, this matters. Both return the same answer, but nsmallest is the interview-preferred idiom for "top K from large collection".</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — HashMap + Sorting (Brute Force)</strong><br>
+    Skip the trie entirely. Store all sentences in a dict <code>{sentence: freq}</code>. On each input, iterate through all sentences, filter those starting with the prefix, sort by (-freq, sentence), return first 3.</p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class AutocompleteSystem:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, sentences, times):</span></div>
+<div class="ann-line"><span class="acode">        self.counts = {}           </span><span class="aann">← {sentence: frequency}</span></div>
+<div class="ann-line"><span class="acode">        for s, t in zip(sentences, times):</span></div>
+<div class="ann-line"><span class="acode">            self.counts[s] = t</span></div>
+<div class="ann-line"><span class="acode">        self.prefix = ""</span></div>
+<div class="ann-line"><span class="acode">    def input(self, c):</span></div>
+<div class="ann-line"><span class="acode">        if c == '#':</span></div>
+<div class="ann-line"><span class="acode">            self.counts[self.prefix] = self.counts.get(self.prefix, 0) + 1</span></div>
+<div class="ann-line"><span class="acode">            self.prefix = ""; return []</span></div>
+<div class="ann-line"><span class="acode">        self.prefix += c</span></div>
+<div class="ann-line"><span class="acode">        p = self.prefix</span></div>
+<div class="ann-line"><span class="acode">        matches = [(v, k) for k, v in self.counts.items() if k.startswith(p)]  </span><span class="aann">← O(N·L)</span></div>
+<div class="ann-line"><span class="acode">        matches.sort(key=lambda x: (-x[0], x[1]))  </span><span class="aann">← O(N log N)</span></div>
+<div class="ann-line"><span class="acode">        return [s for _, s in matches[:3]]</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Comparison</div>
+      <p>
+        <strong>Trie + Heap:</strong> Init O(N·L), each input() O(L + S log 3) where S = subtree size<br>
+        <strong>HashMap + Sort:</strong> Init O(N), each input() O(N·L + N log N) — degrades with scale<br>
+        The trie wins when queries are frequent and N is large (real search systems).
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Design Pattern Signals</div>
+        <p style="font-size:14px;color:var(--text)">"The problem says <em>Design</em> and gives us a class with methods — this is a systems-design-lite problem. The key question is: what data structure supports prefix lookup efficiently?" The answer for strings/prefixes is almost always a <strong>Trie</strong>. If you need ranking, add a heap.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force First</div>
+        <p style="font-size:14px;color:var(--text)">"My simplest approach: store sentences in a dict with their frequencies. On each character, iterate all sentences, filter startswith, sort, return top 3. O(N·L) per character typed. This works but is slow for large N — can we do better?"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Motivate the Trie</div>
+        <p style="font-size:14px;color:var(--text)">"The bottleneck is the prefix scan over all N sentences. A Trie eliminates this: instead of checking every sentence, we navigate directly to the prefix node in O(L) steps, then collect only sentences in that subtree. The trie <em>organizes data by prefix structure</em> — that's the key insight."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Address the '#' Edge Case Explicitly</div>
+        <p style="font-size:14px;color:var(--text)">"When '#' is received, we need to: (1) save the completed prefix as a sentence, (2) increment its frequency in the trie using freq += 1, (3) reset prefix to '''. A new sentence gets freq=1; an existing one gets bumped. The <code>_insert(sentence, 1)</code> method handles both via <code>node.freq += freq</code>."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I see two sub-problems: prefix lookup and ranking. I'll use a Trie for prefix lookup and a min-heap for ranking.<br>
+In the Trie, each terminal node stores the full sentence and its frequency count.<br>
+On input(c): append c to prefix, navigate the trie to the prefix node, DFS to collect all sentences in the subtree, use heapq.nsmallest(3) with key (-freq, sentence) to get top 3.<br>
+On input('#'): insert current prefix with freq += 1 into the trie, reset prefix to ''.<br>
+Time: O(L) to reach prefix node + O(S) to collect matches + O(S log 3) to rank — S is subtree size.<br>
+Space: O(N·L) for the trie where N = number of sentences, L = average length."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if we want top-5 instead of top-3?"</strong> → Same code, change 3 to 5. Heap size is parameterized.</li>
+        <li><strong>"How to handle very large datasets?"</strong> → Cache suggestions at each trie node to avoid re-DFS; trade space for time.</li>
+        <li><strong>"What about case-insensitive matching?"</strong> → Normalize to lowercase on insert and on prefix lookup.</li>
+        <li><strong>"Can you store top-3 at each trie node?"</strong> → Yes — update node's sorted top-3 list on every insert. O(1) lookup but O(N·L) update cost per insertion.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: input() Simulation</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Search Bar Simulation -->
+      <div style="margin-bottom:1rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">SEARCH BAR STATE</div>
+        <div class="search-sim">
+          <span class="search-icon">🔍</span>
+          <span class="search-text" id="search-text">|</span>
+        </div>
+        <!-- Suggestions dropdown -->
+        <div class="live-suggestions">
+          <div class="live-sugg-header">Suggestions (top 3)</div>
+          <div id="sugg-content">
+            <div class="sugg-empty">Type to see suggestions...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trie Path Visualization -->
+      <div style="margin-top:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">TRIE TRAVERSAL PATH (root → prefix node)</div>
+        <div id="trie-path" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+          <div class="trie-node normal" title="root">*</div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-prefix">
+          <span class="var-name">prefix</span>
+          <span class="var-val" id="vv-prefix">""</span>
+        </div>
+        <div class="var-box" id="vb-char">
+          <span class="var-name">c</span>
+          <span class="var-val" id="vv-char">—</span>
+        </div>
+        <div class="var-box" id="vb-matches">
+          <span class="var-name">matches</span>
+          <span class="var-val" id="vv-matches">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def input(self, c):</div>
+      <div class="code-line" id="cl-1">    if c == '#':</div>
+      <div class="code-line" id="cl-2">        self._insert(self.prefix, 1)</div>
+      <div class="code-line" id="cl-3">        self.prefix = ""; return []</div>
+      <div class="code-line" id="cl-4">    self.prefix += c</div>
+      <div class="code-line" id="cl-5">    node = self.root</div>
+      <div class="code-line" id="cl-6">    for ch in self.prefix:</div>
+      <div class="code-line" id="cl-7">        if ch not in node.children: return []</div>
+      <div class="code-line" id="cl-8">        node = node.children[ch]</div>
+      <div class="code-line" id="cl-9">    results = []; self._dfs(node, results)</div>
+      <div class="code-line" id="cl-10">    return [s for _, s in heapq.nsmallest(3, results)]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">System Initialized</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-current"></div> Current node (traversing)</div>
+      <div class="legend-item"><div class="legend-swatch sw-traversed"></div> Visited/matched node</div>
+      <div class="legend-item"><div class="legend-swatch sw-endpoint"></div> Terminal (sentence end)</div>
+      <div class="legend-item"><div class="legend-swatch sw-result"></div> Result candidate</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> Unvisited node</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Trie organizes strings by prefix — navigate to prefix node in O(L) steps</div>
+      <div class="takeaway">DFS from prefix node collects ALL matching sentences (any in subtree)</div>
+      <div class="takeaway">Min-heap with (-freq, sentence) tuples extracts top-K with correct tie-breaking</div>
+      <div class="takeaway">heapq.nsmallest(3, results) is O(N log 3) — better than full sort O(N log N)</div>
+      <div class="takeaway">'#' input → save sentence (insert with freq=1), reset prefix — stateful design</div>
+      <div class="takeaway">Dict-based children (not array) handles spaces and any character set</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Init Time</th><th>input() Time</th><th>Space</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>HashMap + Sort</td>
+          <td>O(N)</td>
+          <td class="mark-bad">O(N·L + N log N)</td>
+          <td>O(N·L)</td>
+        </tr>
+        <tr>
+          <td><strong>Trie + Heap ✓</strong></td>
+          <td>O(N·L)</td>
+          <td class="mark-good">O(L + S log 3)</td>
+          <td>O(N·L)</td>
+        </tr>
+        <tr>
+          <td>Trie + Cached Top-3</td>
+          <td class="mark-bad">O(N·L²)</td>
+          <td class="mark-good">O(L)</td>
+          <td class="mark-bad">O(N·L·K)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Trie + Priority Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Design a system with prefix lookups" → Trie for navigation</li>
+        <li>"Return top K results from a large collection" → Min-heap of size K</li>
+        <li>"Rank by multiple criteria (freq then lex)" → Tuple comparison in heap</li>
+        <li>"Stateful input that accumulates a string" → Track prefix, reset on delimiter</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Trie + Priority Queue / Design)</div>
+      <div class="related-item"><strong>Implement Trie (Prefix Tree)</strong><span class="related-diff diff-med">Medium</span> — Core trie operations: insert, search, startsWith (#208)</div>
+      <div class="related-item"><strong>Word Search II</strong><span class="related-diff diff-hard">Hard</span> — Use trie to simultaneously search for all words in a board (#212)</div>
+      <div class="related-item"><strong>Top K Frequent Words</strong><span class="related-diff diff-med">Medium</span> — Min-heap with (-freq, word) tuples, same ranking logic (#692)</div>
+      <div class="related-item"><strong>Kth Largest Element in a Stream</strong><span class="related-diff diff-med">Medium</span> — Min-heap of size K to maintain top-K dynamically (#703)</div>
+      <div class="related-item"><strong>Search Suggestions System</strong><span class="related-diff diff-med">Medium</span> — Trie or sorted array for prefix suggestions, top 3 results (#1268)</div>
+      <div class="related-item"><strong>Design Add and Search Words Data Structure</strong><span class="related-diff diff-med">Medium</span> — Trie with wildcard '.' support (#211)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Design / Trie section<br>
+      Sub-Pattern: <strong>Trie + Priority Queue</strong> · Source: Analysis (Design Pattern)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── Step Data ───────────────────────────────────────────────
+// Simulating: sentences=["i love you","island","ironman","i love leetcode"], times=[5,3,2,2]
+// Then inputs: 'i', ' ', 'l', 'o', 'v', 'e', '#'
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    c:'—', prefix:'""', matches:0, activeLine:0,
+    triePath:['*'],
+    triePathStyles:['traversed'],
+    suggestions:[],
+    title:'System Initialized',
+    text:'The AutocompleteSystem is built with 4 historical sentences: "i love you" (5×), "island" (3×), "ironman" (2×), "i love leetcode" (2×). All 4 are inserted into the Trie. The prefix accumulator starts empty.'
+  },
+  {
+    id:1, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"'i'", prefix:'"i"', matches:3, activeLine:4,
+    triePath:['*','i'],
+    triePathStyles:['traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'island', hot:'3×'},
+      {rank:3, text:'ironman', hot:'2×'}
+    ],
+    title:"input('i') — prefix = \"i\"",
+    text:"Step 1: c ≠ '#', so we append 'i' to prefix. prefix becomes \"i\". We navigate root → 'i' node. From that node we DFS and find all 4 sentences! But we only return top 3 by (-freq, lex): \"i love you\"(5), \"island\"(3), \"ironman\"(2)."
+  },
+  {
+    id:2, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"' '", prefix:'"i "', matches:2, activeLine:4,
+    triePath:['*','i',' '],
+    triePathStyles:['traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input(' ') — prefix = \"i \"",
+    text:"We append space to prefix. Navigate: root → 'i' → ' '. Both \"i love you\" and \"i love leetcode\" are in this subtree. \"island\" and \"ironman\" don't have 'i' → ' ' path — they're filtered out automatically by the trie! Return top 2 (only 2 exist)."
+  },
+  {
+    id:3, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"'l'", prefix:'"i l"', matches:2, activeLine:4,
+    triePath:['*','i',' ','l'],
+    triePathStyles:['traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input('l') — prefix = \"i l\"",
+    text:"Append 'l'. Navigate to node at \"i l\". Both \"i love you\" and \"i love leetcode\" still share this prefix — both appear. DFS collects them both. heapq.nsmallest(3,...) returns both, in frequency order."
+  },
+  {
+    id:4, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"'o'", prefix:'"i lo"', matches:2, activeLine:4,
+    triePath:['*','i',' ','l','o'],
+    triePathStyles:['traversed','traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input('o') — prefix = \"i lo\"",
+    text:"Still navigating deeper. At node \"i lo\" the subtree still contains both \"i love you\" and \"i love leetcode\". Both begin with \"i lo\". Same 2 results — the more we type, the more the trie narrows candidates."
+  },
+  {
+    id:5, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"'v'", prefix:'"i lov"', matches:2, activeLine:4,
+    triePath:['*','i',' ','l','o','v'],
+    triePathStyles:['traversed','traversed','traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input('v') — prefix = \"i lov\"",
+    text:"Prefix is now \"i lov\". Navigate to that node. Both sentences remain in subtree — they both have \"i lov\" as prefix. Still 2 matches."
+  },
+  {
+    id:6, phase:'insert', phaseLabel:'INSERT', phaseClass:'phase-insert',
+    c:"'e'", prefix:'"i love"', matches:2, activeLine:4,
+    triePath:['*','i',' ','l','o','v','e'],
+    triePathStyles:['traversed','traversed','traversed','traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input('e') — prefix = \"i love\"",
+    text:"Prefix = \"i love\". Both sentences are still candidates: \"i love you\" and \"i love leetcode\". The trie node for \"i love\" has the ' ' child leading to both of them. The 'e' node here is NOT a terminal — it's just the continuation path."
+  },
+  {
+    id:7, phase:'search', phaseLabel:'SEARCH', phaseClass:'phase-search',
+    c:"' '", prefix:'"i love "', matches:2, activeLine:4,
+    triePath:['*','i',' ','l','o','v','e',' '],
+    triePathStyles:['traversed','traversed','traversed','traversed','traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'}
+    ],
+    title:"input(' ') — prefix = \"i love \"",
+    text:"Another space. Prefix = \"i love \". Now from this node, there are two branches: one to 'y' (→ \"i love you\") and one to 'l' (→ \"i love leetcode\"). DFS finds both. Still 2 results."
+  },
+  {
+    id:8, phase:'search', phaseLabel:'SEARCH', phaseClass:'phase-search',
+    c:"'y'", prefix:'"i love y"', matches:1, activeLine:4,
+    triePath:['*','i',' ','l','o','v','e',' ','y'],
+    triePathStyles:['traversed','traversed','traversed','traversed','traversed','traversed','traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'}
+    ],
+    title:"input('y') — prefix = \"i love y\"",
+    text:"Typing 'y' eliminates \"i love leetcode\"! The trie's 'y' branch only leads to \"i love you\". DFS returns just 1 result. This is the power of the trie — it automatically filters by structure, no string comparison needed."
+  },
+  {
+    id:9, phase:'complete', phaseLabel:'COMPLETE', phaseClass:'phase-complete',
+    c:"'#'", prefix:'""', matches:0, activeLine:1,
+    triePath:['*'],
+    triePathStyles:['traversed'],
+    suggestions:[],
+    title:"input('#') — Sentence complete! Save and reset.",
+    text:"c = '#'! We do NOT append # to prefix. Instead: (1) call _insert(\"i love y\", 1) — this new sentence gets added to the trie with freq=1. (2) self.prefix = \"\" — reset for next session. Return []. The sentence \"i love y\" is now stored with frequency 1."
+  },
+  {
+    id:10, phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result',
+    c:"'i'", prefix:'"i"', matches:4, activeLine:4,
+    triePath:['*','i'],
+    triePathStyles:['traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'island', hot:'3×'},
+      {rank:3, text:'ironman', hot:'2×'}
+    ],
+    title:"New session: input('i') — \"i love y\" is now stored",
+    text:"After the '#', we start fresh. If user types 'i' again, the trie now has 5 sentences under 'i': \"i love you\"(5), \"island\"(3), \"ironman\"(2), \"i love leetcode\"(2), \"i love y\"(1). Top 3 by (-freq, lex): \"i love you\", \"island\", \"ironman\" — same as before because \"i love y\" freq=1 is below the top 3 threshold."
+  },
+  {
+    id:11, phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result',
+    c:"' '", prefix:'"i "', matches:3, activeLine:4,
+    triePath:['*','i',' '],
+    triePathStyles:['traversed','traversed','current'],
+    suggestions:[
+      {rank:1, text:'i love you', hot:'5×'},
+      {rank:2, text:'i love leetcode', hot:'2×'},
+      {rank:3, text:'i love y', hot:'1×'}
+    ],
+    title:"input(' ') after save — \"i love y\" now appears!",
+    text:"Now typing space after 'i': prefix = \"i \". The subtree under \"i \" contains: \"i love you\"(5), \"i love leetcode\"(2), \"i love y\"(1). Top 3: all 3! \"i love y\" shows up because it's in the trie. The saved sentence is live immediately — it was inserted right when '#' was received."
+  },
+  {
+    id:12, phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result',
+    c:'done', prefix:'""', matches:0, activeLine:10,
+    triePath:['*'],
+    triePathStyles:['traversed'],
+    suggestions:[],
+    title:"Walkthrough Complete — Key Patterns",
+    text:"The Trie prunes candidates structurally as you type — each additional character eliminates entire subtrees, never requiring string comparison. The Min-Heap (heapq.nsmallest) extracts the best 3 in O(S log 3) without full sort. Together they make the autocomplete efficient at scale."
+  }
+];
+
+// ─── Render Functions ─────────────────────────────────────────
+let current = 0;
+const TOTAL = steps.length;
+
+function renderStep(idx) {
+  const s = steps[idx];
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phaseLabel;
+  badge.className = 'phase-badge ' + s.phaseClass;
+
+  // Step counter
+  document.getElementById('step-counter').textContent = `Step ${idx+1} / ${TOTAL}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // Variable tracker
+  const setPrev = (id, val, prev) => {
+    const box = document.getElementById(id);
+    const valEl = box.querySelector('.var-val');
+    valEl.textContent = val;
+    box.classList.toggle('changed', val !== prev);
+  };
+  const prevS = idx > 0 ? steps[idx-1] : s;
+  setPrev('vb-prefix', s.prefix, prevS.prefix);
+  setPrev('vb-char', s.c, prevS.c);
+  setPrev('vb-matches', s.matches, prevS.matches);
+
+  // Search bar
+  const searchText = document.getElementById('search-text');
+  const raw = s.prefix.replace(/"/g,'');
+  searchText.innerHTML = raw ? escHtml(raw) + '<span class="search-cursor"></span>' : '<span class="search-cursor"></span>';
+
+  // Suggestions
+  const suggContent = document.getElementById('sugg-content');
+  if (s.suggestions && s.suggestions.length > 0) {
+    suggContent.innerHTML = s.suggestions.map((sg, i) =>
+      `<div class="live-sugg-row">
+        <div class="sugg-num sugg-${sg.rank}">${sg.rank}</div>
+        <span class="sugg-text">${escHtml(sg.text)}</span>
+        <span class="sugg-hot">${sg.hot}</span>
+      </div>`
+    ).join('');
+  } else {
+    suggContent.innerHTML = '<div class="sugg-empty">' +
+      (s.id === 0 ? 'Type to see suggestions...' :
+       s.c === "'#'" ? '(Sentence saved — session reset)' :
+       'No matching sentences') + '</div>';
+  }
+
+  // Trie path
+  const triePath = document.getElementById('trie-path');
+  const nodes = s.triePath || ['*'];
+  const styles = s.triePathStyles || ['traversed'];
+  let html = '';
+  for (let i = 0; i < nodes.length; i++) {
+    if (i > 0) html += '<span style="color:var(--text3);font-size:18px;font-weight:300">→</span>';
+    const nodeClass = styles[i] || 'normal';
+    const nodeChar = nodes[i] === ' ' ? '&nbsp;' : escHtml(nodes[i]);
+    html += `<div class="trie-node ${nodeClass}" title="${nodes[i] === '*' ? 'root' : 'char: ' + nodes[i]}">${nodeChar}</div>`;
+  }
+  triePath.innerHTML = html;
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.classList.toggle('active', i === s.activeLine);
+  }
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = steps.map((_, i) =>
+    `<div class="dot ${i === idx ? 'active' : i < idx ? 'visited' : ''}" onclick="goTo(${i})"></div>`
+  ).join('');
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === TOTAL - 1;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < TOTAL) { current = next; renderStep(current); }
+}
+function goTo(idx) { current = idx; renderStep(current); }
+function reset() { current = 0; renderStep(0); }
+
+// ─── Card Toggle ─────────────────────────────────────────────
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// ─── Keyboard ────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ─── Init ────────────────────────────────────────────────────
+renderStep(0);
+</script>
+</body>
+</html>

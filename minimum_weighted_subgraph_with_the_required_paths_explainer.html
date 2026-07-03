@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#2203 · Minimum Weighted Subgraph With the Required Paths</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Graph Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.graph-svg-wrap{display:flex;justify-content:center;margin-bottom:1.5rem}
+svg.graph{overflow:visible}
+
+/* ── Distance Table ── */
+.dist-section{margin:1rem 0}
+.dist-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.dist-table-wrap{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.dist-box{background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border2);padding:12px 16px;min-width:130px;text-align:center}
+.dist-box-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;color:var(--text3)}
+.dist-node{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;padding:3px 0}
+.dist-node-id{color:var(--text2)}
+.dist-node-val{font-weight:700;color:var(--text)}
+.dist-node-val.inf{color:var(--text3)}
+.dist-node-val.finalized{color:var(--green-mid)}
+.dist-node-val.current{color:var(--blue-mid)}
+.dist-box.src-a{border-color:var(--blue-border)}
+.dist-box.src-a .dist-box-label{color:var(--blue-mid)}
+.dist-box.src-b{border-color:var(--amber-border)}
+.dist-box.src-b .dist-box-label{color:var(--amber-mid)}
+.dist-box.src-c{border-color:var(--red-border)}
+.dist-box.src-c .dist-box-label{color:var(--red-mid)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-dijkA{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-dijkB{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-dijkC{background:var(--red-bg);color:var(--red-mid)}
+.phase-merge{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-src1{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-src2{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-src3{background:var(--red-bg);border-color:var(--red-border)}
+.sw-meet{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-done{background:var(--green-bg);border-color:var(--green-border)}
+.sw-normal{background:var(--bg2);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Diagram: Meeting Node ── */
+.meeting-diagram{display:flex;justify-content:center;align-items:center;gap:0;margin:1.5rem 0;flex-wrap:wrap}
+.src-node{width:64px;height:64px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:3px solid}
+.src-node.src1{background:var(--blue-bg);border-color:var(--blue-mid);color:var(--blue-mid)}
+.src-node.src2{background:var(--amber-bg);border-color:var(--amber-mid);color:var(--amber-mid)}
+.src-node.meet{background:var(--purple-bg);border-color:var(--purple-mid);color:var(--purple-mid);font-size:11px}
+.src-node.dest{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-mid)}
+.arrow-line{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:60px}
+.arrow-track{height:3px;width:100%;border-radius:2px}
+.arrow-track.src1c{background:var(--blue-mid)}
+.arrow-track.src2c{background:var(--amber-mid)}
+.arrow-track.meetc{background:var(--purple-mid)}
+.arrow-label{font-size:10px;font-weight:600;color:var(--text3);font-family:var(--mono)}
+.arrow-head{font-size:14px;line-height:1}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #2203</div>
+  <h1>Minimum Weighted Subgraph With the Required Paths</h1>
+  <p class="subtitle">Given a directed weighted graph, find the minimum-weight subgraph containing paths from src1 → dest and src2 → dest.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">Dijkstra</span>
+    <span class="tag tag-complexity">Time: O((V + E) log V)</span>
+    <span class="tag tag-complexity">Space: O(V + E)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a directed weighted graph with <code>n</code> nodes and a list of edges <code>[from, to, weight]</code>. You are given two source nodes <code>src1</code> and <code>src2</code>, and a destination node <code>dest</code>. You need to find a connected subgraph (subset of edges) such that:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;line-height:2">
+      <li>There is a directed path from <code>src1</code> to <code>dest</code></li>
+      <li>There is a directed path from <code>src2</code> to <code>dest</code></li>
+      <li>The total weight of selected edges is <strong>minimised</strong></li>
+    </ul>
+    <p>Return the minimum total weight, or <code>-1</code> if no such subgraph exists.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Both paths must reach <code>dest</code>. At some point, they will either travel <em>completely independently</em>, or they will <strong>merge at some intermediate node v</strong> and share the tail v → dest. The optimal answer is: for every possible meeting node v, compute <code>dist(src1→v) + dist(src2→v) + dist(v→dest)</code>. The minimum over all v is the answer.</p>
+    </div>
+
+    <!-- Diagram: shape of the optimal subgraph -->
+    <div class="meeting-diagram">
+      <div class="src-node src1"><span>src1</span></div>
+      <div class="arrow-line">
+        <div class="arrow-track src1c"></div>
+        <div class="arrow-label">d[src1→v]</div>
+      </div>
+      <div class="src-node meet"><span>meeting</span><span>node v</span></div>
+      <div class="arrow-line">
+        <div class="arrow-track meetc"></div>
+        <div class="arrow-label">d[v→dest]</div>
+      </div>
+      <div class="src-node dest"><span>dest</span></div>
+    </div>
+    <div class="meeting-diagram" style="margin-top:-0.5rem">
+      <div style="width:64px"></div>
+      <div class="arrow-line" style="min-width:60px">
+        <div class="arrow-track src2c"></div>
+        <div class="arrow-label">d[src2→v]</div>
+      </div>
+      <div class="src-node src2"><span>src2</span></div>
+      <div style="min-width:60px"></div>
+      <div style="width:64px"></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> If <code>src1</code> or <code>src2</code> cannot reach <code>dest</code> at all (disconnected), return <code>-1</code>. When <code>src1 == dest</code> or <code>src2 == dest</code>, their contribution is 0. The meeting node v could be <code>src1</code>, <code>src2</code>, or <code>dest</code> itself — those degenerate cases are automatically handled by the formula.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Dijkstra from 3 Sources</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The formula <code>min over v of: d1[v] + d2[v] + d3[v]</code> requires three distance arrays:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;line-height:2">
+      <li><code>d1[v]</code> = shortest distance from <strong>src1</strong> to v (on the original graph)</li>
+      <li><code>d2[v]</code> = shortest distance from <strong>src2</strong> to v (on the original graph)</li>
+      <li><code>d3[v]</code> = shortest distance from <strong>v</strong> to dest = shortest distance from dest to v <strong>on the reversed graph</strong></li>
+    </ul>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build two adjacency lists:</strong> the original directed graph and its reversal (reverse every edge's direction). Both store [neighbor, weight] pairs.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Run Dijkstra from src1</strong> on the original graph → produces <code>d1</code>, shortest distances from src1 to all nodes.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Run Dijkstra from src2</strong> on the original graph → produces <code>d2</code>, shortest distances from src2 to all nodes.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Run Dijkstra from dest</strong> on the <em>reversed</em> graph → produces <code>d3</code>, shortest distances from dest <em>backwards</em> to all nodes. On the reversed graph, a path from dest to v corresponds to a forward path from v to dest in the original.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Iterate every node v</strong>: if all three distances are finite, compute <code>d1[v] + d2[v] + d3[v]</code>. Take the minimum. If no valid v exists, return <code>-1</code>.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why the Reversed Graph for d3?</div>
+      <p>We need the shortest path from node v to <code>dest</code>. Dijkstra only computes distances from a single <em>source</em>. By reversing all edges and running Dijkstra <em>from dest</em>, we get: reversed-distance from dest to v = original forward distance from v to dest. This elegant trick lets us compute "cost to reach dest from any node" with a single Dijkstra run instead of n runs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>In any minimum-weight subgraph where src1 and src2 both reach dest, the two paths must <strong>share a common tail</strong>. Specifically, there always exists some node v (the last "splitting point" when traversing backwards from dest) where the two paths merge. Before v each path is independent; from v onward they share the same route to dest. Trying every candidate v and evaluating the shared-tail formula is therefore <em>complete</em> — no valid subgraph can have a smaller cost.</p>
+    </div>
+
+    <p><strong>Correctness sketch:</strong> Suppose the optimal subgraph has paths P1 (src1→dest) and P2 (src2→dest). Let v be the first node (scanning from dest backward) that both P1 and P2 pass through. Then: cost of subgraph ≥ cost(src1→v in P1) + cost(src2→v in P2) + cost(v→dest in shared tail). But d1[v], d2[v], d3[v] are the shortest possible costs for each leg. So our formula gives a lower bound — and that lower bound is attainable by constructing the optimal paths. Therefore the formula is exact.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Paths merge at v</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">src1 → ... → v → dest<br>src2 → ... → v → dest<br>Shared tail saves edges!<br>Cost: d1[v] + d2[v] + d3[v]</p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naive: two fully independent paths</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">Pay for two complete paths<br>to dest independently.<br>Suboptimal — common tail<br>pays the same cost twice.</p>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ What if all three meet at dest?</div>
+      <p>When v = dest, d3[dest] = 0, and the formula reduces to d1[dest] + d2[dest] — the cost of two fully independent optimal paths with no shared edges. This is the degenerate case (no merging), which our approach handles naturally since we iterate all nodes including dest itself.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Dijkstra from 3 Sources (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode">from collections import defaultdict</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">def minimumWeight(n, edges, src1, src2, dest):</span></div>
+<div class="ann-line"><span class="acode">    g  = defaultdict(list)   </span><span class="aann">← original graph: g[u] = [(v, w), ...]</span></div>
+<div class="ann-line"><span class="acode">    rg = defaultdict(list)   </span><span class="aann">← reversed graph: rg[v] = [(u, w), ...]</span></div>
+<div class="ann-line"><span class="acode">    for u, v, w in edges:    </span><span class="aann">← build both adjacency lists simultaneously</span></div>
+<div class="ann-line"><span class="acode">        g[u].append((v, w))  </span><span class="aann">← original direction u → v</span></div>
+<div class="ann-line"><span class="acode">        rg[v].append((u, w)) </span><span class="aann">← reversed: v → u (so dest → v works for d3)</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def dijkstra(src, graph): </span><span class="aann">← standard Dijkstra, returns dist array</span></div>
+<div class="ann-line"><span class="acode">        INF = float('inf')   </span><span class="aann">← sentinel for "unreachable"</span></div>
+<div class="ann-line"><span class="acode">        dist = [INF] * n     </span><span class="aann">← dist[v] = shortest known dist from src to v</span></div>
+<div class="ann-line"><span class="acode">        dist[src] = 0        </span><span class="aann">← distance from src to itself is 0</span></div>
+<div class="ann-line"><span class="acode">        pq = [(0, src)]      </span><span class="aann">← min-heap: (dist, node)</span></div>
+<div class="ann-line"><span class="acode">        while pq:            </span><span class="aann">← process nodes in order of increasing distance</span></div>
+<div class="ann-line"><span class="acode">            d, u = heapq.heappop(pq)  </span><span class="aann">← pop node with smallest tentative dist</span></div>
+<div class="ann-line"><span class="acode">            if d > dist[u]: continue  </span><span class="aann">← stale entry: already found shorter path</span></div>
+<div class="ann-line"><span class="acode">            for v, w in graph[u]:     </span><span class="aann">← relax each outgoing edge</span></div>
+<div class="ann-line"><span class="acode">                nd = d + w            </span><span class="aann">← new candidate distance through u</span></div>
+<div class="ann-line"><span class="acode">                if nd &lt; dist[v]:      </span><span class="aann">← improvement found</span></div>
+<div class="ann-line"><span class="acode">                    dist[v] = nd      </span><span class="aann">← update dist table</span></div>
+<div class="ann-line"><span class="acode">                    heapq.heappush(pq, (nd, v))  </span><span class="aann">← push updated candidate</span></div>
+<div class="ann-line"><span class="acode">        return dist          </span><span class="aann">← dist[v] = min cost from src to v (INF if unreachable)</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    d1 = dijkstra(src1, g)   </span><span class="aann">← shortest from src1 to every node</span></div>
+<div class="ann-line"><span class="acode">    d2 = dijkstra(src2, g)   </span><span class="aann">← shortest from src2 to every node</span></div>
+<div class="ann-line"><span class="acode">    d3 = dijkstra(dest, rg)  </span><span class="aann">← reversed: shortest from dest backward to every node</span></div>
+<div class="ann-line"><span class="acode">                             </span><span class="aann">  (i.e., d3[v] = cost of v→dest in original graph)</span></div>
+<div class="ann-line"><span class="acode">    ans = float('inf')       </span><span class="aann">← best cost across all candidate meeting nodes</span></div>
+<div class="ann-line"><span class="acode">    for v in range(n):       </span><span class="aann">← try every node as the meeting point</span></div>
+<div class="ann-line"><span class="acode">        ans = min(ans, d1[v] + d2[v] + d3[v])  </span><span class="aann">← inf + anything = inf (invalid paths ignored)</span></div>
+<div class="ann-line"><span class="acode">    return ans if ans &lt; float('inf') else -1    </span><span class="aann">← -1 if no valid subgraph</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Reversed Graph</div>
+      <p>Beginners try to run Dijkstra from every node v to <code>dest</code> — that's O(n × (V+E) log V) which TLEs. The key insight is that running Dijkstra <em>from dest on the reversed graph</em> gives you ALL "v → dest" distances in a single O((V+E) log V) pass.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (TLE on large inputs)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode"># For each node v, run full Dijkstra from v to dest separately.</span></div>
+<div class="ann-line"><span class="acode"># Time: O(n * (V+E) log V) — far too slow for n up to 10^5.</span></div>
+<div class="ann-line"><span class="acode"># Only practical for tiny graphs or as a verifier.</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Optimal (3× Dijkstra):</strong> Time O((V + E) log V) — three Dijkstra passes; Space O(V + E) — two adjacency lists + three dist arrays.<br>
+        <strong>Brute Force:</strong> Time O(n × (V + E) log V) — one Dijkstra per candidate meeting node; hopelessly slow.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Structure</div>
+        <p style="font-size:14px;color:var(--text)">"Two sources, one destination, directed weighted graph — this is a shortest-path problem. The key constraint is that BOTH sources must reach dest. Ask: 'Do the paths have to share any edges?' The answer is: no, but they may share edges optimally."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Formalize the Observation</div>
+        <p style="font-size:14px;color:var(--text)">"Any valid subgraph has two paths converging on dest. Sketch out what those paths look like — they either run fully separate, or they merge at some node v before reaching dest. That merge point v is the key."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the Formula</div>
+        <p style="font-size:14px;color:var(--text)">"For each candidate meeting node v, the cost is: d(src1→v) + d(src2→v) + d(v→dest). I need all three for every v. The first two come from Dijkstra on src1 and src2. The third requires all v→dest costs — I get that by reversing the graph and running Dijkstra from dest."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Code It Up</div>
+        <p style="font-size:14px;color:var(--text)">"Build original graph + reversed graph. Run Dijkstra 3 times. Iterate all nodes, compute the sum, take the minimum. Handle the -1 case when the minimum is still infinity."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Both paths must reach dest. Think of the 'Y-shape': two branches converge at some meeting node v, then share the path v → dest. The cost is d1[v] + d2[v] + d3[v].<br>
+I'll run Dijkstra from src1 and src2 on the original graph to get d1 and d2.<br>
+For d3 — cost from every node to dest — I reverse all edges and run Dijkstra from dest.<br>
+Then I iterate every node v, sum the three distances, and return the minimum.<br>
+Time complexity: O((V + E) log V) for three Dijkstra runs. Space: O(V + E)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if the graph has 3 sources?"</strong> → Run Dijkstra from all 3 sources + 1 reversed from dest; formula becomes d1[v]+d2[v]+d3[v]+d4[v].</li>
+        <li><strong>"Can you handle negative weights?"</strong> → Replace Dijkstra with Bellman-Ford; complexity rises to O(VE).</li>
+        <li><strong>"What if the graph is undirected?"</strong> → Reversed graph = original graph (no need for rg). Just run Dijkstra twice.</li>
+        <li><strong>"How do you verify the subgraph is connected?"</strong> → If any d is INF, the sum is INF, and we return -1 — handled automatically.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=6, src1=0, src2=1, dest=5</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Graph SVG -->
+    <div class="viz-area">
+      <div class="graph-svg-wrap">
+        <svg class="graph" width="420" height="260" viewBox="0 0 420 260" id="graph-svg">
+          <!-- Edge definitions with arrows -->
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#9c9a92"/>
+            </marker>
+            <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#185FA5"/>
+            </marker>
+            <marker id="arrow-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#854F0B"/>
+            </marker>
+            <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#534AB7"/>
+            </marker>
+            <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#3B6D11"/>
+            </marker>
+          </defs>
+
+          <!-- Edges: (u,v,w) positions: 0=(60,130), 1=(60,220), 2=(175,60), 3=(175,195), 4=(310,130), 5=(390,130) -->
+          <!-- 0→2 w=2 -->
+          <line id="e-0-2" x1="78" y1="122" x2="162" y2="72" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="108" y="85" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">2</text>
+          <!-- 0→3 w=5 -->
+          <line id="e-0-3" x1="78" y1="138" x2="162" y2="190" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="110" y="178" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">5</text>
+          <!-- 1→2 w=3 -->
+          <line id="e-1-2" x1="76" y1="211" x2="163" y2="74" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="106" y="150" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">3</text>
+          <!-- 1→3 w=1 -->
+          <line id="e-1-3" x1="78" y1="220" x2="162" y2="200" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="120" y="216" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">1</text>
+          <!-- 2→4 w=4 -->
+          <line id="e-2-4" x1="198" y1="65" x2="296" y2="122" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="252" y="82" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">4</text>
+          <!-- 3→4 w=2 -->
+          <line id="e-3-4" x1="200" y1="192" x2="296" y2="140" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="252" y="180" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">2</text>
+          <!-- 4→5 w=3 -->
+          <line id="e-4-5" x1="334" y1="130" x2="374" y2="130" stroke="#9c9a92" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="354" y="122" fill="#9c9a92" font-size="12" font-family="JetBrains Mono,monospace" text-anchor="middle">3</text>
+
+          <!-- Nodes -->
+          <circle id="node-0" cx="60" cy="130" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="60" y="135" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">0</text>
+          <text x="60" y="108" text-anchor="middle" fill="#185FA5" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">src1</text>
+
+          <circle id="node-1" cx="60" cy="220" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="60" y="225" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">1</text>
+          <text x="60" y="248" text-anchor="middle" fill="#854F0B" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">src2</text>
+
+          <circle id="node-2" cx="175" cy="60" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="175" y="65" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">2</text>
+
+          <circle id="node-3" cx="175" cy="195" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="175" y="200" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">3</text>
+
+          <circle id="node-4" cx="310" cy="130" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="310" y="135" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">4</text>
+
+          <circle id="node-5" cx="390" cy="130" r="22" fill="#f0efe9" stroke="#9c9a92" stroke-width="2"/>
+          <text x="390" y="135" text-anchor="middle" fill="#1a1a18" font-size="14" font-family="DM Sans,sans-serif" font-weight="700">5</text>
+          <text x="390" y="108" text-anchor="middle" fill="#3B6D11" font-size="10" font-family="DM Sans,sans-serif" font-weight="600">dest</text>
+        </svg>
+      </div>
+
+      <!-- Distance Tables -->
+      <div class="dist-section">
+        <div class="dist-label">Shortest distance arrays</div>
+        <div class="dist-table-wrap">
+          <div class="dist-box src-a">
+            <div class="dist-box-label">d1 — from src1(0)</div>
+            <div class="dist-node"><span class="dist-node-id">node 0</span><span class="dist-node-val" id="d1-0">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 1</span><span class="dist-node-val" id="d1-1">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 2</span><span class="dist-node-val" id="d1-2">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 3</span><span class="dist-node-val" id="d1-3">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 4</span><span class="dist-node-val" id="d1-4">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 5</span><span class="dist-node-val" id="d1-5">∞</span></div>
+          </div>
+          <div class="dist-box src-b">
+            <div class="dist-box-label">d2 — from src2(1)</div>
+            <div class="dist-node"><span class="dist-node-id">node 0</span><span class="dist-node-val" id="d2-0">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 1</span><span class="dist-node-val" id="d2-1">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 2</span><span class="dist-node-val" id="d2-2">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 3</span><span class="dist-node-val" id="d2-3">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 4</span><span class="dist-node-val" id="d2-4">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 5</span><span class="dist-node-val" id="d2-5">∞</span></div>
+          </div>
+          <div class="dist-box src-c">
+            <div class="dist-box-label">d3 — v→dest(5)</div>
+            <div class="dist-node"><span class="dist-node-id">node 0</span><span class="dist-node-val" id="d3-0">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 1</span><span class="dist-node-val" id="d3-1">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 2</span><span class="dist-node-val" id="d3-2">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 3</span><span class="dist-node-val" id="d3-3">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 4</span><span class="dist-node-val" id="d3-4">∞</span></div>
+            <div class="dist-node"><span class="dist-node-id">node 5</span><span class="dist-node-val" id="d3-5">∞</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-phase">
+          <span class="var-name">phase</span>
+          <span class="var-val" id="vv-phase">—</span>
+        </div>
+        <div class="var-box" id="vb-node">
+          <span class="var-name">meeting v</span>
+          <span class="var-val" id="vv-node">—</span>
+        </div>
+        <div class="var-box" id="vb-ans">
+          <span class="var-name">best ans</span>
+          <span class="var-val" id="vv-ans">∞</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def minimumWeight(n, edges, src1, src2, dest):</div>
+      <div class="code-line" id="cl-1">    g, rg = defaultdict(list), defaultdict(list)</div>
+      <div class="code-line" id="cl-2">    for u, v, w in edges:</div>
+      <div class="code-line" id="cl-3">        g[u].append((v, w));  rg[v].append((u, w))</div>
+      <div class="code-line" id="cl-4">    d1 = dijkstra(src1, g)   # shortest from src1</div>
+      <div class="code-line" id="cl-5">    d2 = dijkstra(src2, g)   # shortest from src2</div>
+      <div class="code-line" id="cl-6">    d3 = dijkstra(dest, rg)  # reversed → cost v→dest</div>
+      <div class="code-line" id="cl-7">    ans = float('inf')</div>
+      <div class="code-line" id="cl-8">    for v in range(n):</div>
+      <div class="code-line" id="cl-9">        ans = min(ans, d1[v] + d2[v] + d3[v])</div>
+      <div class="code-line" id="cl-10">    return ans if ans &lt; float('inf') else -1</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the algorithm. Graph: n=6 nodes, edges create a diamond shape. src1=0, src2=1, dest=5.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-src1"></div> src1 path (blue)</div>
+      <div class="legend-item"><div class="legend-swatch sw-src2"></div> src2 path (amber)</div>
+      <div class="legend-item"><div class="legend-swatch sw-src3"></div> reversed Dijkstra (red)</div>
+      <div class="legend-item"><div class="legend-swatch sw-meet"></div> optimal meeting node</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> destination / finalized</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Run Dijkstra 3 times: from src1, from src2, and from dest on the reversed graph</div>
+      <div class="takeaway">The "reversed graph trick" converts "v → dest" into "dest → v reversed" — one Dijkstra instead of n</div>
+      <div class="takeaway">For each candidate meeting node v: cost = d1[v] + d2[v] + d3[v]</div>
+      <div class="takeaway">Minimum over all v is the answer; infinity means no valid subgraph exists → return -1</div>
+      <div class="takeaway">Pattern generalises to k sources: run k+1 Dijkstra passes (k forward + 1 reversed from dest)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (Dijkstra from every v)</td>
+          <td class="mark-bad">O(n·(V+E) log V)</td>
+          <td>O(V+E)</td>
+          <td>TLE for n ≥ 10³</td>
+        </tr>
+        <tr>
+          <td><strong>3× Dijkstra ✓ (Interview Pick)</strong></td>
+          <td class="mark-good">O((V+E) log V)</td>
+          <td class="mark-good">O(V+E)</td>
+          <td>Optimal; elegant reversed-graph trick</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the "Dijkstra from 3 Sources" Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Multiple sources must reach a single destination in a weighted directed graph</li>
+        <li>Need to find a minimum-cost shared subgraph (paths may merge)</li>
+        <li>Any "v → dest" cost query → reverse the graph, run Dijkstra from dest</li>
+        <li>Optimal paths form a Y-shape or star converging at one meeting point</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Dijkstra)</div>
+      <div class="related-item"><strong>Network Delay Time</strong><span class="related-diff diff-med">Medium</span> — Single-source Dijkstra; find time for signal to reach all nodes (#743)</div>
+      <div class="related-item"><strong>Path With Minimum Effort</strong><span class="related-diff diff-med">Medium</span> — Dijkstra on a grid with max-edge cost (#1631)</div>
+      <div class="related-item"><strong>Cheapest Flights Within K Stops</strong><span class="related-diff diff-med">Medium</span> — Modified Dijkstra/BFS with hop constraint (#787)</div>
+      <div class="related-item"><strong>Shortest Path Visiting All Nodes</strong><span class="related-diff diff-hard">Hard</span> — Dijkstra + bitmask state for multi-source (#847)</div>
+      <div class="related-item"><strong>Find the City With the Smallest Number of Neighbors</strong><span class="related-diff diff-med">Medium</span> — Floyd-Warshall; all-pairs shortest paths (#1334)</div>
+      <div class="related-item"><strong>Minimum Cost to Reach Destination in Time</strong><span class="related-diff diff-hard">Hard</span> — Time-constrained Dijkstra (#1928)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 7 (Graph)<br>
+      Sub-Pattern: <strong>Dijkstra (from 3 Sources)</strong> · Main Pattern: <strong>Graph</strong></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Graph data (for display) ──
+// Nodes: 0=(60,130), 1=(60,220), 2=(175,60), 3=(175,195), 4=(310,130), 5=(390,130)
+// Edges original: 0→2(2), 0→3(5), 1→2(3), 1→3(1), 2→4(4), 3→4(2), 4→5(3)
+// d1 (from src1=0): [0, ∞, 2, 5, 6, 9]
+// d2 (from src2=1): [∞, 0, 3, 1, 3, 6]
+// d3 (v→dest=5): reversed edges 5→4(3), 4→2(4), 4→3(2), 2→0(2), 2→1(3), 3→0(5), 3→1(1)
+//    from dest(5) on reversed graph: [∞, ∞, 7, 5, 3, 0]
+//    Wait: node0 unreachable from dest on reversed (no path). node1 unreachable. node2=7, node3=5, node4=3, node5=0
+// Best v: node3 → d1[3]+d2[3]+d3[3] = 5+1+5 = 11
+//         node4 → d1[4]+d2[4]+d3[4] = 6+3+3 = 12
+// node2 → d1[2]+d2[2]+d3[2] = 2+3+7 = 12
+// node5 (dest) → d1[5]+d2[5]+d3[5] = 9+6+0 = 15
+// Answer = 11 (meeting at node 3)
+
+const NODE_POS = {
+  0:{x:60,y:130}, 1:{x:60,y:220}, 2:{x:175,y:60},
+  3:{x:175,y:195}, 4:{x:310,y:130}, 5:{x:390,y:130}
+};
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    activeLine:1,
+    d1:[null,null,null,null,null,null],
+    d2:[null,null,null,null,null,null],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Build adjacency lists',
+    text:'Initialize two adjacency lists: g (original graph) and rg (reversed graph). For each edge [u,v,w]: g[u]→(v,w) and rg[v]→(u,w). This gives us the reversed graph for free while building the original.',
+    changed:[]
+  },
+  {
+    id:1, phase:'dijkA', phaseLabel:'DIJKSTRA src1', phaseClass:'phase-dijkA',
+    activeLine:4,
+    d1:[0,'∞','∞','∞','∞','∞'],
+    d2:[null,null,null,null,null,null],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[0], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Dijkstra from src1=0: initialize',
+    text:'Start Dijkstra from node 0 (src1). Set dist[0]=0, all others=∞. Push (0, 0) into the min-heap.',
+    changed:['d1']
+  },
+  {
+    id:2, phase:'dijkA', phaseLabel:'DIJKSTRA src1', phaseClass:'phase-dijkA',
+    activeLine:4,
+    d1:[0,'∞',2,5,'∞','∞'],
+    d2:[null,null,null,null,null,null],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[0,2,3], highlightEdges:['0-2','0-3'],
+    meetNode:-1, ans:null,
+    title:'Dijkstra src1: relax node 0 → 2 (w=2), 0 → 3 (w=5)',
+    text:'Pop (0, node0). Relax edges: 0→2 gives dist[2]=0+2=2. 0→3 gives dist[3]=0+5=5. Push both into heap. Now heap: [(2, node2), (5, node3)].',
+    changed:['d1']
+  },
+  {
+    id:3, phase:'dijkA', phaseLabel:'DIJKSTRA src1', phaseClass:'phase-dijkA',
+    activeLine:4,
+    d1:[0,'∞',2,5,6,'∞'],
+    d2:[null,null,null,null,null,null],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[2,4], highlightEdges:['2-4'],
+    meetNode:-1, ans:null,
+    title:'Dijkstra src1: pop node 2 (dist=2), relax 2→4 (w=4)',
+    text:'Pop (2, node2). Relax 2→4: dist[4] = 2+4 = 6. Push (6, node4). Node 2 is now finalized. Heap: [(5, node3), (6, node4)].',
+    changed:['d1']
+  },
+  {
+    id:4, phase:'dijkA', phaseLabel:'DIJKSTRA src1', phaseClass:'phase-dijkA',
+    activeLine:4,
+    d1:[0,'∞',2,5,6,9],
+    d2:[null,null,null,null,null,null],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[3,4,5], highlightEdges:['3-4','4-5'],
+    meetNode:-1, ans:null,
+    title:'Dijkstra src1: finalize nodes 3, 4, 5',
+    text:'Pop (5, node3): relax 3→4 → dist[4]=min(6, 5+2=7) → stays 6. Pop (6, node4): relax 4→5 → dist[5]=6+3=9. d1 complete: [0, ∞, 2, 5, 6, 9].',
+    changed:['d1']
+  },
+  {
+    id:5, phase:'dijkB', phaseLabel:'DIJKSTRA src2', phaseClass:'phase-dijkB',
+    activeLine:5,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,'∞','∞','∞','∞'],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[1], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Dijkstra from src2=1: initialize',
+    text:'Start fresh Dijkstra from node 1 (src2). Set dist[1]=0, others=∞. Push (0, 1) into heap.',
+    changed:['d2']
+  },
+  {
+    id:6, phase:'dijkB', phaseLabel:'DIJKSTRA src2', phaseClass:'phase-dijkB',
+    activeLine:5,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,'∞','∞'],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[1,2,3], highlightEdges:['1-2','1-3'],
+    meetNode:-1, ans:null,
+    title:'Dijkstra src2: relax node 1 → 2 (w=3), 1 → 3 (w=1)',
+    text:'Pop (0, node1). Relax 1→2: dist[2]=3. Relax 1→3: dist[3]=1. Push both. Heap: [(1, node3), (3, node2)].',
+    changed:['d2']
+  },
+  {
+    id:7, phase:'dijkB', phaseLabel:'DIJKSTRA src2', phaseClass:'phase-dijkB',
+    activeLine:5,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:[null,null,null,null,null,null],
+    highlightNodes:[3,2,4,5], highlightEdges:['3-4','2-4','4-5'],
+    meetNode:-1, ans:null,
+    title:'Dijkstra src2: finalize all remaining nodes',
+    text:'Pop (1, node3): relax 3→4 → dist[4]=1+2=3. Pop (3, node2): relax 2→4 → dist[4]=min(3,3+4)=3. Pop (3, node4): relax 4→5 → dist[5]=3+3=6. d2 complete: [∞, 0, 3, 1, 3, 6].',
+    changed:['d2']
+  },
+  {
+    id:8, phase:'dijkC', phaseLabel:'DIJKSTRA reversed', phaseClass:'phase-dijkC',
+    activeLine:6,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞','∞','∞','∞',0],
+    highlightNodes:[5], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Dijkstra from dest=5 on REVERSED graph: initialize',
+    text:'Run Dijkstra from node 5 on the reversed graph (rg). Reversed edges: 5→4(3), 4→3(2), 4→2(4), 3→1(1), 3→0(5), 2→1(3), 2→0(2). Set dist[5]=0.',
+    changed:['d3']
+  },
+  {
+    id:9, phase:'dijkC', phaseLabel:'DIJKSTRA reversed', phaseClass:'phase-dijkC',
+    activeLine:6,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞','∞',5,3,0],
+    highlightNodes:[5,4,3,2], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Reversed Dijkstra: reach nodes 4, 3, 2',
+    text:'Pop (0, node5): relax 5→4(reversed) → dist[4]=3. Pop (3, node4): relax 4→3 → dist[3]=5, 4→2 → dist[2]=7. Pop (5, node3): relax 3→1 → dist[1]=6, 3→0 → dist[0]=10.',
+    changed:['d3']
+  },
+  {
+    id:10, phase:'dijkC', phaseLabel:'DIJKSTRA reversed', phaseClass:'phase-dijkC',
+    activeLine:6,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞',7,5,3,0],
+    highlightNodes:[2,5], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Reversed Dijkstra: finalize node 2',
+    text:'Pop (7, node2): relax 2→0 → dist[0]=min(10, 7+2)=9, 2→1 → dist[1]=min(6, 7+3)=6. d3 complete: d3=[∞, ∞, 7, 5, 3, 0]. (∞ means node0/1 cannot reach dest — only reachable via node2/3 onward.)',
+    changed:['d3']
+  },
+  {
+    id:11, phase:'merge', phaseLabel:'COMBINE', phaseClass:'phase-merge',
+    activeLine:8,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞',7,5,3,0],
+    highlightNodes:[2,3,4,5], highlightEdges:[],
+    meetNode:-1, ans:null,
+    title:'Evaluate meeting nodes: scan all v',
+    text:'Now evaluate d1[v] + d2[v] + d3[v] for each v. Nodes 0,1 have d1[0]=0 but d2[0]=∞; d3[0]=∞ — so any v with ∞ in any array contributes ∞. Let\'s check v=2,3,4,5.',
+    changed:[]
+  },
+  {
+    id:12, phase:'merge', phaseLabel:'COMBINE', phaseClass:'phase-merge',
+    activeLine:9,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞',7,5,3,0],
+    highlightNodes:[3], highlightEdges:['0-3','1-3','3-4','4-5'],
+    meetNode:3, ans:11,
+    title:'Best meeting node v=3: d1[3]+d2[3]+d3[3] = 5+1+5 = 11',
+    text:'v=2: 2+3+7=12. v=3: 5+1+5=11 ← best! v=4: 6+3+3=12. v=5(dest): 9+6+0=15. The meeting node is node 3. src1 travels 0→3 (cost 5), src2 travels 1→3 (cost 1), then both share 3→4→5 (cost 5). Total = 11.',
+    changed:['ans']
+  },
+  {
+    id:13, phase:'result', phaseLabel:'ANSWER', phaseClass:'phase-result',
+    activeLine:10,
+    d1:[0,'∞',2,5,6,9],
+    d2:['∞',0,3,1,3,6],
+    d3:['∞','∞',7,5,3,0],
+    highlightNodes:[0,1,3,4,5], highlightEdges:['0-3','1-3','3-4','4-5'],
+    meetNode:3, ans:11,
+    title:'Return 11 ✓',
+    text:'Minimum weighted subgraph: edges 0→3 (w=5), 1→3 (w=1), 3→4 (w=2), 4→5 (w=3). Total weight = 5+1+2+3 = 11. Both src1=0 and src2=1 can reach dest=5 via the shared tail through node 3.',
+    changed:[]
+  }
+];
+
+let current = 0;
+
+// Precomputed final d values for display
+const D1_FINAL = [0, '∞', 2, 5, 6, 9];
+const D2_FINAL = ['∞', 0, 3, 1, 3, 6];
+const D3_FINAL = ['∞', '∞', 7, 5, 3, 0];
+
+const NODE_COLORS = {
+  normal:  {fill:'#f0efe9', stroke:'#9c9a92'},
+  src1:    {fill:'#E6F1FB', stroke:'#185FA5'},
+  src2:    {fill:'#FAEEDA', stroke:'#854F0B'},
+  reversed:{fill:'#FCEBEB', stroke:'#A32D2D'},
+  meet:    {fill:'#EEEDFE', stroke:'#534AB7'},
+  dest:    {fill:'#EAF3DE', stroke:'#3B6D11'},
+  active:  {fill:'#E0F7FA', stroke:'#00ACC1'},
+};
+
+function setNodeStyle(id, colorKey) {
+  const el = document.getElementById('node-' + id);
+  if (!el) return;
+  const c = NODE_COLORS[colorKey] || NODE_COLORS.normal;
+  el.setAttribute('fill', c.fill);
+  el.setAttribute('stroke', c.stroke);
+}
+
+function setDistVal(prefix, idx, val, cls) {
+  const el = document.getElementById(prefix + '-' + idx);
+  if (!el) return;
+  el.textContent = (val === null || val === undefined) ? '∞' : String(val);
+  el.className = 'dist-node-val' + (val === null || val === '∞' || val === undefined ? ' inf' : (cls ? ' ' + cls : ''));
+}
+
+function render() {
+  const step = steps[current];
+
+  // Reset all nodes
+  for (let i = 0; i < 6; i++) setNodeStyle(i, 'normal');
+
+  // Apply highlights based on phase
+  if (step.phase === 'dijkA') {
+    setNodeStyle(0, 'src1');
+    step.highlightNodes.forEach(n => { if (n !== 0) setNodeStyle(n, 'active'); });
+  } else if (step.phase === 'dijkB') {
+    setNodeStyle(1, 'src2');
+    step.highlightNodes.forEach(n => { if (n !== 1) setNodeStyle(n, 'active'); });
+  } else if (step.phase === 'dijkC') {
+    setNodeStyle(5, 'dest');
+    step.highlightNodes.forEach(n => { if (n !== 5) setNodeStyle(n, 'reversed'); });
+  } else if (step.phase === 'merge' || step.phase === 'result') {
+    setNodeStyle(0, 'src1');
+    setNodeStyle(1, 'src2');
+    setNodeStyle(5, 'dest');
+    if (step.meetNode >= 0) setNodeStyle(step.meetNode, 'meet');
+  }
+
+  // Update dist tables
+  for (let i = 0; i < 6; i++) {
+    const v1 = step.d1[i];
+    const v2 = step.d2[i];
+    const v3 = step.d3[i];
+    setDistVal('d1', i, v1, step.phase === 'dijkA' && v1 !== null && v1 !== '∞' ? 'finalized' : '');
+    setDistVal('d2', i, v2, step.phase === 'dijkB' && v2 !== null && v2 !== '∞' ? 'finalized' : '');
+    setDistVal('d3', i, v3, step.phase === 'dijkC' && v3 !== null && v3 !== '∞' ? 'finalized' : '');
+  }
+
+  // Highlight current meeting node in dist tables
+  if (step.meetNode >= 0) {
+    const el1 = document.getElementById('d1-' + step.meetNode);
+    const el2 = document.getElementById('d2-' + step.meetNode);
+    const el3 = document.getElementById('d3-' + step.meetNode);
+    if (el1) el1.className = 'dist-node-val current';
+    if (el2) el2.className = 'dist-node-val current';
+    if (el3) el3.className = 'dist-node-val current';
+  }
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  document.getElementById('vv-phase').textContent = step.phase;
+  document.getElementById('vv-node').textContent = step.meetNode >= 0 ? String(step.meetNode) : '—';
+  document.getElementById('vv-ans').textContent = step.ans !== null ? String(step.ans) : '∞';
+
+  const ansChanged = step.changed.includes('ans');
+  document.getElementById('vb-ans').classList.toggle('changed', ansChanged);
+  document.getElementById('vb-node').classList.toggle('changed', step.meetNode >= 0 && step.phase === 'merge');
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Build progress dots
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+buildDom();
+render();
+</script>
+</body>
+</html>

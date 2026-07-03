@@ -1,79 +1,820 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Find the Winner of the Circular Game — LC #1823</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1823 · Find the Winner of the Circular Game</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Queue Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.queue-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+.queue-row{display:flex;gap:5px;align-items:center;min-height:60px;flex-wrap:wrap}
+.player-cell{
+  width:50px;height:50px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;
+}
+.player-cell.p-normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.player-cell.p-front{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.player-cell.p-rotating{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.player-cell.p-eliminated{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid);opacity:0.55;text-decoration:line-through}
+.player-cell.p-winner{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.queue-arrow{font-size:13px;color:var(--text3);padding:0 1px;flex-shrink:0}
+.queue-sep{height:40px;width:2px;background:var(--border2);margin:0 8px;flex-shrink:0}
+
+.round-info{display:flex;gap:12px;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+.round-box{padding:8px 16px;border-radius:var(--radius);text-align:center}
+.round-box.rb-size{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.round-box.rb-round{background:var(--purple-bg);border:1px solid var(--purple-border)}
+.round-box.rb-rot{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.round-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.rb-size .round-label{color:var(--blue-mid)}
+.rb-round .round-label{color:var(--purple-mid)}
+.rb-rot .round-label{color:var(--amber-mid)}
+.round-val{font-family:var(--mono);font-size:20px;font-weight:700}
+.rb-size .round-val{color:var(--blue-text)}
+.rb-round .round-val{color:var(--purple-text)}
+.rb-rot .round-val{color:var(--amber-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-skip{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-elim{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-front{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-rotate{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-elim{background:var(--red-bg);border-color:var(--red-border)}
+.sw-win{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Josephus Formula Box ── */
+.formula-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;text-align:center}
+.formula-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:8px}
+.formula-text{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--cyan-text);line-height:2}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Find the Winner of the Circular Game</h1>
-<div class="subtitle">LeetCode #1823 &mdash; Josephus Problem / Queue</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Queues</span><span class="tag tag-pattern">Josephus Problem / Queue</span><span class="tag tag-cx">O(n*k) Time &middot; O(n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1823</div>
+  <h1>Find the Winner of the Circular Game</h1>
+  <p class="subtitle">n friends sit in a circle, counting k steps clockwise and eliminating — find the last one standing.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Queues</span>
+    <span class="tag tag-pattern">Josephus Problem</span>
+    <span class="tag tag-complexity">Time: O(nk) or O(n)</span>
+    <span class="tag tag-complexity">Space: O(n) or O(1)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>n</strong> friends numbered 1 to n are seated in a circle. Starting from friend 1, you count clockwise. When you reach the <strong>k-th</strong> person in the count, that person is <em>eliminated</em> from the circle. You then immediately start counting again from the <em>next surviving person</em>. This repeats until exactly one person remains — that person is the winner.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is the famous <strong>Josephus Problem</strong> — one of the oldest puzzles in CS. A <strong>deque (queue)</strong> naturally models the circle: move surviving players to the back (rotate), then eliminate the front (the k-th person). There is also a brilliant O(n) mathematical recurrence that computes the winner's position without any simulation.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Walk-through example — n=5, k=2:</strong></p>
+    <div class="two-col">
+      <div class="panel-box neutral">
+        <div class="panel-title">Round-by-round elimination</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--blue-text);line-height:2.1">
+          Circle: [1, 2, 3, 4, 5]<br>
+          Count 2 from 1 → <strong>eliminate 2</strong><br>
+          Count 2 from 3 → <strong>eliminate 4</strong><br>
+          Count 2 from 5 → <strong>eliminate 1</strong><br>
+          Count 2 from 3 → <strong>eliminate 5</strong><br>
+          Winner: <strong>3 🏆</strong>
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Why a queue is perfect</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          The deque front is the "current" player. Rotate k−1 survivors to the back (they live), then popleft() the k-th player (they're out). After rotation, the player at front is exactly who the count lands on.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> k=1 means the first player each round is always eliminated — winner is player n. n=1 means player 1 wins immediately. k larger than the current circle size wraps around using the queue's natural rotation.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Simulate Josephus problem with a queue. Rotate k-1 positions (move k-1 people to back), pop the k-th person (they lose). Repeat until one remains.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Queue Simulation</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Queue Simulation</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">q=deque(1..n)</span></div><div class="step"><span class="snum">2</span><span class="stxt">While len>1: rotate k-1 times (popleft,append); popleft (eliminate k-th)</span></div><div class="step"><span class="snum">3</span><span class="stxt">Return q[0]</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(n*k)</strong> | Space: <strong>O(n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import deque
-def findTheWinner(n,k):
-    q=deque(range(1,n+1))
-    while len(q)>1:
-        q.rotate(-(k-1))
-        q.popleft()
-    return q[0]</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Rotate k-1 so the k-th is at front, then popleft eliminates them</span></div><div class="step"><span class="snum">2</span><span class="stxt">Mathematical O(n): josephus(n,k)=0 if n==1 else (josephus(n-1,k)+k)%n</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Queue Simulation</td><td>O(n*k)</td><td>O(n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Time to Buy Tickets</span><span class="pd de">Easy</span> — Queue simulation</li><li><span class="pn">Number of Recent Calls</span><span class="pd de">Easy</span> — Queue windowing</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Josephus Problem / Queue</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Find the Winner of the Circular Game"}, "title": "Queue Simulation", "desc": "See code for walkthrough.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Queue Simulation + Josephus Recurrence</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Approach 1 — Queue Simulation:</strong> A deque models the circle. Each round, we rotate k−1 players (surviving the count) to the back, then popleft the k-th player (eliminated). Continue until size 1.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>q = deque(range(1, n + 1))</code>. Players 1..n in order, with player 1 at the front (start of count).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Rotate k−1 times:</strong> <code>q.append(q.popleft())</code> repeated k−1 times. Each rotation moves one player from front (counted but surviving) to the back of the queue.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Eliminate:</strong> <code>q.popleft()</code> — the player now at the front is the k-th in the count. They are removed from the circle.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Repeat:</strong> Go to step 2 while <code>len(q) &gt; 1</code>. The surviving front player after k−1 rotations of the previous step automatically becomes the next "counter start."</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Approach 2 — Josephus Recurrence (O(n), O(1)):</strong> Instead of simulating, use the mathematical insight that winning positions follow a recurrence across subproblem sizes:</p>
+
+    <div class="formula-box">
+      <div class="formula-title">Josephus Recurrence (0-indexed positions)</div>
+      <div class="formula-text">J(1) = 0</div>
+      <div class="formula-text">J(i) = (J(i − 1) + k) % i &nbsp;&nbsp;&nbsp;for i = 2, 3, ..., n</div>
+      <div style="font-size:12px;color:var(--cyan-mid);margin-top:8px;font-weight:600">Final Answer = J(n) + 1 &nbsp;&nbsp;(convert 0-indexed → 1-indexed)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 When to use which approach</div>
+      <p>In an interview, <strong>code the queue simulation first</strong> — it's intuitive and easy to explain. Then mention: "There's actually an O(n) mathematical solution using the Josephus recurrence — want me to implement that too?" This demonstrates both practical and theoretical depth.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Queue Invariant &amp; Josephus Recurrence</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Queue Invariant</div>
+      <p>At the start of every elimination round, the deque contains <strong>exactly the surviving players in their correct circular order</strong>, with the "next count-start" at the front. After k−1 rotations, the player at the front is precisely the k-th person in the current count — they are correctly eliminated. This invariant holds at every round, so the simulation is always correct.</p>
+    </div>
+
+    <p><strong>Why the Josephus recurrence works:</strong> After one elimination, n−1 players remain in a new circle. The game of n−1 players has the same structure. The key observation: if the winner is at 0-indexed position <code>p</code> in the (n−1)-player game, then in the n-player game, the same physical person was at position <code>(p + k) % n</code>. This mapping applies because eliminating the k-th player shifts all subsequent positions by k. Build from base case J(1)=0 up to J(n).</p>
+
+    <p style="margin-top:0.75rem"><strong>Verify for n=5, k=2:</strong><br>
+    J(1)=0, J(2)=(0+2)%2=0, J(3)=(0+2)%3=2, J(4)=(2+2)%4=0, J(5)=(0+2)%5=<strong>2</strong> → 2+1=<strong>3</strong> ✓ (matches simulation!)</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Off-by-one: k−1 rotations, not k</div>
+      <p>We count k people total. The first k−1 "survive" this round's count (rotate to back). Only the k-th person is eliminated (popleft). If you rotate k times and then popleft, you eliminate the (k+1)-th — a silent, hard-to-debug off-by-one error. Think: "skip k−1 survivors, then eliminate the front."</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Josephus result is 0-indexed — add 1!</div>
+      <p>The recurrence works in 0-indexed space (positions 0 to n−1). Players are numbered 1 to n. The final answer is <code>josephus(n, k) + 1</code>. Returning the raw recurrence result gives the wrong player number.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Queue Simulation (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import deque</span></div>
+<div class="ann-line"><span class="acode">def findTheWinner(n: int, k: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">    q = deque(range(1, n + 1))  </span><span class="aann">← Build circle: players 1..n, player 1 at front</span></div>
+<div class="ann-line"><span class="acode">    while len(q) > 1:           </span><span class="aann">← Keep going until one survivor remains</span></div>
+<div class="ann-line"><span class="acode">        for _ in range(k - 1):  </span><span class="aann">← Skip k−1 players (they survive this count)</span></div>
+<div class="ann-line"><span class="acode">            q.append(q.popleft())  </span><span class="aann">← Move front to back: "counted past, still in"</span></div>
+<div class="ann-line"><span class="acode">        q.popleft()             </span><span class="aann">← k-th player is at front → eliminate (discard)</span></div>
+<div class="ann-line"><span class="acode">    return q[0]                 </span><span class="aann">← Last surviving player is the winner</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ q.rotate(-(k-1)) vs the explicit loop</div>
+      <p>Python's deque has <code>q.rotate(-(k-1))</code> which does the same rotation in one call. Both are correct. The explicit loop is more readable during an interview; <code>rotate()</code> is the one-liner. In terms of complexity, both are O(k) per round (rotation is not O(1) — it moves k−1 elements).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Josephus Recurrence (O(n), O(1))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def findTheWinner(n: int, k: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">    pos = 0                     </span><span class="aann">← Base case: 1 player, winner is at 0-indexed position 0</span></div>
+<div class="ann-line"><span class="acode">    for i in range(2, n + 1):   </span><span class="aann">← Extend: solve for 2 players, then 3, ..., up to n</span></div>
+<div class="ann-line"><span class="acode">        pos = (pos + k) % i     </span><span class="aann">← Shift winner's position by k (mod i = circle size this round)</span></div>
+<div class="ann-line"><span class="acode">    return pos + 1              </span><span class="aann">← 0-indexed → 1-indexed player number</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Queue Simulation:</strong> Time O(nk), Space O(n) — n rounds, k rotations each<br>
+        <strong>Josephus Recurrence:</strong> Time O(n), Space O(1) — single loop, two variables<br>
+        For n=5, k=2: queue runs 4 rounds × 1 rotation = 4 ops. Recurrence runs 4 iterations. Fast input is better; large k makes queue much slower.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize "Circle + Count + Eliminate" = Josephus</div>
+        <p style="font-size:14px;color:var(--text)">The problem says "circular" arrangement, counting k steps, and eliminating. These three signals together almost always mean Josephus Problem or queue rotation. A deque simulates the circle directly — the front is the current player, and rotating moves the window.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Code the Queue Simulation First</div>
+        <p style="font-size:14px;color:var(--text)">"I'll model the circle with a deque initialized to [1, 2, ..., n]. Each round I rotate k−1 times (survivors move to back) and then popleft the k-th player. This is O(nk) time and O(n) space." Start here — it's easy to code and easy to verify.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Propose the Mathematical Optimization</div>
+        <p style="font-size:14px;color:var(--text)">"If the interviewer asks for O(n), I can use the Josephus recurrence. J(1)=0; for i from 2 to n: J(i)=(J(i−1)+k)%i. The answer is J(n)+1. This runs in O(n) time with O(1) space — just two variables." Even mentioning this gets you points.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Cross-Verify with the Example</div>
+        <p style="font-size:14px;color:var(--text)">Always trace through n=5, k=2 using your code. Queue gives 3; recurrence gives (((0+2)%2+2)%3+2)%4+2)%5 + 1 = 2+1 = 3. Both agree — builds confidence in both solutions.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is the Josephus counting-out game. I'll simulate with a deque.<br>
+Players 1..n go in with 1 at front. Each round: rotate k−1 players to the back<br>
+(they're counted past but survive), then popleft to eliminate the k-th player.<br>
+Loop until one remains — that's the winner. O(nk) time, O(n) space.<br>
+<br>
+For O(n): the Josephus recurrence says J(1)=0, J(i)=(J(i-1)+k)%i.<br>
+Final answer is J(n)+1. O(n) time, O(1) space — just a loop."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do it O(n) time?"</strong> → Yes, Josephus recurrence — two variables, one loop</li>
+        <li><strong>"What if k changes each round?"</strong> → Must simulate; no clean formula exists</li>
+        <li><strong>"What if players form a linked list?"</strong> → Traverse k−1 times and delete next node — O(nk)</li>
+        <li><strong>"Historical context?"</strong> → Flavius Josephus (37 CE) — purportedly used this to survive a mass suicide pact</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=5, k=2</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="queue-label">Active Queue (front → back) &nbsp;|&nbsp; Eliminated (strikethrough)</div>
+      <div class="queue-row" id="queue-row"></div>
+
+      <div class="round-info">
+        <div class="round-box rb-size">
+          <div class="round-label">Queue Size</div>
+          <div class="round-val" id="vv-size">5</div>
+        </div>
+        <div class="round-box rb-round">
+          <div class="round-label">Round</div>
+          <div class="round-val" id="vv-round">1</div>
+        </div>
+        <div class="round-box rb-rot">
+          <div class="round-label">Action</div>
+          <div class="round-val" id="vv-action" style="font-size:13px;padding-top:4px">Init</div>
+        </div>
+      </div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-front">
+          <span class="var-name">Front</span>
+          <span class="var-val" id="vv-front">1</span>
+        </div>
+        <div class="var-box" id="vb-elim">
+          <span class="var-name">Eliminated</span>
+          <span class="var-val" id="vv-elim">—</span>
+        </div>
+        <div class="var-box" id="vb-winner">
+          <span class="var-name">Winner</span>
+          <span class="var-val" id="vv-winner">?</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">from collections import deque</div>
+      <div class="code-line" id="cl-1">def findTheWinner(n, k):</div>
+      <div class="code-line" id="cl-2">    q = deque(range(1, n + 1))</div>
+      <div class="code-line" id="cl-3">    while len(q) > 1:</div>
+      <div class="code-line" id="cl-4">        for _ in range(k - 1):</div>
+      <div class="code-line" id="cl-5">            q.append(q.popleft())</div>
+      <div class="code-line" id="cl-6">        q.popleft()</div>
+      <div class="code-line" id="cl-7">    return q[0]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the queue simulation for n=5, k=2.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-front"></div> Front of queue (counted first)</div>
+      <div class="legend-item"><div class="legend-swatch sw-rotate"></div> Being rotated to back (survives)</div>
+      <div class="legend-item"><div class="legend-swatch sw-elim"></div> Eliminated (k-th player)</div>
+      <div class="legend-item"><div class="legend-swatch sw-win"></div> Winner (last remaining)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A deque models a circle: rotate-to-back simulates "counting past" a player, popleft eliminates them</div>
+      <div class="takeaway">Rotate exactly k−1 times per round (not k) — the k-th player then sits at the front to be eliminated</div>
+      <div class="takeaway">Josephus recurrence J(i) = (J(i−1) + k) % i gives the 0-indexed winner in O(n) time, O(1) space</div>
+      <div class="takeaway">Always add 1 to the Josephus result to get the 1-indexed player number</div>
+      <div class="takeaway">The historical Josephus problem (37 CE) is the same puzzle — one of the oldest known CS problems</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (List pop)</td>
+          <td class="mark-bad">O(n²)</td>
+          <td>O(n)</td>
+          <td>List.pop(i) is O(n) — avoid</td>
+        </tr>
+        <tr>
+          <td><strong>Queue Simulation ✓</strong></td>
+          <td>O(nk)</td>
+          <td>O(n)</td>
+          <td>Interview pick — clear and provably correct</td>
+        </tr>
+        <tr>
+          <td>Josephus Recurrence</td>
+          <td class="mark-good">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Optimal; impressive to know; derive if asked</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"People sit in a circle" + "count to k" + "eliminate" → Josephus / Queue</li>
+        <li>"Hot potato", "eeny meeny", "round-robin countdown" → same structure</li>
+        <li>Rotate-then-eliminate on any circular sequence → deque with popleft/append</li>
+        <li>Optimal "last survivor" position → Josephus recurrence</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Josephus Problem / Queue)</div>
+      <div class="related-item"><strong>Dota2 Senate</strong><span class="related-diff diff-med">Medium</span> — Two-queue circular elimination between two factions (#649)</div>
+      <div class="related-item"><strong>Design Circular Queue</strong><span class="related-diff diff-med">Medium</span> — Implement the circular queue data structure from scratch (#622)</div>
+      <div class="related-item"><strong>Reveal Cards in Increasing Order</strong><span class="related-diff diff-med">Medium</span> — Queue rotation to reconstruct reveal-interleave order (#950)</div>
+      <div class="related-item"><strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span> — Queue-based round-robin CPU task scheduling (#621)</div>
+      <div class="related-item"><strong>Number of Recent Calls</strong><span class="related-diff diff-easy">Easy</span> — Queue to maintain sliding window of timestamps (#933)</div>
+      <div class="related-item"><strong>Time Needed to Buy Tickets</strong><span class="related-diff diff-easy">Easy</span> — Circular queue counting to find when a specific person finishes (#2073)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Queues / Stack-Queue section<br>
+      Sub-Pattern: <strong>Josephus Problem / Queue</strong> · Source: Analysis<br>
+      Named after Flavius Josephus (37–100 CE). The mathematical recurrence was formally analyzed in Knuth's <em>The Art of Computer Programming</em>.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// n=5, k=2 step-by-step simulation
+// State: queue = active players (front to back), eliminated = removed players, highlight = which player is being acted upon
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    queue:[1,2,3,4,5], eliminated:[], acting:-1, actType:'none', activeLine:2,
+    round:1, action:'Initialize', frontVal:1, elimVal:'—', winnerVal:'?',
+    title:'Build the circle: deque([1, 2, 3, 4, 5])',
+    text:'We initialize a deque with players 1 through 5. Player 1 is at the front — this is where counting starts for round 1. With k=2, we will rotate k−1=1 player to the back each round, then eliminate the front.'
+  },
+  // Round 1: eliminate player 2
+  {
+    id:1, phase:'skip', phaseLabel:'ROTATE', phaseClass:'phase-skip',
+    queue:[2,3,4,5,1], eliminated:[], acting:0, actType:'rotate', activeLine:5,
+    round:1, action:'Rotate 1→back', frontVal:1, elimVal:'—', winnerVal:'?',
+    title:'Round 1: Rotate player 1 to back (count = 1 of k−1=1)',
+    text:'k=2, so we must rotate k−1=1 time. Player 1 is at front. popleft() removes player 1, then append() puts them at the back. Queue is now [2,3,4,5,1]. Player 1 was "counted past" but survives.'
+  },
+  {
+    id:2, phase:'elim', phaseLabel:'ELIMINATE', phaseClass:'phase-elim',
+    queue:[3,4,5,1], eliminated:[2], acting:0, actType:'eliminate', activeLine:6,
+    round:1, action:'Eliminate 2', frontVal:2, elimVal:'2', winnerVal:'?',
+    title:'Round 1: Eliminate player 2 — the k=2 count lands here',
+    text:'After 1 rotation, player 2 is at the front. This is the k=2 count! popleft() removes player 2 — they are OUT. Queue is now [3,4,5,1]. Notice: the next round starts from player 3 (new front).'
+  },
+  // Round 2: eliminate player 4
+  {
+    id:3, phase:'skip', phaseLabel:'ROTATE', phaseClass:'phase-skip',
+    queue:[4,5,1,3], eliminated:[2], acting:0, actType:'rotate', activeLine:5,
+    round:2, action:'Rotate 3→back', frontVal:3, elimVal:'2', winnerVal:'?',
+    title:'Round 2: Rotate player 3 to back (count = 1 of k−1=1)',
+    text:'New round from player 3 (front). Rotate once: popleft(3) → append to back. Queue: [4,5,1,3]. Player 3 counted as 1st but survives. One rotation done (k−1=1 total needed).'
+  },
+  {
+    id:4, phase:'elim', phaseLabel:'ELIMINATE', phaseClass:'phase-elim',
+    queue:[5,1,3], eliminated:[2,4], acting:0, actType:'eliminate', activeLine:6,
+    round:2, action:'Eliminate 4', frontVal:4, elimVal:'4', winnerVal:'?',
+    title:'Round 2: Eliminate player 4 — count lands on 4',
+    text:'Player 4 is now at front (k=2 in this round). popleft() removes player 4 — OUT. Queue: [5,1,3]. Players 2 and 4 are eliminated. 3 remain. Next round starts from player 5.'
+  },
+  // Round 3: eliminate player 1
+  {
+    id:5, phase:'skip', phaseLabel:'ROTATE', phaseClass:'phase-skip',
+    queue:[1,3,5], eliminated:[2,4], acting:0, actType:'rotate', activeLine:5,
+    round:3, action:'Rotate 5→back', frontVal:5, elimVal:'4', winnerVal:'?',
+    title:'Round 3: Rotate player 5 to back (count = 1 of k−1=1)',
+    text:'Round 3 starts from player 5 (front). Rotate once: popleft(5) → append. Queue: [1,3,5]. Player 5 counted as 1st but survives.'
+  },
+  {
+    id:6, phase:'elim', phaseLabel:'ELIMINATE', phaseClass:'phase-elim',
+    queue:[3,5], eliminated:[2,4,1], acting:0, actType:'eliminate', activeLine:6,
+    round:3, action:'Eliminate 1', frontVal:1, elimVal:'1', winnerVal:'?',
+    title:'Round 3: Eliminate player 1 — count lands on 1',
+    text:'Player 1 is at front (k=2 count). popleft() removes player 1 — OUT. Queue: [3,5]. Three players eliminated now. Next round starts from player 3.'
+  },
+  // Round 4: eliminate player 5
+  {
+    id:7, phase:'skip', phaseLabel:'ROTATE', phaseClass:'phase-skip',
+    queue:[5,3], eliminated:[2,4,1], acting:0, actType:'rotate', activeLine:5,
+    round:4, action:'Rotate 3→back', frontVal:3, elimVal:'1', winnerVal:'?',
+    title:'Round 4: Rotate player 3 to back (count = 1 of k−1=1)',
+    text:'Round 4, only 2 players left: [3,5]. Rotate once: popleft(3) → append. Queue: [5,3]. Player 3 counted 1st but survives. One rotation done.'
+  },
+  {
+    id:8, phase:'elim', phaseLabel:'ELIMINATE', phaseClass:'phase-elim',
+    queue:[3], eliminated:[2,4,1,5], acting:0, actType:'eliminate', activeLine:6,
+    round:4, action:'Eliminate 5', frontVal:5, elimVal:'5', winnerVal:'?',
+    title:'Round 4: Eliminate player 5 — count lands on 5',
+    text:'Player 5 at front (k=2). popleft() removes player 5 — OUT. Queue: [3]. Only one player remains! len(q)=1 so the while loop exits on the next check.'
+  },
+  {
+    id:9, phase:'result', phaseLabel:'WINNER', phaseClass:'phase-result',
+    queue:[3], eliminated:[2,4,1,5], acting:0, actType:'winner', activeLine:7,
+    round:4, action:'Done!', frontVal:3, elimVal:'5', winnerVal:'3',
+    title:'Winner is Player 3 🏆',
+    text:'len(q) == 1 — exit the while loop. return q[0] = 3. Player 3 wins! Cross-check with Josephus recurrence: J(1)=0, J(2)=0, J(3)=2, J(4)=0, J(5)=2 → 2+1=3 ✓. Both methods agree!'
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function renderQueue(step) {
+  const row = document.getElementById('queue-row');
+  row.innerHTML = '';
+
+  // Active players
+  step.queue.forEach((player, idx) => {
+    if (idx > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'queue-arrow';
+      arrow.textContent = '→';
+      row.appendChild(arrow);
+    }
+    const cell = document.createElement('div');
+    cell.className = 'player-cell';
+    cell.textContent = player;
+
+    if (step.phase === 'result') {
+      cell.classList.add('p-winner');
+    } else if (idx === 0 && step.actType === 'rotate') {
+      cell.classList.add('p-rotating');
+    } else if (idx === 0 && step.actType === 'eliminate') {
+      cell.classList.add('p-eliminated');
+    } else if (idx === 0) {
+      cell.classList.add('p-front');
+    } else {
+      cell.classList.add('p-normal');
+    }
+    row.appendChild(cell);
+  });
+
+  // Separator + eliminated players
+  const eliminated = step.eliminated || [];
+  if (eliminated.length > 0) {
+    const sep = document.createElement('div');
+    sep.className = 'queue-sep';
+    row.appendChild(sep);
+
+    eliminated.forEach(p => {
+      const cell = document.createElement('div');
+      cell.className = 'player-cell p-eliminated';
+      cell.style.marginLeft = '2px';
+      cell.textContent = p;
+      row.appendChild(cell);
+    });
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  renderQueue(step);
+
+  // Round info
+  document.getElementById('vv-size').textContent = step.queue.length;
+  document.getElementById('vv-round').textContent = step.round;
+  document.getElementById('vv-action').textContent = step.action;
+
+  // Var tracker
+  const fv = document.getElementById('vv-front');
+  const ev = document.getElementById('vv-elim');
+  const wv = document.getElementById('vv-winner');
+  fv.textContent = step.frontVal;
+  ev.textContent = step.elimVal;
+  wv.textContent = step.winnerVal;
+
+  document.getElementById('vb-elim').classList.toggle('changed', step.actType === 'eliminate');
+  document.getElementById('vb-winner').classList.toggle('changed', step.phase === 'result');
+  document.getElementById('vb-front').classList.toggle('changed', step.actType === 'rotate');
+
+  // Code panel
+  for (let i = 0; i <= 7; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

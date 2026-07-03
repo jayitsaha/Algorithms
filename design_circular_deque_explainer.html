@@ -1,234 +1,855 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Design Circular Deque – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#641 · Design Circular Deque</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.deque-container{display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+
+/* Ring/array cells */
+.ptr-row{display:flex;gap:6px;justify-content:center;min-height:24px;align-items:flex-end}
+.ptr-slot{width:60px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;line-height:1.4;white-space:nowrap}
+.ptr-front{background:var(--green-bg);color:var(--green-mid)}
+.ptr-rear{background:var(--purple-bg);color:var(--purple-mid)}
+.ptr-both{background:var(--cyan-bg);color:var(--cyan-mid)}
+
+.ring-row{display:flex;gap:6px;justify-content:center}
+.ring-cell{
+  width:60px;height:60px;border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;position:relative;
+}
+.ring-cell .cell-idx{font-size:9px;font-weight:600;color:var(--text3);margin-top:3px;font-family:var(--sans)}
+.ring-cell.empty{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.ring-cell.live{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.ring-cell.front-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.ring-cell.rear-cell{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.ring-cell.both-cell{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.ring-cell.just-added{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+
+/* Stats bar */
+.stats-bar{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;padding:1rem;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);width:100%}
+.stat-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.stat-val{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);min-width:36px;text-align:center}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-push-front{background:var(--green-bg);color:var(--green-mid)}
+.phase-push-rear{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-pop-front{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-pop-rear{background:var(--red-bg);color:var(--red-mid)}
+.phase-peek{background:var(--cyan-bg);color:var(--cyan-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-front{background:var(--green-bg);border-color:var(--green-border)}
+.sw-rear{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-both{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-added{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-live{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-empty{background:var(--bg2);border-color:var(--border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* Formula box */
+.formula-box{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;font-family:var(--mono);font-size:13px;line-height:2.2;border-left:4px solid var(--purple-border)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Design Circular Deque</h1>
-    <p class="subtitle">LeetCode #641 — Data Structure Design · Array + Modulo</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Design</span>
-      <span class="tag tag-complexity">Varies by design Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Data Structure Design</strong> using the <strong>Array + Modulo</strong> technique.</p>
-      <p>Pattern category: <strong>Design</strong>. Apply when: <em>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Combine data structures to achieve target complexities. LRU = hash map + doubly linked list for O(1) get/put.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #641</div>
+  <h1>Design Circular Deque</h1>
+  <p class="subtitle">Implement a double-ended queue backed by a fixed-size circular array. All six operations — insert/delete at front and rear, peek, isEmpty, isFull — must run in O(1).</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Array + Modulo</span>
+    <span class="tag tag-complexity">Time: O(1) all ops</span>
+    <span class="tag tag-complexity">Space: O(k)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Array + Modulo</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Identify all required operations and their target complexities</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Choose primary data structure for main storage</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Add auxiliary structure(s) to speed up slow operations</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Implement each operation using both structures</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Keep structures in sync on every mutation</span></div>
-      </div>
-    </div>
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem         -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>A <strong>deque</strong> (double-ended queue) is a line where people can join <em>or leave</em> from either the front or the back. A <strong>circular deque</strong> stores elements in a fixed-size ring: when you reach one end of the array, you wrap back to the other end instead of going out of bounds.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>You never need to move data. Use two integer pointers — <code>front</code> and <code>rear</code> — that say "where the live region starts and ends." To add at the front, step <code>front</code> one slot backwards (wrapping with modulo). To add at the rear, step <code>rear</code> one slot forwards. O(1) because it's just arithmetic on indices.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Data structure design: identify all operations needed, their frequency, target complexity. Choose structures accordingly.</p>
+
+    <p style="margin-top:1rem">The six operations you must implement:</p>
+    <div class="two-col" style="margin-top:0.75rem">
+      <div class="panel-box after">
+        <div class="panel-title">Mutating (return True/False)</div>
+        <p style="font-size:13px;line-height:2.2;font-family:var(--mono);color:var(--green-text)">
+          insertFront(value)<br>
+          insertLast(value)<br>
+          deleteFront()<br>
+          deleteLast()
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Query (read-only)</div>
+        <p style="font-size:13px;line-height:2.2;font-family:var(--mono);color:var(--red-text)">
+          getFront() → value or -1<br>
+          getRear() → value or -1<br>
+          isEmpty() → bool<br>
+          isFull() → bool
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:0.75rem"><strong>Critical edge cases:</strong></p>
+    <ul style="margin-left:1.5rem;margin-top:0.5rem;line-height:2;font-size:14px;color:var(--text2)">
+      <li><strong>Insert into full deque:</strong> return False without modifying state</li>
+      <li><strong>Delete from empty deque:</strong> return False without modifying state</li>
+      <li><strong>First insert ever:</strong> both <code>front</code> and <code>rear</code> start at 0 — do NOT move the pointer before writing or you'll misalign them</li>
+      <li><strong>One element left:</strong> <code>front == rear</code>; both <code>deleteFront</code> and <code>deleteLast</code> remove the same slot</li>
+    </ul>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">class LRUCache:</div><div class="code-line">    def __init__(self, capacity):</div><div class="code-line">        from collections import OrderedDict</div><div class="code-line">        self.cap, self.cache = capacity, OrderedDict()</div><div class="code-line"></div><div class="code-line">    def get(self, key):</div><div class="code-line">        if key not in self.cache: return -1</div><div class="code-line">        self.cache.move_to_end(key)</div><div class="code-line">        return self.cache[key]</div><div class="code-line"></div><div class="code-line">    def put(self, key, value):</div><div class="code-line">        if key in self.cache: self.cache.move_to_end(key)</div><div class="code-line">        self.cache[key] = value</div><div class="code-line">        if len(self.cache) > self.cap: self.cache.popitem(last=False)</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: Varies by design &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                     -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Fixed Array + Circular Pointer Wrap</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Allocate an array of exactly <code>k</code> slots once in <code>__init__</code>. Maintain four pieces of state: the array, <code>front</code> (index of first live element), <code>rear</code> (index of last live element), and <code>size</code> (count of live elements). Every operation is a pointer move + one array read or write.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Init:</strong> <code>q = [0]*k</code>, <code>front = rear = 0</code>, <code>size = 0</code>, <code>cap = k</code>. No element exists yet — pointers are parked at index 0.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Design problem using Array + Modulo. I'll identify all required operations and their target complexities then choose primary data structure for main storage. Time: Varies by design, Space: O(n)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>insertLast(v):</strong> If full → False. If not empty, advance rear: <code>rear = (rear+1)%k</code>. Write <code>q[rear] = v</code>. Increment size. Return True.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>insertFront(v):</strong> If full → False. If not empty, step front back: <code>front = (front-1+k)%k</code>. Write <code>q[front] = v</code>. Increment size. Return True.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>deleteFront():</strong> If empty → False. Advance front forward: <code>front = (front+1)%k</code>. Decrement size. Return True. (No data erasure needed — the slot is just no longer in the live range.)</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>deleteLast():</strong> If empty → False. Step rear back: <code>rear = (rear-1+k)%k</code>. Decrement size. Return True.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text"><strong>getFront / getRear:</strong> If empty → -1. Otherwise, <code>q[front]</code> or <code>q[rear]</code>. Single array read, O(1).</span>
       </div>
     </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Wrap-Around Formulas</div>
+      <div class="formula-box">
+Moving forward  (insertLast, deleteFront): new_idx = (idx + 1) % k
+Moving backward (insertFront, deleteLast): new_idx = (idx - 1 + k) % k
+
+Why "+ k"? Prevents negative modulo in C++/Java.
+In Python, (-1) % 5 = 4 naturally, but writing "+ k" signals intent clearly.
+      </div>
+    </div>
+
+    <p><strong>Why track <code>size</code> instead of comparing front == rear?</strong> Both an empty and a completely full deque can have <code>front == rear</code>. A size counter disambiguates the two in O(1) without any extra computation.</p>
   </div>
+</div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant       -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
   </div>
-
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every moment: <code>q[front]</code> holds the front element, <code>q[rear]</code> holds the rear element, and the live elements occupy slots <code>front, (front+1)%k, ..., rear</code> (in circular order) — exactly <code>size</code> of them. Inserting extends this range by one slot; deleting shrinks it by one slot.</p>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Design — Array + Modulo</div>
-        <div class="takeaway">✓ Combine data structures to achieve target complexities</div>
-        <div class="takeaway">✓ Time: Varies by design | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Logger Rate Limiter</strong> (Easy) — Hash Map Timestamp</li>
-<li><strong>Implement Queue using Stacks</strong> (Easy) — Two Stacks</li>
-<li><strong>Implement Stack using Queues</strong> (Easy) — One Queue, Rotate</li>
-<li><strong>Design Circular Queue</strong> (Medium) — Array with Head/Tail</li>
-<li><strong>Design Hit Counter</strong> (Medium) — Circular Buffer</li>
-<li><strong>Design Browser History</strong> (Medium) — List + Two Pointers</li></ul>
-      </div>
+
+    <p><strong>Why O(1) for everything?</strong> Each operation performs exactly one modulo addition, at most one array read or write, and one increment/decrement to size. No loops. No shifting. The ring illusion is achieved entirely through arithmetic on two integers.</p>
+
+    <p style="margin-top:1rem"><strong>First insert correctness:</strong> When <code>size == 0</code>, both <code>front</code> and <code>rear</code> sit at index 0. If the first call is <code>insertLast(v)</code>, we write at <code>q[0]</code> — good. If we advanced rear first, it would jump to 1, and then <code>front(0) != rear(1)</code> for a one-element deque — a bug. The guard <code>if not isEmpty()</code> before moving the pointer fixes this.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Moving Pointer Before First Insert</div>
+      <p>A beginner might write <code>rear = (rear+1)%k; q[rear] = v</code> unconditionally. This makes the very first element land at index 1, leaving index 0 unused and making getFront return the wrong slot. Always check <code>if not isEmpty()</code> before moving the pointer in insertFront and insertLast.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Using front == rear as Empty Check</div>
+      <p>When <code>size == k</code> and the deque is full, <code>front</code> can also equal <code>rear</code> (after exactly k elements wrap around). Always use <code>size == 0</code> for empty and <code>size == k</code> for full.</p>
     </div>
   </div>
 </div>
 
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)              -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class MyCircularDeque:</span></div>
+<div class="ann-line"><span class="acode">  def __init__(self, k: int):</span></div>
+<div class="ann-line"><span class="acode">    self.q = [0] * k</span><span class="aann">Pre-allocate the fixed array. No resizing ever.</span></div>
+<div class="ann-line"><span class="acode">    self.front = 0</span><span class="aann">Index of the first (front) element</span></div>
+<div class="ann-line"><span class="acode">    self.rear  = 0</span><span class="aann">Index of the last (rear) element</span></div>
+<div class="ann-line"><span class="acode">    self.size  = 0</span><span class="aann">Current element count</span></div>
+<div class="ann-line"><span class="acode">    self.k     = k</span><span class="aann">Capacity — used in every modulo formula</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">  def insertFront(self, value: int) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    if self.isFull(): return False</span><span class="aann">Guard: full → reject</span></div>
+<div class="ann-line"><span class="acode">    if not self.isEmpty():</span><span class="aann">Only move front if there's already something in the deque</span></div>
+<div class="ann-line"><span class="acode">      self.front = (self.front - 1 + self.k) % self.k</span><span class="aann">Step left (wrap around)</span></div>
+<div class="ann-line"><span class="acode">    self.q[self.front] = value</span><span class="aann">Write value at the new front slot</span></div>
+<div class="ann-line"><span class="acode">    self.size += 1</span><span class="aann">One more live element</span></div>
+<div class="ann-line"><span class="acode">    return True</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">  def insertLast(self, value: int) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    if self.isFull(): return False</span><span class="aann">Guard: full → reject</span></div>
+<div class="ann-line"><span class="acode">    if not self.isEmpty():</span><span class="aann">Only move rear if deque is non-empty</span></div>
+<div class="ann-line"><span class="acode">      self.rear = (self.rear + 1) % self.k</span><span class="aann">Step right (wrap around)</span></div>
+<div class="ann-line"><span class="acode">    self.q[self.rear] = value</span><span class="aann">Write value at the new rear slot</span></div>
+<div class="ann-line"><span class="acode">    self.size += 1</span></div>
+<div class="ann-line"><span class="acode">    return True</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">  def deleteFront(self) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    if self.isEmpty(): return False</span><span class="aann">Guard: nothing to remove</span></div>
+<div class="ann-line"><span class="acode">    self.front = (self.front + 1) % self.k</span><span class="aann">Advance front (shrink from left)</span></div>
+<div class="ann-line"><span class="acode">    self.size -= 1</span></div>
+<div class="ann-line"><span class="acode">    return True</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">  def deleteLast(self) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    if self.isEmpty(): return False</span><span class="aann">Guard: nothing to remove</span></div>
+<div class="ann-line"><span class="acode">    self.rear = (self.rear - 1 + self.k) % self.k</span><span class="aann">Step rear back (shrink from right)</span></div>
+<div class="ann-line"><span class="acode">    self.size -= 1</span></div>
+<div class="ann-line"><span class="acode">    return True</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">  def getFront(self) -> int:</span></div>
+<div class="ann-line"><span class="acode">    return -1 if self.isEmpty() else self.q[self.front]</span><span class="aann">O(1) direct read</span></div>
+<div class="ann-line"><span class="acode">  def getRear(self) -> int:</span></div>
+<div class="ann-line"><span class="acode">    return -1 if self.isEmpty() else self.q[self.rear]</span><span class="aann">O(1) direct read</span></div>
+<div class="ann-line"><span class="acode">  def isEmpty(self) -> bool:  return self.size == 0</span><span class="aann">Always use size for this check</span></div>
+<div class="ann-line"><span class="acode">  def isFull(self)  -> bool:  return self.size == self.k</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Analysis</div>
+      <p><strong>Time:</strong> O(1) per operation — exactly 1 modulo op, 1 array access, 1 size update.<br>
+      <strong>Space:</strong> O(k) for the pre-allocated array. After <code>__init__</code>, zero additional memory is ever allocated.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔵 Alternative: Doubly Linked List</div>
+      <p>A doubly linked list also achieves O(1) for all 6 ops. Pros: no capacity limit, natural "wrap" via head/tail pointers. Cons: O(k) extra space for node pointers (2 pointers per node), no cache locality, no random access. For a fixed-capacity deque, the array approach is faster in practice due to cache efficiency.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1 — Identify the bottleneck</div>
+        <p style="font-size:14px">Naive: use Python's <code>collections.deque</code>. Interviewer wants you to implement it. Key insight: inserting at front of a regular array is O(n) due to shifting. A circular design eliminates shifting entirely.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2 — Pick your data structure</div>
+        <p style="font-size:14px">Fixed array beats linked list for this problem: O(1) random access lets getFront/getRear be a single array read. Pre-allocate once, never again.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3 — Design the state</div>
+        <p style="font-size:14px">You need: the array, <code>front</code>, <code>rear</code>, <code>size</code>, <code>capacity</code>. Resist the temptation to drop size and use <code>front == rear</code> for empty/full — that breaks when the deque wraps fully around.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4 — Derive the modulo formula on the fly</div>
+        <p style="font-size:14px">Draw a ring of 4 slots on paper. "front is at 0. I want to insertFront. Where should the new front be?" → index 3 (one step left, wrapping). That's (0-1+4)%4 = 3. Demonstrate this live on your whiteboard.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5 — Handle the first-insert edge case</div>
+        <p style="font-size:14px">Start empty: front=rear=0. Call insertLast(5). If you advance rear first → rear becomes 1, but front is still 0. Now getFront reads q[0]=0 (wrong). Fix: only move the pointer when the deque is non-empty.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">
+"I'll use a fixed array of size k with two integer pointers — front and rear — plus a size counter.
+For insertFront I step front backwards: (front - 1 + k) % k. For insertLast I step rear forwards:
+(rear + 1) % k. I track size separately to tell empty from full, since both cases can have
+front == rear. One edge case: the very first insert should NOT move the pointer — I guard that
+with 'if not isEmpty()'. Every operation is O(1) and no memory is allocated after init."
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Likely follow-ups:</strong></p>
+    <ul style="margin-left:1.5rem;margin-top:0.5rem;line-height:2.2;font-size:14px;color:var(--text2)">
+      <li><strong>"Implement with a doubly linked list"</strong> — head/tail pointers, O(1) inserts/deletes, no modulo needed</li>
+      <li><strong>"Make it thread-safe"</strong> — wrap each mutation in a lock; or use CAS for lock-free variant</li>
+      <li><strong>"Support dynamic resizing"</strong> — double array on full; copy elements to new array resetting front=0</li>
+      <li><strong>"Where is this used in real systems?"</strong> — I/O ring buffers, monotonic deque for sliding window max, BFS queues</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough           -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:1rem">
+      Trace (k=4): <code>insertLast(1)</code> → <code>insertLast(2)</code> → <code>insertFront(0)</code> → <code>insertFront(9)</code> → <code>getFront()</code> → <code>getRear()</code> → <code>deleteFront()</code> → <code>insertLast(7)</code> → <code>deleteLast()</code> → <code>isFull()</code>
+    </p>
+
+    <div class="viz-area">
+      <div class="deque-container">
+        <div class="ptr-row" id="ptr-row"></div>
+        <div class="ring-row" id="ring-row"></div>
+        <div class="stats-bar">
+          <div class="stat-item"><div class="stat-label">Operation</div><div class="stat-val" id="stat-op">—</div></div>
+          <div class="stat-item"><div class="stat-label">front idx</div><div class="stat-val" id="stat-front">0</div></div>
+          <div class="stat-item"><div class="stat-label">rear idx</div><div class="stat-val" id="stat-rear">0</div></div>
+          <div class="stat-item"><div class="stat-label">size</div><div class="stat-val" id="stat-size">0</div></div>
+          <div class="stat-item"><div class="stat-label">returns</div><div class="stat-val" id="stat-ret">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="var-tracker">
+      <div class="var-box" id="vb-front"><span class="var-name">front</span><span class="var-val" id="vv-front">0</span></div>
+      <div class="var-box" id="vb-rear"><span class="var-name">rear</span><span class="var-val" id="vv-rear">0</span></div>
+      <div class="var-box" id="vb-size"><span class="var-name">size</span><span class="var-val" id="vv-size">0</span></div>
+      <div class="var-box"><span class="var-name">cap</span><span class="var-val">4</span></div>
+    </div>
+
+    <div class="code-panel" id="code-panel">
+<div class="code-line" id="cl0">class MyCircularDeque:</div>
+<div class="code-line" id="cl1">  def __init__(self, k):   # k=4</div>
+<div class="code-line" id="cl2">    self.q=[0]*k; self.front=0; self.rear=0; self.size=0; self.k=k</div>
+<div class="code-line" id="cl3">  def insertLast(self, v):</div>
+<div class="code-line" id="cl4">    if self.isFull(): return False</div>
+<div class="code-line" id="cl5">    if not self.isEmpty():  self.rear=(self.rear+1)%self.k</div>
+<div class="code-line" id="cl6">    self.q[self.rear]=v;  self.size+=1;  return True</div>
+<div class="code-line" id="cl7">  def insertFront(self, v):</div>
+<div class="code-line" id="cl8">    if self.isFull(): return False</div>
+<div class="code-line" id="cl9">    if not self.isEmpty():  self.front=(self.front-1+self.k)%self.k</div>
+<div class="code-line" id="cl10">    self.q[self.front]=v; self.size+=1;  return True</div>
+<div class="code-line" id="cl11">  def deleteFront(self):</div>
+<div class="code-line" id="cl12">    if self.isEmpty(): return False</div>
+<div class="code-line" id="cl13">    self.front=(self.front+1)%self.k; self.size-=1; return True</div>
+<div class="code-line" id="cl14">  def deleteLast(self):</div>
+<div class="code-line" id="cl15">    if self.isEmpty(): return False</div>
+<div class="code-line" id="cl16">    self.rear=(self.rear-1+self.k)%self.k; self.size-=1; return True</div>
+<div class="code-line" id="cl17">  def getFront(self):  return -1 if self.isEmpty() else self.q[self.front]</div>
+<div class="code-line" id="cl18">  def getRear(self):   return -1 if self.isEmpty() else self.q[self.rear]</div>
+<div class="code-line" id="cl19">  def isEmpty(self):   return self.size == 0</div>
+<div class="code-line" id="cl20">  def isFull(self):    return self.size == self.k</div>
+    </div>
+
+    <div class="info-card">
+      <div class="phase-badge phase-init" id="phase-badge">Init</div>
+      <div class="step-counter" id="step-counter">Step 1 of 11</div>
+      <div class="step-title" id="step-title">MyCircularDeque(4)</div>
+      <div class="step-body" id="step-body">Initialize with capacity k=4. Array allocated: [0,0,0,0]. front=0, rear=0, size=0. The pointers are parked at index 0 — they become meaningful after the first insert.</div>
+    </div>
+
+    <div class="progress-dots" id="progress-dots"></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch sw-front"></span> front pointer</div>
+      <div class="legend-item"><span class="legend-swatch sw-rear"></span> rear pointer</div>
+      <div class="legend-item"><span class="legend-swatch sw-both"></span> front == rear</div>
+      <div class="legend-item"><span class="legend-swatch sw-added"></span> just written</div>
+      <div class="legend-item"><span class="legend-swatch sw-live"></span> live element</div>
+      <div class="legend-item"><span class="legend-swatch sw-empty"></span> empty slot</div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways           -->
+<!-- ───────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Pre-allocate array of size k once; never reallocate — all ops stay O(1)</div>
+      <div class="takeaway">Use two integer pointers (front, rear) plus a size counter as the only state</div>
+      <div class="takeaway">Wrap pointers with modulo: forward = (idx+1)%k, backward = (idx-1+k)%k</div>
+      <div class="takeaway">Use size counter (not front==rear) to distinguish empty from full</div>
+      <div class="takeaway">Skip pointer movement on the first insert — write at current position</div>
+      <div class="takeaway">No data ever shifts — only two integers (front, rear) change on each mutation</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-left:1.25rem;line-height:2;font-size:14px">
+        <li>Any "design a fixed-capacity queue/deque" problem (LC 622, 641)</li>
+        <li>Sliding Window Maximum (LC 239) — uses a monotonic deque with the same circular structure</li>
+        <li>Ring/circular buffers in OS-level I/O, audio streaming, network packet queues</li>
+        <li>BFS queues where you want to avoid dynamic allocation overhead</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Design Circular Queue</strong><span class="related-diff diff-med">Medium</span> — Single-ended version; same array+modulo approach, easier boundary logic</div>
+      <div class="related-item"><strong>Sliding Window Maximum</strong><span class="related-diff diff-hard">Hard</span> — Monotonic deque; uses circular deque mechanics for O(1) max queries</div>
+      <div class="related-item"><strong>Design Hit Counter</strong><span class="related-diff diff-med">Medium</span> — Circular array for time-window counting; identical wrap-around trick</div>
+      <div class="related-item"><strong>LRU Cache</strong><span class="related-diff diff-med">Medium</span> — Doubly linked list + hashmap; alternative deque-based design without fixed capacity</div>
+      <div class="related-item"><strong>Moving Average from Data Stream</strong><span class="related-diff diff-easy">Easy</span> — Sliding window sum; circular queue variant</div>
+      <div class="related-item"><strong>Implement Queue Using Stacks</strong><span class="related-diff diff-easy">Easy</span> — Classic queue design contrasted: no wrap-around needed</div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>All ops</th><th>Space</th><th>Cache</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Array + Modulo</strong> (this solution)</td><td class="mark-good">O(1)</td><td>O(k) array only</td><td class="mark-good">Excellent</td></tr>
+        <tr><td>Doubly Linked List</td><td class="mark-good">O(1)</td><td>O(k) + pointer overhead</td><td class="mark-bad">Poor (pointer chasing)</td></tr>
+        <tr><td>Python collections.deque</td><td class="mark-good">O(1)</td><td>O(k)</td><td>Good (but not from scratch)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
+// Step data: q=array contents[0..3], front, rear, size, phase, phaseClass,
+// op, ret, activeLine, justAdded (index or -1), title, body
+const K = 4;
+const steps = [
+  {
+    q:[0,0,0,0], front:0, rear:0, size:0,
+    phase:'Init', phaseClass:'phase-init', op:'__init__(4)', ret:'—',
+    activeLine:2, justAdded:-1,
+    title:'MyCircularDeque(4)',
+    body:'Allocate array [0,0,0,0]. Set front=0, rear=0, size=0. The deque is empty — both pointers park at index 0 but no element exists yet.'
+  },
+  {
+    q:[1,0,0,0], front:0, rear:0, size:1,
+    phase:'insertLast', phaseClass:'phase-push-rear', op:'insertLast(1)', ret:'True',
+    activeLine:6, justAdded:0,
+    title:'insertLast(1)',
+    body:'size==0 (empty) → skip rear advance. Write q[rear=0]=1. size becomes 1. Both front(0) and rear(0) point to the sole element. Return True.'
+  },
+  {
+    q:[1,2,0,0], front:0, rear:1, size:2,
+    phase:'insertLast', phaseClass:'phase-push-rear', op:'insertLast(2)', ret:'True',
+    activeLine:5, justAdded:1,
+    title:'insertLast(2)',
+    body:'Not empty → advance rear: (0+1)%4=1. Write q[1]=2. size=2. Deque: front→idx0(value=1), rear→idx1(value=2). Return True.'
+  },
+  {
+    q:[1,2,0,0], front:3, rear:1, size:3,
+    phase:'insertFront', phaseClass:'phase-push-front', op:'insertFront(0)', ret:'True',
+    activeLine:9, justAdded:3,
+    title:'insertFront(0)',
+    body:'Not empty → step front backwards: (0-1+4)%4=3. Write q[3]=0. size=3. Logical order (front to rear): idx3=0 → idx0=1 → idx1=2. Return True.'
+  },
+  {
+    q:[1,2,9,0], front:2, rear:1, size:4,
+    phase:'insertFront', phaseClass:'phase-push-front', op:'insertFront(9)', ret:'True',
+    activeLine:9, justAdded:2,
+    title:'insertFront(9) — Deque now FULL',
+    body:'front = (3-1+4)%4=2. Write q[2]=9. size=4=k → deque is full! Logical order: idx2=9 → idx3=0 → idx0=1 → idx1=2. front=2, rear=1. Return True.'
+  },
+  {
+    q:[1,2,9,0], front:2, rear:1, size:4,
+    phase:'getFront', phaseClass:'phase-peek', op:'getFront()', ret:'9',
+    activeLine:17, justAdded:-1,
+    title:'getFront() → 9',
+    body:'Not empty → return q[front]=q[2]=9. No pointer moves. O(1) direct read. The front element is 9, which we inserted last via insertFront.'
+  },
+  {
+    q:[1,2,9,0], front:2, rear:1, size:4,
+    phase:'getRear', phaseClass:'phase-peek', op:'getRear()', ret:'2',
+    activeLine:18, justAdded:-1,
+    title:'getRear() → 2',
+    body:'Not empty → return q[rear]=q[1]=2. No pointer moves. O(1) direct read. The rear element is 2, the second value inserted via insertLast.'
+  },
+  {
+    q:[1,2,9,0], front:3, rear:1, size:3,
+    phase:'deleteFront', phaseClass:'phase-pop-front', op:'deleteFront()', ret:'True',
+    activeLine:13, justAdded:-1,
+    title:'deleteFront()',
+    body:'Not empty → advance front forward: (2+1)%4=3. size=3. Element 9 is logically removed (front no longer points there — data stays in array but is outside the live range). Deque: idx3=0 → idx0=1 → idx1=2.'
+  },
+  {
+    q:[1,2,7,0], front:3, rear:2, size:4,
+    phase:'insertLast', phaseClass:'phase-push-rear', op:'insertLast(7)', ret:'True',
+    activeLine:5, justAdded:2,
+    title:'insertLast(7)',
+    body:'Not empty → rear = (1+1)%4=2. Write q[2]=7 (overwrites old 9 — it was no longer live). size=4 → full again. Deque: idx3=0 → idx0=1 → idx1=2 → idx2=7. Return True.'
+  },
+  {
+    q:[1,2,7,0], front:3, rear:1, size:3,
+    phase:'deleteLast', phaseClass:'phase-pop-rear', op:'deleteLast()', ret:'True',
+    activeLine:16, justAdded:-1,
+    title:'deleteLast()',
+    body:'Not empty → step rear back: (2-1+4)%4=1. size=3. Element 7 is logically removed. Deque now: idx3=0 → idx0=1 → idx1=2. front=3, rear=1. Return True.'
+  },
+  {
+    q:[1,2,7,0], front:3, rear:1, size:3,
+    phase:'isFull', phaseClass:'phase-peek', op:'isFull()', ret:'False',
+    activeLine:20, justAdded:-1,
+    title:'isFull() → False',
+    body:'size(3) != k(4) → False. The deque has 3 of 4 slots occupied. One empty slot remains (idx2, though it holds stale data 7 from the previous insertLast — it is outside the live range).'
+  },
 ];
+
 let cur = 0;
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+function isLive(step, i) {
+  if (step.size === 0) return false;
+  let idx = step.front;
+  for (let j = 0; j < step.size; j++) {
+    if (idx === i) return true;
+    idx = (idx + 1) % K;
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+  return false;
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function buildRing(step) {
+  const prow = document.getElementById('ptr-row');
+  const row  = document.getElementById('ring-row');
+  prow.innerHTML = '';
+  row.innerHTML  = '';
+
+  for (let i = 0; i < K; i++) {
+    // Pointer label slot
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot';
+    if (step.size > 0) {
+      const isF = step.front === i;
+      const isR = step.rear  === i;
+      if (isF && isR) {
+        const lb = document.createElement('span');
+        lb.className = 'ptr-lbl ptr-both';
+        lb.textContent = 'F+R';
+        ps.appendChild(lb);
+      } else if (isF) {
+        const lb = document.createElement('span');
+        lb.className = 'ptr-lbl ptr-front';
+        lb.textContent = 'front';
+        ps.appendChild(lb);
+      } else if (isR) {
+        const lb = document.createElement('span');
+        lb.className = 'ptr-lbl ptr-rear';
+        lb.textContent = 'rear';
+        ps.appendChild(lb);
+      }
+    }
+    prow.appendChild(ps);
+
+    // Cell
+    const cell = document.createElement('div');
+    cell.className = 'ring-cell';
+    const live = isLive(step, i);
+    const valSpan = document.createElement('span');
+    valSpan.textContent = live ? step.q[i] : '—';
+    const idxSpan = document.createElement('span');
+    idxSpan.className = 'cell-idx';
+    idxSpan.textContent = 'idx ' + i;
+    cell.appendChild(valSpan);
+    cell.appendChild(idxSpan);
+
+    if (!live) {
+      cell.classList.add('empty');
+    } else if (step.justAdded === i) {
+      cell.classList.add('just-added');
+    } else if (step.size > 0 && step.front === i && step.rear === i) {
+      cell.classList.add('both-cell');
+    } else if (step.size > 0 && step.front === i) {
+      cell.classList.add('front-cell');
+    } else if (step.size > 0 && step.rear === i) {
+      cell.classList.add('rear-cell');
+    } else {
+      cell.classList.add('live');
+    }
+    row.appendChild(cell);
+  }
+}
+
+function renderStep(idx) {
+  const s    = steps[idx];
+  const prev = idx > 0 ? steps[idx - 1] : null;
+
+  buildRing(s);
+
+  // Stats
+  document.getElementById('stat-op').textContent    = s.op;
+  document.getElementById('stat-front').textContent = s.front;
+  document.getElementById('stat-rear').textContent  = s.rear;
+  document.getElementById('stat-size').textContent  = s.size;
+  document.getElementById('stat-ret').textContent   = s.ret;
+
+  // Var tracker
+  ['front', 'rear', 'size'].forEach(v => {
+    const box = document.getElementById('vb-' + v);
+    document.getElementById('vv-' + v).textContent = s[v];
+    box.classList.toggle('changed', !!prev && prev[v] !== s[v]);
+  });
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach((el, i) => {
+    el.classList.toggle('active', i === s.activeLine);
+  });
+
+  // Info card
+  document.getElementById('phase-badge').textContent = s.phase;
+  document.getElementById('phase-badge').className   = 'phase-badge ' + s.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${idx + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent   = s.title;
+  document.getElementById('step-body').textContent    = s.body;
+
+  // Dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active',  i === idx);
+    d.classList.toggle('visited', i < idx);
+  });
+
+  document.getElementById('btn-prev').disabled = (idx === 0);
+  document.getElementById('btn-next').disabled = (idx === steps.length - 1);
+}
+
+function go(delta) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + delta));
+  renderStep(cur);
+}
+
+function reset() { cur = 0; renderStep(0); }
+
+// Build progress dots
+(function () {
+  const pd = document.getElementById('progress-dots');
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => { cur = i; renderStep(cur); };
+    pd.appendChild(d);
+  });
+})();
+
+// Keyboard navigation
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
-render();
+
+// Collapsible cards
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon    = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// Initial render
+renderStep(0);
 </script>
 </body>
 </html>

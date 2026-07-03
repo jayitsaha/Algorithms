@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1368 · Minimum Cost to Make at Least One Valid Path in a Grid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:920px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:28px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:580px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Grid Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-container{display:flex;justify-content:center;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.grid-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.grid-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:4px}
+.grid-row{display:flex;gap:4px}
+.grid-cell{
+  width:58px;height:58px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;position:relative;
+  cursor:default;
+}
+.grid-cell .dir-arrow{font-size:18px;display:block;line-height:1}
+.grid-cell .cell-cost{font-size:9px;color:var(--text3);font-family:var(--sans);margin-top:2px}
+
+.grid-cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.grid-cell.in-queue{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.grid-cell.current{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.grid-cell.free{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.grid-cell.paid{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.grid-cell.on-path{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.grid-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+
+/* ── Cost display overlay ── */
+.cost-grid{margin-top:6px}
+.cost-cell{
+  width:58px;height:30px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text2);
+  transition:background 0.3s,color 0.3s;
+}
+.cost-cell.updated{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border)}
+.cost-cell.zero-cost{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border)}
+.cost-cell.final-path{background:var(--cyan-bg);color:var(--cyan-text);border-color:var(--cyan-border)}
+
+/* ── Deque display ── */
+.deque-area{margin-top:1.25rem;padding:1rem;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border)}
+.deque-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.deque-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:36px}
+.deque-item{
+  padding:5px 10px;border-radius:6px;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  border:1px solid var(--border2);background:var(--surface);color:var(--text2);
+  transition:background 0.3s;
+}
+.deque-item.cost0{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border)}
+.deque-item.cost1{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border)}
+.deque-item.active{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border)}
+.deque-empty{color:var(--text3);font-size:12px;font-style:italic}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-explore{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-free{background:var(--green-bg);color:var(--green-mid)}
+.phase-paid{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-current{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-free{background:var(--green-bg);border-color:var(--green-border)}
+.sw-paid{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-queue{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-path{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── 0-1 BFS diagram ── */
+.bfs-diagram{display:flex;gap:1rem;margin:1rem 0;flex-wrap:wrap}
+.bfs-box{flex:1;min-width:180px;padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.bfs-box.zero-edge{background:var(--green-bg);border-color:var(--green-border)}
+.bfs-box.one-edge{background:var(--purple-bg);border-color:var(--purple-border)}
+.bfs-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.bfs-box.zero-edge .bfs-box-title{color:var(--green-mid)}
+.bfs-box.one-edge .bfs-box-title{color:var(--purple-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1368</div>
+  <h1>Minimum Cost to Make at Least One Valid Path in a Grid</h1>
+  <p class="subtitle">Given an m×n grid with direction signs, find the minimum cost to change signs so a valid path from (0,0) to (m-1,n-1) exists.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">0-1 BFS</span>
+    <span class="tag tag-complexity">Time: O(m·n)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an <strong>m × n grid</strong> where each cell contains a direction sign — <strong>1 (right)</strong>, <strong>2 (left)</strong>, <strong>3 (down)</strong>, or <strong>4 (up)</strong>. Following these arrows as written, you may or may not reach the bottom-right corner (m-1, n-1) from the top-left (0,0). You can <strong>change any sign for a cost of 1</strong>. Find the <strong>minimum number of sign changes</strong> needed to guarantee at least one valid path.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Following an existing sign costs <strong>0</strong>; overriding it to go a different direction costs <strong>1</strong>. This naturally models a <em>weighted graph where edge weights are only 0 or 1</em> — exactly the sweet spot for <strong>0-1 BFS</strong> (a deque instead of a full priority queue). We want the shortest (cheapest) path from (0,0) to (m-1,n-1) in this 0/1-edge-weight graph.</p>
+    </div>
+
+    <p><strong>Concrete example (3×3 grid):</strong></p>
+    <p>Grid: [[1,1,1],[2,2,2],[3,3,3]] — row 0 points right, row 1 points left, row 2 points down.</p>
+    <p>Following the arrows: (0,0)→(0,1)→(0,2)…then stuck (arrow points right, but we are at column edge). We'd need to change the (0,2) sign to go down (cost 1), then change (1,2) to go down (cost 1), and so on. The algorithm finds the optimal sequence of changes that minimises total cost.</p>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">Naive: Try all subsets of sign changes</div>
+        <p style="font-size:13px;color:var(--red-mid)">For an m×n grid, 2^(m·n) subsets — completely infeasible even for a 5×5 grid.</p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Optimal: Model as 0-1 weighted graph</div>
+        <p style="font-size:13px;color:var(--green-mid)">Each cell is a node; free edges (cost 0) follow the sign, paid edges (cost 1) go all other 3 directions. Run 0-1 BFS → O(m·n).</p>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Formal Edge Model</div>
+      <p>From cell (r, c), there are <strong>4 possible moves</strong> (right, left, down, up). The edge to the neighbor that the existing sign points to has weight <strong>0</strong>; the other three neighbors each have weight <strong>1</strong>. We seek the minimum-weight path from (0,0) to (m-1,n-1).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 0-1 BFS</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>0-1 BFS</strong> is a specialised shortest-path algorithm for graphs where every edge has weight <strong>0 or 1</strong>. It uses a <code>deque</code> (double-ended queue): cost-0 neighbours are pushed to the <em>front</em>, cost-1 neighbours to the <em>back</em>. This maintains the deque in non-decreasing cost order — analogous to Dijkstra but O(V+E) because we never need a heap.</p>
+
+    <div class="bfs-diagram">
+      <div class="bfs-box zero-edge">
+        <div class="bfs-box-title">Cost-0 Move (Free)</div>
+        <p style="font-size:13px">Neighbour pointed to by existing sign.<br>→ Push to <strong>FRONT</strong> of deque.<br>Cost stays the same.</p>
+      </div>
+      <div class="bfs-box one-edge">
+        <div class="bfs-box-title">Cost-1 Move (Change Sign)</div>
+        <p style="font-size:13px">Any other valid neighbour.<br>→ Push to <strong>BACK</strong> of deque.<br>Cost increases by 1.</p>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialise:</strong> dist[r][c] = ∞ for all cells; dist[0][0] = 0. Push (0, 0, 0) [cost, row, col] to deque.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Pop from front</strong> of deque. If cost > dist[r][c], skip (stale entry).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>For each of the 4 directions</strong> from (r, c): compute edge cost (0 if it matches the sign, 1 otherwise). If dist[r][c] + edge_cost &lt; dist[nr][nc], update dist and push to front (cost 0) or back (cost 1).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Terminate</strong> when deque is empty. Return dist[m-1][n-1].</span>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Not Dijkstra?</div>
+      <p>Dijkstra with a min-heap would give O(m·n · log(m·n)), which is fine but suboptimal. Because weights are <em>only</em> 0 or 1, the deque trick maintains sorted order in O(1) per operation → O(m·n) total. For m,n ≤ 100, this means ~10,000 operations vs ~130,000 for Dijkstra — 13× faster asymptotically.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why Not Standard BFS?</div>
+      <p>Standard BFS assumes all edges have the same weight. Here weights are 0 or 1, so a plain BFS would process some nodes before their optimal cost is known. The deque trick is the fix: zero-cost edges at the front ensure we always pop the minimum-cost node next.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — The Invariant        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At any point during 0-1 BFS, the deque is <strong>sorted in non-decreasing order of cost</strong>. Specifically, it contains at most <em>two distinct cost values</em> — the current minimum cost k and k+1. Nodes with cost k are in the front section, nodes with cost k+1 are in the back.</p>
+    </div>
+
+    <p><strong>Why this guarantees correctness:</strong></p>
+    <ul style="padding-left:1.25rem;line-height:2">
+      <li>We always pop the minimum-cost unvisited node (like Dijkstra).</li>
+      <li>When we push a cost-0 neighbour to the front, it still has cost k — the front remains sorted.</li>
+      <li>When we push a cost-1 neighbour to the back, it has cost k+1 — the back stays at k+1.</li>
+      <li>Once the front section (cost k) is exhausted, the back section (cost k+1) becomes the new front — this is exactly the BFS level-by-level progression.</li>
+    </ul>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases handled:</strong></p>
+    <ul style="padding-left:1.25rem;line-height:2">
+      <li><strong>1×1 grid:</strong> Already at destination, cost = 0.</li>
+      <li><strong>All arrows already valid:</strong> Every move is cost-0, total cost = 0.</li>
+      <li><strong>Every move requires a change:</strong> Cost = m + n - 2 (the Manhattan distance along the direct path).</li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Analogy: The Traffic Sign Route</div>
+      <p>Think of navigating a city where streets all have one-way signs. If you follow the existing sign, it's free (green light). If you want to go the "wrong way," you pay a toll of $1. 0-1 BFS finds the cheapest route — always choosing free roads first before paying for direction changes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">from collections import deque</span><span class="aann">// deque supports O(1) appendleft and append</span></div>
+      <div class="ann-line"><span class="acode"> </span></div>
+      <div class="ann-line"><span class="acode">def minCost(grid):</span><span class="aann">// main function</span></div>
+      <div class="ann-line"><span class="acode">    m, n = len(grid), len(grid[0])</span><span class="aann">// grid dimensions</span></div>
+      <div class="ann-line"><span class="acode">    # dir: sign -> (dr, dc)</span></div>
+      <div class="ann-line"><span class="acode">    DIRS = [(0,1),(0,-1),(1,0),(-1,0)]</span><span class="aann">// right, left, down, up (1-indexed in grid)</span></div>
+      <div class="ann-line"><span class="acode"> </span></div>
+      <div class="ann-line"><span class="acode">    dist = [[float('inf')]*n for _ in range(m)]</span><span class="aann">// min cost to reach each cell, start at ∞</span></div>
+      <div class="ann-line"><span class="acode">    dist[0][0] = 0</span><span class="aann">// source cell has cost 0</span></div>
+      <div class="ann-line"><span class="acode">    dq = deque([(0, 0, 0)])  # (cost, row, col)</span><span class="aann">// initialise deque with source</span></div>
+      <div class="ann-line"><span class="acode"> </span></div>
+      <div class="ann-line"><span class="acode">    while dq:</span><span class="aann">// process until deque empty</span></div>
+      <div class="ann-line"><span class="acode">        cost, r, c = dq.popleft()</span><span class="aann">// pop cheapest node (front)</span></div>
+      <div class="ann-line"><span class="acode">        if cost > dist[r][c]:</span><span class="aann">// stale entry: a cheaper path was found already</span></div>
+      <div class="ann-line"><span class="acode">            continue</span><span class="aann">// skip — do not reprocess</span></div>
+      <div class="ann-line"><span class="acode"> </span></div>
+      <div class="ann-line"><span class="acode">        for d, (dr, dc) in enumerate(DIRS):</span><span class="aann">// try all 4 neighbours</span></div>
+      <div class="ann-line"><span class="acode">            nr, nc = r + dr, c + dc</span><span class="aann">// neighbour coordinates</span></div>
+      <div class="ann-line"><span class="acode">            if 0 &lt;= nr &lt; m and 0 &lt;= nc &lt; n:</span><span class="aann">// bounds check</span></div>
+      <div class="ann-line"><span class="acode">                # grid sign is 1-indexed: sign d+1 points to DIRS[d]</span></div>
+      <div class="ann-line"><span class="acode">                edge = 0 if grid[r][c] == d+1 else 1</span><span class="aann">// free if sign matches, else cost 1</span></div>
+      <div class="ann-line"><span class="acode">                new_cost = cost + edge</span><span class="aann">// total cost to reach neighbour</span></div>
+      <div class="ann-line"><span class="acode">                if new_cost &lt; dist[nr][nc]:</span><span class="aann">// found cheaper path to neighbour</span></div>
+      <div class="ann-line"><span class="acode">                    dist[nr][nc] = new_cost</span><span class="aann">// update dist table</span></div>
+      <div class="ann-line"><span class="acode">                    if edge == 0:</span><span class="aann">// free move → front of deque (keep cost sorted)</span></div>
+      <div class="ann-line"><span class="acode">                        dq.appendleft((new_cost, nr, nc))</span></div>
+      <div class="ann-line"><span class="acode">                    else:</span><span class="aann">// paid move → back of deque</span></div>
+      <div class="ann-line"><span class="acode">                        dq.append((new_cost, nr, nc))</span></div>
+      <div class="ann-line"><span class="acode"> </span></div>
+      <div class="ann-line"><span class="acode">    return dist[m-1][n-1]</span><span class="aann">// answer: min cost to reach bottom-right</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: 1-indexed Signs</div>
+      <p>The problem uses signs <strong>1, 2, 3, 4</strong> (not 0-indexed). Direction d in DIRS corresponds to sign value <strong>d+1</strong>. Off-by-one here means every move costs 1 when it should cost 0 — the algorithm still finds a path but with inflated cost. Always double-check the sign-to-direction mapping.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Stale Entry Check</div>
+      <p>Because a node can be added to the deque multiple times (with different costs), we use <code>if cost > dist[r][c]: continue</code> to skip outdated entries. This is the same "lazy deletion" trick used in Dijkstra — it avoids maintaining a complex visited set.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Complexity:</strong></p>
+    <ul style="padding-left:1.25rem;line-height:2">
+      <li><strong>Time:</strong> O(m·n) — each cell is processed at most once, and each edge examined at most twice.</li>
+      <li><strong>Space:</strong> O(m·n) — for the dist table and deque (at most m·n entries).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognise "minimum changes = minimum cost"</div>
+        <p style="font-size:14px">Any time you see "minimum changes to achieve a goal," think of it as a <em>cost-minimisation problem on a graph</em>. The question is: what does a node represent? What does an edge weight represent?</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Model as a graph with 0/1 edge weights</div>
+        <p style="font-size:14px">Cells are nodes. From each cell there are 4 edges — one for each direction. The edge to the cell the current sign points to costs 0 (free); all other edges cost 1 (we'd have to change the sign). This is the crucial modelling insight.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Choose the right shortest-path algorithm</div>
+        <p style="font-size:14px">Options: BFS (all equal weights — no), Dijkstra (general weights — yes but O(n log n)), 0-1 BFS (0/1 weights only — yes and O(n)). Since weights are only 0 or 1, use 0-1 BFS with a deque.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Implement and handle the 1-indexed signs</div>
+        <p style="font-size:14px">DIRS = [(0,1),(0,-1),(1,0),(-1,0)]. Sign value d+1 corresponds to DIRS[d]. Edge cost = 0 if grid[r][c] == d+1, else 1.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Let me think of this as a graph problem. Each cell is a node, and from each cell I have 4 possible moves. If the existing arrow already points in that direction, moving there costs nothing — I don't need to change any sign. Otherwise, I'd be overriding the sign, which costs 1.
+
+So the edge weights are only 0 or 1. For 0/1-weighted graphs, I can use 0-1 BFS — it's essentially Dijkstra but with a deque instead of a heap, giving O(m·n) time instead of O(m·n log m·n).
+
+The algorithm: initialise dist to infinity, dist[0][0]=0. Push (0,0,0) to deque. Repeatedly pop the front, skip stale entries, and for each of 4 directions: if free, push to front; if cost 1, push to back. Return dist[m-1][n-1].
+
+One gotcha: the signs are 1-indexed. Direction index d corresponds to sign d+1."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-up: What if costs are 0 to K?</div>
+      <p>If sign changes had varying costs (not just 0 or 1), you'd need Dijkstra with a min-heap. If costs were bounded integers 0 to K, you could use a K-bucket queue for O((V+E)·K). The 0-1 BFS deque trick only works when edge weights are exactly {0, 1}.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:0.5rem">Grid: [[1,1,3],[3,2,2],[1,1,4]] — direction arrows: 1=→, 2=←, 3=↓, 4=↑. Target: cell (2,2). Trace 0-1 BFS step by step.</p>
+
+    <!-- Grid visualisation -->
+    <div class="viz-area">
+      <div class="grid-container">
+        <div>
+          <div class="grid-label">Grid (arrows = signs)</div>
+          <div id="grid-viz"></div>
+        </div>
+        <div>
+          <div class="grid-label">Min Cost (dist table)</div>
+          <div id="cost-viz" class="cost-grid"></div>
+        </div>
+      </div>
+
+      <!-- Deque display -->
+      <div class="deque-area">
+        <div class="deque-title">Deque (front → back): [cost, r, c]</div>
+        <div class="deque-row" id="deque-display"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-current">
+          <span class="var-name">Current</span>
+          <span class="var-val" id="vv-current">(0,0)</span>
+        </div>
+        <div class="var-box" id="vb-cost">
+          <span class="var-name">Cost</span>
+          <span class="var-val" id="vv-cost">0</span>
+        </div>
+        <div class="var-box" id="vb-action">
+          <span class="var-name">Action</span>
+          <span class="var-val" id="vv-action" style="font-size:12px">Init</span>
+        </div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" id="cl0">from collections import deque</div>
+        <div class="code-line" id="cl1"> </div>
+        <div class="code-line" id="cl2">def minCost(grid):</div>
+        <div class="code-line" id="cl3">    DIRS = [(0,1),(0,-1),(1,0),(-1,0)]</div>
+        <div class="code-line" id="cl4">    dist = [[inf]*n for _ in range(m)]</div>
+        <div class="code-line" id="cl5">    dist[0][0] = 0</div>
+        <div class="code-line" id="cl6">    dq = deque([(0, 0, 0)])</div>
+        <div class="code-line" id="cl7">    while dq:</div>
+        <div class="code-line" id="cl8">        cost, r, c = dq.popleft()</div>
+        <div class="code-line" id="cl9">        if cost > dist[r][c]: continue</div>
+        <div class="code-line" id="cl10">        for d, (dr, dc) in enumerate(DIRS):</div>
+        <div class="code-line" id="cl11">            nr, nc = r+dr, c+dc</div>
+        <div class="code-line" id="cl12">            edge = 0 if grid[r][c]==d+1 else 1</div>
+        <div class="code-line" id="cl13">            new_cost = cost + edge</div>
+        <div class="code-line" id="cl14">            if new_cost &lt; dist[nr][nc]:</div>
+        <div class="code-line" id="cl15">                dist[nr][nc] = new_cost</div>
+        <div class="code-line" id="cl16">                if edge==0: dq.appendleft(...)</div>
+        <div class="code-line" id="cl17">                else: dq.append(...)</div>
+        <div class="code-line" id="cl18">    return dist[m-1][n-1]</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <span class="phase-badge" id="phase-badge">Init</span>
+        <div class="step-counter" id="step-counter">Step 0 of 14</div>
+        <div class="step-title" id="step-title">Initialise</div>
+        <div class="step-body" id="step-body">Set dist[0][0]=0, all others ∞. Push (cost=0, r=0, c=0) to deque. We start at the top-left corner with zero cost.</div>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+        <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch sw-current"></span> Current cell</div>
+        <div class="legend-item"><span class="legend-swatch sw-free"></span> Free move (cost 0)</div>
+        <div class="legend-item"><span class="legend-swatch sw-paid"></span> Paid move (cost 1)</div>
+        <div class="legend-item"><span class="legend-swatch sw-queue"></span> In deque</div>
+        <div class="legend-item"><span class="legend-swatch sw-path"></span> On optimal path</div>
+        <div class="legend-item"><span class="legend-swatch sw-done"></span> Settled</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Model the problem as a shortest-path on a 0/1-weighted graph: free edge = follow sign, paid edge = change sign.</div>
+      <div class="takeaway">0-1 BFS uses a deque: appendleft for cost-0 edges, append for cost-1 edges — keeps the deque sorted without a heap.</div>
+      <div class="takeaway">Time complexity O(m·n) beats Dijkstra's O(m·n · log(m·n)) by exploiting the {0,1} weight constraint.</div>
+      <div class="takeaway">Skip stale deque entries with the lazy check: if cost > dist[r][c]: continue.</div>
+      <div class="takeaway">Remember the 1-indexed sign encoding: sign value d+1 corresponds to direction index d in DIRS.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use 0-1 BFS</div>
+      <ul style="padding-left:1rem;line-height:2">
+        <li>Edge weights are exactly 0 or 1 (or can be mapped to {0,1})</li>
+        <li>You want shortest/cheapest path from source to destination</li>
+        <li>Full Dijkstra would work but is overkill — 0-1 BFS is faster and simpler</li>
+        <li>Keywords: "minimum changes", "minimum flips", "minimum cost" with binary edge weights</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item">
+        <strong>Minimum Obstacle Removal to Reach Corner</strong><span class="related-diff diff-med">Medium</span> — Same 0-1 BFS pattern: obstacles cost 1, empty cells cost 0.
+      </div>
+      <div class="related-item">
+        <strong>Cheapest Flights Within K Stops</strong><span class="related-diff diff-med">Medium</span> — Weighted graph shortest path with a constraint; use Bellman-Ford or modified Dijkstra.
+      </div>
+      <div class="related-item">
+        <strong>Shortest Path in Binary Matrix</strong><span class="related-diff diff-med">Medium</span> — Standard BFS on a 0/1 grid (all moves equal cost).
+      </div>
+      <div class="related-item">
+        <strong>Network Delay Time</strong><span class="related-diff diff-med">Medium</span> — Dijkstra on a weighted graph; recognise when you need full heap vs. deque.
+      </div>
+      <div class="related-item">
+        <strong>Minimum Cost to Reach City With Discounts</strong><span class="related-diff diff-med">Medium</span> — State-augmented Dijkstra; direction sign problem family.
+      </div>
+      <div class="related-item">
+        <strong>Jump Game VII</strong><span class="related-diff diff-med">Medium</span> — BFS reachability on a string with range jumps; minimum steps variant.
+      </div>
+      <div class="related-item">
+        <strong>Minimum Number of Flips to Make Binary Grid Palindrome</strong><span class="related-diff diff-med">Medium</span> — Minimum flip count with constraints; greedy/BFS hybrid.
+      </div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>BFS (wrong — ignores weights)</td>
+          <td class="mark-bad">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td class="mark-bad">Incorrect — gives wrong answer</td>
+        </tr>
+        <tr>
+          <td>Dijkstra + Min-Heap</td>
+          <td>O(m·n · log(m·n))</td>
+          <td>O(m·n)</td>
+          <td>Correct; acceptable for interview</td>
+        </tr>
+        <tr>
+          <td><strong>0-1 BFS (Deque)</strong></td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td class="mark-good">Optimal — interview pick</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ─── Grid definition ───
+// [[1,1,3],[3,2,2],[1,1,4]]  3×3 grid
+// Signs: 1=right(→), 2=left(←), 3=down(↓), 4=up(↑)
+const GRID = [[1,1,3],[3,2,2],[1,1,4]];
+const M = 3, N = 3;
+const ARROW = ['→','←','↓','↑'];
+const DIRS = [[0,1],[0,-1],[1,0],[-1,0]];
+
+// Pre-computed steps for the 3x3 grid walkthrough
+// Each step: { phase, phaseClass, activeLine, current, cost, action,
+//              cellStates (M×N), distTable (M×N or '∞'), deque, title, body }
+const steps = [
+  {
+    phase:'Init', phaseClass:'phase-init', activeLine:6,
+    current:[0,0], cost:0, action:'Init',
+    cellStates:[['current','normal','normal'],['normal','normal','normal'],['normal','normal','normal']],
+    distTable:[['0','∞','∞'],['∞','∞','∞'],['∞','∞','∞']],
+    deque:[{label:'(0,0,0)',cls:'cost0 active'}],
+    title:'Initialise: push (cost=0, r=0, c=0)',
+    body:'Set dist[0][0]=0, all others ∞. Push source (0,0,0) to deque. The top-left cell is our starting point with zero cost accumulated.'
+  },
+  {
+    phase:'Explore', phaseClass:'phase-explore', activeLine:8,
+    current:[0,0], cost:0, action:'Pop (0,0,0)',
+    cellStates:[['current','in-queue','normal'],['in-queue','normal','normal'],['normal','normal','normal']],
+    distTable:[['0','0','∞'],['0','∞','∞'],['∞','∞','∞']],
+    deque:[{label:'(0,0,1)',cls:'cost0 active'},{label:'(1,1,0)',cls:'cost1'}],
+    title:'Pop (0,0,0): Process cell (0,0)',
+    body:'Pop front: cost=0, cell=(0,0). Sign here is 1 (→) so moving right is FREE. Neighbour (0,1): new_cost=0 → appendleft. Moving down to (1,0) costs 1 (sign mismatch) → append to back. dist updated.'
+  },
+  {
+    phase:'Free', phaseClass:'phase-free', activeLine:16,
+    current:[0,1], cost:0, action:'Free move →',
+    cellStates:[['done','current','in-queue'],['in-queue','normal','normal'],['normal','normal','normal']],
+    distTable:[['0','0','0'],['0','∞','∞'],['∞','∞','∞']],
+    deque:[{label:'(0,0,2)',cls:'cost0 active'},{label:'(1,1,0)',cls:'cost1'}],
+    title:'Pop (0,0,1): Process cell (0,1) — cost 0',
+    body:'Pop front: cost=0, cell=(0,1). Sign is 1 (→) so moving right is FREE. Neighbour (0,2): new_cost=0 → appendleft. Moving down to (1,1) costs 1 → append. dist[0][1]=0 already set.'
+  },
+  {
+    phase:'Free', phaseClass:'phase-free', activeLine:16,
+    current:[0,2], cost:0, action:'Free move →',
+    cellStates:[['done','done','current'],['in-queue','in-queue','in-queue'],['normal','normal','normal']],
+    distTable:[['0','0','0'],['0','∞','1'],['∞','∞','∞']],
+    deque:[{label:'(1,1,0)',cls:'cost1 active'},{label:'(1,1,2)',cls:'cost1'}],
+    title:'Pop (0,0,2): Process cell (0,2) — cost 0',
+    body:'Pop front: cost=0, cell=(0,2). Sign is 3 (↓). Moving DOWN to (1,2) is FREE (sign matches). dist[1][2]=0+0=0, but wait — we also check (1,1) direction: sign is 3 here, so right is cost 1. Let\'s push (1,1,2) cost 1 to back. (0,2) is fully processed.'
+  },
+  {
+    phase:'Paid', phaseClass:'phase-paid', activeLine:17,
+    current:[1,0], cost:1, action:'Paid move ↓',
+    cellStates:[['done','done','done'],['current','in-queue','in-queue'],['in-queue','normal','normal']],
+    distTable:[['0','0','0'],['0','∞','1'],['1','∞','∞']],
+    deque:[{label:'(1,1,1)',cls:'cost1'},{label:'(1,1,2)',cls:'cost1 active'},{label:'(1,2,0)',cls:'cost1'}],
+    title:'Pop (1,1,0): Process cell (1,0) — cost 1',
+    body:'Pop front: cost=1, cell=(1,0). Sign is 3 (↓). Moving down to (2,0) is FREE: new_cost=1+0=1 → appendleft. Moving right to (1,1): sign≠right → cost 1, new_cost=2. dist[2][0]=1. Processing continues.'
+  },
+  {
+    phase:'Paid', phaseClass:'phase-paid', activeLine:12,
+    current:[1,2], cost:1, action:'Process (1,2)',
+    cellStates:[['done','done','done'],['done','in-queue','current'],['in-queue','normal','in-queue']],
+    distTable:[['0','0','0'],['0','∞','1'],['1','∞','1'],],
+    deque:[{label:'(1,2,0)',cls:'cost1 active'},{label:'(1,1,1)',cls:'cost1'}],
+    title:'Pop (1,1,2): Process cell (1,2) — cost 1',
+    body:'Pop (1,1,2): cost=1, cell=(1,2). Sign is 2 (←). Moving left to (1,1) is FREE: new_cost=1. But dist[1][1] was ∞, so update to 1 → appendleft. Moving down to (2,2): sign≠down, cost 1, new_cost=2. dist[2][2]=2 tentatively.'
+  },
+  {
+    phase:'Paid', phaseClass:'phase-paid', activeLine:15,
+    current:[2,0], cost:1, action:'Process (2,0)',
+    cellStates:[['done','done','done'],['done','done','done'],['current','in-queue','in-queue']],
+    distTable:[['0','0','0'],['0','1','1'],['1','1','2']],
+    deque:[{label:'(1,2,1)',cls:'cost1 active'},{label:'(1,2,2)',cls:'cost1'}],
+    title:'Pop (1,2,0): Process cell (2,0) — cost 1',
+    body:'Pop (1,2,0): cost=1, cell=(2,0). Sign is 1 (→). Moving right to (2,1) is FREE: new_cost=1 → appendleft. dist[2][1]=1. Processing row 2 now!'
+  },
+  {
+    phase:'Paid', phaseClass:'phase-paid', activeLine:16,
+    current:[1,1], cost:1, action:'Process (1,1)',
+    cellStates:[['done','done','done'],['done','current','done'],['done','in-queue','in-queue']],
+    distTable:[['0','0','0'],['0','1','1'],['1','1','2']],
+    deque:[{label:'(1,2,1)',cls:'cost1 active'},{label:'(1,2,2)',cls:'cost1'}],
+    title:'Pop (1,2,1): Process cell (1,1) — cost 1',
+    body:'Pop (1,2,1): cost=1, cell=(1,1). Sign is 2 (←). Moving left to (1,0): dist[1][0]=0 already. No improvement. Moving down to (2,1): dist[2][1]=1 already. Processing each neighbour and checking if we improve dist.'
+  },
+  {
+    phase:'Paid', phaseClass:'phase-paid', activeLine:15,
+    current:[2,1], cost:1, action:'Process (2,1)',
+    cellStates:[['done','done','done'],['done','done','done'],['done','current','in-queue']],
+    distTable:[['0','0','0'],['0','1','1'],['1','1','1']],
+    deque:[{label:'(1,2,2)',cls:'cost1 active'}],
+    title:'Pop (1,2,1): Process cell (2,1) — cost 1',
+    body:'Pop (1,2,1): cost=1, cell=(2,1). Sign is 1 (→). Moving right to (2,2) is FREE! new_cost=1+0=1. dist[2][2] was 2, now improved to 1 → appendleft. This is the key step: we found a cheaper way to reach the destination!'
+  },
+  {
+    phase:'Result', phaseClass:'phase-result', activeLine:18,
+    current:[2,2], cost:1, action:'Reached Target!',
+    cellStates:[['done','done','done'],['done','done','done'],['done','done','on-path']],
+    distTable:[['0','0','0'],['0','1','1'],['1','1','1']],
+    deque:[{label:'empty',cls:''}],
+    title:'Cell (2,2) reached! Cost = 1',
+    body:'The minimum cost to reach (2,2) is 1. Only ONE sign change is needed along the optimal path: (0,0)→(0,1)→(0,2)→(1,2) [sign ↓ is free]→(1,1) [sign ← is free]→(2,1)→(2,2). Just one override: the sign at (0,0) that needed to be followed to its free chain.'
+  }
+];
+
+// ─── Build DOM ───
+function buildGridViz() {
+  const gv = document.getElementById('grid-viz');
+  gv.innerHTML = '';
+  for (let r = 0; r < M; r++) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    row.style.marginBottom = '4px';
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell normal';
+      cell.id = `gc-${r}-${c}`;
+      const arrowEl = document.createElement('span');
+      arrowEl.className = 'dir-arrow';
+      arrowEl.textContent = ARROW[GRID[r][c] - 1];
+      cell.appendChild(arrowEl);
+      row.appendChild(cell);
+    }
+    gv.appendChild(row);
+  }
+}
+
+function buildCostViz() {
+  const cv = document.getElementById('cost-viz');
+  cv.innerHTML = '';
+  for (let r = 0; r < M; r++) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    row.style.marginBottom = '4px';
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cost-cell';
+      cell.id = `cc-${r}-${c}`;
+      cell.textContent = '∞';
+      row.appendChild(cell);
+    }
+    cv.appendChild(row);
+  }
+}
+
+function buildDots() {
+  const pd = document.getElementById('progress-dots');
+  pd.innerHTML = '';
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = `dot-${i}`;
+    d.onclick = () => { currentStep = i; render(); };
+    pd.appendChild(d);
+  }
+}
+
+// ─── Render ───
+let currentStep = 0;
+
+function render() {
+  const s = steps[currentStep];
+
+  // Grid cells
+  for (let r = 0; r < M; r++) {
+    for (let c = 0; c < N; c++) {
+      const cell = document.getElementById(`gc-${r}-${c}`);
+      cell.className = `grid-cell ${s.cellStates[r][c]}`;
+    }
+  }
+
+  // Cost table
+  for (let r = 0; r < M; r++) {
+    for (let c = 0; c < N; c++) {
+      const cell = document.getElementById(`cc-${r}-${c}`);
+      const val = s.distTable[r][c];
+      cell.textContent = val;
+      cell.className = 'cost-cell';
+      if (val === '0' && !(r===0 && c===0 && currentStep===0)) cell.classList.add('zero-cost');
+      else if (val !== '∞' && val !== '0') cell.classList.add('updated');
+      if (s.cellStates[r][c] === 'on-path') cell.classList.add('final-path');
+    }
+  }
+
+  // Deque
+  const dq = document.getElementById('deque-display');
+  dq.innerHTML = '';
+  if (!s.deque || s.deque.length === 0 || (s.deque.length === 1 && s.deque[0].label === 'empty')) {
+    dq.innerHTML = '<span class="deque-empty">Deque empty — algorithm complete</span>';
+  } else {
+    s.deque.forEach(item => {
+      const el = document.createElement('div');
+      el.className = `deque-item ${item.cls}`;
+      el.textContent = item.label;
+      dq.appendChild(el);
+    });
+  }
+
+  // Variables
+  const curEl = document.getElementById('vv-current');
+  const costEl = document.getElementById('vv-cost');
+  const actEl = document.getElementById('vv-action');
+  const [r, c] = s.current;
+  curEl.textContent = `(${r},${c})`;
+  costEl.textContent = s.cost;
+  actEl.textContent = s.action;
+
+  // Code highlight
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const cl = document.getElementById(`cl${s.activeLine}`);
+  if (cl) cl.classList.add('active');
+
+  // Info card
+  document.getElementById('phase-badge').textContent = s.phase;
+  document.getElementById('phase-badge').className = `phase-badge ${s.phaseClass}`;
+  document.getElementById('step-counter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Dots
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    d.className = 'dot' + (i === currentStep ? ' active' : (i < currentStep ? ' visited' : ''));
+  }
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = currentStep === 0;
+  document.getElementById('btn-next').disabled = currentStep === steps.length - 1;
+}
+
+function go(delta) {
+  const next = currentStep + delta;
+  if (next >= 0 && next < steps.length) {
+    currentStep = next;
+    render();
+  }
+}
+
+function reset() {
+  currentStep = 0;
+  render();
+}
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Init
+buildGridViz();
+buildCostViz();
+buildDots();
+render();
+</script>
+</body>
+</html>

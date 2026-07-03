@@ -1,232 +1,917 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K Closest Points to Origin – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#973 · K Closest Points to Origin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-container{display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.coord-grid{position:relative;width:260px;height:260px;flex-shrink:0}
+.grid-svg{width:100%;height:100%}
+
+/* Heap Panel */
+.heap-viz{flex:1;min-width:220px}
+.heap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.heap-slots{display:flex;flex-direction:column;gap:6px}
+.heap-slot{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border2);transition:background 0.3s,border-color 0.3s}
+.heap-slot.max-top{background:var(--red-bg);border-color:var(--red-border)}
+.heap-slot.in-heap{background:var(--blue-bg);border-color:var(--blue-border)}
+.heap-slot.evicted{background:var(--amber-bg);border-color:var(--amber-border);opacity:0.6}
+.heap-slot.result{background:var(--green-bg);border-color:var(--green-border)}
+.heap-pt{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);min-width:70px}
+.heap-dist{font-family:var(--mono);font-size:12px;color:var(--text3)}
+.heap-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-left:auto}
+.heap-slot.max-top .heap-label{color:var(--red-mid)}
+.heap-slot.in-heap .heap-label{color:var(--blue-mid)}
+.heap-slot.evicted .heap-label{color:var(--amber-mid)}
+.heap-slot.result .heap-label{color:var(--green-mid)}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Interactive Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-process{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-evict{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-process{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-evict{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-result{background:var(--green-bg);border-color:var(--green-border)}
+.sw-max{background:var(--red-bg);border-color:var(--red-border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* Heap binary tree diagram */
+.heap-tree{margin:1rem 0}
+.heap-tree-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.tree-level{display:flex;justify-content:center;gap:12px;margin-bottom:6px}
+.tree-node{padding:8px 14px;border-radius:var(--radius);background:var(--surface);border:2px solid var(--border2);font-family:var(--mono);font-size:12px;font-weight:600;text-align:center;min-width:80px}
+.tree-node.max-root{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid)}
+.tree-node.child{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.tree-node.empty{background:var(--bg2);border-color:var(--border);color:var(--text3);opacity:0.5}
+.tree-connector{text-align:center;color:var(--text3);font-size:20px;margin-bottom:2px;letter-spacing:6px}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>K Closest Points to Origin</h1>
-    <p class="subtitle">LeetCode #973 — Top K Elements · Max Heap of Size K</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Heaps</span>
-      <span class="tag tag-complexity">O(n log k) Time</span>
-      <span class="tag tag-complexity">O(k) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Top K Elements</strong> using the <strong>Max Heap of Size K</strong> technique.</p>
-      <p>Pattern category: <strong>Heaps</strong>. Apply when: <em>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Heap gives O(log n) insert/delete and O(1) min/max access. Use for top-K, median tracking, scheduling.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #973</div>
+  <h1>K Closest Points to Origin</h1>
+  <p class="subtitle">Given an array of points on a 2D plane, return the k points closest to the origin (0, 0). Distance is Euclidean.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Heaps</span>
+    <span class="tag tag-pattern">Max Heap of Size K</span>
+    <span class="tag tag-complexity">Time: O(n log k)</span>
+    <span class="tag tag-complexity">Space: O(k)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Max Heap of Size K</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Build heap from initial elements</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each new element: push to heap</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">If heap exceeds size limit: pop smallest/largest</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Top of heap = current kth element</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">For two heaps: balance sizes, rebalance on every push</span></div>
-      </div>
-    </div>
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>We have a list of 2D points <code>[x, y]</code> and need to find the <strong>k closest to the origin (0, 0)</strong>. Euclidean distance from point [x, y] to origin is √(x² + y²). We must return exactly k points; order doesn't matter.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>We <strong>never need to compute the square root</strong>. Since √ is a monotone increasing function, comparing x₁²+y₁² vs x₂²+y₂² gives the exact same ordering as comparing actual distances. Squaring avoids floating-point arithmetic entirely.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Min-heap: parent ≤ children. Max-heap: parent ≥ children. Heap property maintained after every op.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Example: points=[[1,3],[-2,2]], k=1</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          dist([1,3])² = 1 + 9 = <strong>10</strong><br>
+          dist([-2,2])² = 4 + 4 = <strong>8</strong><br>
+          k=1 → return <strong>[[-2, 2]]</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Why not sort all n points?</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Sort all n = O(n log n)<br>
+          Heap keeps only k → <strong>O(n log k)</strong><br>
+          When k ≪ n, heap wins!
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> k equals n (return all), k equals 1 (single closest), all equidistant points (any k are valid), negative coordinates (x²+y² is still positive), single-element input.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">import heapq</div><div class="code-line">def topKFrequent(nums, k):</div><div class="code-line">    freq = {}</div><div class="code-line">    for n in nums: freq[n] = freq.get(n, 0) + 1</div><div class="code-line">    heap = []</div><div class="code-line">    for num, cnt in freq.items():</div><div class="code-line">        heapq.heappush(heap, (cnt, num))</div><div class="code-line">        if len(heap) > k: heapq.heappop(heap)</div><div class="code-line">    return [h[1] for h in heap]</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log k) &nbsp;|&nbsp; Space: O(k)</p>
-    </div>
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Max Heap of Size K</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>We maintain a <strong>max heap capped at k elements</strong>, where the root always holds the <em>farthest</em> current candidate. For each new point, we push it in. If the heap grows past k, we evict the root — the farthest point. After all n points, the heap holds exactly the k closest.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Compute squared distance:</strong> For each [x, y], compute dist_sq = x*x + y*y. <strong>Negate it</strong> when pushing: Python's heapq is a min-heap, so -dist_sq makes the largest actual distance sit at the root.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Heaps problem using Max Heap of Size K. I'll build heap from initial elements then for each new element: push to heap. Time: O(n log k), Space: O(k)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Push onto heap:</strong> <code>heappush(heap, (-dist_sq, x, y))</code>. The heap automatically maintains the most-negative value (largest distance) at the top — our "eviction candidate."</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Evict if over size k:</strong> If <code>len(heap) > k</code>, call <code>heappop(heap)</code>. This removes the root — the point with the <em>largest</em> squared distance. Heap is back to size k, holding the best k seen so far.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return the heap contents:</strong> Extract [x, y] from each tuple. These k points are the final answer. (No need to sort them — the problem doesn't require ordering.)</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Max Heap vs Min Heap — What's the Difference Here?</div>
+      <p>A <strong>min heap of all n points</strong> (then pop k times) works but needs O(n) space. A <strong>max heap of size k</strong> uses O(k) space and processes each point online. The max at the top acts as a "bouncer threshold" — any new point closer than the bouncer gets in, and the bouncer leaves.</p>
     </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Heaps — Max Heap of Size K</div>
-        <div class="takeaway">✓ Heap gives O(log n) insert/delete and O(1) min/max access</div>
-        <div class="takeaway">✓ Time: O(n log k) | Space: O(k)</div>
+    <div class="heap-tree">
+      <div class="heap-tree-title">Max Heap example (k=2) — largest dist at root, always ready to evict</div>
+      <div class="tree-level">
+        <div class="tree-node max-root">ROOT: [5,-1]<br>dist²=26 ← evict next</div>
       </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Kth Largest Element in a Stream</strong> (Easy) — Min Heap of Size K</li>
-<li><strong>Top K Frequent Elements</strong> (Medium) — Heap or Bucket Sort</li></ul>
+      <div class="tree-connector">/ \</div>
+      <div class="tree-level">
+        <div class="tree-node child">[3,3]<br>dist²=18</div>
+        <div class="tree-node empty">(slot)</div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {heap:[],msg:"Empty min-heap",phase:"INIT"},
-  {heap:[3],msg:"Push 3",phase:"PUSH"},
-  {heap:[1,3],msg:"Push 1 → heapify up",phase:"PUSH"},
-  {heap:[1,3,5],msg:"Push 5",phase:"PUSH"},
-  {heap:[1,3,5,7],msg:"Push 7",phase:"PUSH"},
-  {heap:[3,7,5],top:1,msg:"Pop 1 (min) → heapify down",phase:"POP"},
-  {heap:[3,7,5],msg:"Top=3 (second smallest)",phase:"DONE"},
-];
-let cur = 0;
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing each point, the max heap contains <strong>at most k elements, all of which are the k closest points seen so far</strong>. No point outside the heap has a smaller distance than any point inside it.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why evicting the max is always correct:</strong> When heap size exceeds k after a push, the heap has k+1 candidates for the "k closest." Exactly one must leave — and it should be the worst (farthest) of the k+1. The max heap root is always that worst element. After eviction, the invariant is restored.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why squaring distances preserves order:</strong> For non-negative a, b: a &lt; b ↔ a² &lt; b² ↔ √a &lt; √b. Squared distances are always non-negative, so comparing x₁²+y₁² vs x₂²+y₂² is equivalent to comparing √(x₁²+y₁²) vs √(x₂²+y₂²).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Negation Trick — Easy to Forget</div>
+      <p>Python's <code>heapq</code> only provides a <em>min-heap</em>. Push <code>(-dist_sq, x, y)</code> — negating the distance. The most-negative value (= largest actual dist) floats to the top. When we pop, we remove the farthest point. Forgetting to negate produces a min-heap that evicts the <em>closest</em> points — exactly backwards!</p>
+    </div>
+
+    <p><strong>Proof by induction:</strong> Base case: empty heap is trivially the "0 closest of 0 seen." Inductive step: after processing point p — if heap &lt; k elements, push p (heap now holds all seen, which are the k closest of those). If heap = k and dist(p) &lt; max(heap), push p then pop the max: new heap holds k closest. If dist(p) ≥ max(heap), push p then immediately pop p (equivalently skip it): heap unchanged, still holds k closest.</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Max Heap of Size K (Interview Pick, O(n log k))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode">def kClosest(points, k):                          </span><span class="aann">← points=[[x,y],...], k=how many to return</span></div>
+<div class="ann-line"><span class="acode">    heap = []                                     </span><span class="aann">← max heap simulated via negation; stores (-dist², x, y)</span></div>
+<div class="ann-line"><span class="acode">    for x, y in points:                           </span><span class="aann">← iterate all n points — O(n) iterations</span></div>
+<div class="ann-line"><span class="acode">        dist_sq = x*x + y*y                       </span><span class="aann">← squared distance; skip sqrt (monotone function)</span></div>
+<div class="ann-line"><span class="acode">        heapq.heappush(heap, (-dist_sq, x, y))    </span><span class="aann">← negated: largest dist becomes most-negative → sits at root</span></div>
+<div class="ann-line"><span class="acode">        if len(heap) > k:                         </span><span class="aann">← after push, do we have k+1 candidates?</span></div>
+<div class="ann-line"><span class="acode">            heapq.heappop(heap)                   </span><span class="aann">← evict the root = farthest point; heap back to k</span></div>
+<div class="ann-line"><span class="acode">    return [[x, y] for (_, x, y) in heap]         </span><span class="aann">← unpack (neg_dist, x, y) tuples into [x,y] lists</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why (-dist_sq, x, y) and not just -dist_sq?</div>
+      <p>Storing the tuple <code>(-dist_sq, x, y)</code> keeps the coordinates alongside the key. If two points have equal distance, Python compares the next tuple element (x) as a tiebreaker — this is fine and avoids errors. The underscore <code>_</code> in the return unpacking discards the negated distance; we only want [x, y].</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Sort All Points (Simpler, O(n log n))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def kClosest(points, k):                          </span></div>
+<div class="ann-line"><span class="acode">    points.sort(key=lambda p: p[0]**2 + p[1]**2)  </span><span class="aann">← sort all n by dist² — O(n log n), in-place</span></div>
+<div class="ann-line"><span class="acode">    return points[:k]                             </span><span class="aann">← first k are the k closest — slice O(k)</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — QuickSelect (O(n) avg, O(n²) worst)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import random</span></div>
+<div class="ann-line"><span class="acode">def kClosest(points, k):                          </span></div>
+<div class="ann-line"><span class="acode">    def dist(p): return p[0]**2 + p[1]**2        </span></div>
+<div class="ann-line"><span class="acode">    def quickselect(lo, hi):                      </span><span class="aann">← partition-based selection — like quicksort but one side</span></div>
+<div class="ann-line"><span class="acode">        pivot = dist(points[random.randint(lo,hi)])</span><span class="aann">← random pivot avoids worst-case O(n²)</span></div>
+<div class="ann-line"><span class="acode">        l, r, m = lo, hi, lo                     </span><span class="aann">← 3-way Dutch National Flag partition</span></div>
+<div class="ann-line"><span class="acode">        while m <= r:                             </span></div>
+<div class="ann-line"><span class="acode">            d = dist(points[m])                  </span></div>
+<div class="ann-line"><span class="acode">            if d < pivot:   points[l],points[m]=points[m],points[l]; l+=1; m+=1</span></div>
+<div class="ann-line"><span class="acode">            elif d > pivot: points[m],points[r]=points[r],points[m]; r-=1</span></div>
+<div class="ann-line"><span class="acode">            else:           m+=1</span></div>
+<div class="ann-line"><span class="acode">        if k <= l: return quickselect(lo, l-1)   </span><span class="aann">← answer is entirely in left partition</span></div>
+<div class="ann-line"><span class="acode">        elif k <= m: return                      </span><span class="aann">← answer spans into pivot group — done</span></div>
+<div class="ann-line"><span class="acode">        else: return quickselect(m, hi)          </span><span class="aann">← answer is in right partition</span></div>
+<div class="ann-line"><span class="acode">    quickselect(0, len(points)-1)</span></div>
+<div class="ann-line"><span class="acode">    return points[:k]                            </span><span class="aann">← points[:k] now hold the k closest (not sorted)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Max Heap of k:</strong> O(n log k) time, O(k) space — interview pick; optimal for k ≪ n and streaming<br>
+        <strong>Sort all:</strong> O(n log n) time, O(1) extra — easiest to write; best when k ≈ n<br>
+        <strong>QuickSelect:</strong> O(n) avg, O(n²) worst, O(1) space — fastest average but tricky under pressure
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Spot the "Top K" Pattern</div>
+        <p style="font-size:14px;color:var(--text)">The phrase "find the k closest" is a classic signal. Any "k smallest/largest/most-frequent/nearest" question maps to the heap pattern. Here "k closest distances" = "k smallest squared distances."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Sort First (Brute Force)</div>
+        <p style="font-size:14px;color:var(--text)">"I can sort all points by x²+y² and return the first k. That's O(n log n) — correct but potentially wasteful since we sorted more than we needed to." Establish a baseline, then optimize.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize with Max Heap of Size K</div>
+        <p style="font-size:14px;color:var(--text)">"I only need to track k candidates at any time. A max heap lets me maintain the k closest seen so far: push each point, if heap exceeds k evict the root (farthest). O(n log k) time, O(k) space — strictly better when k ≪ n."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Bonus — Mention QuickSelect</div>
+        <p style="font-size:14px;color:var(--text)">"For O(n) average time, QuickSelect partitions in-place. But worst case is O(n²) and it's harder to code correctly without bugs. For an interview I'd stick with the heap solution unless the problem explicitly asks for O(n)."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a 'k smallest by a metric' problem — my go-to is a max heap of size k.<br>
+First: I'll use squared distance x²+y² instead of Euclidean — same ordering, avoids sqrt.<br>
+I iterate all n points; for each I push (-dist_sq, x, y) onto the heap.<br>
+Python heapq is a min-heap, so negating makes the farthest point bubble to the root.<br>
+If heap size exceeds k, I pop the root — evicting the farthest candidate.<br>
+At the end, the heap holds exactly the k closest. Time O(n log k), Space O(k)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if new points keep arriving (online stream)?"</strong> → Heap handles this perfectly; process one at a time</li>
+        <li><strong>"Return them sorted by distance?"</strong> → Sort the k results: O(k log k) extra; total still O(n log k)</li>
+        <li><strong>"What about 3D points?"</strong> → dist² = x²+y²+z²; algorithm identical</li>
+        <li><strong>"Kth closest (not k closest)?"</strong> → Same heap; the point evicted when size first reaches k+1 is the (k+1)-th closest</li>
+        <li><strong>"What if k=n?"</strong> → Just return all points; heap approach still works, same as sorting</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: points=[[3,3],[5,-1],[-2,4],[1,1]], k=2</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="grid-container">
+        <!-- SVG coordinate plane -->
+        <div class="coord-grid">
+          <svg class="grid-svg" viewBox="-10 -10 140 140" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="smallgrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e8e6df" stroke-width="0.4"/>
+              </pattern>
+              <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <rect width="20" height="20" fill="url(#smallgrid)"/>
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#d4d2ca" stroke-width="0.8"/>
+              </pattern>
+            </defs>
+            <rect width="120" height="120" fill="url(#grid)"/>
+            <!-- Axes -->
+            <line x1="60" y1="0" x2="60" y2="120" stroke="#9c9a92" stroke-width="1.5"/>
+            <line x1="0" y1="60" x2="120" y2="60" stroke="#9c9a92" stroke-width="1.5"/>
+            <!-- Axis labels -->
+            <text x="113" y="57" font-size="8" fill="#9c9a92" font-family="monospace">x</text>
+            <text x="62" y="8" font-size="8" fill="#9c9a92" font-family="monospace">y</text>
+            <!-- Origin -->
+            <circle cx="60" cy="60" r="3.5" fill="#185FA5"/>
+            <text x="63" y="75" font-size="7" fill="#185FA5" font-family="monospace">(0,0)</text>
+            <!-- Distance lines (canvas: origin=60,60; scale=10; y-flipped) -->
+            <!-- [3,3]:  cx=90, cy=30 -->
+            <!-- [5,-1]: cx=110, cy=70 -->
+            <!-- [-2,4]: cx=40, cy=20 -->
+            <!-- [1,1]:  cx=70, cy=50 -->
+            <line id="line0" x1="60" y1="60" x2="90" y2="30" stroke="transparent" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line id="line1" x1="60" y1="60" x2="110" y2="70" stroke="transparent" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line id="line2" x1="60" y1="60" x2="40" y2="20" stroke="transparent" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line id="line3" x1="60" y1="60" x2="70" y2="50" stroke="transparent" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <!-- Point circles -->
+            <circle id="pt0" cx="90" cy="30" r="6" fill="#9c9a92" stroke="#6b6b65" stroke-width="1.5"/>
+            <text id="pt0l" x="93" y="26" font-size="7.5" fill="#6b6b65" font-family="monospace">[3,3]</text>
+            <circle id="pt1" cx="110" cy="70" r="6" fill="#9c9a92" stroke="#6b6b65" stroke-width="1.5"/>
+            <text id="pt1l" x="112" y="68" font-size="7.5" fill="#6b6b65" font-family="monospace">[5,-1]</text>
+            <circle id="pt2" cx="40" cy="20" r="6" fill="#9c9a92" stroke="#6b6b65" stroke-width="1.5"/>
+            <text id="pt2l" x="15" y="18" font-size="7.5" fill="#6b6b65" font-family="monospace">[-2,4]</text>
+            <circle id="pt3" cx="70" cy="50" r="6" fill="#9c9a92" stroke="#6b6b65" stroke-width="1.5"/>
+            <text id="pt3l" x="72" y="47" font-size="7.5" fill="#6b6b65" font-family="monospace">[1,1]</text>
+          </svg>
+        </div>
+
+        <!-- Max Heap panel -->
+        <div class="heap-viz">
+          <div class="heap-title">Max Heap (≤ k=2 slots) — farthest at top</div>
+          <div class="heap-slots" id="heap-slots">
+            <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">(empty)</div>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--text3);text-align:center" id="heap-size-label">Heap size: 0 / k=2</div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-point">
+          <span class="var-name">point</span>
+          <span class="var-val" id="vv-point">—</span>
+        </div>
+        <div class="var-box" id="vb-dist">
+          <span class="var-name">dist²</span>
+          <span class="var-val" id="vv-dist">—</span>
+        </div>
+        <div class="var-box" id="vb-action">
+          <span class="var-name">action</span>
+          <span class="var-val" id="vv-action">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">import heapq</div>
+      <div class="code-line" id="cl-1">def kClosest(points, k):</div>
+      <div class="code-line" id="cl-2">    heap = []</div>
+      <div class="code-line" id="cl-3">    for x, y in points:</div>
+      <div class="code-line" id="cl-4">        dist_sq = x*x + y*y</div>
+      <div class="code-line" id="cl-5">        heapq.heappush(heap, (-dist_sq, x, y))</div>
+      <div class="code-line" id="cl-6">        if len(heap) &gt; k:</div>
+      <div class="code-line" id="cl-7">            heapq.heappop(heap)</div>
+      <div class="code-line" id="cl-8">    return [[x, y] for (_, x, y) in heap]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 12</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the algorithm. We process 4 points with k=2 and find the 2 closest to the origin.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-process"></div> In heap (candidate)</div>
+      <div class="legend-item"><div class="legend-swatch sw-max"></div> Heap root (farthest, to evict)</div>
+      <div class="legend-item"><div class="legend-swatch sw-evict"></div> Evicted (too far)</div>
+      <div class="legend-item"><div class="legend-swatch sw-result"></div> Final answer</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Use squared distance (x²+y²) — same ordering as Euclidean, no sqrt needed</div>
+      <div class="takeaway">Max heap of size k: root always holds the current farthest candidate — the one to evict</div>
+      <div class="takeaway">Python's heapq is a min-heap; negate the key to simulate a max-heap</div>
+      <div class="takeaway">O(n log k) time, O(k) space — much better than O(n log n) sort when k ≪ n</div>
+      <div class="takeaway">"Find k closest/smallest/largest/most-frequent" → think max heap of size k</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>When to Use</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sort All Points</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(1)</td>
+          <td>k ≈ n; simplest code to write</td>
+        </tr>
+        <tr>
+          <td><strong>Max Heap of k ✓</strong></td>
+          <td class="mark-good">O(n log k)</td>
+          <td>O(k)</td>
+          <td>k ≪ n; streaming data; interview pick</td>
+        </tr>
+        <tr>
+          <td>QuickSelect</td>
+          <td class="mark-good">O(n) avg</td>
+          <td>O(1)</td>
+          <td>Best avg time; in-place; risky worst case</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Max Heap of Size K Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Find k smallest/largest/closest/most-frequent" from n items → max heap of size k</li>
+        <li>Data is a stream (can't hold all n at once) → heap handles one element at a time in O(k) space</li>
+        <li>k is significantly smaller than n → heap beats full sort</li>
+        <li>You need the answer to update as data grows → maintain the bounded heap</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Max Heap of Size K / Top K)</div>
+      <div class="related-item"><strong>Kth Largest Element in an Array</strong><span class="related-diff diff-med">Medium</span> — Min heap of size k; root is the kth largest (#215)</div>
+      <div class="related-item"><strong>Top K Frequent Elements</strong><span class="related-diff diff-med">Medium</span> — Heap ordered by frequency; bucket sort also viable (#347)</div>
+      <div class="related-item"><strong>Top K Frequent Words</strong><span class="related-diff diff-med">Medium</span> — Same pattern with lexicographic tiebreaker (#692)</div>
+      <div class="related-item"><strong>Find Median from Data Stream</strong><span class="related-diff diff-hard">Hard</span> — Two heaps (max + min) to track running median (#295)</div>
+      <div class="related-item"><strong>Kth Smallest Element in a Sorted Matrix</strong><span class="related-diff diff-med">Medium</span> — Min heap with (val, row, col) for multi-source merge (#378)</div>
+      <div class="related-item"><strong>Sort Characters By Frequency</strong><span class="related-diff diff-med">Medium</span> — Max heap by character frequency, then reconstruct string (#451)</div>
+      <div class="related-item"><strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span> — Greedy + max heap; always schedule most-frequent remaining task (#621)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Heaps section<br>
+      Sub-Pattern: <strong>Max Heap of Size K</strong> (Top K) · Main Pattern: <strong>Heaps</strong> · Source: Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// points = [[3,3],[5,-1],[-2,4],[1,1]], k=2
+// dist_sq: [18, 26, 20, 2]
+// SVG coords (origin=60,60; scale=10; y-flipped):
+// [3,3]  → (90, 30)
+// [5,-1] → (110, 70)
+// [-2,4] → (40, 20)
+// [1,1]  → (70, 50)
+
+const PT_FILL = {
+  normal:  '#9c9a92',
+  active:  '#185FA5',
+  inhoop:  '#3B6D11',
+  evicted: '#854F0B',
+  result:  '#3B6D11'
+};
+const PT_STROKE = {
+  normal:  '#6b6b65',
+  active:  '#042C53',
+  inhoop:  '#173404',
+  evicted: '#412402',
+  result:  '#173404'
+};
+const LINE_CLR = {
+  normal:  'transparent',
+  active:  '#85B7EB',
+  inhoop:  '#97C459',
+  evicted: '#EF9F27',
+  result:  '#97C459'
+};
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:2,
+    point:'—', dist:'—', action:'—',
+    ptStates:['normal','normal','normal','normal'],
+    heap:[],
+    title:'Initialize — heap = []',
+    text:'points = [[3,3],[5,-1],[-2,4],[1,1]], k = 2. We initialize an empty max heap. We will stream through each point, always keeping the best 2 (closest) candidates in the heap. Farthest gets evicted when heap exceeds k.'
+  },
+  {
+    id:1, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:4,
+    point:'[3,3]', dist:'18', action:'compute',
+    ptStates:['active','normal','normal','normal'],
+    heap:[],
+    title:'Point [3,3] — compute dist² = 3²+3² = 18',
+    text:'We look at the first point [3,3]. Squared distance = 3×3 + 3×3 = 9 + 9 = 18. No square root needed — we compare squared distances directly, which preserves the same ordering.'
+  },
+  {
+    id:2, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:5,
+    point:'[3,3]', dist:'18', action:'push',
+    ptStates:['inhoop','normal','normal','normal'],
+    heap:[{dist_sq:18,x:3,y:3,state:'max-top'}],
+    title:'heappush(−18, 3, 3) → heap size = 1 ≤ k',
+    text:'Push (−18, 3, 3). We negate because Python heapq is a min-heap: the most-negative entry (= largest actual distance) will float to the root, ready to be evicted. Heap size = 1 ≤ k=2, so no eviction needed.'
+  },
+  {
+    id:3, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:4,
+    point:'[5,-1]', dist:'26', action:'compute',
+    ptStates:['inhoop','active','normal','normal'],
+    heap:[{dist_sq:18,x:3,y:3,state:'max-top'}],
+    title:'Point [5,-1] — compute dist² = 5²+(-1)² = 26',
+    text:'Second point [5,-1]. Squared distance = 25 + 1 = 26. This is farther than [3,3] (26 > 18), but we push it anyway and handle eviction only after the push — that keeps the code clean.'
+  },
+  {
+    id:4, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:5,
+    point:'[5,-1]', dist:'26', action:'push',
+    ptStates:['inhoop','inhoop','normal','normal'],
+    heap:[
+      {dist_sq:26,x:5,y:-1,state:'max-top'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'}
+    ],
+    title:'heappush(−26, 5, -1) → heap size = 2 = k',
+    text:'Push (−26, 5, -1). Heap now has 2 elements. The most-negative root is −26, meaning [5,-1] (dist²=26) is at the top — the current farthest candidate. Heap size = k=2 exactly, so no eviction. Heap is "full."'
+  },
+  {
+    id:5, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:4,
+    point:'[-2,4]', dist:'20', action:'compute',
+    ptStates:['inhoop','inhoop','active','normal'],
+    heap:[
+      {dist_sq:26,x:5,y:-1,state:'max-top'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'}
+    ],
+    title:'Point [-2,4] — compute dist² = (-2)²+4² = 20',
+    text:'Third point [-2,4]. Squared distance = 4 + 16 = 20. The current heap maximum is 26 (point [5,-1]). Since 20 < 26, this new point is CLOSER than the current farthest. It deserves a spot in our k=2 closest — push and evict [5,-1].'
+  },
+  {
+    id:6, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:5,
+    point:'[-2,4]', dist:'20', action:'push',
+    ptStates:['inhoop','inhoop','inhoop','normal'],
+    heap:[
+      {dist_sq:26,x:5,y:-1,state:'max-top'},
+      {dist_sq:20,x:-2,y:4,state:'in-heap'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'}
+    ],
+    title:'heappush(−20, -2, 4) → heap size = 3 > k!',
+    text:'Push (−20, -2, 4). Heap now has 3 elements — one over the limit k=2. The root remains (−26, 5, -1) — still the farthest among the 3 current candidates. We must evict it.'
+  },
+  {
+    id:7, phase:'evict', phaseLabel:'EVICT', phaseClass:'phase-evict', activeLine:7,
+    point:'[-2,4]', dist:'20', action:'pop [5,-1]',
+    ptStates:['inhoop','evicted','inhoop','normal'],
+    heap:[
+      {dist_sq:26,x:5,y:-1,state:'evicted'},
+      {dist_sq:20,x:-2,y:4,state:'max-top'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'}
+    ],
+    title:'heappop → evict [5,-1] (dist²=26). Too far!',
+    text:'heappop removes (−26, 5, -1) — the most-negative key = farthest point. [5,-1] with dist²=26 is gone. Remaining heap has 2 elements: [3,3](dist²=18) and [-2,4](dist²=20). These are the 2 closest points seen so far.'
+  },
+  {
+    id:8, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:4,
+    point:'[1,1]', dist:'2', action:'compute',
+    ptStates:['inhoop','evicted','inhoop','active'],
+    heap:[
+      {dist_sq:20,x:-2,y:4,state:'max-top'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'}
+    ],
+    title:'Point [1,1] — compute dist² = 1²+1² = 2',
+    text:'Final point [1,1]. Squared distance = 1 + 1 = 2. This is extremely close to the origin! The current heap maximum is 20 ([-2,4]). Since 2 < 20, [1,1] is much closer than our current farthest candidate. Push and evict again.'
+  },
+  {
+    id:9, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process', activeLine:5,
+    point:'[1,1]', dist:'2', action:'push',
+    ptStates:['inhoop','evicted','inhoop','inhoop'],
+    heap:[
+      {dist_sq:20,x:-2,y:4,state:'max-top'},
+      {dist_sq:18,x:3,y:3,state:'in-heap'},
+      {dist_sq:2,x:1,y:1,state:'in-heap'}
+    ],
+    title:'heappush(−2, 1, 1) → heap size = 3 > k again!',
+    text:'Push (−2, 1, 1). Heap has 3 elements again. Root is still (−20, -2, 4) — [-2,4] with dist²=20 is the farthest among the 3 current candidates. Evict it.'
+  },
+  {
+    id:10, phase:'evict', phaseLabel:'EVICT', phaseClass:'phase-evict', activeLine:7,
+    point:'[1,1]', dist:'2', action:'pop [-2,4]',
+    ptStates:['inhoop','evicted','evicted','inhoop'],
+    heap:[
+      {dist_sq:20,x:-2,y:4,state:'evicted'},
+      {dist_sq:18,x:3,y:3,state:'max-top'},
+      {dist_sq:2,x:1,y:1,state:'in-heap'}
+    ],
+    title:'heappop → evict [-2,4] (dist²=20). Too far!',
+    text:'heappop removes (−20, -2, 4). [-2,4] is evicted. Remaining heap: [3,3](dist²=18) and [1,1](dist²=2). We have processed all 4 points. The heap holds exactly the 2 closest: [1,1] and [3,3].'
+  },
+  {
+    id:11, phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:8,
+    point:'—', dist:'—', action:'return',
+    ptStates:['result','evicted','evicted','result'],
+    heap:[
+      {dist_sq:18,x:3,y:3,state:'result'},
+      {dist_sq:2,x:1,y:1,state:'result'}
+    ],
+    title:'Return [[3,3],[1,1]] — the 2 closest points ✓',
+    text:'Extract [x,y] from each heap tuple (discarding the negated distance). Result = [[3,3],[1,1]]. Verification: dist([1,1])=√2≈1.41, dist([3,3])=√18≈4.24, dist([-2,4])=√20≈4.47, dist([5,-1])=√26≈5.10. Correct — [1,1] and [3,3] are closest!'
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function updateSvg(ptStates) {
+  const ids = ['pt0','pt1','pt2','pt3'];
+  const lineIds = ['line0','line1','line2','line3'];
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    const le = document.getElementById(lineIds[i]);
+    const st = ptStates[i] || 'normal';
+    if (el) {
+      el.setAttribute('fill', PT_FILL[st] || PT_FILL.normal);
+      el.setAttribute('stroke', PT_STROKE[st] || PT_STROKE.normal);
+      el.setAttribute('r', st === 'active' ? '7' : '6');
+    }
+    if (le) {
+      le.setAttribute('stroke', LINE_CLR[st] || 'transparent');
+    }
+  });
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function updateHeap(heapData) {
+  const container = document.getElementById('heap-slots');
+  const sizeLabel = document.getElementById('heap-size-label');
+  const active = (heapData || []).filter(h => h.state !== 'evicted');
+  sizeLabel.textContent = `Heap size: ${active.length} / k=2`;
+  if (!heapData || heapData.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">(empty)</div>';
+    return;
+  }
+  const sorted = [...heapData].sort((a,b) => b.dist_sq - a.dist_sq);
+  container.innerHTML = sorted.map(item => {
+    const cls = item.state === 'max-top' ? 'max-top' :
+                item.state === 'evicted' ? 'evicted' :
+                item.state === 'result'  ? 'result'  : 'in-heap';
+    const lbl = item.state === 'max-top' ? 'MAX (root)' :
+                item.state === 'evicted' ? 'EVICTED'   :
+                item.state === 'result'  ? 'RESULT'    : 'in heap';
+    return `<div class="heap-slot ${cls}">
+      <span class="heap-pt">[${item.x},${item.y}]</span>
+      <span class="heap-dist">dist²=${item.dist_sq}</span>
+      <span class="heap-label">${lbl}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  updateSvg(step.ptStates);
+  updateHeap(step.heap);
+
+  // Code panel
+  for (let i = 0; i <= 8; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Var tracker
+  const changed = current > 0;
+  document.getElementById('vv-point').textContent  = step.point;
+  document.getElementById('vv-dist').textContent   = step.dist;
+  document.getElementById('vv-action').textContent = step.action;
+  document.getElementById('vb-point').classList.toggle('changed',  changed && step.point  !== '—');
+  document.getElementById('vb-dist').classList.toggle('changed',   changed && step.dist   !== '—');
+  document.getElementById('vb-action').classList.toggle('changed', changed && step.action !== '—');
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active',  i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

@@ -1,87 +1,979 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Connecting Cities With Minimum Cost — LC #1135</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1135 · Connecting Cities With Minimum Cost</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Graph Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.graph-svg-container{display:flex;justify-content:center;margin-bottom:1rem}
+.graph-svg-container svg{max-width:100%;height:auto}
+
+/* ── Edge List ── */
+.edge-list-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;text-align:center}
+.edge-list{display:flex;flex-direction:column;gap:6px;margin-top:0.5rem}
+.edge-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--radius);font-family:var(--mono);font-size:13px;border:2px solid var(--border);background:var(--surface);transition:all 0.3s}
+.edge-row.edge-considering{background:var(--amber-bg);border-color:var(--amber-border)}
+.edge-row.edge-accepted{background:var(--green-bg);border-color:var(--green-border)}
+.edge-row.edge-rejected{background:var(--red-bg);border-color:var(--red-border);opacity:0.7}
+.edge-row.edge-done{background:var(--bg2);border-color:var(--border);opacity:0.5}
+.edge-status{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;min-width:90px}
+.edge-considering .edge-status{color:var(--amber-mid)}
+.edge-accepted .edge-status{color:var(--green-mid)}
+.edge-rejected .edge-status{color:var(--red-mid)}
+.edge-done .edge-status{color:var(--text3)}
+
+/* ── Union-Find Tracker ── */
+.uf-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:1rem 0 8px;text-align:center}
+.uf-tracker{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.uf-group{display:flex;flex-direction:column;align-items:center;padding:10px 16px;background:var(--surface);border:2px solid var(--border2);border-radius:var(--radius);transition:all 0.3s;min-width:80px}
+.uf-group.merged{border-color:var(--blue-border);background:var(--blue-bg)}
+.uf-group.all-done{border-color:var(--green-border);background:var(--green-bg)}
+.uf-group-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.uf-group.merged .uf-group-label{color:var(--blue-mid)}
+.uf-group.all-done .uf-group-label{color:var(--green-mid)}
+.uf-nodes{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text)}
+.uf-group.merged .uf-nodes{color:var(--blue-text)}
+.uf-group.all-done .uf-nodes{color:var(--green-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-consider{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-accept{background:var(--green-bg);color:var(--green-mid)}
+.phase-reject{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-consider{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-accept{background:var(--green-bg);border-color:var(--green-border)}
+.sw-reject{background:var(--red-bg);border-color:var(--red-border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Deep Dive Cyan Box ── */
+.deep-dive-box{background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.deep-dive-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:0.5rem}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Connecting Cities With Minimum Cost</h1>
-<div class="subtitle">LeetCode #1135 &mdash; Kruskal's Algorithm</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">Kruskal's Algorithm</span><span class="tag tag-cx">O(E log E) Time &middot; O(V) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1135</div>
+  <h1>Connecting Cities With Minimum Cost</h1>
+  <p class="subtitle">Given n cities and a list of connections with costs, return the minimum cost to connect all cities — or -1 if impossible.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">Kruskal's Algorithm</span>
+    <span class="tag tag-pattern">Union-Find</span>
+    <span class="tag tag-complexity">Time: O(E log E)</span>
+    <span class="tag tag-complexity">Space: O(N)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have <code>n</code> cities labeled 1 through n, and a list of possible roads — each described as <code>[city1, city2, cost]</code>. You want to build the cheapest set of roads that <strong>connects every city to every other city</strong>, directly or through intermediary cities. Return the total construction cost, or -1 if it's impossible with the given roads.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is the classic <strong>Minimum Spanning Tree (MST)</strong> problem. A spanning tree connecting n nodes needs exactly <strong>n−1 edges</strong> (no more, no less) with no cycles. The MST is the spanning tree with the minimum total edge weight — the cheapest network of roads that keeps all cities reachable from each other.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Valid MST: n=4, cost = 12</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          MST edges chosen:<br>
+          1–2 (cost 1)<br>
+          1–3 (cost 3)<br>
+          2–4 (cost 8)<br>
+          Total: 1+3+8 = <strong>12</strong> ✓
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Incomplete: City 4 isolated</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Only edges 1–2 and 1–3<br>
+          City 4 is unreachable<br>
+          n−1 = 3 edges needed<br>
+          Only 2 connected → <strong>-1</strong> ✗
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> n=1 (already connected, return 0), disconnected graph (not enough roads to connect all cities, return -1), multiple roads between same pair (we'll always pick cheapest), all cities already connected with just one road.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Sort edges by cost. Use union-find. Add edges greedily (smallest first) if they connect different components. Stop when all connected (n-1 edges added).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Kruskal's MST</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Kruskal's MST</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Sort edges by cost</span></div><div class="step"><span class="snum">2</span><span class="stxt">Union-Find</span></div><div class="step"><span class="snum">3</span><span class="stxt">For each edge: if different components: union, add cost, edge_count++</span></div><div class="step"><span class="snum">4</span><span class="stxt">Return total cost if edge_count==n-1 else -1</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(E log E)</strong> | Space: <strong>O(V)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def minimumCost(n, connections):
-    parent=list(range(n+1))
-    def find(x):
-        if parent[x]!=x: parent[x]=find(parent[x])
-        return parent[x]
-    def union(x,y):
-        px,py=find(x),find(y)
-        if px==py: return False
-        parent[px]=py; return True
-    connections.sort(key=lambda e:e[2])
-    cost=cnt=0
-    for u,v,w in connections:
-        if union(u,v): cost+=w; cnt+=1
-        if cnt==n-1: return cost
-    return -1</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Sort by cost, add greedily — Kruskal's is O(E log E)</span></div><div class="step"><span class="snum">2</span><span class="stxt">If fewer than n-1 edges added: disconnected graph</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Kruskal's MST</td><td>O(E log E)</td><td>O(V)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Min Cost to Connect All Points</span><span class="pd dm">Medium</span> — Prim's on complete graph</li><li><span class="pn">Redundant Connection</span><span class="pd dm">Medium</span> — Union-find cycle</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Kruskal's Algorithm</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Connecting Cities With Minimum Cost"}, "title": "Kruskal's MST", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>nodes/cells</div><div class="li"><div class="ld" style="background:var(--green)"></div>visited/result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Kruskal's MST + Union-Find</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Kruskal's algorithm is a greedy approach: <strong>always add the cheapest road that doesn't create a cycle</strong>. The magic is in detecting cycles efficiently — that's where <strong>Union-Find (Disjoint Set Union, DSU)</strong> comes in. It tracks which cities are already connected in near-constant time.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Sort all roads by cost</strong> (ascending). This is the greedy foundation — we evaluate cheaper connections before expensive ones, ensuring the total cost is minimized.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize Union-Find:</strong> each of the n cities starts as its own independent component. We have n components initially and need to reduce to exactly 1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Process each road in sorted order:</strong> call <code>find(u)</code> and <code>find(v)</code> to get the root representative of each city's component. If the roots differ, these cities are in separate components.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Accept or reject:</strong> If different roots → <code>union(u, v)</code>, add cost, decrement component count. Same root → skip (adding would create a cycle, violating the "spanning tree" requirement).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Termination:</strong> Stop as soon as components reaches 1 (all connected). If we exhaust all roads with components > 1, the graph is disconnected — return -1.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Greedy "Cheapest First" is Provably Optimal</div>
+      <p>The <strong>Cut Property</strong> of MSTs guarantees this: for any way to split the cities into two groups S and V−S, the minimum-weight road crossing between the groups <em>must</em> appear in some MST. Kruskal's exploits this property repeatedly — each accepted edge is the cheapest road crossing some cut at that moment, so it's always optimal to include it.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Union-Find Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Core Invariant</div>
+      <p>At any point, <code>find(x)</code> returns the <strong>canonical root representative</strong> of x's connected component. Two cities x and y are in the same component if and only if <code>find(x) == find(y)</code>. Merging two components always reduces the total count by exactly 1.</p>
+    </div>
+
+    <p><strong>Path Compression:</strong> When <code>find(x)</code> traverses up to the root, it flattens the path — every node encountered points directly to the root. This makes future lookups nearly O(1). The amortized cost becomes O(α(n)) where α is the inverse Ackermann function, essentially a constant for all practical n.</p>
+
+    <p style="margin-top:0.75rem"><strong>Union by Rank:</strong> When merging components, attach the shallower tree under the root of the deeper tree. This keeps the maximum tree height at O(log n), complementing path compression to achieve the near-constant amortized cost.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why exactly n−1 edges?</strong> A spanning tree on n vertices is a connected acyclic graph, which always has exactly n−1 edges by definition. Each accepted edge reduces the component count by 1 (from n down to 1), so we always accept exactly n−1 edges to span the entire graph.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Critical: Always check for disconnected graphs</div>
+      <p>After the loop, if <code>components > 1</code>, some cities are unreachable from others — return -1. This check is easy to forget when implementing Kruskal's. The component count tracker handles this elegantly: we decrement on each accepted edge and check at the end.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="deep-dive-box">
+      <div class="deep-dive-title">🔬 Algorithm Deep-Dive: Kruskal's MST (1956)</div>
+      <p style="font-size:14px;line-height:1.7;margin-top:0.5rem"><strong>Origin:</strong> Joseph Bernard Kruskal Jr., 1956. Solves the Minimum Spanning Tree problem on weighted undirected graphs in O(E log E) time.</p>
+      <p style="font-size:14px;line-height:1.7;margin-top:0.5rem"><strong>Core invariant:</strong> After processing k edges, the selected edges form a spanning forest — a collection of trees — with the minimum weight among all forests that can be extended to a valid MST. Each accepted edge is provably part of some MST (by the Cut Property).</p>
+      <p style="font-size:14px;line-height:1.7;margin-top:0.5rem"><strong>Exchange argument (why it's optimal):</strong> Suppose Kruskal's accepted edge e but some optimal MST T* does not contain e. Adding e to T* creates a cycle. That cycle must contain some other edge e' crossing the same cut that e crosses. Since Kruskal's sorted by weight and accepted e before e', we know cost(e) ≤ cost(e'). Swapping e' for e gives a spanning tree with cost ≤ T*, contradicting T* being optimal.</p>
+      <p style="font-size:14px;line-height:1.7;margin-top:0.5rem"><strong>Recognize when:</strong> "Connect all nodes with minimum total edge weight" → MST → Kruskal's or Prim's. Choose Kruskal's when edges are sparse or given as an edge list (easier to sort). Choose Prim's for dense graphs (adjacency matrix).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 1 — Kruskal's with Union-Find (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def minimumCost(n: int, connections: list) -> int:</span></div>
+<div class="ann-line"><span class="acode">    parent = list(range(n + 1))          </span><span class="aann">← 1-indexed: parent[i] = i means i is its own root</span></div>
+<div class="ann-line"><span class="acode">    rank = [0] * (n + 1)                 </span><span class="aann">← Rank (proxy for tree height) for union by rank</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def find(x):                          </span><span class="aann">← Returns root of x's component (with path compression)</span></div>
+<div class="ann-line"><span class="acode">        if parent[x] != x:</span></div>
+<div class="ann-line"><span class="acode">            parent[x] = find(parent[x])  </span><span class="aann">← Flatten: x points directly to root</span></div>
+<div class="ann-line"><span class="acode">        return parent[x]</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def union(x, y) -> bool:             </span><span class="aann">← Merge x and y's components; return False if already same</span></div>
+<div class="ann-line"><span class="acode">        rx, ry = find(x), find(y)</span></div>
+<div class="ann-line"><span class="acode">        if rx == ry: return False         </span><span class="aann">← Same root = same component = adding would cycle</span></div>
+<div class="ann-line"><span class="acode">        if rank[rx] &lt; rank[ry]: rx, ry = ry, rx  </span><span class="aann">← Attach smaller-rank tree under larger</span></div>
+<div class="ann-line"><span class="acode">        parent[ry] = rx                  </span><span class="aann">← ry's entire tree now hangs under rx</span></div>
+<div class="ann-line"><span class="acode">        if rank[rx] == rank[ry]: rank[rx] += 1   </span><span class="aann">← Only increase rank on equal-rank merge</span></div>
+<div class="ann-line"><span class="acode">        return True                       </span><span class="aann">← Successfully merged two distinct components</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    connections.sort(key=lambda e: e[2]) </span><span class="aann">← Sort edges cheapest first — O(E log E)</span></div>
+<div class="ann-line"><span class="acode">    total_cost = 0                        </span><span class="aann">← Accumulate the MST edge costs</span></div>
+<div class="ann-line"><span class="acode">    components = n                        </span><span class="aann">← Start with n isolated components</span></div>
+<div class="ann-line"><span class="acode">    for u, v, cost in connections:</span></div>
+<div class="ann-line"><span class="acode">        if union(u, v):                   </span><span class="aann">← Edge bridges two different components</span></div>
+<div class="ann-line"><span class="acode">            total_cost += cost</span></div>
+<div class="ann-line"><span class="acode">            components -= 1</span></div>
+<div class="ann-line"><span class="acode">            if components == 1:           </span><span class="aann">← All cities connected — early exit!</span></div>
+<div class="ann-line"><span class="acode">                return total_cost</span></div>
+<div class="ann-line"><span class="acode">    return -1                             </span><span class="aann">← Exhausted all edges, still disconnected</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Off-by-one: cities are 1-indexed!</div>
+      <p>The problem uses cities numbered 1 to n (not 0 to n−1). Make <code>parent</code> and <code>rank</code> arrays of size <strong>n+1</strong> so index n is valid. A classic bug: using <code>list(range(n))</code> only covers 0..n−1, causing city n to cause an IndexError or silently corrupt results.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Prim's Algorithm (alternative, better for dense graphs)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode">from collections import defaultdict</span></div>
+<div class="ann-line"><span class="acode">def minimumCost_prims(n, connections):</span></div>
+<div class="ann-line"><span class="acode">    graph = defaultdict(list)            </span><span class="aann">← Build adjacency list</span></div>
+<div class="ann-line"><span class="acode">    for u, v, w in connections:</span></div>
+<div class="ann-line"><span class="acode">        graph[u].append((w, v))</span></div>
+<div class="ann-line"><span class="acode">        graph[v].append((w, u))          </span><span class="aann">← Undirected: add both directions</span></div>
+<div class="ann-line"><span class="acode">    heap = [(0, 1)]                      </span><span class="aann">← Start from city 1 with cost 0</span></div>
+<div class="ann-line"><span class="acode">    visited = set(); total = 0; count = 0</span></div>
+<div class="ann-line"><span class="acode">    while heap and count &lt; n:</span></div>
+<div class="ann-line"><span class="acode">        cost, city = heapq.heappop(heap)</span></div>
+<div class="ann-line"><span class="acode">        if city in visited: continue      </span><span class="aann">← Skip already-processed cities</span></div>
+<div class="ann-line"><span class="acode">        visited.add(city); total += cost; count += 1</span></div>
+<div class="ann-line"><span class="acode">        for w, nxt in graph[city]:       </span><span class="aann">← Explore neighbors</span></div>
+<div class="ann-line"><span class="acode">            if nxt not in visited:</span></div>
+<div class="ann-line"><span class="acode">                heapq.heappush(heap, (w, nxt))</span></div>
+<div class="ann-line"><span class="acode">    return total if count == n else -1</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Kruskal's + Union-Find:</strong> Time O(E log E) for sort, O(E · α(n)) for union-find ops ≈ O(E log E) total. Space O(n) for parent/rank arrays.<br>
+        <strong>Prim's + Min-Heap:</strong> Time O(E log V). Space O(V + E) for adjacency list + heap. Better for dense graphs where E ≫ V.<br>
+        <strong>Both are optimal for MST.</strong> Kruskal's is simpler to code in interviews (sort edges, simple union-find template).
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the MST Pattern</div>
+        <p style="font-size:14px;color:var(--text)">Key signals: "connect all nodes/cities," "minimum cost," weighted undirected edges, "return -1 if impossible." These together scream Minimum Spanning Tree. The "all connected, minimum total weight" constraint is the MST definition.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: State your algorithm choices and pick one</div>
+        <p style="font-size:14px;color:var(--text)">"Two standard MST algorithms: Kruskal's (sort edges + Union-Find) and Prim's (BFS with min-heap). Since we're given an edge list, I'll use Kruskal's — sort by cost, greedily accept edges that don't create cycles." This shows you know the trade-offs.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Code Union-Find cleanly from scratch</div>
+        <p style="font-size:14px;color:var(--text)">Interviewers love this template: parent array (1-indexed), find with path compression, union with rank. That's ~12 lines to memorize. Always mention path compression and union by rank — these are the two optimizations that make it near-O(1) amortized.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle impossibility explicitly</div>
+        <p style="font-size:14px;color:var(--text)">Track component count (start at n, decrement each accepted edge). If we exhaust all edges with components > 1, return -1. Mentioning this shows you think about edge cases before coding.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a Minimum Spanning Tree problem: connect all n cities with exactly n−1 edges at minimum total cost.<br>
+I'll use Kruskal's algorithm. First sort edges by cost — O(E log E). Then initialize Union-Find with each city as its own component.<br>
+Greedily process edges: if union(u,v) succeeds (different components), add the cost and decrement components.<br>
+Stop as soon as components reaches 1. If we exhaust all edges first, the graph is disconnected — return -1.<br>
+Total: O(E log E) time, O(n) space. Union-Find uses path compression + rank for near-O(1) amortized operations."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if you can only use at most k roads?"</strong> → Accept first k valid edges; check if all connected.</li>
+        <li><strong>"Can you solve this with Prim's instead?"</strong> → Yes; discuss dense vs sparse graph trade-offs.</li>
+        <li><strong>"What if roads are directed (one-way)?"</strong> → Becomes Minimum Arborescence — much harder, Edmonds' algorithm.</li>
+        <li><strong>"How do you find ALL possible MSTs?"</strong> → Matroid intersection — mention as advanced topic.</li>
+        <li><strong>"What if some edges are already selected (fixed)?"</strong> → Modified Kruskal's: accept fixed edges first, then run standard algorithm.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=4, finding the MST</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- SVG Graph Visualization -->
+      <div class="graph-svg-container">
+        <svg id="graph-svg" width="360" height="240" viewBox="0 0 360 240">
+          <!-- background rect for dark mode -->
+          <rect width="360" height="240" fill="transparent"/>
+
+          <!-- Edge lines (drawn under nodes) -->
+          <!-- 0: 1-2 cost=1 -->
+          <line id="eline-0" x1="75" y1="120" x2="180" y2="55"
+                stroke-width="3" stroke="var(--border2)" stroke-dasharray="none" stroke-linecap="round"/>
+          <!-- 1: 1-3 cost=3 -->
+          <line id="eline-1" x1="75" y1="120" x2="180" y2="185"
+                stroke-width="3" stroke="var(--border2)" stroke-dasharray="none" stroke-linecap="round"/>
+          <!-- 2: 2-3 cost=4 -->
+          <line id="eline-2" x1="180" y1="55" x2="180" y2="185"
+                stroke-width="3" stroke="var(--border2)" stroke-dasharray="none" stroke-linecap="round"/>
+          <!-- 3: 2-4 cost=8 -->
+          <line id="eline-3" x1="180" y1="55" x2="285" y2="120"
+                stroke-width="3" stroke="var(--border2)" stroke-dasharray="none" stroke-linecap="round"/>
+          <!-- 4: 3-4 cost=9 -->
+          <line id="eline-4" x1="180" y1="185" x2="285" y2="120"
+                stroke-width="3" stroke="var(--border2)" stroke-dasharray="none" stroke-linecap="round"/>
+
+          <!-- Edge cost labels -->
+          <text x="115" y="78" font-size="13" fill="var(--text3)" font-family="JetBrains Mono, monospace" font-weight="600" text-anchor="middle">1</text>
+          <text x="115" y="165" font-size="13" fill="var(--text3)" font-family="JetBrains Mono, monospace" font-weight="600" text-anchor="middle">3</text>
+          <text x="168" y="122" font-size="13" fill="var(--text3)" font-family="JetBrains Mono, monospace" font-weight="600" text-anchor="middle">4</text>
+          <text x="245" y="78" font-size="13" fill="var(--text3)" font-family="JetBrains Mono, monospace" font-weight="600" text-anchor="middle">8</text>
+          <text x="245" y="165" font-size="13" fill="var(--text3)" font-family="JetBrains Mono, monospace" font-weight="600" text-anchor="middle">9</text>
+
+          <!-- City nodes -->
+          <circle id="ncircle-1" cx="75" cy="120" r="24" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5"/>
+          <text id="ntext-1" x="75" y="126" font-size="15" font-weight="700" fill="var(--text)" font-family="JetBrains Mono, monospace" text-anchor="middle">1</text>
+
+          <circle id="ncircle-2" cx="180" cy="55" r="24" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5"/>
+          <text id="ntext-2" x="180" y="61" font-size="15" font-weight="700" fill="var(--text)" font-family="JetBrains Mono, monospace" text-anchor="middle">2</text>
+
+          <circle id="ncircle-3" cx="180" cy="185" r="24" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5"/>
+          <text id="ntext-3" x="180" y="191" font-size="15" font-weight="700" fill="var(--text)" font-family="JetBrains Mono, monospace" text-anchor="middle">3</text>
+
+          <circle id="ncircle-4" cx="285" cy="120" r="24" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5"/>
+          <text id="ntext-4" x="285" y="126" font-size="15" font-weight="700" fill="var(--text)" font-family="JetBrains Mono, monospace" text-anchor="middle">4</text>
+        </svg>
+      </div>
+
+      <!-- Edge List -->
+      <div class="edge-list-title">All edges (sorted by cost) — Kruskal's processes top to bottom</div>
+      <div class="edge-list">
+        <div class="edge-row" id="er-0">
+          <span class="edge-status" id="es-0">pending</span>
+          <span style="font-weight:600">1 — 2</span>
+          <span style="margin-left:auto;font-weight:700;color:var(--green-mid)">cost = 1</span>
+        </div>
+        <div class="edge-row" id="er-1">
+          <span class="edge-status" id="es-1">pending</span>
+          <span style="font-weight:600">1 — 3</span>
+          <span style="margin-left:auto;font-weight:700;color:var(--green-mid)">cost = 3</span>
+        </div>
+        <div class="edge-row" id="er-2">
+          <span class="edge-status" id="es-2">pending</span>
+          <span style="font-weight:600">2 — 3</span>
+          <span style="margin-left:auto;font-weight:700">cost = 4</span>
+        </div>
+        <div class="edge-row" id="er-3">
+          <span class="edge-status" id="es-3">pending</span>
+          <span style="font-weight:600">2 — 4</span>
+          <span style="margin-left:auto;font-weight:700">cost = 8</span>
+        </div>
+        <div class="edge-row" id="er-4">
+          <span class="edge-status" id="es-4">pending</span>
+          <span style="font-weight:600">3 — 4</span>
+          <span style="margin-left:auto;font-weight:700">cost = 9</span>
+        </div>
+      </div>
+
+      <!-- Union-Find display -->
+      <div class="uf-section-title">Union-Find Components</div>
+      <div class="uf-tracker" id="uf-tracker"></div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-total">
+          <span class="var-name">total_cost</span>
+          <span class="var-val" id="vv-total">0</span>
+        </div>
+        <div class="var-box" id="vb-comp">
+          <span class="var-name">components</span>
+          <span class="var-val" id="vv-comp">4</span>
+        </div>
+        <div class="var-box" id="vb-edge">
+          <span class="var-name">current edge</span>
+          <span class="var-val" id="vv-edge" style="font-size:13px;min-width:80px">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def minimumCost(n, connections):</div>
+      <div class="code-line" id="cl-1">    parent = list(range(n + 1))</div>
+      <div class="code-line" id="cl-2">    rank = [0] * (n + 1)</div>
+      <div class="code-line" id="cl-3">    # (find and union helpers omitted for brevity)</div>
+      <div class="code-line" id="cl-4">    connections.sort(key=lambda e: e[2])</div>
+      <div class="code-line" id="cl-5">    total_cost = 0;  components = n</div>
+      <div class="code-line" id="cl-6">    for u, v, cost in connections:</div>
+      <div class="code-line" id="cl-7">        if union(u, v):   # different components?</div>
+      <div class="code-line" id="cl-8">            total_cost += cost</div>
+      <div class="code-line" id="cl-9">            components -= 1</div>
+      <div class="code-line" id="cl-10">            if components == 1: return total_cost</div>
+      <div class="code-line" id="cl-11">        # else: skip (same component → would cycle)</div>
+      <div class="code-line" id="cl-12">    return -1  # graph disconnected</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 10</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through Kruskal's algorithm on a 4-city example.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-consider"></div> Considering</div>
+      <div class="legend-item"><div class="legend-swatch sw-accept"></div> Accepted (MST edge)</div>
+      <div class="legend-item"><div class="legend-swatch sw-reject"></div> Rejected (creates cycle)</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> Not yet processed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">MST = minimum-weight set of n−1 edges connecting all n cities with no cycles</div>
+      <div class="takeaway">Kruskal's: sort edges by weight, greedily accept if it doesn't create a cycle (Union-Find check)</div>
+      <div class="takeaway">Union-Find: path compression + union by rank gives near-O(1) amortized per operation</div>
+      <div class="takeaway">Track component count: start at n, decrement each accepted edge, stop at 1; return -1 if stuck > 1</div>
+      <div class="takeaway">Cities are 1-indexed → parent/rank arrays need size n+1 (not n) to avoid IndexError</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (all spanning trees)</td>
+          <td class="mark-bad">Exponential</td>
+          <td>O(n)</td>
+          <td>Completely impractical; shows intuition</td>
+        </tr>
+        <tr>
+          <td><strong>Kruskal's + Union-Find ✓</strong></td>
+          <td class="mark-good">O(E log E)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Interview pick; sparse graphs, edge list</td>
+        </tr>
+        <tr>
+          <td>Prim's + Min-Heap</td>
+          <td class="mark-good">O(E log V)</td>
+          <td>O(V+E)</td>
+          <td>Better for dense graphs (adjacency matrix)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Connect all N nodes at minimum total cost" → MST → Kruskal's</li>
+        <li>Union-Find: any "grouping," "merging," "cycle detection" problem</li>
+        <li>Redundant connections → Union-Find cycle detection</li>
+        <li>Weighted undirected graph + "spanning" structure → think MST first</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Kruskal's Algorithm / MST + Union-Find)</div>
+      <div class="related-item"><strong>Min Cost to Connect All Points</strong><span class="related-diff diff-med">Medium</span> — MST on a complete graph where cost = Manhattan distance (#1584)</div>
+      <div class="related-item"><strong>Redundant Connection</strong><span class="related-diff diff-med">Medium</span> — Find the edge that creates a cycle in an almost-tree using Union-Find (#684)</div>
+      <div class="related-item"><strong>Number of Provinces</strong><span class="related-diff diff-med">Medium</span> — Count connected components using Union-Find on adjacency matrix (#547)</div>
+      <div class="related-item"><strong>Accounts Merge</strong><span class="related-diff diff-med">Medium</span> — Group emails belonging to same person using Union-Find (#721)</div>
+      <div class="related-item"><strong>Most Stones Removed with Same Row/Column</strong><span class="related-diff diff-med">Medium</span> — Union-Find grouping stones by shared row/column (#947)</div>
+      <div class="related-item"><strong>Critical Connections in a Network</strong><span class="related-diff diff-hard">Hard</span> — Find bridges in graph — contrast with MST which includes all essential edges (#1192)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Graph Algorithms section<br>
+      Sub-Pattern: <strong>Kruskal's Algorithm</strong> (MST) · Algorithm: <strong>Kruskal's MST + Union-Find (DSU)</strong><br>
+      Source: Guide Graph section + Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Step data for n=4, connections sorted by cost:
+// edges: [1,2,1], [1,3,3], [2,3,4], [2,4,8], [3,4,9]
+// MST: accept 1-2(1), 1-3(3), reject 2-3(4), accept 2-4(8) → total=12
+//
+// edgeStates: array of 5 values for each edge:
+//   'pending' | 'considering' | 'accepted' | 'rejected' | 'done'
+// components: array of arrays (each sub-array is one component's cities)
+// nodeColors: array of 4 (for cities 1,2,3,4): 'normal'|'active'|'merged'|'result'
+// activeEdgeLine: index 0-4 or -1 for no highlight
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    activeLine:1,
+    edgeStates:['pending','pending','pending','pending','pending'],
+    components:[[1],[2],[3],[4]],
+    totalCost:0, compCount:4, currentEdge:'—',
+    nodeColors:['normal','normal','normal','normal'],
+    activeEdgeLine:-1, changedVars:[],
+    title:'Initialize: n=4 cities, 5 connections',
+    text:'We have 4 cities (1–4) and 5 possible roads. Initialize Union-Find: parent=[_,1,2,3,4] — each city is its own root. Sort edges by cost: 1-2(1), 1-3(3), 2-3(4), 2-4(8), 3-4(9). We start with 4 isolated components and need to reduce to exactly 1.'
+  },
+  {
+    id:1, phase:'consider', phaseLabel:'CONSIDER', phaseClass:'phase-consider',
+    activeLine:7,
+    edgeStates:['considering','pending','pending','pending','pending'],
+    components:[[1],[2],[3],[4]],
+    totalCost:0, compCount:4, currentEdge:'1–2 (cost=1)',
+    nodeColors:['active','active','normal','normal'],
+    activeEdgeLine:0, changedVars:['edge'],
+    title:'Consider cheapest edge: 1–2 (cost=1)',
+    text:'First edge (cheapest): cities 1 and 2, cost=1. Call find(1)=1, find(2)=2. Different roots! Cities 1 and 2 are in separate components — this road safely connects two previously isolated cities without creating any cycle.'
+  },
+  {
+    id:2, phase:'accept', phaseLabel:'ACCEPT', phaseClass:'phase-accept',
+    activeLine:8,
+    edgeStates:['accepted','pending','pending','pending','pending'],
+    components:[[1,2],[3],[4]],
+    totalCost:1, compCount:3, currentEdge:'1–2 (cost=1)',
+    nodeColors:['merged','merged','normal','normal'],
+    activeEdgeLine:0, changedVars:['total','comp'],
+    title:'Accept! union(1,2) → components: 4→3, cost: 0→1',
+    text:'Accepted: union(1,2) sets parent[2]=1. total_cost = 0+1 = 1. components = 4-1 = 3. Still need 2 more edges. Components now: {1,2}, {3}, {4}. The edge 1-2 is now part of our growing MST (shown in green on the graph).'
+  },
+  {
+    id:3, phase:'consider', phaseLabel:'CONSIDER', phaseClass:'phase-consider',
+    activeLine:7,
+    edgeStates:['accepted','considering','pending','pending','pending'],
+    components:[[1,2],[3],[4]],
+    totalCost:1, compCount:3, currentEdge:'1–3 (cost=3)',
+    nodeColors:['merged','merged','active','normal'],
+    activeEdgeLine:1, changedVars:['edge'],
+    title:'Consider edge: 1–3 (cost=3)',
+    text:'Next cheapest: cities 1 and 3, cost=3. find(1)=1 (root of {1,2}). find(3)=3 (isolated city). Different roots! City 3 is still isolated — this road will connect it to our growing MST network containing cities 1 and 2.'
+  },
+  {
+    id:4, phase:'accept', phaseLabel:'ACCEPT', phaseClass:'phase-accept',
+    activeLine:8,
+    edgeStates:['accepted','accepted','pending','pending','pending'],
+    components:[[1,2,3],[4]],
+    totalCost:4, compCount:2, currentEdge:'1–3 (cost=3)',
+    nodeColors:['merged','merged','merged','normal'],
+    activeEdgeLine:1, changedVars:['total','comp'],
+    title:'Accept! union(1,3) → components: 3→2, cost: 1→4',
+    text:'Accepted: union(1,3) sets parent[3]=1. total_cost = 1+3 = 4. components = 3-1 = 2. Two components remain: {1,2,3} and the isolated {4}. We need exactly ONE more edge to connect all 4 cities.'
+  },
+  {
+    id:5, phase:'consider', phaseLabel:'CONSIDER', phaseClass:'phase-consider',
+    activeLine:7,
+    edgeStates:['accepted','accepted','considering','pending','pending'],
+    components:[[1,2,3],[4]],
+    totalCost:4, compCount:2, currentEdge:'2–3 (cost=4)',
+    nodeColors:['merged','merged','merged','normal'],
+    activeEdgeLine:2, changedVars:['edge'],
+    title:'Consider edge: 2–3 (cost=4)',
+    text:'Next: cities 2 and 3, cost=4. find(2): parent[2]=1 → root=1. find(3): parent[3]=1 → root=1. SAME ROOT! Both cities 2 and 3 are already in component {1,2,3}. Adding this edge would create a cycle 1-2-3-1. Must skip!'
+  },
+  {
+    id:6, phase:'reject', phaseLabel:'REJECT', phaseClass:'phase-reject',
+    activeLine:11,
+    edgeStates:['accepted','accepted','rejected','pending','pending'],
+    components:[[1,2,3],[4]],
+    totalCost:4, compCount:2, currentEdge:'2–3 (cost=4)',
+    nodeColors:['merged','merged','merged','normal'],
+    activeEdgeLine:2, changedVars:[],
+    title:'Reject! 2–3 would create a cycle',
+    text:'Skipped: find(2)=1 == find(3)=1. Union-Find detects they share root 1. Adding edge 2-3 would form cycle 1→2→3→1, violating the spanning TREE requirement. total_cost stays 4, components stays 2. Move to next edge.'
+  },
+  {
+    id:7, phase:'consider', phaseLabel:'CONSIDER', phaseClass:'phase-consider',
+    activeLine:7,
+    edgeStates:['accepted','accepted','rejected','considering','pending'],
+    components:[[1,2,3],[4]],
+    totalCost:4, compCount:2, currentEdge:'2–4 (cost=8)',
+    nodeColors:['merged','merged','merged','active'],
+    activeEdgeLine:3, changedVars:['edge'],
+    title:'Consider edge: 2–4 (cost=8)',
+    text:'Next: cities 2 and 4, cost=8. find(2)=1 (root of {1,2,3}). find(4)=4 (isolated city). Different roots! This is exactly the edge we need — city 4 is the last isolated city, and this road bridges it to our large component.'
+  },
+  {
+    id:8, phase:'accept', phaseLabel:'ACCEPT', phaseClass:'phase-accept',
+    activeLine:8,
+    edgeStates:['accepted','accepted','rejected','accepted','done'],
+    components:[[1,2,3,4]],
+    totalCost:12, compCount:1, currentEdge:'2–4 (cost=8)',
+    nodeColors:['merged','merged','merged','merged'],
+    activeEdgeLine:3, changedVars:['total','comp'],
+    title:'Accept! union(2,4) → components: 2→1, cost: 4→12',
+    text:'Accepted: union(2,4) sets parent[4]=1. total_cost = 4+8 = 12. components = 2-1 = 1. All 4 cities are now connected in one component! components == 1 → return total_cost immediately. We don\'t even need to look at edge 3-4.'
+  },
+  {
+    id:9, phase:'result', phaseLabel:'RESULT ✓', phaseClass:'phase-result',
+    activeLine:10,
+    edgeStates:['accepted','accepted','rejected','accepted','done'],
+    components:[[1,2,3,4]],
+    totalCost:12, compCount:1, currentEdge:'done',
+    nodeColors:['result','result','result','result'],
+    activeEdgeLine:-1, changedVars:[],
+    title:'Return 12 — Minimum Spanning Tree found!',
+    text:'MST complete! Total cost = 12 using 3 edges (n-1=3 as required). The MST edges are: 1-2(cost 1) + 1-3(cost 3) + 2-4(cost 8) = 12. Edge 2-3(cost 4) was correctly rejected (cycle). Edge 3-4(cost 9) was never even examined (we stopped early at components==1). This is the cheapest possible network connecting all 4 cities.'
+  }
+];
+
+let current = 0;
+
+// SVG node styling
+const NODE_STYLES = {
+  normal:  { fill:'var(--surface)',   stroke:'var(--border2)',     textFill:'var(--text)' },
+  active:  { fill:'var(--amber-bg)',  stroke:'var(--amber-border)', textFill:'var(--amber-text)' },
+  merged:  { fill:'var(--blue-bg)',   stroke:'var(--blue-border)', textFill:'var(--blue-text)' },
+  result:  { fill:'var(--green-bg)',  stroke:'var(--green-border)', textFill:'var(--green-text)' }
+};
+
+// Edge line stroke colors by state
+const EDGE_STROKE = {
+  pending:     'var(--border2)',
+  considering: '#EF9F27',   // amber-mid
+  accepted:    '#3B6D11',   // green-mid
+  rejected:    '#A32D2D',   // red-mid
+  done:        'var(--border2)'
+};
+
+function buildUFTracker(components) {
+  const container = document.getElementById('uf-tracker');
+  container.innerHTML = '';
+  components.forEach((group, gi) => {
+    const div = document.createElement('div');
+    const isLarge = group.length > 1;
+    const isDone = group.length === 4;
+    div.className = 'uf-group' + (isDone ? ' all-done' : isLarge ? ' merged' : '');
+    div.innerHTML = `
+      <div class="uf-group-label">C${gi+1}</div>
+      <div class="uf-nodes">{${group.join(',')}}</div>
+    `;
+    container.appendChild(div);
+  });
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function buildProgressDots() {
+  const pd = document.getElementById('progress-dots');
+  pd.innerHTML = '';
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+  const prevStep = current > 0 ? steps[current - 1] : null;
+
+  // ── SVG nodes ──
+  [1,2,3,4].forEach((city, idx) => {
+    const circle = document.getElementById('ncircle-' + city);
+    const text   = document.getElementById('ntext-' + city);
+    if (!circle || !text) return;
+    const colorKey = step.nodeColors[idx] || 'normal';
+    const s = NODE_STYLES[colorKey];
+    circle.setAttribute('fill', s.fill);
+    circle.setAttribute('stroke', s.stroke);
+    text.setAttribute('fill', s.textFill);
+    circle.setAttribute('stroke-width', colorKey === 'normal' ? '2.5' : '3');
+  });
+
+  // ── SVG edge lines ──
+  step.edgeStates.forEach((state, idx) => {
+    const line = document.getElementById('eline-' + idx);
+    if (!line) return;
+    line.setAttribute('stroke', EDGE_STROKE[state] || 'var(--border2)');
+    const w = (state === 'considering') ? '4' : (state === 'accepted') ? '4' : '2.5';
+    line.setAttribute('stroke-width', w);
+    line.setAttribute('stroke-dasharray', state === 'rejected' ? '6,4' : 'none');
+    line.setAttribute('stroke-opacity', state === 'pending' || state === 'done' ? '0.5' : '1');
+  });
+
+  // ── Edge list rows ──
+  step.edgeStates.forEach((state, idx) => {
+    const row = document.getElementById('er-' + idx);
+    const statusEl = document.getElementById('es-' + idx);
+    if (!row || !statusEl) return;
+    row.className = 'edge-row';
+    if (state !== 'pending') row.classList.add('edge-' + state);
+    statusEl.textContent = state;
+  });
+
+  // ── Union-Find tracker ──
+  buildUFTracker(step.components);
+
+  // ── Variable tracker ──
+  const totalChanged = prevStep && prevStep.totalCost !== step.totalCost;
+  const compChanged  = prevStep && prevStep.compCount !== step.compCount;
+  const edgeChanged  = step.changedVars.includes('edge');
+
+  document.getElementById('vv-total').textContent = step.totalCost;
+  document.getElementById('vv-comp').textContent  = step.compCount;
+  document.getElementById('vv-edge').textContent  = step.currentEdge;
+
+  document.getElementById('vb-total').classList.toggle('changed', !!totalChanged);
+  document.getElementById('vb-comp').classList.toggle('changed',  !!compChanged);
+  document.getElementById('vb-edge').classList.toggle('changed',  !!edgeChanged);
+
+  // ── Code panel ──
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent   = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) return;
+    dot.classList.toggle('active',  i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildProgressDots();
+render();
 </script>
-</body></html>
+</body>
+</html>

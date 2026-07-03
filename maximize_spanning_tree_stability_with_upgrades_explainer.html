@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#0 · Maximize Spanning Tree Stability with Upgrades</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Graph Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.graph-canvas{position:relative;width:100%;height:260px;margin:0 auto}
+.graph-svg{width:100%;height:100%}
+.node-circle{fill:var(--surface);stroke:var(--border2);stroke-width:2;transition:fill 0.3s,stroke 0.3s}
+.node-circle.active{fill:var(--blue-bg);stroke:var(--blue-border);stroke-width:3}
+.node-circle.in-mst{fill:var(--green-bg);stroke:var(--green-border);stroke-width:3}
+.node-circle.upgraded{fill:var(--purple-bg);stroke:var(--purple-border);stroke-width:3}
+.node-label{font-family:var(--mono);font-size:13px;font-weight:700;fill:var(--text);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.edge-line{stroke:var(--border2);stroke-width:2;transition:stroke 0.3s,stroke-width 0.3s,stroke-dasharray 0.3s}
+.edge-line.considering{stroke:var(--amber-mid);stroke-width:3;stroke-dasharray:6,3}
+.edge-line.in-mst{stroke:var(--green-mid);stroke-width:3}
+.edge-line.rejected{stroke:var(--red-mid);stroke-width:1.5;stroke-dasharray:4,4;opacity:0.4}
+.edge-line.upgraded-edge{stroke:var(--purple-mid);stroke-width:3}
+.edge-weight{font-family:var(--mono);font-size:11px;font-weight:600;fill:var(--text2);text-anchor:middle}
+.edge-weight.considering{fill:var(--amber-mid)}
+.edge-weight.in-mst{fill:var(--green-mid)}
+.edge-weight.upgraded-edge{fill:var(--purple-mid)}
+.upgrade-badge{fill:var(--purple-bg);stroke:var(--purple-border);stroke-width:1.5;rx:4}
+.upgrade-text{font-family:var(--sans);font-size:9px;font-weight:700;fill:var(--purple-mid);text-anchor:middle}
+
+/* ── BS Panel ── */
+.bs-panel{display:flex;align-items:center;gap:12px;background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:var(--radius);padding:12px 16px;margin:1rem 0;flex-wrap:wrap}
+.bs-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);white-space:nowrap}
+.bs-range{display:flex;gap:6px;align-items:center;font-family:var(--mono);font-size:13px}
+.bs-lo,.bs-hi{padding:4px 10px;border-radius:6px;font-weight:700}
+.bs-lo{background:var(--blue-bg);color:var(--blue-mid)}
+.bs-hi{background:var(--red-bg);color:var(--red-mid)}
+.bs-mid{padding:4px 12px;border-radius:6px;background:var(--amber-bg);color:var(--amber-mid);font-weight:700}
+.bs-sep{color:var(--text3)}
+
+/* ── UF Panel ── */
+.uf-panel{display:flex;gap:10px;flex-wrap:wrap;margin:0.75rem 0}
+.uf-group{display:flex;flex-direction:column;align-items:center;gap:4px}
+.uf-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase}
+.uf-nodes{display:flex;gap:4px}
+.uf-node{width:36px;height:36px;border-radius:8px;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);transition:background 0.3s,border-color 0.3s}
+.uf-node.merged{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.uf-node.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-bs{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-kruskal{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-mst{background:var(--green-bg);border-color:var(--green-border)}
+.sw-considering{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-rejected{background:var(--red-bg);border-color:var(--red-border)}
+.sw-upgraded{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Upgrade diagram ── */
+.upgrade-flow{display:flex;gap:0;align-items:center;justify-content:center;margin:1.25rem 0;flex-wrap:wrap;gap:8px}
+.uf-box{padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;text-align:center}
+.uf-box.normal-e{background:var(--surface);border:2px solid var(--border2);color:var(--text)}
+.uf-box.upgraded-e{background:var(--purple-bg);border:2px solid var(--purple-border);color:var(--purple-mid)}
+.uf-arrow{font-size:18px;color:var(--text3);padding:0 4px}
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">Custom Problem · Graph / Binary Search + MST</div>
+  <h1>Maximize Spanning Tree Stability with Upgrades</h1>
+  <p class="subtitle">Given a weighted undirected graph and k upgrade tokens, maximize the minimum edge weight in any spanning tree — the "stability" of the most stable spanning tree achievable.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">Binary Search on Answer</span>
+    <span class="tag tag-pattern">Kruskal's MST</span>
+    <span class="tag tag-complexity">Time: O(E log E · log W)</span>
+    <span class="tag tag-complexity">Space: O(N + E)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a <strong>weighted undirected graph</strong> with <code>n</code> nodes and <code>m</code> edges. Each edge has a stability weight. You have <strong>k upgrade tokens</strong> — each token lets you increase any edge's weight by a fixed amount <code>delta</code>. You want to find a spanning tree (connecting all nodes) that maximizes the <strong>minimum edge weight</strong> in that tree. The answer is the maximum achievable "minimum edge" across all possible uses of upgrades and all possible spanning trees.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The <strong>"maximize the minimum"</strong> phrasing is the strongest signal in this problem. It screams <strong>Binary Search on Answer</strong>: instead of directly constructing the optimal spanning tree, guess a target minimum weight T and ask: "Can I use at most k upgrades to make a spanning tree exist where every edge weighs ≥ T?" Binary search over T.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">❌ Without Upgrades (k=0)</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8">
+          Some edges may be weak (low weight).<br>
+          The best spanning tree's minimum edge<br>
+          is bounded by original weights.<br>
+          Stability = min edge weight in best ST.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ With k=2, delta=3 Upgrades</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8">
+          Two weakest edges get +3 each.<br>
+          Now more spanning trees are viable<br>
+          with a higher minimum edge weight.<br>
+          We find the max achievable stability.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>The feasibility question:</strong> For a given target T, an edge is "viable" if its original weight ≥ T (free to use), or if its weight + delta ≥ T (costs one upgrade token). Use Kruskal's algorithm considering only viable edges — if a spanning tree forms using ≤ k upgrades, T is feasible.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> If the graph is already disconnected (no spanning tree possible at all), return -1. If k = 0, the answer is the minimum edge of a maximum spanning tree (found by standard Kruskal in descending order). If all edges can be upgraded past any T, the answer grows unboundedly (though in practice weights are bounded).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Binary Search + Kruskal's MST</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The approach has two interlocking parts: <strong>Binary Search</strong> narrows down the target minimum weight T, and a <strong>modified Kruskal's</strong> checks feasibility for each T by greedily building a spanning tree.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Set search bounds:</strong> lo = min possible edge weight (or 0), hi = max edge weight + k * delta. These are the extremes of what T could be. Binary search between them.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Binary search on T:</strong> Compute mid = (lo + hi) // 2. Call feasible(mid). If feasible, lo = mid + 1 (try higher). Otherwise hi = mid - 1 (try lower). Repeat until lo > hi. Answer = lo - 1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Classify edges for target T:</strong> An edge with weight w is "free" if w ≥ T (no upgrade needed). It is "upgradeable" if w + delta ≥ T (costs one token). Otherwise it's unusable for this T.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Greedy Kruskal (modified):</strong> First, try to build a spanning tree using only FREE edges (sorted by weight descending, so we prefer stronger edges). Then, fill any remaining disconnected components using UPGRADEABLE edges, counting each one used. If we connect all n nodes using ≤ k upgrades, feasible = True.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Union-Find (DSU):</strong> Use path-compressed Union-Find to efficiently track connected components during Kruskal's. Each union operation merges two components. A spanning tree needs exactly n-1 unions.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Binary Search Works Here</div>
+      <p>The feasibility function is <strong>monotone</strong>: if target T is achievable, then any T' &lt; T is also achievable (lower bar = easier). This monotonicity property is precisely the condition required for binary search to work. The search finds the boundary between feasible and infeasible.</p>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 Feasibility Check Formula</div>
+      <div style="font-family:var(--mono);font-size:13px;line-height:2">
+        For target T:<br>
+        free_edges = {(u,v,w) : w ≥ T}         ← no upgrade needed<br>
+        upgrade_edges = {(u,v,w) : w+delta ≥ T, w &lt; T}  ← costs 1 token<br>
+        Run Kruskal on free_edges first, then on upgrade_edges.<br>
+        Count upgrades_used ≤ k AND components == 1  →  feasible(T) = True
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Binary Search Invariant</div>
+      <p>After every iteration, the invariant is: <strong>every T ≤ lo-1 is feasible</strong>, and <strong>every T ≥ hi+1 is infeasible</strong>. When lo > hi, the answer is lo-1 (the largest feasible T).</p>
+    </div>
+
+    <p><strong>Why Kruskal's is valid here:</strong> Kruskal's algorithm works because greedily picking the highest-weight edge that doesn't form a cycle produces an optimal (maximum weight) spanning tree. The modification: we run two passes — first with free edges (no cost), then with upgrade edges (with cost) — and this greedy order minimizes the number of upgrades needed to span the graph.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Greedy Order for Upgrades</div>
+      <p>We must try <strong>free edges first</strong>, then upgrade edges. If we used an upgrade when a free edge could have served, we'd waste upgrade tokens. Kruskal's greedy order naturally handles this — free edges (higher effective weight for feasibility) come first, upgrade edges fill in the gaps.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why we don't need to choose WHICH edges to upgrade:</strong> For a given T, an edge either CAN be upgraded to meet T (costs 1 token) or it CANNOT. We just need to know: is there a spanning tree where the non-free edges number ≤ k? The greedy Kruskal minimizes upgrades used, so if any valid plan exists, the greedy finds one.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Monotonicity Proof</div>
+      <p>If feasible(T) = True, then for any T' &lt; T: every edge that was usable for T is still usable for T' (since a lower threshold lets MORE edges qualify). So feasible(T') = True as well. This strict monotonicity is why binary search converges to the exact boundary.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Binary Search + Kruskal's MST (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def maxStability(n, edges, k, delta):</span></div>
+<div class="ann-line"><span class="acode">    # Union-Find helpers</span></div>
+<div class="ann-line"><span class="acode">    def find(p, x):                                  </span><span class="aann">← Path-compressed find</span></div>
+<div class="ann-line"><span class="acode">        while p[x] != x: p[x] = p[p[x]]; x = p[x]</span></div>
+<div class="ann-line"><span class="acode">        return x</span></div>
+<div class="ann-line"><span class="acode">    def union(p, rank, a, b):                        </span><span class="aann">← Union by rank</span></div>
+<div class="ann-line"><span class="acode">        a, b = find(p, a), find(p, b)</span></div>
+<div class="ann-line"><span class="acode">        if a == b: return False                      </span><span class="aann">← Already connected — skip</span></div>
+<div class="ann-line"><span class="acode">        if rank[a] < rank[b]: a, b = b, a</span></div>
+<div class="ann-line"><span class="acode">        p[b] = a; rank[a] += (rank[a] == rank[b])   </span><span class="aann">← Merge smaller under larger</span></div>
+<div class="ann-line"><span class="acode">        return True</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def feasible(target):                            </span><span class="aann">← Can we build ST with min weight ≥ target?</span></div>
+<div class="ann-line"><span class="acode">        p = list(range(n)); rank = [0] * n</span></div>
+<div class="ann-line"><span class="acode">        free = [(u,v,w) for u,v,w in edges if w >= target]      </span><span class="aann">← No upgrade needed</span></div>
+<div class="ann-line"><span class="acode">        upg  = [(u,v,w) for u,v,w in edges if w+delta >= target > w]  </span><span class="aann">← Costs 1 token</span></div>
+<div class="ann-line"><span class="acode">        upgrades_used = 0</span></div>
+<div class="ann-line"><span class="acode">        for u,v,w in sorted(free, key=lambda e:-e[2]):  </span><span class="aann">← Kruskal: free edges first (desc weight)</span></div>
+<div class="ann-line"><span class="acode">            union(p, rank, u, v)</span></div>
+<div class="ann-line"><span class="acode">        for u,v,w in sorted(upg,  key=lambda e:-e[2]):  </span><span class="aann">← Then upgrade edges (desc weight)</span></div>
+<div class="ann-line"><span class="acode">            if union(p, rank, u, v):</span></div>
+<div class="ann-line"><span class="acode">                upgrades_used += 1                   </span><span class="aann">← Count each upgrade actually used</span></div>
+<div class="ann-line"><span class="acode">        roots = len(set(find(p, i) for i in range(n)))</span></div>
+<div class="ann-line"><span class="acode">        return roots == 1 and upgrades_used <= k     </span><span class="aann">← Spanning tree formed within budget</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    lo = min(w for _,_,w in edges)</span></div>
+<div class="ann-line"><span class="acode">    hi = max(w for _,_,w in edges) + k * delta       </span><span class="aann">← Max possible T after k upgrades</span></div>
+<div class="ann-line"><span class="acode">    while lo <= hi:</span></div>
+<div class="ann-line"><span class="acode">        mid = (lo + hi) // 2</span></div>
+<div class="ann-line"><span class="acode">        if feasible(mid): lo = mid + 1               </span><span class="aann">← T is achievable; try higher</span></div>
+<div class="ann-line"><span class="acode">        else:             hi = mid - 1               </span><span class="aann">← T too high; try lower</span></div>
+<div class="ann-line"><span class="acode">    return hi  # = lo - 1 after loop                 </span><span class="aann">← Largest feasible T</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why return hi (not lo)?</div>
+      <p>After the binary search loop, <code>lo = hi + 1</code>. The last feasible T is <code>lo - 1 = hi</code>. Returning <code>hi</code> (rather than <code>lo</code>) gives the correct answer — the maximum T for which the spanning tree is still achievable.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force: Try All Upgrade Combinations (Exponential)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from itertools import combinations</span></div>
+<div class="ann-line"><span class="acode">def maxStabilityBrute(n, edges, k, delta):</span></div>
+<div class="ann-line"><span class="acode">    best = 0</span></div>
+<div class="ann-line"><span class="acode">    for num_upgrades in range(k+1):                  </span><span class="aann">← Try 0, 1, ..., k upgrades</span></div>
+<div class="ann-line"><span class="acode">        for chosen in combinations(range(len(edges)), num_upgrades):  </span><span class="aann">← Every C(m,i) subset</span></div>
+<div class="ann-line"><span class="acode">            new_edges = [list(e) for e in edges]</span></div>
+<div class="ann-line"><span class="acode">            for idx in chosen:</span></div>
+<div class="ann-line"><span class="acode">                new_edges[idx][2] += delta           </span><span class="aann">← Apply upgrade to chosen edges</span></div>
+<div class="ann-line"><span class="acode">            best = max(best, max_spanning_min(n, new_edges))  </span><span class="aann">← Run max-min MST</span></div>
+<div class="ann-line"><span class="acode">    return best                                      </span><span class="aann">← O(2^m * m log m) — only for tiny graphs</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Binary Search + Kruskal:</strong> O(E log E · log W) where W = weight range.<br>
+        Binary search: O(log W) iterations. Each feasibility check: O(E log E) for sorting + O(E α(N)) for DSU.<br>
+        <strong>Brute Force:</strong> O(2^E · E log E) — infeasible for large inputs.<br>
+        Space: O(N + E) for DSU + edge lists.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Spot "Maximize the Minimum" — This Means Binary Search</div>
+        <p style="font-size:14px;color:var(--text)">Any time you see "maximize the minimum" or "minimize the maximum," binary search on the answer is almost always the right approach. The answer space forms a sorted range; binary search the boundary. Say this explicitly to the interviewer.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Formulate the Feasibility Check</div>
+        <p style="font-size:14px;color:var(--text)">Ask: "If I fix a target T, what does it take to check if it's achievable?" For T: (1) edges with w ≥ T are free, (2) edges with w+delta ≥ T cost 1 upgrade, (3) others are unusable. Build a spanning tree using these — if it exists with ≤ k upgrades, T is feasible.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Choose Kruskal's for the Inner Check</div>
+        <p style="font-size:14px;color:var(--text)">The feasibility check is a spanning tree problem with two tiers of edges. Kruskal's greedy works perfectly: use free edges first, then upgrade edges (minimizing cost). Union-Find gives O(α(n)) per operation. This is the standard MST toolkit.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Set Binary Search Bounds Carefully</div>
+        <p style="font-size:14px;color:var(--text)">lo = min edge weight (smallest achievable answer — no upgrades), hi = max edge weight + k*delta (upper bound — upgrade every edge maximally). Binary search between these. After the loop, hi = answer.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I notice this asks to maximize the minimum edge weight — a classic binary search on answer signal.<br>
+I'll binary search on the target T: lo = min weight, hi = max weight + k * delta.<br>
+For each T, I check: can I form a spanning tree where every edge has weight ≥ T, using at most k upgrades?<br>
+To check: free edges (weight ≥ T) are used first in Kruskal's, then upgrade edges (weight + delta ≥ T) as needed.<br>
+If we connect all nodes with ≤ k upgrades used, T is feasible. Return hi after binary search.<br>
+Time: O(E log E · log W), Space: O(N+E)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if upgrades have different costs?"</strong> → Turn into a weighted coverage problem; use Dijkstra-like approach on upgrade budget.</li>
+        <li><strong>"What if we want the maximum spanning tree total weight instead?"</strong> → Standard Kruskal's max-MST (sort descending, no binary search needed).</li>
+        <li><strong>"Can you upgrade edges more than once?"</strong> → Each upgrade still costs 1 token; k tokens → k total upgrades (possibly same edge multiple times). Adjust delta calculation.</li>
+        <li><strong>"What if the graph might be disconnected?"</strong> → Check roots == 1 in feasibility; return -1 if even at T = min weight, no spanning tree exists.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: 5 nodes, 6 edges, k=1, delta=4</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Graph: edges [(0,1,5),(0,2,8),(1,2,6),(1,3,4),(2,4,7),(3,4,2)]. k=1 upgrade, delta=4. Binary search finds max stability.</p>
+
+    <!-- Graph Visualization -->
+    <div class="viz-area">
+      <svg class="graph-svg" viewBox="0 0 560 240" style="max-height:240px">
+        <!-- Edges (drawn first, under nodes) -->
+        <!-- 0-1: 5 -->
+        <line id="e-0-1" class="edge-line" x1="140" y1="80" x2="240" y2="160"/>
+        <text id="ew-0-1" class="edge-weight" x="185" y="128">5</text>
+        <!-- 0-2: 8 -->
+        <line id="e-0-2" class="edge-line" x1="140" y1="80" x2="280" y2="60"/>
+        <text id="ew-0-2" class="edge-weight" x="208" y="58">8</text>
+        <!-- 1-2: 6 -->
+        <line id="e-1-2" class="edge-line" x1="240" y1="160" x2="280" y2="60"/>
+        <text id="ew-1-2" class="edge-weight" x="268" y="118">6</text>
+        <!-- 1-3: 4 -->
+        <line id="e-1-3" class="edge-line" x1="240" y1="160" x2="360" y2="180"/>
+        <text id="ew-1-3" class="edge-weight" x="300" y="182">4</text>
+        <!-- 2-4: 7 -->
+        <line id="e-2-4" class="edge-line" x1="280" y1="60" x2="420" y2="80"/>
+        <text id="ew-2-4" class="edge-weight" x="352" y="58">7</text>
+        <!-- 3-4: 2 -->
+        <line id="e-3-4" class="edge-line" x1="360" y1="180" x2="420" y2="80"/>
+        <text id="ew-3-4" class="edge-weight" x="396" y="142">2</text>
+
+        <!-- Upgrade badges (hidden initially) -->
+        <rect id="upg-badge-3-4" class="upgrade-badge" x="408" y="136" width="30" height="14" rx="3" style="display:none"/>
+        <text id="upg-text-3-4" class="upgrade-text" x="423" y="146" style="display:none">+4</text>
+        <rect id="upg-badge-1-3" class="upgrade-badge" x="312" y="176" width="30" height="14" rx="3" style="display:none"/>
+        <text id="upg-text-1-3" class="upgrade-text" x="327" y="186" style="display:none">+4</text>
+
+        <!-- Nodes -->
+        <circle id="node-0" class="node-circle" cx="140" cy="80" r="20"/>
+        <text class="node-label" x="140" y="80">0</text>
+        <circle id="node-1" class="node-circle" cx="240" cy="160" r="20"/>
+        <text class="node-label" x="240" y="160">1</text>
+        <circle id="node-2" class="node-circle" cx="280" cy="60" r="20"/>
+        <text class="node-label" x="280" y="60">2</text>
+        <circle id="node-3" class="node-circle" cx="360" cy="180" r="20"/>
+        <text class="node-label" x="360" y="180">3</text>
+        <circle id="node-4" class="node-circle" cx="420" cy="80" r="20"/>
+        <text class="node-label" x="420" y="80">4</text>
+      </svg>
+
+      <!-- Binary Search State -->
+      <div class="bs-panel">
+        <div class="bs-label">Binary Search</div>
+        <div class="bs-range">
+          lo=<span id="bs-lo" class="bs-lo">2</span>
+          <span class="bs-sep">···</span>
+          mid=<span id="bs-mid" class="bs-mid">?</span>
+          <span class="bs-sep">···</span>
+          hi=<span id="bs-hi" class="bs-hi">6</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-left:auto">target T = <span id="bs-target" style="font-weight:700;font-family:var(--mono)">?</span></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-components">
+          <span class="var-name">components</span>
+          <span class="var-val" id="vv-components">5</span>
+        </div>
+        <div class="var-box" id="vb-upgrades">
+          <span class="var-name">upgrades used</span>
+          <span class="var-val" id="vv-upgrades">0</span>
+        </div>
+        <div class="var-box" id="vb-feasible">
+          <span class="var-name">feasible</span>
+          <span class="var-val" id="vv-feasible">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def feasible(target):  # Union-Find inside</div>
+      <div class="code-line" id="cl-1">    free = [(u,v,w) for u,v,w in edges if w >= target]</div>
+      <div class="code-line" id="cl-2">    upg  = [(u,v,w) for u,v,w in edges if w+delta>=target>w]</div>
+      <div class="code-line" id="cl-3">    for u,v,w in sorted(free, key=lambda e:-e[2]):  # free pass</div>
+      <div class="code-line" id="cl-4">        union(p, rank, u, v)</div>
+      <div class="code-line" id="cl-5">    for u,v,w in sorted(upg, key=lambda e:-e[2]):   # upgrade pass</div>
+      <div class="code-line" id="cl-6">        if union(p, rank, u, v): upgrades_used += 1</div>
+      <div class="code-line" id="cl-7">    return roots==1 and upgrades_used &lt;= k</div>
+      <div class="code-line" id="cl-8">lo,hi = min_w, max_w + k*delta  # = 2, 6</div>
+      <div class="code-line" id="cl-9">while lo &lt;= hi: mid=(lo+hi)//2</div>
+      <div class="code-line" id="cl-10">    if feasible(mid): lo = mid+1  # try higher</div>
+      <div class="code-line" id="cl-11">    else:             hi = mid-1  # try lower</div>
+      <div class="code-line" id="cl-12">return hi  # largest feasible T</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through. We have 5 nodes, 6 edges (weights: 2,4,5,6,7,8), k=1 upgrade of +4. Goal: find max achievable minimum edge weight in a spanning tree.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-mst"></div> In MST (free)</div>
+      <div class="legend-item"><div class="legend-swatch sw-upgraded"></div> Upgraded edge</div>
+      <div class="legend-item"><div class="legend-swatch sw-considering"></div> Currently checking</div>
+      <div class="legend-item"><div class="legend-swatch sw-rejected"></div> Rejected / unusable</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> Unused</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">"Maximize the minimum" → Binary Search on Answer (the most important recognition)</div>
+      <div class="takeaway">Feasibility = can we build a spanning tree with min edge ≥ T using ≤ k upgrades?</div>
+      <div class="takeaway">Two-pass Kruskal: free edges first, then upgrade edges — minimizes token cost greedily</div>
+      <div class="takeaway">Union-Find with path compression + union by rank gives near-O(1) per merge</div>
+      <div class="takeaway">After binary search: answer is hi (= lo-1), the last feasible threshold</div>
+      <div class="takeaway">Monotonicity of feasibility is what justifies binary search — always verify this property first</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (try all upgrade subsets)</td>
+          <td class="mark-bad">O(2^E · E log E)</td>
+          <td>O(N+E)</td>
+          <td>Only feasible for tiny graphs</td>
+        </tr>
+        <tr>
+          <td><strong>Binary Search + Kruskal ✓</strong></td>
+          <td class="mark-good">O(E log E · log W)</td>
+          <td>O(N+E)</td>
+          <td>Optimal; interview pick</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Binary Search on Answer + MST</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Problem asks to "maximize the minimum" or "minimize the maximum" of some structural property</li>
+        <li>Resources (upgrades, budgets) let you modify edge weights or connectivity</li>
+        <li>A feasibility check is easy to implement (spanning tree existence)</li>
+        <li>The feasibility function is monotone in the answer parameter</li>
+        <li>Graph problems involving optimization over edge sets → think Kruskal's / Prim's</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same pattern: Binary Search + Graph)</div>
+      <div class="related-item"><strong>Minimum Spanning Tree (Kruskal / Prim)</strong><span class="related-diff diff-med">Medium</span> — Core MST algorithm with Union-Find</div>
+      <div class="related-item"><strong>Path With Minimum Effort</strong><span class="related-diff diff-med">Medium</span> (LeetCode #1631) — Binary search on max edge in path</div>
+      <div class="related-item"><strong>Swim in Rising Water</strong><span class="related-diff diff-hard">Hard</span> (LeetCode #778) — Binary search + BFS/DSU feasibility</div>
+      <div class="related-item"><strong>Kruskal's Algorithm Problems</strong><span class="related-diff diff-med">Medium</span> (LeetCode #1584) — Min cost to connect all points</div>
+      <div class="related-item"><strong>Find Critical and Pseudo-Critical Edges in MST</strong><span class="related-diff diff-hard">Hard</span> (LeetCode #1489) — Deep MST analysis</div>
+      <div class="related-item"><strong>Cheapest Flights Within K Stops</strong><span class="related-diff diff-med">Medium</span> (LeetCode #787) — Resource-constrained graph traversal</div>
+      <div class="related-item"><strong>Capacity to Ship Packages</strong><span class="related-diff diff-med">Medium</span> (LeetCode #1011) — Binary search on answer template</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 6 (Graph Algorithms)<br>
+      Sub-Pattern: <strong>Binary Search on Answer + MST (Kruskal)</strong> · Source: Analysis (custom problem)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Graph structure for visualization
+// nodes: 0(140,80), 1(240,160), 2(280,60), 3(360,180), 4(420,80)
+// edges: 0-1:5, 0-2:8, 1-2:6, 1-3:4, 2-4:7, 3-4:2
+
+const steps = [
+  {
+    id:0,phase:'init',phaseLabel:'INIT',phaseClass:'phase-init',
+    activeLine:8,
+    bsLo:2,bsHi:6,bsMid:'?',bsTarget:'?',
+    components:5,upgrades:0,feasible:'—',
+    edgeStates:{},nodeStates:{},upgBadge:{},
+    title:'Setup: Binary Search Bounds',
+    text:'Edges: [(0,1,5),(0,2,8),(1,2,6),(1,3,4),(2,4,7),(3,4,2)]. Min weight = 2, max weight = 8, k=1, delta=4. Binary search bounds: lo = 2, hi = max(8) + 1*4 = 12. But since we only need to check integer weights in [2,12], we will trace the key iterations. All nodes start disconnected (5 components).'
+  },
+  {
+    id:1,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    activeLine:9,
+    bsLo:2,bsHi:12,bsMid:7,bsTarget:7,
+    components:5,upgrades:0,feasible:'—',
+    edgeStates:{},nodeStates:{},upgBadge:{},
+    title:'Round 1: Test T = 7 (mid = (2+12)//2 = 7)',
+    text:'First binary search iteration: lo=2, hi=12, mid=7. We ask: can we build a spanning tree where every edge weight ≥ 7, using at most 1 upgrade of +4? Free edges (w ≥ 7): (0,2,8) and (2,4,7). Upgrade edges (w+4 ≥ 7, w < 7): (1,2,6). Unusable: (0,1,5), (1,3,4), (3,4,2).'
+  },
+  {
+    id:2,phase:'kruskal',phaseLabel:'KRUSKAL T=7',phaseClass:'phase-kruskal',
+    activeLine:3,
+    bsLo:2,bsHi:12,bsMid:7,bsTarget:7,
+    components:4,upgrades:0,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'considering'},nodeStates:{'0':'in-mst','2':'in-mst'},upgBadge:{},
+    title:'T=7: Free edges pass — merge (0,2,w=8)',
+    text:'Sort free edges by weight descending: [(0,2,8),(2,4,7)]. First: (0,2). Find(0)=0, Find(2)=2 → different roots → union! Nodes 0 and 2 now connected. Components: 5→4.'
+  },
+  {
+    id:3,phase:'kruskal',phaseLabel:'KRUSKAL T=7',phaseClass:'phase-kruskal',
+    activeLine:4,
+    bsLo:2,bsHi:12,bsMid:7,bsTarget:7,
+    components:3,upgrades:0,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst'},nodeStates:{'0':'in-mst','2':'in-mst','4':'in-mst'},upgBadge:{},
+    title:'T=7: Free edges pass — merge (2,4,w=7)',
+    text:'Next free edge: (2,4,7). Find(2)=root(0,2 component), Find(4)=4 → different → union! Now {0,2,4} connected. Components: 4→3. No more free edges.'
+  },
+  {
+    id:4,phase:'kruskal',phaseLabel:'KRUSKAL T=7',phaseClass:'phase-kruskal',
+    activeLine:6,
+    bsLo:2,bsHi:12,bsMid:7,bsTarget:7,
+    components:2,upgrades:1,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'upgraded-edge'},
+    nodeStates:{'0':'in-mst','2':'in-mst','4':'in-mst','1':'upgraded'},
+    upgBadge:{},
+    title:'T=7: Upgrade pass — use 1 upgrade on (1,2,w=6)',
+    text:'Upgrade edges: [(1,2,6)] (6+4=10 ≥ 7, so upgradeable). Apply 1 upgrade: edge (1,2) costs 1 token. Find(1)=1, Find(2)=root(0,2,4 group) → different → union! Now {0,1,2,4} connected. upgrades_used = 1. Components: 3→2.'
+  },
+  {
+    id:5,phase:'kruskal',phaseLabel:'KRUSKAL T=7',phaseClass:'phase-kruskal',
+    activeLine:7,
+    bsLo:2,bsHi:12,bsMid:7,bsTarget:7,
+    components:2,upgrades:1,feasible:'False',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'upgraded-edge','1-3':'rejected','0-1':'rejected','3-4':'rejected'},
+    nodeStates:{'0':'in-mst','2':'in-mst','4':'in-mst','1':'upgraded'},
+    upgBadge:{},
+    title:'T=7: Feasibility check — FAIL (2 components remain)',
+    text:'After all edges: {0,1,2,4} are one component, {3} is isolated. Node 3 cannot be reached — (1,3,4): w+4=8 ≥ 7 but we already used our 1 upgrade! (3,4,2): 2+4=6 < 7, unusable. Roots = 2 ≠ 1. feasible(7) = False. Binary search: hi = mid-1 = 6.'
+  },
+  {
+    id:6,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    activeLine:11,
+    bsLo:2,bsHi:6,bsMid:4,bsTarget:4,
+    components:5,upgrades:0,feasible:'—',
+    edgeStates:{},nodeStates:{},upgBadge:{},
+    title:'Round 2: Test T = 4 (mid = (2+6)//2 = 4)',
+    text:'Now lo=2, hi=6, mid=4. Free edges (w ≥ 4): (0,2,8),(2,4,7),(1,2,6),(0,1,5),(1,3,4). Upgrade edges (w+4 ≥ 4, w < 4): (3,4,2) → 2+4=6 ≥ 4 → upgradeable! Running Kruskal with this target...'
+  },
+  {
+    id:7,phase:'kruskal',phaseLabel:'KRUSKAL T=4',phaseClass:'phase-kruskal',
+    activeLine:3,
+    bsLo:2,bsHi:6,bsMid:4,bsTarget:4,
+    components:1,upgrades:0,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst','0-1':'rejected','1-3':'in-mst'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','3':'in-mst','4':'in-mst'},
+    upgBadge:{},
+    title:'T=4: Free edges span ALL 5 nodes with 0 upgrades!',
+    text:'Sorted free edges: (0,2,8)→merge{0,2}, (2,4,7)→merge{0,2,4}, (1,2,6)→merge{0,1,2,4}, (0,1,5)→SKIP (cycle), (1,3,4)→merge{0,1,2,3,4}. All 5 nodes connected! 4 unions = n-1 = 4. Upgrades used = 0 ≤ k=1. Components = 1.'
+  },
+  {
+    id:8,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    activeLine:10,
+    bsLo:5,bsHi:6,bsMid:5,bsTarget:5,
+    components:5,upgrades:0,feasible:'True',
+    edgeStates:{},nodeStates:{},upgBadge:{},
+    title:'T=4 feasible! lo = mid+1 = 5. Test T=5',
+    text:'feasible(4) = True (0 upgrades, all connected). Binary search goes higher: lo = 5, hi = 6, mid = 5. Test T = 5. Free edges (w ≥ 5): (0,2,8),(2,4,7),(1,2,6),(0,1,5). Upgrade edges (w+4 ≥ 5, w<5): (1,3,4)→8≥5 yes, (3,4,2)→6≥5 yes.'
+  },
+  {
+    id:9,phase:'kruskal',phaseLabel:'KRUSKAL T=5',phaseClass:'phase-kruskal',
+    activeLine:3,
+    bsLo:5,bsHi:6,bsMid:5,bsTarget:5,
+    components:2,upgrades:0,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst','0-1':'rejected'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','4':'in-mst'},
+    upgBadge:{},
+    title:'T=5: Free pass connects {0,1,2,4}, node 3 still alone',
+    text:'Free edges sorted: (0,2,8)→{0,2}, (2,4,7)→{0,2,4}, (1,2,6)→{0,1,2,4}, (0,1,5)→skip cycle. Free pass done: 2 components ({0,1,2,4} and {3}).'
+  },
+  {
+    id:10,phase:'kruskal',phaseLabel:'KRUSKAL T=5',phaseClass:'phase-kruskal',
+    activeLine:6,
+    bsLo:5,bsHi:6,bsMid:5,bsTarget:5,
+    components:1,upgrades:1,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst','0-1':'rejected','1-3':'upgraded-edge'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','4':'in-mst','3':'upgraded'},
+    upgBadge:{'1-3':true},
+    title:'T=5: 1 upgrade on (1,3,4) connects node 3!',
+    text:'Upgrade edges sorted desc: (1,3,4)→w+4=8≥5 → try union(1,3). Find(1)=root({0,1,2,4}), Find(3)=3 → different → union! upgrades_used=1. Components: 2→1. All 5 nodes connected! Check: roots==1 ✓, upgrades_used=1 ≤ k=1 ✓.'
+  },
+  {
+    id:11,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    activeLine:10,
+    bsLo:6,bsHi:6,bsMid:6,bsTarget:6,
+    components:5,upgrades:0,feasible:'True',
+    edgeStates:{},nodeStates:{},upgBadge:{},
+    title:'T=5 feasible! lo=6, hi=6. Test T=6',
+    text:'feasible(5) = True. lo = 6, hi = 6, mid = 6. One more test: T=6. Free edges (w≥6): (0,2,8),(2,4,7),(1,2,6). Upgrade edges (w+4≥6, w<6): (0,1,5)→9≥6, (1,3,4)→8≥6, (3,4,2)→6≥6. All edges except none are usable!'
+  },
+  {
+    id:12,phase:'kruskal',phaseLabel:'KRUSKAL T=6',phaseClass:'phase-kruskal',
+    activeLine:3,
+    bsLo:6,bsHi:6,bsMid:6,bsTarget:6,
+    components:2,upgrades:0,feasible:'—',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','4':'in-mst'},
+    upgBadge:{},
+    title:'T=6: Free pass: (0,2,8),(2,4,7),(1,2,6) → {0,1,2,4} connected',
+    text:'Free edges sorted: (0,2,8)→{0,2}, (2,4,7)→{0,2,4}, (1,2,6)→{0,1,2,4}. Node 3 still isolated. 2 components remain after free pass.'
+  },
+  {
+    id:13,phase:'kruskal',phaseLabel:'KRUSKAL T=6',phaseClass:'phase-kruskal',
+    activeLine:6,
+    bsLo:6,bsHi:6,bsMid:6,bsTarget:6,
+    components:1,upgrades:1,feasible:'True',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst','0-1':'rejected','1-3':'upgraded-edge','3-4':'rejected'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','4':'in-mst','3':'upgraded'},
+    upgBadge:{'1-3':true},
+    title:'T=6: 1 upgrade on (1,3,4) → fully connected! feasible(6)=True',
+    text:'Upgrade pass sorted: (0,1,5)→w+4=9≥6 but 0,1 already connected → skip. (1,3,4)→w+4=8≥6 → union(1,3): success! upgrades_used=1. (3,4,2) → would skip (3,4 now connected). Components=1, upgrades=1 ≤ k=1. feasible(6) = True! lo = 7 > hi = 6. Loop ends.'
+  },
+  {
+    id:14,phase:'result',phaseLabel:'ANSWER',phaseClass:'phase-result',
+    activeLine:12,
+    bsLo:7,bsHi:6,bsMid:6,bsTarget:'done',
+    components:1,upgrades:1,feasible:'True',
+    edgeStates:{'0-2':'in-mst','2-4':'in-mst','1-2':'in-mst','1-3':'upgraded-edge'},
+    nodeStates:{'0':'in-mst','1':'in-mst','2':'in-mst','4':'in-mst','3':'upgraded'},
+    upgBadge:{'1-3':true},
+    title:'Answer = hi = 6 ✓',
+    text:'Binary search ends: lo=7 > hi=6. Return hi = 6. The maximum achievable minimum edge weight in any spanning tree (with 1 upgrade of +4) is 6. The optimal spanning tree uses edges (0,2,8), (2,4,7), (1,2,6), and upgraded edge (1,3,4→8). All edges ≥ 6. Stability = 6!'
+  }
+];
+
+// Edge key helpers
+function eKey(u,v){ return u<v ? u+'-'+v : v+'-'+u; }
+
+let current = 0;
+
+function render() {
+  const step = steps[current];
+
+  // ── Edge states ──
+  const allEdges = [['0','1'],['0','2'],['1','2'],['1','3'],['2','4'],['3','4']];
+  allEdges.forEach(([u,v]) => {
+    const k = u+'-'+v;
+    const el = document.getElementById('e-'+k);
+    const ew = document.getElementById('ew-'+k);
+    if (!el) return;
+    const state = step.edgeStates[k] || 'normal';
+    el.className = 'edge-line ' + state;
+    ew.className = 'edge-weight ' + state;
+  });
+
+  // ── Upgrade badges ──
+  const allBadges = ['3-4','1-3'];
+  allBadges.forEach(k => {
+    const badge = document.getElementById('upg-badge-'+k);
+    const text  = document.getElementById('upg-text-'+k);
+    if (badge) badge.style.display = step.upgBadge[k] ? '' : 'none';
+    if (text)  text.style.display  = step.upgBadge[k] ? '' : 'none';
+  });
+
+  // ── Node states ──
+  for (let i=0; i<5; i++) {
+    const el = document.getElementById('node-'+i);
+    if (!el) continue;
+    const state = step.nodeStates[String(i)] || 'normal';
+    el.className = 'node-circle ' + state;
+  }
+
+  // ── Binary search panel ──
+  document.getElementById('bs-lo').textContent = step.bsLo;
+  document.getElementById('bs-hi').textContent = step.bsHi;
+  document.getElementById('bs-mid').textContent = step.bsMid;
+  document.getElementById('bs-target').textContent = step.bsTarget;
+
+  // ── Variable tracker ──
+  document.getElementById('vv-components').textContent = step.components;
+  document.getElementById('vv-upgrades').textContent = step.upgrades;
+  document.getElementById('vv-feasible').textContent = step.feasible;
+
+  const prevComp = current > 0 ? steps[current-1].components : 5;
+  const prevUpg  = current > 0 ? steps[current-1].upgrades : 0;
+  const prevFeas = current > 0 ? steps[current-1].feasible : '—';
+  document.getElementById('vb-components').classList.toggle('changed', step.components !== prevComp);
+  document.getElementById('vb-upgrades').classList.toggle('changed', step.upgrades !== prevUpg);
+  document.getElementById('vb-feasible').classList.toggle('changed', step.feasible !== prevFeas);
+
+  // ── Code panel ──
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current+1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-'+i);
+    if (!dot) return;
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+// Build progress dots
+(function buildDots(){
+  const pd = document.getElementById('progress-dots');
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-'+i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  });
+})();
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,87 +1,960 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Shortest Path in a Grid with Obstacles Elimination — LC #1293</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1293 · Shortest Path in a Grid with Obstacles Elimination</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:28px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Grid Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-section{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:1.5rem}
+.grid-row{display:flex;gap:4px}
+.grid-cell{
+  width:60px;height:60px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s,box-shadow 0.3s;
+  flex-shrink:0;position:relative;
+}
+.cell-coord{font-size:9px;font-weight:500;color:var(--text3);line-height:1.2}
+.cell-icon{font-size:18px;line-height:1}
+.grid-cell.wall{background:#2a2a2a;border-color:#444;color:#aaa}
+.grid-cell.wall .cell-coord{color:#888}
+.grid-cell.elim-wall{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.grid-cell.start-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.grid-cell.goal-cell{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.grid-cell.current-cell{background:var(--amber-bg);border-color:var(--amber-mid);color:var(--amber-text);box-shadow:0 0 0 3px var(--amber-border);transform:scale(1.05)}
+.grid-cell.frontier-cell{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.grid-cell.visited-cell{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);opacity:0.75}
+.grid-cell.path-cell{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text);box-shadow:0 0 0 2px var(--cyan-mid)}
+.grid-cell.goal-found{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-text);box-shadow:0 0 0 3px var(--green-mid);transform:scale(1.08)}
+
+/* ── Queue display ── */
+.queue-section{margin-bottom:1rem}
+.queue-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.queue-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:44px;align-items:center}
+.queue-item{
+  padding:4px 9px;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:600;
+  background:var(--blue-bg);border:1.5px solid var(--blue-border);color:var(--blue-text);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.queue-item.front-item{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.queue-item-pos{font-size:9px;font-weight:400;color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-bfs{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-dequeue{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-explore{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-found{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-start{background:var(--green-bg);border-color:var(--green-border)}
+.sw-goal{background:var(--red-bg);border-color:var(--red-border)}
+.sw-curr{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-frontier{background:var(--blue-bg);border-color:var(--blue-mid)}
+.sw-visited{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-path{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-wall{background:#2a2a2a;border-color:#444}
+.sw-elim{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── State diagram ── */
+.state-diagram{display:flex;justify-content:center;align-items:center;gap:16px;margin:1.5rem 0;flex-wrap:wrap}
+.state-box{padding:12px 18px;border-radius:var(--radius);border:2px solid var(--blue-border);background:var(--blue-bg);text-align:center;min-width:130px}
+.state-box-label{font-size:12px;font-weight:700;color:var(--blue-mid);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.state-box-desc{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.state-arrow{font-size:20px;color:var(--text3);font-weight:700}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Shortest Path in a Grid with Obstacles Elimination</h1>
-<div class="subtitle">LeetCode #1293 &mdash; BFS with State (x, y, k)</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">BFS with State (x, y, k)</span><span class="tag tag-cx">O(m*n*k) Time &middot; O(m*n*k) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1293</div>
+  <h1>Shortest Path in a Grid with Obstacles Elimination</h1>
+  <p class="subtitle">Find the minimum steps from top-left to bottom-right of an m×n grid, allowed to eliminate at most k obstacles along the way.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">BFS with State</span>
+    <span class="tag tag-complexity">Time: O(m·n·k)</span>
+    <span class="tag tag-complexity">Space: O(m·n·k)</span>
+  </div>
+</header>
+
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You start at the top-left cell <code>(0, 0)</code> of an <code>m × n</code> grid. Each cell is either empty (<code>0</code>) or an obstacle (<code>1</code>). You want to reach the bottom-right cell <code>(m-1, n-1)</code> using the fewest steps. At each step you move in one of four directions (up, down, left, right). You have a special budget: you can <strong>walk through at most k obstacles</strong> as if they were open cells.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Core Insight — State Expansion</div>
+      <p>Standard BFS tracks which <em>cell</em> you've been to. Here, reaching the same cell with <strong>different remaining elimination budgets</strong> creates genuinely different situations — one might let you find a shortcut the other can't. So the BFS state must be <strong>(row, col, k_remaining)</strong>, not just (row, col).</p>
+    </div>
+
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">✓ State includes k: correct</div>
+        <p style="font-size:13px;color:var(--green-text);line-height:1.8;font-family:var(--mono)">
+          State = (r, c, k_left)<br>
+          (1,1,3) ≠ (1,1,1)<br>
+          Both stored — different futures!<br>
+          BFS explores 3D state space.
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ State is just (r, c): wrong</div>
+        <p style="font-size:13px;color:var(--red-text);line-height:1.8;font-family:var(--mono)">
+          Mark (1,1) visited with k=0<br>
+          Later arrive with k=3 → blocked!<br>
+          Miss the path that uses the budget.<br>
+          Returns wrong (or -1) answer.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong></p>
+    <ul style="margin-left:1.2rem;font-size:14px;line-height:2.2">
+      <li>If <code>k ≥ m + n - 2</code>: the Manhattan distance path has at most m+n-3 cells (excluding start/end); we can eliminate all of them. Answer = <code>m + n - 2</code>.</li>
+      <li>If the grid is 1×1: you're already at the destination. Return 0.</li>
+      <li>If the destination is unreachable even with k eliminations: return -1.</li>
+    </ul>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>State = (row, col, remaining_k). BFS: at each step can move to adjacent cell; if obstacle and k>0: move with k-1. First time reaching (m-1,n-1) is shortest path.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: BFS with Extra State</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: BFS with Extra State</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">BFS: state=(r,c,k_remaining)</span></div><div class="step"><span class="snum">2</span><span class="stxt">On obstacle: need k>0</span></div><div class="step"><span class="snum">3</span><span class="stxt">Return steps when destination reached</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n*k)</strong> | Space: <strong>O(m*n*k)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import deque
-def shortestPath(grid, k):
-    m,n=len(grid),len(grid[0])
-    if m==1 and n==1: return 0
-    q=deque([(0,0,k,0)]); visited={(0,0,k)}
-    while q:
-        r,c,remaining,steps=q.popleft()
-        for dr,dc in[(0,1),(0,-1),(1,0),(-1,0)]:
-            nr,nc=r+dr,c+dc
-            if 0<=nr<m and 0<=nc<n:
-                if nr==m-1 and nc==n-1: return steps+1
-                nk=remaining-grid[nr][nc]
-                if nk>=0 and (nr,nc,nk) not in visited:
-                    visited.add((nr,nc,nk)); q.append((nr,nc,nk,steps+1))
-    return -1</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">State includes remaining elimination budget k</span></div><div class="step"><span class="snum">2</span><span class="stxt">BFS guarantees shortest path at first visit</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>BFS with Extra State</td><td>O(m*n*k)</td><td>O(m*n*k)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Shortest Path in Binary Matrix</span><span class="pd dm">Medium</span> — No obstacle budget</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>BFS with State (x, y, k)</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Shortest Path in a Grid with Obstacles Elimination"}, "title": "BFS with Extra State", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: BFS over a 3D State Space</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We reshape this problem into a standard unweighted shortest-path problem — just with a bigger "graph." Each node is a triple <code>(row, col, k_remaining)</code>. Edges connect adjacent nodes where moving to a free cell keeps k unchanged, and moving into an obstacle decrements k by 1 (and is only allowed if k ≥ 1).</p>
+
+    <div class="state-diagram">
+      <div class="state-box">
+        <div class="state-box-label">State</div>
+        <div class="state-box-desc">(r, c, k_left)</div>
+      </div>
+      <div class="state-arrow">→</div>
+      <div class="state-box">
+        <div class="state-box-label">Transitions</div>
+        <div class="state-box-desc">4 neighbors<br>obstacle: k_left − 1<br>empty: k_left unchanged</div>
+      </div>
+      <div class="state-arrow">→</div>
+      <div class="state-box">
+        <div class="state-box-label">Goal</div>
+        <div class="state-box-desc">(m−1, n−1, any k ≥ 0)<br>first hit = shortest</div>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Manhattan shortcut:</strong> If <code>k ≥ m + n - 2</code>, return <code>m + n - 2</code> immediately. We can always blast straight through every obstacle on the direct diagonal path.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize BFS:</strong> Create a queue with the starting state <code>(steps=0, r=0, c=0, k_remaining=k)</code>. Create a visited set containing the initial state <code>(0, 0, k)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>BFS loop:</strong> Dequeue the front state. If <code>(r, c)</code> is the destination, return the step count — BFS guarantees this is minimal. Otherwise, explore all 4 neighbors.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>For each in-bounds neighbor <code>(nr, nc)</code>:</strong> Compute <code>new_k = remaining - grid[nr][nc]</code>. If <code>new_k ≥ 0</code> and the state <code>(nr, nc, new_k)</code> has not been visited, mark it visited and enqueue <code>(steps+1, nr, nc, new_k)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return -1</strong> if the queue empties without reaching the destination — no valid path exists.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why BFS, Not DFS or Dijkstra?</div>
+      <p>Every step has the same cost (exactly 1). Using an obstacle elimination doesn't add distance — it only changes your remaining budget. Since all edges are weight-1, <strong>BFS naturally processes states in non-decreasing order of steps</strong>. The first time the destination state is dequeued, it was reached via the fewest steps. Dijkstra would work but is slower (O(m·n·k·log(m·n·k))). DFS has no shortest-path guarantee.</p>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The BFS Level-Order Invariant</div>
+      <p>BFS processes states in strict non-decreasing order of distance from the source. All states at distance <em>d</em> are processed before any state at distance <em>d+1</em>. Therefore, the <em>first</em> time the goal state <code>(m-1, n-1, any k)</code> is dequeued, it was reached via the minimum number of steps — there is no shorter path not yet considered.</p>
+    </div>
+
+    <p><strong>Why the 3D visited set is correct:</strong> If we have already enqueued state <code>(r, c, k_rem=5)</code> and later would enqueue <code>(r, c, k_rem=3)</code>, we must allow the second one — the k=3 path may have taken a different route with different future options. However, if we've already enqueued <code>(r, c, k_rem=3)</code> and later see <code>(r, c, k_rem=3)</code> again, that is a true duplicate — same position, same budget, arrived in the same or more steps (BFS order) — skip it.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why we mark visited BEFORE enqueueing:</strong> If we only mark on dequeue, the same state may be added to the queue multiple times. For a state with many predecessors, this could blow up queue size exponentially. Mark on enqueue to ensure each (r, c, k) is queued at most once.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Most Common Bug</div>
+      <p>Using <code>(r, c)</code> — without k — as the visited key. This causes the algorithm to prematurely block valid paths. Example: if you visit <code>(2,3)</code> with k=0 first (found via a long detour), you block a later visit with k=2, which could have used its budget to reach the goal much faster via a straight line. Always include k in the visited state.</p>
+    </div>
+
+    <p><strong>Complexity proof:</strong> The total number of distinct states is <code>m × n × (k+1)</code>. Each state is enqueued and dequeued at most once. Each dequeue examines 4 neighbors. Total operations: O(4 × m × n × k) = O(m·n·k).</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — BFS with 3D State (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import deque</span></div>
+<div class="ann-line"><span class="acode">def shortestPath(grid, k):                                    </span><span class="aann">← grid is m×n; k = max eliminations allowed</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(grid), len(grid[0])</span></div>
+<div class="ann-line"><span class="acode">    if k >= m + n - 2:                                        </span><span class="aann">← Shortcut: can blast straight through Manhattan path</span></div>
+<div class="ann-line"><span class="acode">        return m + n - 2                                      </span><span class="aann">← Minimum possible steps; answer in O(1)</span></div>
+<div class="ann-line"><span class="acode">    # state = (steps, row, col, k_remaining)</span></div>
+<div class="ann-line"><span class="acode">    queue = deque([(0, 0, 0, k)])                             </span><span class="aann">← Start: 0 steps, at (0,0), k budget left</span></div>
+<div class="ann-line"><span class="acode">    visited = {(0, 0, k)}                                     </span><span class="aann">← Mark start state visited immediately</span></div>
+<div class="ann-line"><span class="acode">    while queue:</span></div>
+<div class="ann-line"><span class="acode">        steps, r, c, remaining = queue.popleft()              </span><span class="aann">← FIFO: popleft() ensures BFS level-order</span></div>
+<div class="ann-line"><span class="acode">        if r == m - 1 and c == n - 1:                         </span><span class="aann">← Reached bottom-right? First dequeue = shortest</span></div>
+<div class="ann-line"><span class="acode">            return steps</span></div>
+<div class="ann-line"><span class="acode">        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:            </span><span class="aann">← 4 directions: right, left, down, up</span></div>
+<div class="ann-line"><span class="acode">            nr, nc = r + dr, c + dc</span></div>
+<div class="ann-line"><span class="acode">            if 0 &lt;= nr &lt; m and 0 &lt;= nc &lt; n:                  </span><span class="aann">← Bounds check before accessing grid</span></div>
+<div class="ann-line"><span class="acode">                new_k = remaining - grid[nr][nc]               </span><span class="aann">← grid=0→k unchanged; grid=1→k decrements by 1</span></div>
+<div class="ann-line"><span class="acode">                if new_k &gt;= 0 and (nr, nc, new_k) not in visited:  </span><span class="aann">← Can afford it and state is unseen</span></div>
+<div class="ann-line"><span class="acode">                    visited.add((nr, nc, new_k))               </span><span class="aann">← Mark before enqueue to prevent queue duplicates</span></div>
+<div class="ann-line"><span class="acode">                    queue.append((steps + 1, nr, nc, new_k))   </span><span class="aann">← One more step to reach (nr, nc)</span></div>
+<div class="ann-line"><span class="acode">    return -1                                                  </span><span class="aann">← Queue exhausted — destination unreachable</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Elegant One-Liner: new_k = remaining - grid[nr][nc]</div>
+      <p>Since <code>grid[nr][nc]</code> is exactly 0 (open) or 1 (obstacle): moving into an open cell subtracts 0 (budget unchanged); moving into an obstacle subtracts 1 (uses one elimination). If the result is negative, we can't afford it. This eliminates the need for an if/else — a single subtraction handles both cases.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force DFS with Backtracking (conceptual only)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def shortestPath_dfs(grid, k):                                </span><span class="aann">← Explores all paths — exponential time</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(grid), len(grid[0])</span></div>
+<div class="ann-line"><span class="acode">    best = [float('inf')]</span></div>
+<div class="ann-line"><span class="acode">    def dfs(r, c, steps, remaining, seen):</span></div>
+<div class="ann-line"><span class="acode">        if r == m-1 and c == n-1:                             </span><span class="aann">← Found destination — check if shortest</span></div>
+<div class="ann-line"><span class="acode">            best[0] = min(best[0], steps); return</span></div>
+<div class="ann-line"><span class="acode">        if steps >= best[0]: return                           </span><span class="aann">← Prune: can't beat current best</span></div>
+<div class="ann-line"><span class="acode">        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:</span></div>
+<div class="ann-line"><span class="acode">            nr, nc = r+dr, c+dc</span></div>
+<div class="ann-line"><span class="acode">            if 0&lt;=nr&lt;m and 0&lt;=nc&lt;n and (nr,nc) not in seen:</span></div>
+<div class="ann-line"><span class="acode">                new_k = remaining - grid[nr][nc]</span></div>
+<div class="ann-line"><span class="acode">                if new_k &gt;= 0:                                </span><span class="aann">← Can afford the move</span></div>
+<div class="ann-line"><span class="acode">                    seen.add((nr,nc))</span></div>
+<div class="ann-line"><span class="acode">                    dfs(nr, nc, steps+1, new_k, seen)</span></div>
+<div class="ann-line"><span class="acode">                    seen.remove((nr,nc))                       </span><span class="aann">← Backtrack — allow revisit in other paths</span></div>
+<div class="ann-line"><span class="acode">    dfs(0, 0, 0, k, {(0,0)})</span></div>
+<div class="ann-line"><span class="acode">    return best[0] if best[0] != float('inf') else -1</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity at a Glance</div>
+      <p>
+        <strong>BFS with 3D State:</strong> Time O(m·n·k), Space O(m·n·k) — each state visited at most once<br>
+        <strong>DFS Brute Force:</strong> Exponential — visits same cell many times from different directions<br>
+        <strong>A* (heuristic BFS):</strong> O(m·n·k·log) — faster in practice, more complex to implement
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: "Shortest path on a grid" → BFS reflex</div>
+        <p style="font-size:14px;color:var(--text)">Say this out loud: "Minimum steps on a grid with unit cost → BFS." This pattern recognition is the first unlock. You don't need Dijkstra because every step costs exactly 1, regardless of whether an obstacle is eliminated.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: What makes two paths different?</div>
+        <p style="font-size:14px;color:var(--text)">Ask: "Can two paths reach the same cell in different situations that affect what I can do next?" Here, yes — same cell, different remaining k. So (row, col) is not enough. The state must capture (row, col, k_remaining).</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Mention the Manhattan shortcut</div>
+        <p style="font-size:14px;color:var(--text)">Before coding, say: "If k ≥ m+n-2, we can eliminate every obstacle on the direct path — answer is always m+n-2." This edge-case catch is easy points and shows engineering maturity.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State complexity clearly and confidently</div>
+        <p style="font-size:14px;color:var(--text)">The state space is m rows × n columns × (k+1) possible remaining budgets = O(m·n·k) states. BFS visits each at most once. Time and space are both O(m·n·k).</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Minimum steps on a grid = BFS. The twist is the elimination budget k.<br>
+Standard BFS only tracks (row, col), but here the same cell with different<br>
+remaining k represents genuinely different situations — so I'll expand<br>
+the state to (row, col, k_remaining) and run BFS over this 3D space.<br>
+<br>
+Edge case first: if k ≥ m+n-2, answer is just m+n-2.<br>
+Otherwise: BFS, mark (r,c,k) visited on enqueue.<br>
+new_k = remaining - grid[nr][nc] handles obstacle/empty elegantly.<br>
+First time we dequeue the goal = shortest path.<br>
+Time and space: O(m·n·k)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if obstacles have different weights to eliminate?"</strong> → Use Dijkstra with a priority queue (weighted edge = elimination cost).</li>
+        <li><strong>"Can you reduce memory?"</strong> → Use a 3D boolean array instead of a set for O(1) lookups; same asymptotic space.</li>
+        <li><strong>"What if you can regenerate k over time?"</strong> → Add regeneration as another state dimension or use Bellman-Ford.</li>
+        <li><strong>"Could A* be faster?"</strong> → Yes, in practice; Manhattan heuristic admissible. But BFS is simpler and correct for this.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: 3×3 Grid, k=1</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Grid: <code>[[0,1,0],[0,0,0],[0,0,0]]</code>, k=1. Obstacle at (0,1). Answer: 4 steps via path S→(0,1)[elim]→(0,2)→(1,2)→G.</p>
+
+    <div class="viz-area">
+      <div class="grid-section" id="grid-display"></div>
+
+      <!-- Queue -->
+      <div class="queue-section">
+        <div class="queue-title">BFS Queue (front → back) · format: (steps, r, c, k)</div>
+        <div class="queue-row" id="bfs-queue"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-steps">
+          <span class="var-name">steps</span>
+          <span class="var-val" id="vv-steps">0</span>
+        </div>
+        <div class="var-box" id="vb-pos">
+          <span class="var-name">position</span>
+          <span class="var-val" id="vv-pos">(0,0)</span>
+        </div>
+        <div class="var-box" id="vb-k">
+          <span class="var-name">k left</span>
+          <span class="var-val" id="vv-k">1</span>
+        </div>
+        <div class="var-box" id="vb-vis">
+          <span class="var-name">|visited|</span>
+          <span class="var-val" id="vv-vis">1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">from collections import deque</div>
+      <div class="code-line" id="cl-1">def shortestPath(grid, k):                    # m=3,n=3,k=1</div>
+      <div class="code-line" id="cl-2">    m, n = len(grid), len(grid[0])</div>
+      <div class="code-line" id="cl-3">    if k >= m + n - 2: return m + n - 2        # k=1 &lt; 4, skip</div>
+      <div class="code-line" id="cl-4">    queue = deque([(0, 0, 0, k)])</div>
+      <div class="code-line" id="cl-5">    visited = {(0, 0, k)}</div>
+      <div class="code-line" id="cl-6">    while queue:</div>
+      <div class="code-line" id="cl-7">        steps, r, c, remaining = queue.popleft()</div>
+      <div class="code-line" id="cl-8">        if r == m - 1 and c == n - 1: return steps</div>
+      <div class="code-line" id="cl-9">        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:</div>
+      <div class="code-line" id="cl-10">            nr, nc = r + dr, c + dc</div>
+      <div class="code-line" id="cl-11">            if 0 &lt;= nr &lt; m and 0 &lt;= nc &lt; n:</div>
+      <div class="code-line" id="cl-12">                new_k = remaining - grid[nr][nc]</div>
+      <div class="code-line" id="cl-13">                if new_k &gt;= 0 and (nr,nc,new_k) not in visited:</div>
+      <div class="code-line" id="cl-14">                    visited.add((nr, nc, new_k))</div>
+      <div class="code-line" id="cl-15">                    queue.append((steps+1, nr, nc, new_k))</div>
+      <div class="code-line" id="cl-16">    return -1</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 15</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the BFS algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-start"></div> Start S (0,0)</div>
+      <div class="legend-item"><div class="legend-swatch sw-goal"></div> Goal G (2,2)</div>
+      <div class="legend-item"><div class="legend-swatch sw-curr"></div> Current node</div>
+      <div class="legend-item"><div class="legend-swatch sw-frontier"></div> In queue (frontier)</div>
+      <div class="legend-item"><div class="legend-swatch sw-visited"></div> Processed (visited)</div>
+      <div class="legend-item"><div class="legend-swatch sw-path"></div> Shortest path</div>
+      <div class="legend-item"><div class="legend-swatch sw-wall"></div> Obstacle (wall)</div>
+      <div class="legend-item"><div class="legend-swatch sw-elim"></div> Eliminated obstacle</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Minimum steps on a grid = BFS (reflexive pattern recognition)</div>
+      <div class="takeaway">When a resource changes path optimality, include it in the BFS state</div>
+      <div class="takeaway">State is (row, col, k_remaining) — the 3D space is the key innovation</div>
+      <div class="takeaway">Manhattan shortcut: if k ≥ m+n-2, answer is m+n-2 (handle in O(1))</div>
+      <div class="takeaway">new_k = remaining - grid[nr][nc] handles obstacle/empty in one elegant line</div>
+      <div class="takeaway">Mark state visited on enqueue (not dequeue) to prevent duplicate queue entries</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DFS Brute Force</td>
+          <td class="mark-bad">Exponential</td>
+          <td>O(m·n)</td>
+          <td>Explores all paths; impractical</td>
+        </tr>
+        <tr>
+          <td><strong>BFS with 3D State ✓</strong></td>
+          <td class="mark-good">O(m·n·k)</td>
+          <td class="mark-good">O(m·n·k)</td>
+          <td>Optimal; the interview answer</td>
+        </tr>
+        <tr>
+          <td>A* with Manhattan heuristic</td>
+          <td>O(m·n·k·log)</td>
+          <td>O(m·n·k)</td>
+          <td>Faster in practice; harder to code</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize "BFS with Extended State"</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Grid shortest-path + a special resource (k eliminations, k fuel, k jumps)</li>
+        <li>"You can do X at most k times" → k becomes part of BFS state</li>
+        <li>Same cell reachable with different "situations" that affect future options</li>
+        <li>Keywords: "at most k eliminations/jumps/teleports" → extended BFS</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: BFS with State)</div>
+      <div class="related-item"><strong>Shortest Path in Binary Matrix</strong><span class="related-diff diff-med">Medium</span> — Standard BFS on grid, no elimination budget (#1091)</div>
+      <div class="related-item"><strong>Minimum Obstacle Removal to Reach Corner</strong><span class="related-diff diff-hard">Hard</span> — 0-1 BFS variant; obstacle removal has binary cost (#2290)</div>
+      <div class="related-item"><strong>Jump Game IV</strong><span class="related-diff diff-hard">Hard</span> — BFS with same-value teleport edges; state includes position (#1345)</div>
+      <div class="related-item"><strong>Escape the Spreading Fire</strong><span class="related-diff diff-hard">Hard</span> — BFS with two evolving agents (you and fire state) (#2258)</div>
+      <div class="related-item"><strong>Cut Off Trees for Golf Event</strong><span class="related-diff diff-hard">Hard</span> — Repeated BFS with changing grid targets (#675)</div>
+      <div class="related-item"><strong>Minimum Number of Days to Disconnect Island</strong><span class="related-diff diff-hard">Hard</span> — BFS with structural grid constraints (#1568)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Graph Traversal section (BFS)<br>
+      Sub-Pattern: <strong>BFS with State (x, y, k)</strong> · Source: Analysis (extended BFS state pattern)<br>
+      Related: "BFS: Shortest Path Unweighted" → extended to include resource budget in state</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// Grid: 3×3, obstacle at (0,1)
+// GRID[r][c]: 0=empty, 1=obstacle
+const GRID = [[0,1,0],[0,0,0],[0,0,0]];
+const M = 3, N = 3;
+
+// Visualization steps for BFS walkthrough
+// grid[0][1] = 1 (obstacle). k=1.
+// BFS path: (0,0)→(0,1)[elim,k→0]→(0,2)→(1,2)→(2,2) = 4 steps
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:4,
+    current:null, frontier:[], visited:['0,0,1'], eliminated:[],
+    queue:['(0, 0,0, k=1)'],
+    stepsVal:'0', posVal:'—', kVal:'1', visVal:'1',
+    changedVars:[],
+    title:'Initialize: queue with starting state (0,0, k=1)',
+    text:'Grid is 3×3. Obstacle (■) is at (0,1). We have k=1 elimination. Check shortcut: k=1, m+n-2=4. Since 1 < 4, no shortcut. Initialize queue with (steps=0, r=0, c=0, k=1). Visited = {(0,0,1)}. S = start, G = goal.'
+  },
+  {
+    id:1, phase:'dequeue', phaseLabel:'DEQUEUE', phaseClass:'phase-dequeue', activeLine:7,
+    current:[0,0], frontier:[], visited:['0,0,1'], eliminated:[],
+    queue:['(0, 0,0, k=1)'],
+    stepsVal:'0', posVal:'(0,0)', kVal:'1', visVal:'1',
+    changedVars:['pos'],
+    title:'Dequeue front: (steps=0, r=0, c=0, k=1)',
+    text:'Pop from front of queue: (0, r=0, c=0, k=1). Current cell = (0,0), the start. Steps=0, k=1 remaining. Is (0,0) == (2,2)? No. Explore 4 neighbors: right (0,1), left (out of bounds), down (1,0), up (out of bounds).'
+  },
+  {
+    id:2, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[0,0], frontier:[[0,1]], visited:['0,0,1','0,1,0'], eliminated:[[0,1]],
+    queue:['(1, 0,1, k=0)'],
+    stepsVal:'0', posVal:'(0,0)', kVal:'0', visVal:'2',
+    changedVars:['k','vis'],
+    title:'Neighbor right (0,1) — OBSTACLE! new_k = 1−1 = 0',
+    text:'Right neighbor (0,1): grid[0][1]=1 (obstacle). new_k = remaining − grid[0][1] = 1 − 1 = 0. new_k ≥ 0 and (0,1,0) not visited → enqueue (steps=1, r=0, c=1, k=0). Mark (0,1,0) visited. Budget spent: k goes from 1 to 0 after this elimination.'
+  },
+  {
+    id:3, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[0,0], frontier:[[0,1],[1,0]], visited:['0,0,1','0,1,0','1,0,1'], eliminated:[],
+    queue:['(1, 0,1, k=0)','(1, 1,0, k=1)'],
+    stepsVal:'0', posVal:'(0,0)', kVal:'1', visVal:'3',
+    changedVars:['vis'],
+    title:'Neighbor down (1,0) — empty cell, k stays 1',
+    text:'Down neighbor (1,0): grid[1][0]=0 (empty). new_k = 1 − 0 = 1. State (1,0,1) not visited → enqueue (steps=1, r=1, c=0, k=1). Budget preserved — this is the alternate path going down. Queue now has two states from (0,0) at step 1.'
+  },
+  {
+    id:4, phase:'dequeue', phaseLabel:'DEQUEUE', phaseClass:'phase-dequeue', activeLine:7,
+    current:[0,1], frontier:[[1,0]], visited:['0,0,1','0,1,0','1,0,1'], eliminated:[[0,1]],
+    queue:['(1, 0,1, k=0)','(1, 1,0, k=1)'],
+    stepsVal:'1', posVal:'(0,1)', kVal:'0', visVal:'3',
+    changedVars:['steps','pos','k'],
+    title:'Dequeue: (steps=1, r=0, c=1, k=0) — at eliminated obstacle',
+    text:'Dequeue next: (steps=1, r=0, c=1, k=0). We are standing at the cell that was an obstacle — we eliminated it! Steps=1, k=0 (no more eliminations). Not at goal. Explore neighbors from (0,1) with k=0.'
+  },
+  {
+    id:5, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[0,1], frontier:[[1,0],[0,2]], visited:['0,0,1','0,1,0','1,0,1','0,2,0'], eliminated:[[0,1]],
+    queue:['(1, 1,0, k=1)','(2, 0,2, k=0)'],
+    stepsVal:'1', posVal:'(0,1)', kVal:'0', visVal:'4',
+    changedVars:['vis'],
+    title:'From (0,1): neighbor right (0,2) — empty, enqueue steps=2',
+    text:'Right of (0,1): (0,2). grid[0][2]=0, new_k=0. State (0,2,0) not visited → enqueue (steps=2, r=0, c=2, k=0). The path so far: (0,0)→(0,1)[elim]→(0,2). We have k=0, no budget left for future obstacles. Back-neighbor (0,0) is already visited.'
+  },
+  {
+    id:6, phase:'dequeue', phaseLabel:'DEQUEUE', phaseClass:'phase-dequeue', activeLine:7,
+    current:[1,0], frontier:[[0,2]], visited:['0,0,1','0,1,0','1,0,1','0,2,0'], eliminated:[],
+    queue:['(1, 1,0, k=1)','(2, 0,2, k=0)'],
+    stepsVal:'1', posVal:'(1,0)', kVal:'1', visVal:'4',
+    changedVars:['pos','k'],
+    title:'Dequeue: (steps=1, r=1, c=0, k=1) — the alternate path with full k',
+    text:'Dequeue (steps=1, r=1, c=0, k=1) — this is the path that went DOWN from start, avoiding the obstacle. It still has k=1. This parallel path is valuable: it might find a shortcut through a future obstacle if needed. Explore neighbors.'
+  },
+  {
+    id:7, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[1,0], frontier:[[0,2],[1,1],[2,0]], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1'], eliminated:[],
+    queue:['(2, 0,2, k=0)','(2, 1,1, k=1)','(2, 2,0, k=1)'],
+    stepsVal:'1', posVal:'(1,0)', kVal:'1', visVal:'6',
+    changedVars:['vis'],
+    title:'From (1,0): neighbors (1,1) and (2,0) — both empty, k=1 preserved',
+    text:'From (1,0) with k=1: right (1,1) is empty → enqueue (steps=2, r=1, c=1, k=1). Down (2,0) is empty → enqueue (steps=2, r=2, c=0, k=1). Both paths keep the full k=1 budget. This is the key advantage of exploring multiple paths in BFS: each might need the budget in different ways.'
+  },
+  {
+    id:8, phase:'dequeue', phaseLabel:'DEQUEUE', phaseClass:'phase-dequeue', activeLine:7,
+    current:[0,2], frontier:[[1,1],[2,0]], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1'], eliminated:[[0,1]],
+    queue:['(2, 0,2, k=0)','(2, 1,1, k=1)','(2, 2,0, k=1)'],
+    stepsVal:'2', posVal:'(0,2)', kVal:'0', visVal:'6',
+    changedVars:['steps','pos','k'],
+    title:'Dequeue: (steps=2, r=0, c=2, k=0) — top-right corner',
+    text:'Dequeue (steps=2, r=0, c=2, k=0). At top-right corner (0,2). k=0. Not at (2,2). Only useful neighbor is down: (1,2). Left would be (0,1) — already visited. Enqueue (1,2,0) with steps=3.'
+  },
+  {
+    id:9, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[0,2], frontier:[[1,1],[2,0],[1,2]], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1','1,2,0'], eliminated:[[0,1]],
+    queue:['(2, 1,1, k=1)','(2, 2,0, k=1)','(3, 1,2, k=0)'],
+    stepsVal:'2', posVal:'(0,2)', kVal:'0', visVal:'7',
+    changedVars:['vis'],
+    title:'From (0,2): neighbor (1,2) — steps=3 on the obstacle-elim path',
+    text:'Down from (0,2): (1,2). grid[1][2]=0, new_k=0. State (1,2,0) not visited → enqueue (steps=3, r=1, c=2, k=0). We are now 3 steps along the path that eliminated the obstacle. One more step will reach (2,2)!'
+  },
+  {
+    id:10, phase:'dequeue', phaseLabel:'DEQUEUE', phaseClass:'phase-dequeue', activeLine:7,
+    current:[1,2], frontier:[[1,1],[2,0]], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1','1,2,0'], eliminated:[[0,1]],
+    queue:['(3, 1,2, k=0)'],
+    stepsVal:'3', posVal:'(1,2)', kVal:'0', visVal:'7',
+    changedVars:['steps','pos'],
+    title:'Dequeue: (steps=3, r=1, c=2, k=0) — one step from goal!',
+    text:'Multiple intermediate steps were processed. Now dequeue (steps=3, r=1, c=2, k=0). We are at (1,2) — directly above the goal (2,2). Steps=3, k=0. Not at goal yet. Explore down neighbor (2,2).'
+  },
+  {
+    id:11, phase:'explore', phaseLabel:'EXPLORE', phaseClass:'phase-explore', activeLine:12,
+    current:[1,2], frontier:[[2,2]], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1','1,2,0','2,2,0'], eliminated:[[0,1]],
+    queue:['(4, 2,2, k=0)'],
+    stepsVal:'3', posVal:'(1,2)', kVal:'0', visVal:'8',
+    changedVars:['vis'],
+    title:'From (1,2): neighbor (2,2) — THE GOAL! Enqueue with steps=4',
+    text:'Down from (1,2): (2,2) — that is the destination! grid[2][2]=0, new_k=0. State (2,2,0) not visited → enqueue (steps=4, r=2, c=2, k=0). The goal is in the queue. On the next dequeue, we return the answer: 4.'
+  },
+  {
+    id:12, phase:'found', phaseLabel:'FOUND!', phaseClass:'phase-found', activeLine:8,
+    current:[2,2], frontier:[], visited:['0,0,1','0,1,0','1,0,1','0,2,0','1,1,1','2,0,1','1,2,0','2,2,0'], eliminated:[[0,1]],
+    queue:['(4, 2,2, k=0)'],
+    stepsVal:'4', posVal:'(2,2)', kVal:'0', visVal:'8',
+    changedVars:['steps','pos'],
+    title:'GOAL REACHED! r=2=m-1, c=2=n-1 → return 4',
+    text:'Dequeue (steps=4, r=2, c=2, k=0). Check: r==m-1 and c==n-1? YES! Return 4. BFS guarantees this is the minimum — every shorter path was explored first and did not reach the goal. Answer: 4 steps.'
+  },
+  {
+    id:13, phase:'found', phaseLabel:'RESULT', phaseClass:'phase-found', activeLine:8,
+    current:null, frontier:[], visited:[], eliminated:[[0,1]],
+    pathCells:[[0,0],[0,1],[0,2],[1,2],[2,2]],
+    queue:[],
+    stepsVal:'4', posVal:'(2,2)', kVal:'0', visVal:'8',
+    changedVars:[],
+    title:'Optimal Path: 4 steps with 1 obstacle eliminated',
+    text:'Shortest path: (0,0) → (0,1)[obstacle eliminated!] → (0,2) → (1,2) → (2,2). Total: 4 steps, 1 elimination used. The path going around the obstacle (down then right) also achieves 4 steps with k=1 intact — both are equally optimal!'
+  }
+];
+
+let cur = 0;
+
+function renderGrid(s) {
+  const container = document.getElementById('grid-display');
+  container.innerHTML = '';
+  const pathCells = s.pathCells || [];
+  const elimSet = new Set((s.eliminated || []).map(e => e[0]+','+e[1]));
+  const frontierSet = new Set((s.frontier || []).map(f => f[0]+','+f[1]));
+
+  for (let r = 0; r < M; r++) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'grid-row';
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      const coord = document.createElement('div');
+      coord.className = 'cell-coord';
+      coord.textContent = '(' + r + ',' + c + ')';
+      const icon = document.createElement('div');
+      icon.className = 'cell-icon';
+
+      const isWall = GRID[r][c] === 1;
+      const isStart = r === 0 && c === 0;
+      const isGoal = r === M-1 && c === N-1;
+      const isCurrent = s.current && s.current[0] === r && s.current[1] === c;
+      const isElim = elimSet.has(r+','+c);
+      const inPath = pathCells.some(p => p[0]===r && p[1]===c);
+      const inFrontier = frontierSet.has(r+','+c);
+
+      if (inPath) {
+        if (isStart) { cell.classList.add('start-cell'); icon.textContent = 'S'; }
+        else if (isGoal) { cell.classList.add('goal-found'); icon.textContent = 'G'; }
+        else if (isWall) { cell.classList.add('elim-wall'); icon.textContent = '×'; }
+        else { cell.classList.add('path-cell'); icon.textContent = '→'; }
+      } else if (isCurrent) {
+        if (isWall && isElim) { cell.classList.add('elim-wall'); icon.textContent = '×'; }
+        else if (isGoal) { cell.classList.add('goal-found'); icon.textContent = 'G'; }
+        else { cell.classList.add('current-cell'); icon.textContent = isStart ? 'S' : ''; }
+      } else if (isStart && !isCurrent) {
+        cell.classList.add('start-cell'); icon.textContent = 'S';
+      } else if (isGoal && !isCurrent) {
+        cell.classList.add('goal-cell'); icon.textContent = 'G';
+      } else if (isWall && isElim) {
+        cell.classList.add('elim-wall'); icon.textContent = '×';
+      } else if (isWall) {
+        cell.classList.add('wall'); icon.textContent = '■';
+      } else if (inFrontier) {
+        cell.classList.add('frontier-cell'); icon.textContent = '+';
+      } else {
+        // Check if visited (any k)
+        const v = s.visited || [];
+        const isVisited = v.some(vk => {
+          const parts = vk.split(',');
+          return parseInt(parts[0]) === r && parseInt(parts[1]) === c;
+        });
+        if (isVisited && !isStart) {
+          cell.classList.add('visited-cell');
+        }
+        icon.textContent = '';
+      }
+
+      cell.appendChild(coord);
+      cell.appendChild(icon);
+      rowEl.appendChild(cell);
+    }
+    container.appendChild(rowEl);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function renderQueue(s) {
+  const container = document.getElementById('bfs-queue');
+  container.innerHTML = '';
+  const items = s.queue || [];
+  if (items.length === 0) {
+    const empty = document.createElement('span');
+    empty.style.cssText = 'font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px';
+    empty.textContent = '[ empty ]';
+    container.appendChild(empty);
+    return;
+  }
+  items.forEach((label, i) => {
+    const item = document.createElement('div');
+    item.className = 'queue-item' + (i === 0 ? ' front-item' : '');
+    const pos = document.createElement('div');
+    pos.className = 'queue-item-pos';
+    pos.textContent = i === 0 ? '← front' : ('  +' + i);
+    item.appendChild(pos);
+    item.appendChild(document.createTextNode(label));
+    container.appendChild(item);
+  });
+}
+
+function render(idx) {
+  const s = steps[idx];
+  renderGrid(s);
+  renderQueue(s);
+
+  // Variable tracker
+  const vars = ['steps','pos','k','vis'];
+  const vals = [s.stepsVal, s.posVal, s.kVal, s.visVal];
+  const ids  = ['vv-steps','vv-pos','vv-k','vv-vis'];
+  const boxIds = ['vb-steps','vb-pos','vb-k','vb-vis'];
+  const changedKeys = ['steps','pos','k','vis'];
+  vars.forEach((v, i) => {
+    document.getElementById(ids[i]).textContent = vals[i];
+    const box = document.getElementById(boxIds[i]);
+    box.classList.toggle('changed', s.changedVars.includes(changedKeys[i]));
+  });
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  if (s.activeLine !== undefined) {
+    const cl = document.getElementById('cl-' + s.activeLine);
+    if (cl) cl.classList.add('active');
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = s.phaseLabel;
+  badge.className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${idx + 1} / ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.remove('active','visited');
+    if (i === idx) d.classList.add('active');
+    else if (i < idx) d.classList.add('visited');
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === steps.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  render(cur);
+}
+
+function reset() { cur = 0; render(0); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// Build progress dots
+const dotsContainer = document.getElementById('progress-dots');
+steps.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.onclick = () => { cur = i; render(i); };
+  dotsContainer.appendChild(d);
+});
+
+render(0);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
 </script>
-</body></html>
+</body>
+</html>

@@ -1,81 +1,877 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Sliding Window Maximum — LC #239</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#239 · Sliding Window Maximum</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Deque static diagram */
+.deque-diagram{display:flex;align-items:stretch;margin:1.25rem auto;justify-content:center;max-width:540px;border-radius:var(--radius);overflow:hidden;border:1.5px solid var(--border2)}
+.deque-end-lbl{padding:10px 16px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;text-align:center;line-height:1.4}
+.deque-body{display:flex;flex:1}
+.deque-slot{flex:1;height:52px;border-left:1.5px solid var(--blue-border);background:var(--blue-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue-text)}
+.deque-slot small{font-size:10px;font-weight:400;color:var(--blue-mid)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.array-row-wrap{display:flex;align-items:flex-start;gap:0;flex-direction:column;align-items:center}
+.ptr-row{display:flex;gap:4px;min-height:26px;align-items:flex-end;margin-bottom:2px;justify-content:center}
+.ptr-slot{width:52px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;line-height:1.4;white-space:nowrap}
+.ptr-i{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-win{background:var(--green-bg);color:var(--green-mid)}
+.ptr-max{background:var(--amber-bg);color:var(--amber-mid)}
+
+.cells-row{display:flex;gap:4px;justify-content:center}
+.cell{
+  width:52px;height:52px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.in-window{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.current{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.cell.maximum{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);font-weight:800}
+.cell.expired{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.result-cell{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:4px;justify-content:center}
+.idx-slot{width:52px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* Deque Live */
+.deque-viz-section{margin-top:1.5rem}
+.deque-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.deque-live{display:flex;align-items:center;justify-content:center;gap:0;min-height:50px}
+.deque-bracket{font-size:28px;color:var(--text3);font-weight:300;padding:0 4px}
+.deque-item{
+  min-width:56px;height:48px;background:var(--purple-bg);border:2px solid var(--purple-border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);color:var(--purple-text);
+  border-left:none;transition:all 0.3s;padding:0 8px;
+}
+.deque-item.first-item{border-left:2px solid var(--purple-border);border-radius:var(--radius) 0 0 var(--radius)}
+.deque-item.last-item{border-radius:0 var(--radius) var(--radius) 0}
+.deque-item.only-item{border-left:2px solid var(--purple-border);border-radius:var(--radius)}
+.deque-idx{font-size:9px;font-weight:600;color:var(--purple-mid);opacity:0.75}
+.deque-val{font-size:16px;font-weight:800}
+.deque-empty{color:var(--text3);font-size:13px;font-style:italic}
+
+/* Result Row */
+.result-row-wrap{margin-top:1.25rem}
+.result-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;text-align:center}
+.result-cells{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;min-height:36px;align-items:center}
+.res-cell{
+  min-width:44px;height:38px;border-radius:var(--radius);
+  background:var(--purple-bg);border:2px solid var(--purple-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;color:var(--purple-text);
+  padding:0 8px;transition:all 0.3s;
+}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-add{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-clean{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-record{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){opacity:0.9}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-window{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-cur{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-max{background:var(--green-bg);border-color:var(--green-border)}
+.sw-exp{background:var(--bg2);border-color:var(--border)}
+.sw-res{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Sliding Window Maximum</h1>
-<div class="subtitle">LeetCode #239 &mdash; Decreasing Deque</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Queues</span><span class="tag tag-pattern">Decreasing Deque</span><span class="tag tag-cx">O(n) Time &middot; O(k) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #239</div>
+  <h1>Sliding Window Maximum</h1>
+  <p class="subtitle">Given an integer array <code>nums</code> and an integer <code>k</code>, return an array of the maximum value in each contiguous window of size <code>k</code> as it slides from left to right.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Monotonic Queue</span>
+    <span class="tag tag-pattern">Decreasing Deque</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(k)</span>
+  </div>
+</header>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Imagine placing a magnifying glass of width <code>k</code> over an array. At each position, you can see exactly <code>k</code> numbers. You slide the glass one position to the right, and ask: <em>what is the biggest number I can see right now?</em> Do this for every valid position and collect all the answers.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Finding the max of a static array is O(n) — easy. The challenge is that our "array" changes every step: one element leaves from the left, one enters from the right. The naive approach (re-scan all k elements) costs O(k) per step, giving O(n·k) total. For large k, this is prohibitively slow. The question is: <strong>can we track the maximum in O(1) per step, amortized?</strong></p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box neutral">
+        <div class="panel-title">Example: nums=[1,3,-1,-3,5,3,6,7], k=3</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--blue-text);line-height:2.1">
+          Window [<b>1, 3,-1</b>,-3, 5, 3, 6, 7] → max = <b>3</b><br>
+          Window [ 1,<b> 3,-1,-3</b>, 5, 3, 6, 7] → max = <b>3</b><br>
+          Window [ 1, 3,<b>-1,-3, 5</b>, 3, 6, 7] → max = <b>5</b><br>
+          Window [ 1, 3,-1,<b>-3, 5, 3</b>, 6, 7] → max = <b>5</b><br>
+          Window [ 1, 3,-1,-3,<b> 5, 3, 6</b>, 7] → max = <b>6</b><br>
+          Window [ 1, 3,-1,-3, 5,<b> 3, 6, 7</b>] → max = <b>7</b><br>
+          Output: [3, 3, 5, 5, 6, 7]
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Why naive O(n·k) fails</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2.1">
+          n=100 000, k=50 000<br>
+          Windows = n-k+1 = 50 001<br>
+          Work per window = k = 50 000<br>
+          Total = ~2.5 × 10⁹ ops<br>
+          → Time Limit Exceeded ✗
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> <code>k=1</code> returns the array unchanged. <code>k=n</code> returns a single element (the global max). Strictly decreasing arrays (every new element evicts nothing). All identical elements (deque holds only 1 index at a time).</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Maintain a deque of indices with decreasing values. Front = current window max. Remove expired indices from front. Remove smaller values from back before pushing new index.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Monotonic Decreasing Deque</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Monotonic Decreasing Deque</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dq=deque() (indices)</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each i: while dq and dq[0]<=i-k: popleft (expired)</span></div><div class="step"><span class="snum">3</span><span class="stxt">While dq and nums[dq[-1]]<nums[i]: pop (smaller)</span></div><div class="step"><span class="snum">4</span><span class="stxt">Append i</span></div><div class="step"><span class="snum">5</span><span class="stxt">If i>=k-1: result.append(nums[dq[0]])</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant maintained at each step.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(n)</strong> | Space: <strong>O(k)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import deque
-def maxSlidingWindow(nums: list[int], k: int) -> list[int]:
-    dq = deque(); result = []
-    for i, num in enumerate(nums):
-        while dq and dq[0] <= i-k: dq.popleft()    # expired
-        while dq and nums[dq[-1]] < num: dq.pop()  # smaller
-        dq.append(i)
-        if i >= k-1: result.append(nums[dq[0]])
-    return result</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Front = max of current window</span></div><div class="step"><span class="snum">2</span><span class="stxt">Remove expired from front, smaller from back (maintain decreasing order)</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Monotonic Decreasing Deque</td><td>O(n)</td><td>O(k)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Jump Game VI</span><span class="pd dm">Medium</span> — DP window max</li><li><span class="pn">Min Stack</span><span class="pd dm">Medium</span> — Monotonic for min</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Decreasing Deque</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Sliding Window Maximum"}, "title": "Monotonic Decreasing Deque", "desc": "See code for walkthrough.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Monotonic Decreasing Deque</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The key observation: when element <code>v</code> enters the window, any element already in the window that is <em>both older and smaller</em> than <code>v</code> can be permanently discarded. Why? For every future window that still contains that smaller element, it also contains <code>v</code> (since <code>v</code> came later). And <code>v</code> is larger. So the smaller element will <em>never</em> be the maximum of any future window.</p>
+
+    <p style="margin-top:0.75rem">We use a <strong>deque (double-ended queue)</strong> storing array <em>indices</em> (not values), with the invariant that the values at those indices are <em>strictly decreasing</em> from front to back. The front is always the current window's maximum index.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Evict expired (front):</strong> If <code>dq[0] &lt;= i - k</code>, the front index is no longer in the current window <code>[i-k+1, i]</code>. Remove it with <code>popleft()</code>. Repeat until the front is valid or deque is empty.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Remove dominated (back):</strong> While the back of the deque has value <code>≤ nums[i]</code>, pop it. That index is now permanently useless — it is dominated by index <code>i</code> which is larger and newer.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Append current index:</strong> Push <code>i</code> to the back. The deque is now still decreasing (new element appended, all dominated elements removed).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Record max when window is full:</strong> Once <code>i &gt;= k-1</code>, the first full window exists. The front of the deque, <code>nums[dq[0]]</code>, is the window maximum. Append it to result.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem">The deque after processing index 5 of [1,3,-1,-3,5,3,...], k=3, looks like:</p>
+
+    <div class="deque-diagram">
+      <div class="deque-end-lbl">FRONT<br>(max)</div>
+      <div class="deque-body">
+        <div class="deque-slot" style="border-left:1.5px solid var(--blue-border)">idx 4<small>val=5</small></div>
+        <div class="deque-slot">idx 5<small>val=3</small></div>
+      </div>
+      <div class="deque-end-lbl">BACK<br>(recent)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Indices, Not Values?</div>
+      <p>We need to check whether the front element is still inside the window. To do that, we compare its <em>index</em> against the current window boundary. If we stored values, we would have no way to know when an element expires.</p>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant (Always True)</div>
+      <p>After processing index <code>i</code>, the deque contains a subsequence of indices from the current window <code>[max(0, i-k+1), i]</code>, in increasing order, such that their corresponding values are strictly decreasing front-to-back. The front index points to the window maximum.</p>
+    </div>
+
+    <p><strong>Proof that discarding dominated elements is safe:</strong> Suppose index <code>j &lt; i</code> is in the deque and <code>nums[j] &lt;= nums[i]</code>. For any window <code>W</code> containing <code>j</code>, since <code>j &lt; i</code>, if <code>j</code> is still in <code>W</code>, then <code>i</code> is in <code>W</code> too (because windows are contiguous and <code>i</code> came after <code>j</code> but within the same window lifespan). Since <code>nums[i] &gt;= nums[j]</code>, the maximum of <code>W</code> is at least <code>nums[i]</code>, so <code>nums[j]</code> can never be the maximum of <code>W</code>. Discarding <code>j</code> is lossless.</p>
+
+    <p style="margin-top:1rem"><strong>Why is the complexity O(n)?</strong> Each of the <code>n</code> indices is pushed to the deque exactly once and popped at most once (either from back when dominated, or from front when expired). Total deque operations: O(n). Result array construction: O(n-k+1). Overall: O(n).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Order of Operations Matters</div>
+      <p>Always evict expired elements from the front <em>before</em> removing dominated elements from the back. If you swap the order, you may incorrectly remove valid candidates based on a comparison against a stale deque state. The eviction step cleans up the past; the dominated-removal step prepares for the future.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Edge case — equal values:</strong> When <code>nums[dq[-1]] &lt;= v</code>, we pop even if equal. Why? The new index <code>i</code> is strictly newer (larger index). If two elements have the same value, the older one will expire from the window sooner, so we keep the newer one. Using <code>&lt;=</code> correctly prioritizes the index that stays valid longest.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:0.5rem"><strong>Solution 1 — Monotonic Deque (Optimal — Interview Pick)</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">from collections import deque         </span><span class="aann">← O(1) popleft + pop, unlike list.pop(0)</span></div>
+      <div class="ann-line"><span class="acode">                                       </span></div>
+      <div class="ann-line"><span class="acode">def maxSlidingWindow(nums, k):         </span></div>
+      <div class="ann-line"><span class="acode">    dq = deque()  # stores indices     </span><span class="aann">← indices, not values!</span></div>
+      <div class="ann-line"><span class="acode">    result = []                        </span></div>
+      <div class="ann-line"><span class="acode">    for i, v in enumerate(nums):       </span><span class="aann">← single O(n) pass</span></div>
+      <div class="ann-line"><span class="acode">        # Step 1: Evict expired front  </span></div>
+      <div class="ann-line"><span class="acode">        while dq and dq[0] &lt;= i - k:  </span><span class="aann">← dq[0] is out of [i-k+1, i]</span></div>
+      <div class="ann-line"><span class="acode">            dq.popleft()               </span><span class="aann">← O(1) removal from front</span></div>
+      <div class="ann-line"><span class="acode">        # Step 2: Remove dominated back</span></div>
+      <div class="ann-line"><span class="acode">        while dq and nums[dq[-1]] &lt;= v:</span><span class="aann">← smaller+older → useless</span></div>
+      <div class="ann-line"><span class="acode">            dq.pop()                   </span><span class="aann">← O(1) removal from back</span></div>
+      <div class="ann-line"><span class="acode">        # Step 3: Append current index </span></div>
+      <div class="ann-line"><span class="acode">        dq.append(i)                   </span><span class="aann">← deque remains decreasing</span></div>
+      <div class="ann-line"><span class="acode">        # Step 4: Record max           </span></div>
+      <div class="ann-line"><span class="acode">        if i &gt;= k - 1:                 </span><span class="aann">← first full window at i = k-1</span></div>
+      <div class="ann-line"><span class="acode">            result.append(nums[dq[0]]) </span><span class="aann">← front is always the max</span></div>
+      <div class="ann-line"><span class="acode">    return result                      </span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Using a List Instead of deque</div>
+      <p>Python's <code>list.pop(0)</code> is O(n) because it shifts all elements. Always use <code>collections.deque</code> for O(1) <code>popleft()</code>. Using a plain list turns the solution back to O(n²) in the worst case.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (Baseline, do NOT use in interview)</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def maxSlidingWindow_brute(nums, k):   </span></div>
+      <div class="ann-line"><span class="acode">    n = len(nums)                      </span></div>
+      <div class="ann-line"><span class="acode">    return [max(nums[i:i+k])           </span><span class="aann">← O(k) per window</span></div>
+      <div class="ann-line"><span class="acode">            for i in range(n - k + 1)] </span><span class="aann">← n-k+1 windows → O(n·k) total</span></div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force</td><td class="mark-bad">O(n·k)</td><td class="mark-good">O(1)</td><td>TLE for large n,k</td></tr>
+        <tr><td>Monotonic Deque</td><td class="mark-good">O(n)</td><td>O(k)</td><td class="mark-good">Interview answer</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize Sliding Window + Extreme Value</div>
+        <p>Keywords: "sliding window of size k", "maximum" (or minimum). This pattern signals you need an efficient way to maintain the extreme value across window slides — classic monotonic queue territory.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: State the Brute Force First</div>
+        <p>"I can use max() on each window slice — O(n·k). For n=10⁵ and k=50000, that's 5×10⁹ operations. The interviewer will nod and ask for better. This buys you time to think."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Ask — What Can We Throw Away?</div>
+        <p>Think about what information becomes useless. Key realization: any element that is smaller than the newest element AND entered the window earlier will <em>never</em> be the maximum of any future window. It's safe to permanently discard it right now.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Choose the Right Data Structure</div>
+        <p>We need: O(1) pop from front (expired), O(1) pop from back (dominated), O(1) push to back (new element), O(1) peek at front (current max). Only a deque provides all four. Explain this reasoning explicitly.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Justify O(n) Amortized</div>
+        <p>Each of the n elements is pushed once and popped at most once (total: ≤ 2n operations). Therefore the algorithm is O(n) despite the nested while loops.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say</h4>
+      <div class="script-content">
+"The naive approach scans k elements per window for O(n·k). The insight is that when element v enters, any element in the deque that is both smaller AND older is permanently dominated — v is bigger and will outlast it in the window. We can discard those useless elements immediately. A deque lets us remove from both ends in O(1): we pop expired indices from the front, and pop dominated indices from the back before appending the new one. The front always holds the window maximum. Since each element enters and leaves the deque at most once, total time is O(n)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-up Questions</div>
+      <p><strong>Window minimum?</strong> Use a monotonic <em>increasing</em> deque — pop from back when new value is <em>smaller or equal</em>. All other logic is identical.</p>
+      <p style="margin-top:0.5rem"><strong>What if k is variable?</strong> The deque approach only works for fixed-k expiry. For variable windows you would need a segment tree or sparse table for O(1) or O(log n) range max queries.</p>
+      <p style="margin-top:0.5rem"><strong>What about using a heap?</strong> A max-heap works but costs O(n log n) due to heap insertions and the need to lazily remove expired elements — valid but suboptimal compared to the deque.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Array: <code>[1, 3, -1, -3, 5, 3, 6, 7]</code>, k = 3. Step through each position and watch the deque evolve.</p>
+
+    <div class="viz-area">
+      <div class="array-row-wrap">
+        <div class="ptr-row" id="ptrRow"></div>
+        <div class="cells-row" id="cellsRow"></div>
+        <div class="idx-row" id="idxRow"></div>
+      </div>
+
+      <div class="deque-viz-section">
+        <div class="deque-label">Deque (indices, values decrease front→back | front = current max)</div>
+        <div class="deque-live" id="dequeLive"><span class="deque-empty">[ empty ]</span></div>
+      </div>
+
+      <div class="result-row-wrap">
+        <div class="result-label">Result array built so far</div>
+        <div class="result-cells" id="resultCells"><span style="color:var(--text3);font-size:13px">—</span></div>
+      </div>
+    </div>
+
+    <div class="var-tracker" id="varTracker">
+      <div class="var-box" id="vb-i"><span class="var-name">i</span><span class="var-val" id="vv-i">—</span></div>
+      <div class="var-box" id="vb-v"><span class="var-name">v = nums[i]</span><span class="var-val" id="vv-v">—</span></div>
+      <div class="var-box" id="vb-dq"><span class="var-name">deque</span><span class="var-val" id="vv-dq">[ ]</span></div>
+      <div class="var-box" id="vb-res"><span class="var-name">result</span><span class="var-val" id="vv-res">[ ]</span></div>
+    </div>
+
+    <div class="code-panel" id="codePanel">
+      <div class="code-line" id="cl0">from collections import deque</div>
+      <div class="code-line" id="cl1">&nbsp;</div>
+      <div class="code-line" id="cl2">def maxSlidingWindow(nums, k):</div>
+      <div class="code-line" id="cl3">    dq = deque()      # stores indices</div>
+      <div class="code-line" id="cl4">    result = []</div>
+      <div class="code-line" id="cl5">    for i, v in enumerate(nums):</div>
+      <div class="code-line" id="cl6">        while dq and dq[0] &lt;= i - k:    # evict expired</div>
+      <div class="code-line" id="cl7">            dq.popleft()</div>
+      <div class="code-line" id="cl8">        while dq and nums[dq[-1]] &lt;= v: # pop dominated</div>
+      <div class="code-line" id="cl9">            dq.pop()</div>
+      <div class="code-line" id="cl10">        dq.append(i)                     # add current index</div>
+      <div class="code-line" id="cl11">        if i &gt;= k - 1:                   # window is full</div>
+      <div class="code-line" id="cl12">            result.append(nums[dq[0]])   # front = max</div>
+      <div class="code-line" id="cl13">    return result</div>
+    </div>
+
+    <div class="info-card" id="infoCard">
+      <span class="phase-badge phase-init" id="phaseBadge">Init</span>
+      <div class="step-counter" id="stepCounter">Step 1 of 19</div>
+      <div class="step-title" id="stepTitle">Ready to begin</div>
+      <div class="step-body" id="stepBody">Press Next to start the walkthrough. We will process each element of [1,3,-1,-3,5,3,6,7] with k=3.</div>
+    </div>
+
+    <div class="progress-dots" id="progressDots"></div>
+
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-window"></div>In current window</div>
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div>Current element (i)</div>
+      <div class="legend-item"><div class="legend-swatch sw-max"></div>Window maximum</div>
+      <div class="legend-item"><div class="legend-swatch sw-exp"></div>Expired (left window)</div>
+      <div class="legend-item"><div class="legend-swatch sw-res"></div>Final result recorded</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Store <strong>indices</strong> (not values) in the deque — you need indices to check window expiry.</div>
+      <div class="takeaway">Pop from the <strong>back</strong> any element dominated by the new incoming value — it can never be a future max.</div>
+      <div class="takeaway">Pop from the <strong>front</strong> any index that has left the window — its contribution is over.</div>
+      <div class="takeaway">The front of the deque is always the <strong>current window maximum</strong> — O(1) lookup per step.</div>
+      <div class="takeaway">Each element enters the deque once and leaves at most once — total: <strong>O(n) amortized</strong>.</div>
+      <div class="takeaway">Space is <strong>O(k)</strong> — the deque holds at most k live indices at any moment.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 Pattern Recognition Signals</div>
+      <ul style="margin-left:1rem;line-height:2">
+        <li>Fixed-size sliding window + range max or min</li>
+        <li>Brute force O(n·k) is too slow and you need O(n)</li>
+        <li>A newly arrived element can permanently invalidate earlier elements</li>
+        <li>You need O(1) access to the current extreme value at every step</li>
+      </ul>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🧠 Analogy: The Ticket Queue</div>
+      <p>Imagine a concert ticket queue. Each person holds a numbered ticket (their value). When a stronger performer arrives, all weaker performers already in queue who will leave before this person get dismissed immediately — they'll never headline while this act is available. When someone's time slot expires, they leave from the front. At all times, the headliner is whoever is at the front of the queue.</p>
+    </div>
+
+    <h4 style="margin-top:1.25rem;margin-bottom:0.75rem">Related Problems</h4>
+    <div class="related-list">
+      <div class="related-item"><strong>Jump Game VI</strong><span class="related-diff diff-med">Medium</span> — Maximize score with k-length jumps: apply same deque on the DP state array</div>
+      <div class="related-item"><strong>Longest Continuous Subarray With Absolute Diff ≤ Limit</strong><span class="related-diff diff-med">Medium</span> — Two deques simultaneously (monotonic max + monotonic min) for variable window</div>
+      <div class="related-item"><strong>Max Value of Equation</strong><span class="related-diff diff-hard">Hard</span> — Transform points to y+x form; use decreasing deque with constraint |xi-xj|≤k</div>
+      <div class="related-item"><strong>Shortest Subarray with Sum at Least K</strong><span class="related-diff diff-hard">Hard</span> — Prefix sums + monotonic increasing deque to find minimum-length valid subarray</div>
+      <div class="related-item"><strong>Constrained Subsequence Sum</strong><span class="related-diff diff-hard">Hard</span> — DP with sliding window maximum using decreasing deque on the DP array</div>
+      <div class="related-item"><strong>Daily Temperatures</strong><span class="related-diff diff-med">Medium</span> — Monotonic decreasing stack (not deque) for "next greater element" variant</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+const nums = [1, 3, -1, -3, 5, 3, 6, 7];
+const k = 3;
+
+// Steps: hand-authored for nums=[1,3,-1,-3,5,3,6,7], k=3
+// Each step captures the full state AFTER the described action.
+const steps = [
+  // 0: Init
+  { i:-1, v:null, dq:[], result:[],
+    activeLine:[3,4], phase:'Init', phaseClass:'phase-init',
+    title:'Initialize dq and result',
+    body:'Create empty deque dq (stores indices, not values) and empty result list. The deque will be kept in decreasing-value order at all times.',
+    cellStates:['normal','normal','normal','normal','normal','normal','normal','normal'],
+    ptrLabels:{}, changed:['dq','res'] },
+
+  // 1: i=0 enter loop
+  { i:0, v:1, dq:[], result:[],
+    activeLine:[5], phase:'Scan', phaseClass:'phase-add',
+    title:'i=0, v=1 — Enter loop',
+    body:'Begin processing index 0 (value 1). Expiry check: deque is empty, skip. Dominated check: deque is empty, skip.',
+    cellStates:['current','normal','normal','normal','normal','normal','normal','normal'],
+    ptrLabels:{0:{lbl:'i',cls:'ptr-i'}}, changed:['i','v'] },
+
+  // 2: i=0 append, window not full
+  { i:0, v:1, dq:[0], result:[],
+    activeLine:[10,11], phase:'Append', phaseClass:'phase-add',
+    title:'Append index 0 (val=1). Window not full yet.',
+    body:'Append index 0 to deque. dq=[0]. i=0 < k-1=2, so window is not full — no result recorded yet.',
+    cellStates:['in-window','normal','normal','normal','normal','normal','normal','normal'],
+    ptrLabels:{0:{lbl:'i',cls:'ptr-i'}}, changed:['dq'] },
+
+  // 3: i=1 enter loop, check expiry
+  { i:1, v:3, dq:[0], result:[],
+    activeLine:[5,6], phase:'Scan', phaseClass:'phase-add',
+    title:'i=1, v=3 — Expiry check passes',
+    body:'Processing index 1 (value 3). Expiry: dq[0]=0, is 0 <= 1-3=-2? NO. No eviction. Now check dominated.',
+    cellStates:['in-window','current','normal','normal','normal','normal','normal','normal'],
+    ptrLabels:{1:{lbl:'i',cls:'ptr-i'},0:{lbl:'win',cls:'ptr-win'}}, changed:['i','v'] },
+
+  // 4: i=1 pop dominated idx 0, append 1
+  { i:1, v:3, dq:[1], result:[],
+    activeLine:[8,9,10], phase:'Clean', phaseClass:'phase-clean',
+    title:'Pop dominated idx 0 (val=1 <= 3), append idx 1',
+    body:'Back of deque: index 0, value 1. Since 1 <= 3, index 0 is dominated — any future window containing index 0 also contains index 1, and 3 > 1. Pop it. Append index 1. dq=[1].',
+    cellStates:['in-window','in-window','normal','normal','normal','normal','normal','normal'],
+    ptrLabels:{1:{lbl:'i',cls:'ptr-i'},0:{lbl:'win',cls:'ptr-win'}}, changed:['dq'] },
+
+  // 5: i=2 enter loop
+  { i:2, v:-1, dq:[1], result:[],
+    activeLine:[5,6,8], phase:'Scan', phaseClass:'phase-add',
+    title:'i=2, v=-1 — No eviction, no dominated removal',
+    body:'Processing index 2 (value -1). Expiry: dq[0]=1, is 1 <= 2-3=-1? NO. Dominated: nums[dq[-1]]=nums[1]=3, is 3 <= -1? NO. Just append.',
+    cellStates:['in-window','in-window','current','normal','normal','normal','normal','normal'],
+    ptrLabels:{2:{lbl:'i',cls:'ptr-i'},0:{lbl:'win',cls:'ptr-win'}}, changed:['i','v'] },
+
+  // 6: i=2 append, window full, record
+  { i:2, v:-1, dq:[1,2], result:[3],
+    activeLine:[10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'Append idx 2 (val=-1). Window full! Record max = nums[1] = 3.',
+    body:'Append index 2. dq=[1,2] → values [3,-1], decreasing. i=2 >= k-1=2: window [1,3,-1] is full. Front = index 1, value 3. Append 3 to result!',
+    cellStates:['in-window','maximum','in-window','normal','normal','normal','normal','normal'],
+    ptrLabels:{2:{lbl:'i',cls:'ptr-i'},0:{lbl:'win',cls:'ptr-win'},1:{lbl:'MAX',cls:'ptr-max'}}, changed:['dq','res'] },
+
+  // 7: i=3, v=-3 — expiry no, dominated no
+  { i:3, v:-3, dq:[1,2], result:[3],
+    activeLine:[5,6,8], phase:'Scan', phaseClass:'phase-add',
+    title:'i=3, v=-3 — No eviction, no dominated removal',
+    body:'Processing index 3 (value -3). Expiry: dq[0]=1, is 1 <= 3-3=0? NO (1>0). Dominated: nums[2]=-1, is -1 <= -3? NO. Append -3.',
+    cellStates:['expired','in-window','in-window','current','normal','normal','normal','normal'],
+    ptrLabels:{3:{lbl:'i',cls:'ptr-i'},1:{lbl:'win',cls:'ptr-win'}}, changed:['i','v'] },
+
+  // 8: i=3 append, record
+  { i:3, v:-3, dq:[1,2,3], result:[3,3],
+    activeLine:[10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'Append idx 3 (val=-3). Record max = nums[1] = 3.',
+    body:'dq=[1,2,3] → values [3,-1,-3], still decreasing. Front = index 1 (value 3). Window [3,-1,-3]: max is 3. Append 3 to result. Result: [3,3].',
+    cellStates:['expired','maximum','in-window','in-window','normal','normal','normal','normal'],
+    ptrLabels:{3:{lbl:'i',cls:'ptr-i'},1:{lbl:'MAX',cls:'ptr-max'}}, changed:['dq','res'] },
+
+  // 9: i=4, v=5 — EVICT front (idx 1, expired), then pop dominated
+  { i:4, v:5, dq:[1,2,3], result:[3,3],
+    activeLine:[5,6,7], phase:'Evict', phaseClass:'phase-clean',
+    title:'i=4, v=5 — Evict expired index 1 from front!',
+    body:'Processing index 4 (value 5). Expiry check: dq[0]=1, is 1 <= 4-3=1? YES (1<=1). Index 1 is no longer in window [2,3,4]. Popleft() it.',
+    cellStates:['expired','expired','in-window','in-window','current','normal','normal','normal'],
+    ptrLabels:{4:{lbl:'i',cls:'ptr-i'},2:{lbl:'win',cls:'ptr-win'}}, changed:['dq','i','v'] },
+
+  // 10: i=4 pop dominated (idx 2 val=-1, idx 3 val=-3)
+  { i:4, v:5, dq:[], result:[3,3],
+    activeLine:[8,9], phase:'Clean', phaseClass:'phase-clean',
+    title:'Pop all dominated: vals -1 and -3 are both <= 5',
+    body:'Back = index 3 (val=-3), -3 <= 5 → pop. Back = index 2 (val=-1), -1 <= 5 → pop. Deque is now empty. Element 5 dominates everything remaining in the window.',
+    cellStates:['expired','expired','in-window','in-window','current','normal','normal','normal'],
+    ptrLabels:{4:{lbl:'i',cls:'ptr-i'},2:{lbl:'win',cls:'ptr-win'}}, changed:['dq'] },
+
+  // 11: i=4 append, record
+  { i:4, v:5, dq:[4], result:[3,3,5],
+    activeLine:[10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'Append idx 4 (val=5). Record max = 5.',
+    body:'dq=[4], values=[5]. Front = index 4, value 5. Window [-1,-3,5]: max is 5. Append 5. Result: [3,3,5].',
+    cellStates:['expired','expired','in-window','in-window','maximum','normal','normal','normal'],
+    ptrLabels:{4:{lbl:'i MAX',cls:'ptr-max'}}, changed:['dq','res'] },
+
+  // 12: i=5, v=3 — no expiry (4>5-3=2), no dominated (5>3), append, record
+  { i:5, v:3, dq:[4,5], result:[3,3,5,5],
+    activeLine:[5,6,8,10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'i=5, v=3 — No eviction, no pop. Append, record max=5.',
+    body:'Expiry: dq[0]=4, is 4 <= 5-3=2? NO. Dominated: nums[4]=5 <= 3? NO. Append 5. dq=[4,5] → values [5,3]. Front still index 4 (val=5). Window [-3,5,3]: max=5. Result: [3,3,5,5].',
+    cellStates:['expired','expired','expired','in-window','maximum','in-window','normal','normal'],
+    ptrLabels:{5:{lbl:'i',cls:'ptr-i'},4:{lbl:'MAX',cls:'ptr-max'}}, changed:['dq','res','i','v'] },
+
+  // 13: i=6, v=6 — no expiry (4>6-3=3), pop dominated (idx 5 val=3, idx 4 val=5)
+  { i:6, v:6, dq:[4,5], result:[3,3,5,5],
+    activeLine:[5,6,8,9], phase:'Clean', phaseClass:'phase-clean',
+    title:'i=6, v=6 — Pop dominated: vals 3 and 5 both <= 6',
+    body:'Expiry: dq[0]=4, is 4 <= 6-3=3? NO (4>3). Dominated: nums[5]=3 <= 6 → pop idx 5. nums[4]=5 <= 6 → pop idx 4. Deque empty. 6 dominates everything.',
+    cellStates:['expired','expired','expired','expired','in-window','in-window','current','normal'],
+    ptrLabels:{6:{lbl:'i',cls:'ptr-i'},4:{lbl:'win',cls:'ptr-win'}}, changed:['dq','i','v'] },
+
+  // 14: i=6 append, record
+  { i:6, v:6, dq:[6], result:[3,3,5,5,6],
+    activeLine:[10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'Append idx 6 (val=6). Record max = 6.',
+    body:'dq=[6], values=[6]. Front = index 6, value 6. Window [5,3,6]: max is 6. Append 6. Result: [3,3,5,5,6].',
+    cellStates:['expired','expired','expired','expired','expired','in-window','maximum','normal'],
+    ptrLabels:{6:{lbl:'i MAX',cls:'ptr-max'}}, changed:['dq','res'] },
+
+  // 15: i=7, v=7 — no expiry (6>7-3=4), pop dominated (idx 6 val=6 <= 7)
+  { i:7, v:7, dq:[6], result:[3,3,5,5,6],
+    activeLine:[5,6,8,9], phase:'Clean', phaseClass:'phase-clean',
+    title:'i=7, v=7 — Pop dominated: index 6 (val=6) <= 7',
+    body:'Expiry: dq[0]=6, is 6 <= 7-3=4? NO. Dominated: nums[6]=6 <= 7 → pop idx 6. Deque empty. 7 is the new dominant value.',
+    cellStates:['expired','expired','expired','expired','expired','expired','in-window','current'],
+    ptrLabels:{7:{lbl:'i',cls:'ptr-i'},5:{lbl:'win',cls:'ptr-win'}}, changed:['dq','i','v'] },
+
+  // 16: i=7 append, record final
+  { i:7, v:7, dq:[7], result:[3,3,5,5,6,7],
+    activeLine:[10,11,12], phase:'Record', phaseClass:'phase-record',
+    title:'Append idx 7 (val=7). Record max = 7.',
+    body:'dq=[7], values=[7]. Front = index 7, value 7. Window [3,6,7]: max is 7. Append 7. Result: [3,3,5,5,6,7].',
+    cellStates:['expired','expired','expired','expired','expired','expired','in-window','maximum'],
+    ptrLabels:{7:{lbl:'i MAX',cls:'ptr-max'}}, changed:['dq','res'] },
+
+  // 17: Done!
+  { i:7, v:7, dq:[7], result:[3,3,5,5,6,7],
+    activeLine:[13], phase:'Done', phaseClass:'phase-result',
+    title:'Complete! Return result = [3,3,5,5,6,7]',
+    body:'All 8 elements processed. The 6 windows of size 3 had maxima: 3, 3, 5, 5, 6, 7. Total deque operations: O(n) = O(8). Each index entered once and left once.',
+    cellStates:['result-cell','result-cell','result-cell','result-cell','result-cell','result-cell','result-cell','result-cell'],
+    ptrLabels:{}, changed:['res'] },
+];
+
+let cur = 0;
+const totalSteps = steps.length;
+
+function buildStatic() {
+  const pr = document.getElementById('ptrRow');
+  const cr = document.getElementById('cellsRow');
+  const ir = document.getElementById('idxRow');
+  nums.forEach((v, i) => {
+    const ps = document.createElement('div'); ps.className='ptr-slot'; ps.id='ps'+i; pr.appendChild(ps);
+    const c = document.createElement('div'); c.className='cell normal'; c.id='cell'+i; c.textContent=v; cr.appendChild(c);
+    const ix = document.createElement('div'); ix.className='idx-slot'; ix.textContent=i; ir.appendChild(ix);
+  });
+  const pd = document.getElementById('progressDots');
+  for (let i=0;i<totalSteps;i++){
+    const d=document.createElement('div'); d.className='dot';
+    d.onclick=(s=>()=>goTo(s))(i);
+    pd.appendChild(d);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function renderDeque(dqArr) {
+  const el = document.getElementById('dequeLive');
+  el.innerHTML = '';
+  if (!dqArr || dqArr.length === 0) {
+    el.innerHTML = '<span class="deque-empty">[ empty ]</span>'; return;
+  }
+  const lb = document.createElement('span'); lb.className='deque-bracket'; lb.textContent='['; el.appendChild(lb);
+  dqArr.forEach((idx, pos) => {
+    const item = document.createElement('div');
+    item.className = 'deque-item';
+    if (dqArr.length === 1) item.classList.add('only-item');
+    else if (pos === 0) item.classList.add('first-item');
+    else if (pos === dqArr.length-1) item.classList.add('last-item');
+    item.innerHTML = `<span class="deque-idx">idx ${idx}</span><span class="deque-val">${nums[idx]}</span>`;
+    el.appendChild(item);
+  });
+  const rb = document.createElement('span'); rb.className='deque-bracket'; rb.textContent=']'; el.appendChild(rb);
+}
+
+function renderResult(resArr) {
+  const el = document.getElementById('resultCells');
+  if (!resArr || resArr.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:13px">—</span>'; return;
+  }
+  el.innerHTML = '';
+  resArr.forEach(v => {
+    const c = document.createElement('div'); c.className='res-cell'; c.textContent=v; el.appendChild(c);
+  });
+}
+
+function goTo(s) {
+  cur = s;
+  const st = steps[s];
+
+  // Cell states
+  nums.forEach((_, i) => {
+    document.getElementById('cell'+i).className = 'cell ' + (st.cellStates[i] || 'normal');
+  });
+
+  // Pointer labels
+  document.querySelectorAll('.ptr-slot').forEach(ps => ps.innerHTML = '');
+  if (st.ptrLabels) {
+    Object.entries(st.ptrLabels).forEach(([idx, obj]) => {
+      const ps = document.getElementById('ps'+idx);
+      if (ps) ps.innerHTML = `<span class="ptr-lbl ${obj.cls}">${obj.lbl}</span>`;
+    });
+  }
+
+  renderDeque(st.dq);
+  renderResult(st.result);
+
+  // Variable boxes
+  ['i','v','dq','res'].forEach(name => {
+    const box = document.getElementById('vb-'+name);
+    const val = document.getElementById('vv-'+name);
+    if (!box || !val) return;
+    box.classList.toggle('changed', !!(st.changed && st.changed.includes(name)));
+    if (name==='i') val.textContent = st.i === -1 ? '—' : st.i;
+    else if (name==='v') val.textContent = st.v === null ? '—' : st.v;
+    else if (name==='dq') val.textContent = '['+st.dq.join(',')+']';
+    else if (name==='res') val.textContent = '['+st.result.join(',')+']';
+  });
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+  const lines = Array.isArray(st.activeLine) ? st.activeLine : [st.activeLine];
+  lines.forEach(l => { const el=document.getElementById('cl'+l); if(el) el.classList.add('active'); });
+
+  // Info card
+  const pb = document.getElementById('phaseBadge');
+  pb.textContent = st.phase; pb.className = 'phase-badge ' + st.phaseClass;
+  document.getElementById('stepCounter').textContent = `Step ${s+1} of ${totalSteps}`;
+  document.getElementById('stepTitle').textContent = st.title;
+  document.getElementById('stepBody').textContent = st.body;
+
+  // Dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i===s);
+    d.classList.toggle('visited', i<s);
+  });
+
+  document.getElementById('btnPrev').disabled = (s===0);
+  document.getElementById('btnNext').disabled = (s===totalSteps-1);
+}
+
+function go(dir) { const n=cur+dir; if(n>=0&&n<totalSteps) goTo(n); }
+function reset() { goTo(0); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') go(1);
+  if (e.key==='ArrowLeft') go(-1);
+  if (e.key==='r'||e.key==='R') reset();
+});
+
+buildStatic();
+goTo(0);
 </script>
-</body></html>
+</body>
+</html>

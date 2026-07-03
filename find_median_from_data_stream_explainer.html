@@ -1,232 +1,875 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Median from Data Stream – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#295 · Find Median from Data Stream</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.info{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.info .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Heap Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.heap-outer{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.heap-side{display:flex;flex-direction:column;align-items:center;min-width:140px;flex:1;max-width:220px}
+.heap-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center}
+.heap-label.max-lbl{color:var(--blue-mid)}
+.heap-label.min-lbl{color:var(--green-mid)}
+.heap-items{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.heap-cell{
+  width:50px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;
+  border:2px solid;
+  transition:background 0.35s,border-color 0.35s,color 0.35s,transform 0.25s;
+}
+.heap-cell.max-el{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.heap-cell.min-el{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.heap-cell.top-max{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);transform:scale(1.15)}
+.heap-cell.top-min{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);transform:scale(1.15)}
+.heap-cell.incoming{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text);transform:scale(1.18)}
+.heap-cell.empty-el{background:var(--surface);border-color:var(--border);color:var(--text3);opacity:0.4}
+.heap-note{font-size:10px;color:var(--text3);font-style:italic;text-align:center;margin-top:6px}
+.median-box{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:var(--cyan-bg);border:2px solid var(--cyan-border);
+  border-radius:var(--radius-lg);padding:14px 22px;
+  min-width:100px;flex-shrink:0;
+}
+.median-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan-mid)}
+.median-val{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--cyan-mid)}
+.median-sub{font-size:10px;color:var(--text3);text-align:center}
+.divider-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.divider-line{width:2px;height:60px;background:var(--border2);border-radius:2px}
+.divider-lte{font-size:12px;color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-add{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-balance{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-median{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-max{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-min{background:var(--green-bg);border-color:var(--green-border)}
+.sw-top{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-in{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-med{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Find Median from Data Stream</h1>
-    <p class="subtitle">LeetCode #295 — Two Heaps · Max Heap Left + Min Heap Right</p>
-    <div class="tags">
-      <span class="tag tag-hard">Hard</span>
-      <span class="tag tag-pattern">Heaps</span>
-      <span class="tag tag-complexity">O(n log k) Time</span>
-      <span class="tag tag-complexity">O(k) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Two Heaps</strong> using the <strong>Max Heap Left + Min Heap Right</strong> technique.</p>
-      <p>Pattern category: <strong>Heaps</strong>. Apply when: <em>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Heap gives O(log n) insert/delete and O(1) min/max access. Use for top-K, median tracking, scheduling.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #295</div>
+  <h1>Find Median from Data Stream</h1>
+  <p class="subtitle">Design a data structure that supports adding integers one by one and answering "what is the current median?" after each addition — in O(log n) per add and O(1) per query.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Heaps</span>
+    <span class="tag tag-pattern">Two Heaps</span>
+    <span class="tag tag-complexity">addNum: O(log n)</span>
+    <span class="tag tag-complexity">findMedian: O(1)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Max Heap Left + Min Heap Right</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Build heap from initial elements</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each new element: push to heap</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">If heap exceeds size limit: pop smallest/largest</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Top of heap = current kth element</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">For two heaps: balance sizes, rebalance on every push</span></div>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>The <strong>median</strong> of a sorted dataset is the middle element (when count is odd) or the average of the two middle elements (when count is even). The twist here is that numbers arrive one-by-one in a stream — you don't have them all upfront, and you must be able to answer a median query at any point.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The median is the <strong>boundary between the lower half and upper half</strong> of all numbers seen. If you could efficiently access the <em>largest element of the lower half</em> and the <em>smallest element of the upper half</em>, you could answer median in O(1). A <strong>max-heap</strong> gives you the largest of a set in O(1). A <strong>min-heap</strong> gives you the smallest. So: one max-heap holds the lower half, one min-heap holds the upper half, and the median is at their tops.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Min-heap: parent ≤ children. Max-heap: parent ≥ children. Heap property maintained after every op.</p>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Odd count: stream [1, 3, 5]</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          Left max-heap: [3, 1]  top=3<br>
+          Right min-heap: [5]    top=5<br>
+          Left has 1 more → <strong>median = 3.0</strong>
+        </p>
+      </div>
+      <div class="panel-box info">
+        <div class="panel-title">Even count: stream [1, 2, 3, 4]</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--blue-text);line-height:1.9">
+          Left max-heap: [2, 1]  top=2<br>
+          Right min-heap: [3, 4] top=3<br>
+          Equal sizes → <strong>median = (2+3)/2 = 2.5</strong>
+        </p>
+      </div>
     </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">import heapq</div><div class="code-line">class MedianFinder:</div><div class="code-line">    def __init__(self): self.lo, self.hi = [], []   # max, min heap</div><div class="code-line">    def addNum(self, num):</div><div class="code-line">        heapq.heappush(self.lo, -num)</div><div class="code-line">        heapq.heappush(self.hi, -heapq.heappop(self.lo))</div><div class="code-line">        if len(self.hi) > len(self.lo):</div><div class="code-line">            heapq.heappush(self.lo, -heapq.heappop(self.hi))</div><div class="code-line">    def findMedian(self):</div><div class="code-line">        if len(self.lo) > len(self.hi): return -self.lo[0]</div><div class="code-line">        return (-self.lo[0] + self.hi[0]) / 2</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log k) &nbsp;|&nbsp; Space: O(k)</p>
-    </div>
-  </div>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Heaps problem using Max Heap Left + Min Heap Right. I'll build heap from initial elements then for each new element: push to heap. Time: O(n log k), Space: O(k)."</div>
-      </div>
-    </div>
-  </div>
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> single element (return it directly), two elements (average both), all identical elements, negative numbers, INT_MIN/MAX values, queries interleaved with adds.</p>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Heaps — Max Heap Left + Min Heap Right</div>
-        <div class="takeaway">✓ Heap gives O(log n) insert/delete and O(1) min/max access</div>
-        <div class="takeaway">✓ Time: O(n log k) | Space: O(k)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>IPO</strong> (Hard) — Min Heap Capital + Max Heap Profit</li>
-<li><strong>Sliding Window Median</strong> (Hard) — Two Heaps + Lazy Deletion</li></ul>
-      </div>
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why not sort on every query?</div>
+      <p>Sorting all n elements per query costs O(n log n) per call. If you maintain a sorted array and insert in place, each insert is O(n) to shift elements. Neither approach scales to millions of insertions with frequent median queries. The heap approach gives O(log n) insert and O(1) query — the best possible for a general data stream.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {heap:[],msg:"Empty min-heap",phase:"INIT"},
-  {heap:[3],msg:"Push 3",phase:"PUSH"},
-  {heap:[1,3],msg:"Push 1 → heapify up",phase:"PUSH"},
-  {heap:[1,3,5],msg:"Push 5",phase:"PUSH"},
-  {heap:[1,3,5,7],msg:"Push 7",phase:"PUSH"},
-  {heap:[3,7,5],top:1,msg:"Pop 1 (min) → heapify down",phase:"POP"},
-  {heap:[3,7,5],msg:"Top=3 (second smallest)",phase:"DONE"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two Heaps — Max Left, Min Right</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain two heaps that partition <em>all seen elements</em> into a lower half and an upper half. Two invariants must always hold:</p>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">I</span>
+        <span class="step-text"><strong>Order invariant:</strong> Every element in the left (max-heap) ≤ every element in the right (min-heap). The left's top is the "largest small number" and the right's top is the "smallest large number." Together they bracket the median.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">II</span>
+        <span class="step-text"><strong>Balance invariant:</strong> The left heap may have at most 1 more element than the right: <code>|len(left) − len(right)| ≤ 1</code>, and we allow left to be the bigger one. This makes median extraction simple: if equal sizes, average both tops; if left is bigger, its top is the median.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>addNum protocol — 3 steps:</strong></p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Always push to the left heap first.</strong> In Python, simulate the max-heap by pushing the negative: <code>heappush(left, -num)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Fix the order invariant.</strong> Pop left's max and push it to right: <code>heappush(right, -heappop(left))</code>. This ensures left's maximum is never larger than right's minimum — even if the new element was very large and "shouldn't" be in the left half.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Fix the balance invariant.</strong> If right now has more elements than left (because of step 2), move right's minimum back to left: <code>heappush(left, -heappop(right))</code>. After this, left has at most 1 more element than right.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Python Max-Heap via Negation</div>
+      <p>Python's <code>heapq</code> module only provides a min-heap. To use it as a max-heap, store the negatives of all values. <code>heappush(left, -5)</code> inserts 5. <code>-left[0]</code> gives you the maximum (negating the stored minimum). Always remember to negate when pushing to, and when reading from, the left heap.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Two-Heap Invariant</div>
+      <p>After each <code>addNum</code> call, the following is guaranteed:<br>
+      <strong>(1)</strong> All elements in <code>left</code> ≤ all elements in <code>right</code>.<br>
+      <strong>(2)</strong> <code>len(left) == len(right)</code> or <code>len(left) == len(right) + 1</code>.<br><br>
+      These two invariants together mean: if you were to merge both heaps and sort them, the median would be exactly at position <code>len(left)-1</code> (0-indexed) of the combined sorted array, which is always <code>left[0]</code> (when odd) or the average of <code>left[0]</code> and <code>right[0]</code> (when even).</p>
+    </div>
+
+    <p><strong>Why pushing to left first, then cross-pushing, maintains the order invariant:</strong> No matter what value <code>num</code> is, after pushing to left and then unconditionally moving left's maximum to right, the new top of right is the largest value among all elements seen, and left contains everything smaller. The cross-push is the key: it doesn't just move the new element — it moves whatever <em>ended up as left's maximum</em> after the push, which might be an older element if <code>num</code> was small.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why the balance step after cross-push:</strong> The cross-push always moves one element from left to right. Before the operation, left might have had 1 extra (odd total). After: right now has 1 extra (even total but swapped). The balance step moves right's min back to left, restoring the invariant that left can be the bigger heap.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The "Unconditional Cross-Push" Is the Trick</div>
+      <p>Some implementations try to conditionally push to left or right based on the new number's value relative to heap tops. This creates bugs: you still need to check and fix both invariants. The unconditional approach (always push to left, always cross-push to right, then rebalance) is simpler, provably correct, and does at most 3 heap operations per <code>addNum</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Two Heaps (Optimal — Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode">class MedianFinder:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):             </span><span class="aann">← Initialize both heaps as empty lists</span></div>
+<div class="ann-line"><span class="acode">        self.left = []   # max-heap </span><span class="aann">← Stores negatives; left[0] = -max</span></div>
+<div class="ann-line"><span class="acode">        self.right = []  # min-heap </span><span class="aann">← Stores positives; right[0] = min</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    def addNum(self, num: int) -> None:</span></div>
+<div class="ann-line"><span class="acode">        heapq.heappush(self.left, -num)            </span><span class="aann">← Step 1: always push to left (as negative)</span></div>
+<div class="ann-line"><span class="acode">        heapq.heappush(self.right,                 </span><span class="aann">← Step 2: always cross-push left's max to right</span></div>
+<div class="ann-line"><span class="acode">            -heapq.heappop(self.left))             </span><span class="aann">← Pop left's top, negate back to positive</span></div>
+<div class="ann-line"><span class="acode">        if len(self.right) > len(self.left):       </span><span class="aann">← Step 3: if right grew too big...</span></div>
+<div class="ann-line"><span class="acode">            heapq.heappush(self.left,              </span><span class="aann">← ...move right's min back to left</span></div>
+<div class="ann-line"><span class="acode">                -heapq.heappop(self.right))        </span><span class="aann">← Negate to store as negative in left</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    def findMedian(self) -> float:</span></div>
+<div class="ann-line"><span class="acode">        if len(self.left) > len(self.right):       </span><span class="aann">← Odd total: left has 1 extra → it's the median</span></div>
+<div class="ann-line"><span class="acode">            return float(-self.left[0])            </span><span class="aann">← Negate stored negative to get true max</span></div>
+<div class="ann-line"><span class="acode">        return (-self.left[0] + self.right[0]) / 2.0  </span><span class="aann">← Even total: average both tops</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Negation Bug — #1 Mistake</div>
+      <p>Every interaction with <code>self.left</code> requires negation: push <code>-num</code>, read <code>-self.left[0]</code>, pop with <code>-heappop(self.left)</code>. Forgetting any single negation corrupts the max-heap ordering. When in doubt: "store negative, read negative" — the heap holds negatives, so negate on the way in AND on the way out.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Python SortedList (cleaner but library-dependent)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from sortedcontainers import SortedList</span></div>
+<div class="ann-line"><span class="acode">class MedianFinder:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self): self.data = SortedList()   </span><span class="aann">← Maintains sorted order automatically</span></div>
+<div class="ann-line"><span class="acode">    def addNum(self, num): self.data.add(num)       </span><span class="aann">← O(log n) insertion into sorted structure</span></div>
+<div class="ann-line"><span class="acode">    def findMedian(self):                           </span><span class="aann">← O(1) index access in sorted list</span></div>
+<div class="ann-line"><span class="acode">        n = len(self.data); mid = n // 2</span></div>
+<div class="ann-line"><span class="acode">        if n % 2: return float(self.data[mid])     </span><span class="aann">← Odd: middle element directly</span></div>
+<div class="ann-line"><span class="acode">        return (self.data[mid-1] + self.data[mid]) / 2.0  </span><span class="aann">← Even: average two midpoints</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Two Heaps (optimal):</strong> addNum O(log n) — 3 heap ops each O(log n). findMedian O(1) — peek both tops. Space O(n).<br>
+        <strong>SortedList:</strong> addNum O(log n) with better constants (C implementation). findMedian O(1). Not available in interviews without imports.<br>
+        <strong>Naive approach:</strong> Re-sort on each add O(n log n) or shift on insert O(n) — neither acceptable for a stream.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p style="font-size:14px;color:var(--text)">Three signals trigger Two Heaps: (1) "data stream" — you're processing numbers online, not all at once. (2) "median" — you need the middle of a sorted collection. (3) "efficient per operation" — sorting the whole thing after each add is too slow. When you hear these three together, the answer is almost always Two Heaps.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Build the Intuition Aloud</div>
+        <p style="font-size:14px;color:var(--text)">"The median is at the boundary between smaller and larger halves. If I split all elements into a lower half and an upper half, the median is either the top of the lower half (odd count) or the average of both tops (even count). A max-heap gives me the lower half's top in O(1). A min-heap gives me the upper half's top in O(1)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: State the Invariants Explicitly</div>
+        <p style="font-size:14px;color:var(--text)">"I need two invariants: every element in the left heap must be ≤ every element in the right heap (order), and their sizes differ by at most 1 with left allowed to be bigger (balance). My addNum protocol restores both invariants in O(log n)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Address the Python Trick Proactively</div>
+        <p style="font-size:14px;color:var(--text)">"Since Python's heapq is a min-heap, I'll simulate the max-heap for the left side by storing negatives. Every push to left negates the value; every read from left negates again to get the real number."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use two heaps: a max-heap 'left' for the smaller half, a min-heap 'right' for the larger half.<br>
+Invariants: left's max ≤ right's min, and left can have at most 1 more element than right.<br>
+addNum: (1) push to left, (2) always move left's max to right, (3) if right grew bigger, move right's min back to left.<br>
+findMedian: if sizes equal, average both tops. If left bigger, return left's top.<br>
+Python: heapq is min-heap only, so I store negatives in left — push -num, read -left[0].<br>
+Time: O(log n) per add (3 heap ops), O(1) per findMedian. Space: O(n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Sliding Window Median?"</strong> → Same two-heap idea but with lazy deletion (#480) — much harder</li>
+        <li><strong>"What if numbers are in range [0, 100]?"</strong> → Counting sort / bucket approach: O(1) insert, O(100) = O(1) median</li>
+        <li><strong>"Can you do O(1) insert?"</strong> → Not possible for a fully general data stream — O(log n) is optimal</li>
+        <li><strong>"What about the kth largest element?"</strong> → Just a single min-heap of size k (#703, #215)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Stream [5, 1, 3, 4, 2]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="heap-outer">
+        <!-- Left max-heap -->
+        <div class="heap-side">
+          <div class="heap-label max-lbl">Max-Heap · left (smaller half)</div>
+          <div class="heap-items" id="left-items"></div>
+          <div class="heap-note">values stored as negatives in Python</div>
+        </div>
+
+        <!-- Divider + median -->
+        <div class="divider-col">
+          <div class="divider-line"></div>
+          <div class="divider-lte">≤</div>
+          <div class="median-box">
+            <div class="median-lbl">Median</div>
+            <div class="median-val" id="median-val">—</div>
+          </div>
+          <div class="divider-lte">≤</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Right min-heap -->
+        <div class="heap-side">
+          <div class="heap-label min-lbl">Min-Heap · right (larger half)</div>
+          <div class="heap-items" id="right-items"></div>
+          <div class="heap-note">smallest element is at the top</div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-num">
+          <span class="var-name">num</span>
+          <span class="var-val" id="vv-num">—</span>
+        </div>
+        <div class="var-box" id="vb-ls">
+          <span class="var-name">|left|</span>
+          <span class="var-val" id="vv-ls">0</span>
+        </div>
+        <div class="var-box" id="vb-rs">
+          <span class="var-name">|right|</span>
+          <span class="var-val" id="vv-rs">0</span>
+        </div>
+        <div class="var-box" id="vb-op">
+          <span class="var-name">op</span>
+          <span class="var-val" id="vv-op" style="font-size:11px;min-width:80px">init</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def addNum(self, num: int) -> None:</div>
+      <div class="code-line" id="cl-1">    heapq.heappush(self.left, -num)                # push to left</div>
+      <div class="code-line" id="cl-2">    heapq.heappush(self.right, -heapq.heappop(self.left))  # cross-push</div>
+      <div class="code-line" id="cl-3">    if len(self.right) > len(self.left):           # fix balance</div>
+      <div class="code-line" id="cl-4">        heapq.heappush(self.left, -heapq.heappop(self.right))</div>
+      <div class="code-line" id="cl-5">def findMedian(self) -> float:</div>
+      <div class="code-line" id="cl-6">    if len(self.left) > len(self.right):</div>
+      <div class="code-line" id="cl-7">        return float(-self.left[0])                # odd: left top</div>
+      <div class="code-line" id="cl-8">    return (-self.left[0] + self.right[0]) / 2.0   # even: avg</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 16</div>
+      <div class="step-title" id="step-title">Ready to Begin</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys. We will add [5, 1, 3, 4, 2] one by one, tracing each heap operation and median result.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-top"></div> Heap top (boundary element)</div>
+      <div class="legend-item"><div class="legend-swatch sw-max"></div> Left (max-heap) element</div>
+      <div class="legend-item"><div class="legend-swatch sw-min"></div> Right (min-heap) element</div>
+      <div class="legend-item"><div class="legend-swatch sw-in"></div> Newly added / moving</div>
+      <div class="legend-item"><div class="legend-swatch sw-med"></div> Current median</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">The median is at the boundary between the sorted lower half and upper half</div>
+      <div class="takeaway">Two heaps (max-left, min-right) maintain that boundary efficiently</div>
+      <div class="takeaway">Always push to left first, then unconditionally cross-push to right — this is simpler and bug-free</div>
+      <div class="takeaway">Rebalance if right grows bigger than left — at most one extra heap op</div>
+      <div class="takeaway">Python: store negatives in left heap to simulate max-heap; negate when reading back</div>
+      <div class="takeaway">O(log n) per add (≤ 3 heap operations), O(1) per findMedian (just peek two tops)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>addNum</th><th>findMedian</th><th>Space</th><th>Best For</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Append + Sort on Query</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Rare median queries</td>
+        </tr>
+        <tr>
+          <td>Sorted Insert (bisect)</td>
+          <td class="mark-bad">O(n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>O(n)</td>
+          <td>Rare insertions</td>
+        </tr>
+        <tr>
+          <td><strong>Two Heaps ✓ (Interview Pick)</strong></td>
+          <td class="mark-good">O(log n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>O(n)</td>
+          <td>Balanced stream workload</td>
+        </tr>
+        <tr>
+          <td>SortedList (Python)</td>
+          <td class="mark-good">O(log n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>O(n)</td>
+          <td>Cleaner; needs 3rd-party lib</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Two Heaps Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Median of a stream" or "running median" → Two heaps</li>
+        <li>"Need the max of one group AND the min of another simultaneously" → Two heaps</li>
+        <li>Partitioning into lower/upper halves with boundary queries → Two heaps</li>
+        <li>Scheduling problems where you need both smallest and largest active tasks → Two heaps</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Heap / Two Heaps Pattern)</div>
+      <div class="related-item"><strong>Sliding Window Median</strong><span class="related-diff diff-hard">Hard</span> — Running median in a fixed-size window with deletions — extends two heaps with lazy removal (#480)</div>
+      <div class="related-item"><strong>IPO</strong><span class="related-diff diff-hard">Hard</span> — Greedy project selection: max-heap of profits unlocked by min-heap of capital requirements (#502)</div>
+      <div class="related-item"><strong>Kth Largest Element in a Stream</strong><span class="related-diff diff-easy">Easy</span> — Single min-heap of size k, top is always kth largest (#703)</div>
+      <div class="related-item"><strong>Meeting Rooms II</strong><span class="related-diff diff-med">Medium</span> — Min-heap of end times to count minimum rooms needed (#253)</div>
+      <div class="related-item"><strong>Merge K Sorted Lists</strong><span class="related-diff diff-hard">Hard</span> — Min-heap over list pointers merges k sorted streams efficiently (#23)</div>
+      <div class="related-item"><strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span> — Max-heap of task frequencies drives greedy scheduling (#621)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Heap section<br>
+      Sub-Pattern: <strong>Two Heaps</strong> · Source: Guide (Heap Sub-Patterns table)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Each step captures the state of both heaps after the operation.
+// left = sorted descending (max first), right = sorted ascending (min first)
+// "topLeft" marker highlights left[0], "topRight" highlights right[0]
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    left:[], right:[], num:null, median:'—', op:'start',
+    activeLine:-1,
+    title:'Initialize: Both Heaps Empty',
+    text:'We create two empty heaps: left (max-heap, stores smaller half) and right (min-heap, stores larger half). Both invariants hold trivially for an empty set. Stream to process: [5, 1, 3, 4, 2].'
+  },
+  // addNum(5)
+  {
+    id:1, phase:'add', phaseLabel:'ADD 5', phaseClass:'phase-add',
+    left:[5], right:[], num:5, median:'—', op:'push left',
+    activeLine:1,
+    title:'addNum(5) — Step 1: Push 5 to left',
+    text:'heappush(left, -5). Left max-heap now contains [5]. The heap stores -5 internally; we negate to get 5. Right is still empty.'
+  },
+  {
+    id:2, phase:'add', phaseLabel:'ADD 5', phaseClass:'phase-add',
+    left:[], right:[5], num:5, median:'—', op:'cross-push →',
+    activeLine:2,
+    title:'addNum(5) — Step 2: Cross-push left top to right',
+    text:'heappush(right, -heappop(left)). Pop left\'s top (-5 → real value 5). Push 5 to right. Now left=[], right=[5]. We always do this cross-push unconditionally — it ensures the order invariant.'
+  },
+  {
+    id:3, phase:'balance', phaseLabel:'BALANCE', phaseClass:'phase-balance',
+    left:[5], right:[], num:5, median:'—', op:'balance ←',
+    activeLine:3,
+    title:'addNum(5) — Step 3: Rebalance (right > left)',
+    text:'len(right)=1 > len(left)=0 → balance violated. Pop right\'s min (5), push -5 to left. Now left=[5], right=[]. Balance restored: left has 1 extra (allowed).'
+  },
+  {
+    id:4, phase:'median', phaseLabel:'findMedian', phaseClass:'phase-median',
+    left:[5], right:[], num:null, median:'5.0', op:'query',
+    activeLine:6,
+    title:'findMedian() after addNum(5) → 5.0',
+    text:'len(left)=1 > len(right)=0. Odd count: median = -left[0] = -(-5) = 5. Return 5.0. Correct! Only one element so far.'
+  },
+  // addNum(1)
+  {
+    id:5, phase:'add', phaseLabel:'ADD 1', phaseClass:'phase-add',
+    left:[5,1], right:[], num:1, median:'—', op:'push left',
+    activeLine:1,
+    title:'addNum(1) — Step 1: Push 1 to left',
+    text:'heappush(left, -1). Left max-heap now contains [5, 1] (5 at top). Right is empty. The heap maintains max-heap property: top is always the maximum.'
+  },
+  {
+    id:6, phase:'add', phaseLabel:'ADD 1', phaseClass:'phase-add',
+    left:[1], right:[5], num:1, median:'—', op:'cross-push →',
+    activeLine:2,
+    title:'addNum(1) — Step 2: Cross-push left top to right',
+    text:'Pop left\'s max (5), push to right. Now left=[1], right=[5]. The cross-push moved 5 from left to right, not the new element 1! This is correct — 5 belongs in the upper half, 1 belongs in the lower half.'
+  },
+  {
+    id:7, phase:'balance', phaseLabel:'BALANCE', phaseClass:'phase-balance',
+    left:[1], right:[5], num:1, median:'—', op:'balanced ✓',
+    activeLine:3,
+    title:'addNum(1) — Step 3: Check balance',
+    text:'len(right)=1, len(left)=1. Equal sizes — no rebalancing needed. Both invariants hold: 1 ≤ 5 (order), sizes equal (balance).'
+  },
+  {
+    id:8, phase:'median', phaseLabel:'findMedian', phaseClass:'phase-median',
+    left:[1], right:[5], num:null, median:'3.0', op:'query',
+    activeLine:8,
+    title:'findMedian() after addNum(1) → 3.0',
+    text:'Equal sizes. Median = (-left[0] + right[0]) / 2 = (1 + 5) / 2 = 3.0. Sorted stream so far: [1, 5], median = (1+5)/2 = 3.0. ✓'
+  },
+  // addNum(3)
+  {
+    id:9, phase:'add', phaseLabel:'ADD 3', phaseClass:'phase-add',
+    left:[3,1], right:[5], num:3, median:'—', op:'push→cross→bal',
+    activeLine:1,
+    title:'addNum(3) — All 3 steps',
+    text:'(1) Push -3 to left → left=[3,1] (max=3). (2) Cross-push: pop 3, push to right → left=[1], right=[3,5]. (3) Balance: len(right)=2 > len(left)=1 → pop right\'s min (3), push -3 to left → left=[3,1], right=[5]. Done. Both invariants hold: 3≤5 (order), left has 1 extra (balance).'
+  },
+  {
+    id:10, phase:'median', phaseLabel:'findMedian', phaseClass:'phase-median',
+    left:[3,1], right:[5], num:null, median:'3.0', op:'query',
+    activeLine:7,
+    title:'findMedian() after addNum(3) → 3.0',
+    text:'len(left)=2 > len(right)=1. Odd count: median = -left[0] = 3. Sorted stream [1,3,5], middle element is 3. ✓'
+  },
+  // addNum(4)
+  {
+    id:11, phase:'add', phaseLabel:'ADD 4', phaseClass:'phase-add',
+    left:[3,1], right:[4,5], num:4, median:'—', op:'push→cross',
+    activeLine:1,
+    title:'addNum(4) — Push and cross-push',
+    text:'(1) Push -4 to left → left=[4,3,1] (max=4). (2) Cross-push: pop 4, push to right → left=[3,1], right=[4,5]. (3) Balance: len(right)=2, len(left)=2 — equal, no rebalance needed. Order invariant: 3 ≤ 4. ✓'
+  },
+  {
+    id:12, phase:'median', phaseLabel:'findMedian', phaseClass:'phase-median',
+    left:[3,1], right:[4,5], num:null, median:'3.5', op:'query',
+    activeLine:8,
+    title:'findMedian() after addNum(4) → 3.5',
+    text:'Equal sizes. Median = (max(left) + min(right)) / 2 = (3 + 4) / 2 = 3.5. Sorted stream [1,3,4,5], middle = (3+4)/2 = 3.5. ✓'
+  },
+  // addNum(2)
+  {
+    id:13, phase:'add', phaseLabel:'ADD 2', phaseClass:'phase-add',
+    left:[3,2,1], right:[4,5], num:2, median:'—', op:'push left',
+    activeLine:1,
+    title:'addNum(2) — Step 1: Push 2 to left',
+    text:'heappush(left, -2). Left becomes [3,2,1] (max=3 still at top since 3>2). Right=[4,5].'
+  },
+  {
+    id:14, phase:'add', phaseLabel:'ADD 2', phaseClass:'phase-add',
+    left:[2,1], right:[3,4,5], num:2, median:'—', op:'cross-push →',
+    activeLine:2,
+    title:'addNum(2) — Step 2: Cross-push left top (3) to right',
+    text:'Pop left\'s max (3), push to right → left=[2,1], right=[3,4,5]. The cross-push moved 3 (not 2!) because 3 was the largest in left. It correctly belongs in the upper half. Order invariant: 2 ≤ 3. ✓'
+  },
+  {
+    id:15, phase:'balance', phaseLabel:'BALANCE', phaseClass:'phase-balance',
+    left:[3,2,1], right:[4,5], num:2, median:'—', op:'balance ←',
+    activeLine:3,
+    title:'addNum(2) — Step 3: Rebalance (right too big)',
+    text:'len(right)=3 > len(left)=2 → rebalance. Pop right\'s min (3), push -3 to left → left=[3,2,1], right=[4,5]. Now left=3 elements, right=2 elements. Left has 1 extra — allowed. Both invariants restored: 3≤4 (order), |3-2|=1 (balance). ✓'
+  },
+  {
+    id:16, phase:'median', phaseLabel:'findMedian', phaseClass:'phase-median',
+    left:[3,2,1], right:[4,5], num:null, median:'3.0', op:'query',
+    activeLine:7,
+    title:'findMedian() after addNum(2) → 3.0',
+    text:'len(left)=3 > len(right)=2. Odd count: median = -left[0] = 3. Sorted stream [1,2,3,4,5], middle is index 2 = 3. ✓ The two-heap invariants maintained the correct answer throughout all 5 insertions!'
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function renderHeap(containerId, values, type, isAdd) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  if (values.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'heap-cell empty-el';
+    empty.textContent = '—';
+    el.appendChild(empty);
+    return;
+  }
+  values.forEach((val, i) => {
+    const cell = document.createElement('div');
+    const isTop = i === 0;
+    if (isTop) {
+      cell.className = 'heap-cell ' + (type === 'max' ? 'top-max' : 'top-min');
+    } else {
+      cell.className = 'heap-cell ' + (type === 'max' ? 'max-el' : 'min-el');
+    }
+    cell.textContent = String(val);
+    el.appendChild(cell);
+  });
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  renderHeap('left-items', step.left, 'max', step.num !== null);
+  renderHeap('right-items', step.right, 'min', step.num !== null);
+
+  document.getElementById('median-val').textContent = step.median;
+
+  const numEl = document.getElementById('vv-num');
+  numEl.textContent = step.num !== null ? String(step.num) : '—';
+  document.getElementById('vv-ls').textContent = String(step.left.length);
+  document.getElementById('vv-rs').textContent = String(step.right.length);
+  document.getElementById('vv-op').textContent = step.op;
+
+  document.getElementById('vb-num').classList.toggle('changed', step.num !== null);
+  document.getElementById('vb-ls').classList.toggle('changed', step.phase === 'add' || step.phase === 'balance');
+  document.getElementById('vb-rs').classList.toggle('changed', step.phase === 'add' || step.phase === 'balance');
+  document.getElementById('vb-op').classList.toggle('changed', step.op !== 'start' && step.op !== 'init');
+
+  for (let i = 0; i <= 8; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

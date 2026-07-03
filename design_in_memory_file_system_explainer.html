@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#588 · Design In-Memory File System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Trie Tree Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.trie-diagram{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;min-width:520px}
+.trie-level{display:flex;justify-content:center;gap:24px;width:100%;margin-bottom:0}
+.trie-node{
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;
+  min-width:80px;
+}
+.node-box{
+  width:76px;min-height:54px;border-radius:10px;
+  border:2px solid var(--border2);
+  background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--text);
+  padding:4px 6px;
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  text-align:center;
+  line-height:1.3;
+}
+.node-name{font-size:13px;font-weight:700}
+.node-content{font-size:10px;color:var(--text3);margin-top:2px;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node-box.root{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.node-box.dir{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.node-box.file{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.node-box.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text);transform:scale(1.08);box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.node-box.new-node{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.node-connector-down{width:2px;height:24px;background:var(--border2);margin:0 auto}
+.node-connector-up{width:2px;height:24px;background:var(--border2);margin:0 auto}
+.trie-children{display:flex;gap:20px;justify-content:center;position:relative;padding-top:4px}
+.trie-children::before{
+  content:'';position:absolute;top:0;left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 76px);height:2px;
+  background:var(--border2);
+}
+.edge-label{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:2px}
+
+/* ── Operation Log ── */
+.op-log{margin-top:1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.9;max-height:120px;overflow-y:auto}
+.op-line{color:var(--text2);padding:1px 0}
+.op-line.active-op{color:var(--green-text);font-weight:600}
+.op-result{color:var(--blue-mid);font-weight:600}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);min-width:32px;text-align:center;word-break:break-all;max-width:160px}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-mkdir{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-addcontent{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-readcontent{background:var(--green-bg);color:var(--green-mid)}
+.phase-ls{background:var(--amber-bg);color:var(--amber-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-root{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-dir{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-file{background:var(--green-bg);border-color:var(--green-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-new{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #588</div>
+  <h1>Design In-Memory File System</h1>
+  <p class="subtitle">Implement a file system supporting mkdir, addContentToFile, readContentFromFile, and ls operations using a Trie of directory nodes.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Trie of Directories</span>
+    <span class="tag tag-complexity">Time: O(L) per op</span>
+    <span class="tag tag-complexity">Space: O(N·L)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We need to build a simplified in-memory file system that supports four operations: creating directories, adding content to files, reading file content, and listing directory entries. Think of it like a tiny Unix filesystem living entirely in RAM — no disk, no OS.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A filesystem is a <strong>tree of named nodes</strong>. Each node is either a directory (which can have children) or a file (which stores content). An absolute path like <code>/a/b/c</code> is just a sequence of edge labels to follow from the root. This maps perfectly to a <strong>Trie</strong> — where each "character" is an entire directory/file name rather than a single letter.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">What's tricky</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--red-text)">
+          • ls("/") could return a directory OR a file listing<br>
+          • mkdir must create <em>all</em> intermediate dirs<br>
+          • addContentToFile must auto-create parent dirs<br>
+          • Paths always start with "/" — split carefully
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Concrete example</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          mkdir("/a/b/c")<br>
+          addContentToFile("/a/b/c/d","hello")<br>
+          ls("/a/b") → ["c"]<br>
+          readContent("/a/b/c/d") → "hello"
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>The four operations explained:</strong></p>
+    <ul style="margin-left:1.25rem;font-size:14px;line-height:2.2">
+      <li><strong>ls(path)</strong>: If <code>path</code> is a file → return <code>[filename]</code>. If it's a dir → return sorted list of its children names.</li>
+      <li><strong>mkdir(path)</strong>: Create the full path, auto-creating any missing intermediate directories. No return value.</li>
+      <li><strong>addContentToFile(filePath, content)</strong>: If file exists, append content. If not, create it (auto-create parent dirs). No return value.</li>
+      <li><strong>readContentFromFile(filePath)</strong>: Return the full content string of the file at that path.</li>
+    </ul>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> root "/" is always present, paths always start with "/", ls("/") returns sorted children of root, a file can be created at the same time as intermediate dirs, content is <em>appended</em> (not replaced) on repeated addContentToFile calls.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Trie of Directory Nodes</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We model the filesystem as a <strong>Trie</strong> where each node represents either a directory or a file. Edges are labeled by name (e.g., "a", "b", "myfile.txt"). Splitting a path by "/" gives us the sequence of edges to traverse.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why a Trie (Not a Hash Map of Full Paths)?</div>
+      <p>We could store paths as flat keys in a dict, but then <code>ls("/a")</code> would require scanning <em>all</em> keys with the prefix "/a/" — O(N) per ls. With a Trie, <code>ls</code> is O(L) path traversal + O(k log k) for sorting k children. Structural queries are instantaneous.</p>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>TrieNode:</strong> Each node holds a dict <code>children: {name → TrieNode}</code> and a string <code>content</code>. If <code>content</code> is non-empty, the node is a file; otherwise it's a directory. A single node type handles both cases elegantly.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Path traversal helper:</strong> Split path by "/" and drop the empty string at index 0 (since paths start with "/"). Walk from root, creating missing nodes on demand (for mkdir and addContentToFile).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>ls(path):</strong> Walk to the node. If it has content, it's a file — return <code>[last component of path]</code>. Otherwise it's a dir — return <code>sorted(node.children.keys())</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>mkdir(path):</strong> Walk each component, creating child nodes as needed. No return value, no content set.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>addContentToFile(filePath, content):</strong> Walk all but the last component (creating dirs), then create/access the file node and append <code>content</code> to it.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">6</span>
+        <span class="step-text"><strong>readContentFromFile(filePath):</strong> Walk to the file node and return its <code>content</code> string. O(L) traversal, O(1) read.</span>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🧠 Analogy: A Trie of Words vs. a Trie of Paths</div>
+      <p>In a classic string Trie, each edge is a <em>single character</em>. In this filesystem Trie, each edge is a <em>full name</em> (like "documents" or "readme.txt"). It's the same traversal logic — just with a <code>dict</code> of names instead of an array of 26 letters. This is sometimes called a "radix Trie" at the word boundary.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times, every path from the root to any node in the Trie corresponds to a <strong>valid absolute path in the filesystem</strong>. The depth of a node equals the number of components in its path. Any node with a non-empty <code>content</code> string is a file; any node with an empty <code>content</code> string is a directory (even if it has no children — an empty directory).</p>
+    </div>
+
+    <p><strong>Why content="" means directory:</strong> When we create a directory node via mkdir, we never set content. We only set content when addContentToFile is called on the final node. A file <em>can</em> have children in our model (reflecting the simplification in the problem — a file path component can appear as a parent in another path), but in the constraints given, this never occurs.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The ls Edge Case: Path Points to a File</div>
+      <p>When ls is called with a path that points to a file (not a directory), the expected output is a list containing just the filename itself — <code>[last_component]</code> — NOT an empty list, and NOT the file's content. You must distinguish files from dirs in the final node. A quick <code>if node.content</code> check handles this cleanly.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why "walk and create" is safe:</strong> The <code>_walk</code> helper creates nodes on demand (setdefault pattern). Because we always start from the root and walk forward, we can never accidentally skip a level. Each intermediate component gets its own node, so the invariant holds after every mutation.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Splitting "/" — Common Off-by-One</div>
+      <p><code>"/a/b/c".split("/")</code> yields <code>["", "a", "b", "c"]</code>. The leading empty string must be filtered out with <code>[x for x in path.split("/") if x]</code>. Forgetting this causes a spurious lookup for the empty-string key in root's children.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Trie of Nodes (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TrieNode:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):         </span><span class="aann">← Each node = one dir or file entry</span></div>
+<div class="ann-line"><span class="acode">        self.children = {}      </span><span class="aann">← name (str) → TrieNode, maps child names</span></div>
+<div class="ann-line"><span class="acode">        self.content = ""       </span><span class="aann">← "" = directory, non-empty = file with this content</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class FileSystem:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):         </span><span class="aann">← Create the root "/"</span></div>
+<div class="ann-line"><span class="acode">        self.root = TrieNode()  </span><span class="aann">← Root node always exists; represents "/"</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def _walk(self, path, create=False):</span><span class="aann">← Helper: traverse path, optionally create nodes</span></div>
+<div class="ann-line"><span class="acode">        parts = [x for x in path.split("/") if x]  </span><span class="aann">← Split + drop "" from leading "/"</span></div>
+<div class="ann-line"><span class="acode">        node = self.root        </span><span class="aann">← Start at root</span></div>
+<div class="ann-line"><span class="acode">        for p in parts:         </span><span class="aann">← Walk each path component</span></div>
+<div class="ann-line"><span class="acode">            if create:          </span><span class="aann">← mkdir/addContentToFile mode</span></div>
+<div class="ann-line"><span class="acode">                node.children.setdefault(p, TrieNode())</span><span class="aann">← Create child only if missing</span></div>
+<div class="ann-line"><span class="acode">            node = node.children[p]  </span><span class="aann">← Descend into child</span></div>
+<div class="ann-line"><span class="acode">        return node             </span><span class="aann">← Return the final node</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def ls(self, path: str):</span></div>
+<div class="ann-line"><span class="acode">        node = self._walk(path) </span><span class="aann">← Traverse without creating</span></div>
+<div class="ann-line"><span class="acode">        if node.content:        </span><span class="aann">← Non-empty content → this IS a file</span></div>
+<div class="ann-line"><span class="acode">            return [path.split("/")[-1]]  </span><span class="aann">← Return just the filename</span></div>
+<div class="ann-line"><span class="acode">        return sorted(node.children.keys())</span><span class="aann">← Directory → sorted children names</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def mkdir(self, path: str):</span></div>
+<div class="ann-line"><span class="acode">        self._walk(path, create=True)  </span><span class="aann">← Walk with creation; that's it</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def addContentToFile(self, filePath: str, content: str):</span></div>
+<div class="ann-line"><span class="acode">        node = self._walk(filePath, create=True)  </span><span class="aann">← Auto-create all parent dirs</span></div>
+<div class="ann-line"><span class="acode">        node.content += content </span><span class="aann">← Append (not replace) content</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def readContentFromFile(self, filePath: str):</span></div>
+<div class="ann-line"><span class="acode">        return self._walk(filePath).content  </span><span class="aann">← Walk, then return stored content</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why += instead of = for content?</div>
+      <p>The problem says repeated <code>addContentToFile</code> calls on the same path <em>append</em> to existing content. Using <code>+=</code> handles both the first write (empty string + content) and subsequent appends uniformly. Using <code>=</code> would silently discard prior content.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        Let L = length of path (number of components), k = number of children in a directory.<br>
+        <strong>ls:</strong> O(L + k log k) — L for traversal, k log k for sorting<br>
+        <strong>mkdir:</strong> O(L) — create up to L nodes<br>
+        <strong>addContentToFile:</strong> O(L + |content|) — traverse + string append<br>
+        <strong>readContentFromFile:</strong> O(L) — traverse + return<br>
+        <strong>Space:</strong> O(N · L) where N = total nodes, L = average path depth
+      </p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Flat HashMap (Simpler, Slower ls)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class FileSystem:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):              </span><span class="aann">← No trie needed</span></div>
+<div class="ann-line"><span class="acode">        self.dirs = {"/"}            </span><span class="aann">← Set of existing directory paths</span></div>
+<div class="ann-line"><span class="acode">        self.files = {}              </span><span class="aann">← filePath → content string</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def ls(self, path):</span></div>
+<div class="ann-line"><span class="acode">        if path in self.files:       </span><span class="aann">← It's a file</span></div>
+<div class="ann-line"><span class="acode">            return [path.rpartition("/")[2]]  </span><span class="aann">← Extract filename</span></div>
+<div class="ann-line"><span class="acode">        # It's a dir: find direct children</span></div>
+<div class="ann-line"><span class="acode">        prefix = path if path == "/" else path + "/"</span></div>
+<div class="ann-line"><span class="acode">        children = set()</span></div>
+<div class="ann-line"><span class="acode">        for p in list(self.dirs) + list(self.files):  </span><span class="aann">← O(N) scan — expensive</span></div>
+<div class="ann-line"><span class="acode">            if p.startswith(prefix):</span></div>
+<div class="ann-line"><span class="acode">                rest = p[len(prefix):]</span></div>
+<div class="ann-line"><span class="acode">                children.add(rest.split("/")[0])</span></div>
+<div class="ann-line"><span class="acode">        return sorted(children)</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def mkdir(self, path):</span></div>
+<div class="ann-line"><span class="acode">        parts = path.split("/")</span></div>
+<div class="ann-line"><span class="acode">        for i in range(2, len(parts)+1):</span></div>
+<div class="ann-line"><span class="acode">            self.dirs.add("/".join(parts[:i]))  </span><span class="aann">← Add each prefix</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def addContentToFile(self, fp, content):</span></div>
+<div class="ann-line"><span class="acode">        self.mkdir(fp.rpartition("/")[0] or "/")  </span><span class="aann">← Ensure parent dirs</span></div>
+<div class="ann-line"><span class="acode">        self.files[fp] = self.files.get(fp, "") + content</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def readContentFromFile(self, fp):</span></div>
+<div class="ann-line"><span class="acode">        return self.files[fp]</span></div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Trie vs. Flat Map: The Trade-off</div>
+      <p>The Trie solution has O(L) ls (after traversal, children are directly accessible). The flat-map solution has O(N·L) ls since it scans all stored paths. For an interview, always prefer the Trie — it's the canonical answer and shows understanding of tree data structures for hierarchical data.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Hierarchy</div>
+        <p style="font-size:14px;color:var(--text)">"A filesystem has a hierarchical, tree-like structure. Paths are sequences of names. This screams Trie — a tree where each edge is a name segment from splitting the path on '/'."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Design the TrieNode</div>
+        <p style="font-size:14px;color:var(--text)">"Each node needs: (1) a dict mapping child names to child nodes, and (2) a content string. Non-empty content distinguishes files from directories. One class handles both — I don't need separate File and Directory classes."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Extract the Walk Helper</div>
+        <p style="font-size:14px;color:var(--text)">"All four operations need path traversal. I'll write a single <code>_walk(path, create=False)</code> helper. With create=True it uses setdefault to auto-create nodes; with create=False it just navigates. This eliminates code duplication."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the ls File Case</div>
+        <p style="font-size:14px;color:var(--text)">"The trickiest part is ls on a file path. I check if the final node has content — if so, it's a file, return [just the filename]. Otherwise it's a directory, return sorted children. Easy check, but easy to forget."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Filesystems are inherently hierarchical — paths are sequences of names. I'll model this as a Trie where each node represents one directory or file. Each node has a children dict mapping names to TrieNode objects, plus a content string — empty for directories, non-empty for files.<br><br>
+The key insight: all four operations share the same path traversal logic. I'll extract a _walk helper that splits the path by '/', filters the empty leading string, then walks the Trie, optionally creating missing nodes.<br><br>
+For ls, after traversal I check if the node has content — it's a file, so return [filename]. Otherwise return sorted children keys. For mkdir, just walk with creation. For addContentToFile, walk with creation and append. For readContentFromFile, walk and return content.<br><br>
+Time: O(L) per operation (L = path depth), plus O(k log k) sort in ls. Space: O(N·L) total nodes."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Support delete file/dir?"</strong> → Walk to parent, remove child key from parent.children</li>
+        <li><strong>"Support rename?"</strong> → Walk to parent, rename the key in parent.children dict</li>
+        <li><strong>"Support symlinks?"</strong> → TrieNode gets a <code>symlink_target</code> field; walk resolves symlinks recursively</li>
+        <li><strong>"Make it thread-safe?"</strong> → Add a threading.RLock; acquire on all mutating operations</li>
+        <li><strong>"Persist to disk?"</strong> → Serialize the Trie with BFS/DFS; deserialize on load</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: mkdir → addContent → ls → read</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Trie Tree Visualization -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px;text-align:center">Filesystem Trie</div>
+      <div class="trie-diagram" id="trie-viz">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Operation Log -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:14px 0 6px">Operation Sequence</div>
+      <div class="op-log" id="op-log"></div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-op">
+          <span class="var-name">operation</span>
+          <span class="var-val" id="vv-op">—</span>
+        </div>
+        <div class="var-box" id="vb-path">
+          <span class="var-name">path</span>
+          <span class="var-val" id="vv-path">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">class TrieNode:</div>
+      <div class="code-line" id="cl-1">    def __init__(self): self.children = {}; self.content = ""</div>
+      <div class="code-line" id="cl-2">class FileSystem:</div>
+      <div class="code-line" id="cl-3">    def __init__(self): self.root = TrieNode()</div>
+      <div class="code-line" id="cl-4">    def _walk(self, path, create=False):</div>
+      <div class="code-line" id="cl-5">        parts = [x for x in path.split("/") if x]</div>
+      <div class="code-line" id="cl-6">        node = self.root</div>
+      <div class="code-line" id="cl-7">        for p in parts:</div>
+      <div class="code-line" id="cl-8">            if create: node.children.setdefault(p, TrieNode())</div>
+      <div class="code-line" id="cl-9">            node = node.children[p]</div>
+      <div class="code-line" id="cl-10">        return node</div>
+      <div class="code-line" id="cl-11">    def ls(self, path):</div>
+      <div class="code-line" id="cl-12">        node = self._walk(path)</div>
+      <div class="code-line" id="cl-13">        if node.content: return [path.split("/")[-1]]</div>
+      <div class="code-line" id="cl-14">        return sorted(node.children.keys())</div>
+      <div class="code-line" id="cl-15">    def mkdir(self, path): self._walk(path, create=True)</div>
+      <div class="code-line" id="cl-16">    def addContentToFile(self, fp, content):</div>
+      <div class="code-line" id="cl-17">        node = self._walk(fp, create=True)</div>
+      <div class="code-line" id="cl-18">        node.content += content</div>
+      <div class="code-line" id="cl-19">    def readContentFromFile(self, fp):</div>
+      <div class="code-line" id="cl-20">        return self._walk(fp).content</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to walk through the filesystem operations step by step.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-root"></div> Root "/"</div>
+      <div class="legend-item"><div class="legend-swatch sw-dir"></div> Directory</div>
+      <div class="legend-item"><div class="legend-swatch sw-file"></div> File (has content)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Currently visited</div>
+      <div class="legend-item"><div class="legend-swatch sw-new"></div> Newly created</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A filesystem is a Trie where edges are full names (not single characters)</div>
+      <div class="takeaway">One TrieNode class handles both files (content ≠ "") and directories (content = "")</div>
+      <div class="takeaway">A single _walk helper with create=True/False eliminates code duplication across all four operations</div>
+      <div class="takeaway">ls must handle the file case: return [filename], not sorted children</div>
+      <div class="takeaway">Split by "/" and filter empty strings to handle the leading "/" in absolute paths</div>
+      <div class="takeaway">addContentToFile uses += to append content (not = to replace)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>ls Time</th><th>mkdir Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Flat HashMap</td>
+          <td class="mark-bad">O(N·L)</td>
+          <td>O(L)</td>
+          <td>O(N·L)</td>
+          <td>Simple, but ls scans everything</td>
+        </tr>
+        <tr>
+          <td><strong>Trie of Nodes ✓</strong></td>
+          <td class="mark-good">O(L + k log k)</td>
+          <td class="mark-good">O(L)</td>
+          <td>O(N·L)</td>
+          <td>Optimal; structural queries fast</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Trie of Directories Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Design a filesystem / directory structure" → Trie with dict children</li>
+        <li>"Hierarchical keys with prefix queries" → Trie (classic or by-name)</li>
+        <li>"List direct children of a node efficiently" → Trie beats flat map</li>
+        <li>Paths that share prefixes → structural Trie avoids repeated storage</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Design / Trie pattern)</div>
+      <div class="related-item"><strong>Implement Trie (Prefix Tree)</strong><span class="related-diff diff-med">Medium</span> — Core Trie DS: insert, search, startsWith (#208)</div>
+      <div class="related-item"><strong>Design Add and Search Words Data Structure</strong><span class="related-diff diff-med">Medium</span> — Trie with wildcard matching via DFS (#211)</div>
+      <div class="related-item"><strong>Design File System</strong><span class="related-diff diff-med">Medium</span> — Simplified FS: create path + get value, no ls (#1166)</div>
+      <div class="related-item"><strong>LRU Cache</strong><span class="related-diff diff-med">Medium</span> — Classic design problem: OrderedDict or doubly-linked list + hash map (#146)</div>
+      <div class="related-item"><strong>Word Search II</strong><span class="related-diff diff-hard">Hard</span> — Trie + DFS backtracking on grid (#212)</div>
+      <div class="related-item"><strong>Design Search Autocomplete System</strong><span class="related-diff diff-hard">Hard</span> — Trie node stores top-k sentences by frequency (#642)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Design section<br>
+      Sub-Pattern: <strong>Trie of Directories</strong> · Main Pattern: Design</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── Trie state at each step ───
+// We represent the trie as a JS object for rendering
+// Each step defines: which nodes exist, which are active/new, phase, etc.
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    op:'FileSystem()', path:'/', result:'—', activeLine:3,
+    title:'Initialize FileSystem',
+    text:'Create the FileSystem object. The root TrieNode is created representing "/". It has no children yet and empty content — a fresh empty filesystem.',
+    changed:['op'],
+    trie:{
+      root:{state:'root',children:{}}
+    },
+    activeNodes:['root'],newNodes:['root'],
+    opLog:[{text:'fs = FileSystem()', result:'', active:true}]
+  },
+  {
+    id:1, phase:'mkdir', phaseLabel:'MKDIR', phaseClass:'phase-mkdir',
+    op:'mkdir', path:'/a', result:'None', activeLine:15,
+    title:'mkdir("/a") — split path',
+    text:'Call mkdir("/a"). _walk splits "/a" by "/" → ["", "a"], filter empty → ["a"]. Start at root, walk component "a". create=True so we call root.children.setdefault("a", TrieNode()) — creates node "a" as a child of root.',
+    changed:['op','path'],
+    trie:{
+      root:{state:'root',children:{a:{state:'new',children:{}}}},
+    },
+    activeNodes:['a'], newNodes:['a'],
+    opLog:[
+      {text:'fs = FileSystem()', result:'', active:false},
+      {text:'fs.mkdir("/a")', result:'', active:true}
+    ]
+  },
+  {
+    id:2, phase:'mkdir', phaseLabel:'MKDIR', phaseClass:'phase-mkdir',
+    op:'mkdir', path:'/a/b', result:'None', activeLine:15,
+    title:'mkdir("/a/b") — create intermediate',
+    text:'mkdir("/a/b"): parts = ["a","b"]. Walk "a" — already exists, setdefault is a no-op. Then walk "b" — not in "a".children, so create new TrieNode "b". Node "b" is a child of "a".',
+    changed:['path'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'new',children:{}}}}}}
+    },
+    activeNodes:['b'], newNodes:['b'],
+    opLog:[
+      {text:'fs = FileSystem()', result:'', active:false},
+      {text:'fs.mkdir("/a")', result:'', active:false},
+      {text:'fs.mkdir("/a/b")', result:'', active:true}
+    ]
+  },
+  {
+    id:3, phase:'mkdir', phaseLabel:'MKDIR', phaseClass:'phase-mkdir',
+    op:'mkdir', path:'/a/b/c', result:'None', activeLine:15,
+    title:'mkdir("/a/b/c") — one more level',
+    text:'mkdir("/a/b/c"): parts = ["a","b","c"]. Walk "a" (exists), walk "b" (exists), then create "c" under "b". The trie now has three levels: root → a → b → c.',
+    changed:['path'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'new',children:{}}}}}}}}
+    },
+    activeNodes:['c'], newNodes:['c'],
+    opLog:[
+      {text:'fs = FileSystem()', result:'', active:false},
+      {text:'fs.mkdir("/a")', result:'', active:false},
+      {text:'fs.mkdir("/a/b")', result:'', active:false},
+      {text:'fs.mkdir("/a/b/c")', result:'', active:true}
+    ]
+  },
+  {
+    id:4, phase:'addcontent', phaseLabel:'ADD CONTENT', phaseClass:'phase-addcontent',
+    op:'addContentToFile', path:'/a/b/c/d', result:'None', activeLine:16,
+    title:'addContentToFile("/a/b/c/d", "hello") — traverse',
+    text:'addContentToFile is called. _walk runs with create=True on "/a/b/c/d". parts=["a","b","c","d"]. Walk a→b→c (all exist). At "d": not in c.children — setdefault creates new TrieNode "d". Descend into "d".',
+    changed:['op','path'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'new',children:{},content:''}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:['d'],
+    opLog:[
+      {text:'fs.mkdir("/a")', result:'', active:false},
+      {text:'fs.mkdir("/a/b")', result:'', active:false},
+      {text:'fs.mkdir("/a/b/c")', result:'', active:false},
+      {text:'fs.addContentToFile("/a/b/c/d","hello")', result:'', active:true}
+    ]
+  },
+  {
+    id:5, phase:'addcontent', phaseLabel:'ADD CONTENT', phaseClass:'phase-addcontent',
+    op:'addContentToFile', path:'/a/b/c/d', result:'None', activeLine:18,
+    title:'addContentToFile — set content',
+    text:'node.content += "hello". The node at /a/b/c/d had content="" (empty). Now it has content="hello". Non-empty content marks this node as a file. The Trie now has a file at depth 4.',
+    changed:['result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'file',children:{},content:'hello'}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:[],
+    opLog:[
+      {text:'fs.mkdir("/a/b")', result:'', active:false},
+      {text:'fs.mkdir("/a/b/c")', result:'', active:false},
+      {text:'fs.addContentToFile("/a/b/c/d","hello")', result:'→ node.content = "hello"', active:true}
+    ]
+  },
+  {
+    id:6, phase:'ls', phaseLabel:'LS', phaseClass:'phase-ls',
+    op:'ls', path:'/', result:'["a"]', activeLine:11,
+    title:'ls("/") — list root directory',
+    text:'ls("/") is called. _walk("/") with no creation: parts=[] (split gives ["",""], filter gives []). Returns root node immediately. root.content="" (directory). Return sorted(root.children.keys()) = sorted(["a"]) = ["a"].',
+    changed:['op','path','result'],
+    trie:{
+      root:{state:'active',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'file',children:{},content:'hello'}}}}}}}}
+    },
+    activeNodes:['root'], newNodes:[],
+    opLog:[
+      {text:'fs.mkdir("/a/b/c")', result:'', active:false},
+      {text:'fs.addContentToFile("/a/b/c/d","hello")', result:'', active:false},
+      {text:'fs.ls("/")', result:'→ ["a"]', active:true}
+    ]
+  },
+  {
+    id:7, phase:'ls', phaseLabel:'LS', phaseClass:'phase-ls',
+    op:'ls', path:'/a/b', result:'["c"]', activeLine:14,
+    title:'ls("/a/b") — list subdirectory',
+    text:'ls("/a/b"): _walk traverses root→a→b. node "b" has content="" → it\'s a directory. Return sorted(b.children.keys()) = sorted(["c"]) = ["c"]. We see only direct children, not deeper entries.',
+    changed:['path','result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'active',children:{c:{state:'dir',children:{d:{state:'file',children:{},content:'hello'}}}}}}}}
+    },
+    activeNodes:['b'], newNodes:[],
+    opLog:[
+      {text:'fs.addContentToFile("/a/b/c/d","hello")', result:'', active:false},
+      {text:'fs.ls("/")', result:'→ ["a"]', active:false},
+      {text:'fs.ls("/a/b")', result:'→ ["c"]', active:true}
+    ]
+  },
+  {
+    id:8, phase:'ls', phaseLabel:'LS', phaseClass:'phase-ls',
+    op:'ls', path:'/a/b/c/d', result:'["d"]', activeLine:13,
+    title:'ls("/a/b/c/d") — ls on a FILE',
+    text:'ls("/a/b/c/d"): _walk goes to node "d". node.content = "hello" (non-empty!) → it\'s a file. Return [path.split("/")[-1]] = ["d"]. The filename itself, as a single-element list. This is the tricky case!',
+    changed:['path','result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'active',children:{},content:'hello'}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:[],
+    opLog:[
+      {text:'fs.ls("/")', result:'→ ["a"]', active:false},
+      {text:'fs.ls("/a/b")', result:'→ ["c"]', active:false},
+      {text:'fs.ls("/a/b/c/d")', result:'→ ["d"]  ← file case!', active:true}
+    ]
+  },
+  {
+    id:9, phase:'readcontent', phaseLabel:'READ', phaseClass:'phase-readcontent',
+    op:'readContentFromFile', path:'/a/b/c/d', result:'"hello"', activeLine:20,
+    title:'readContentFromFile("/a/b/c/d")',
+    text:'_walk("/a/b/c/d") traverses root→a→b→c→d and returns node "d". Return node.content = "hello". O(L) traversal, O(1) access. Clean and simple.',
+    changed:['op','result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'active',children:{},content:'hello'}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:[],
+    opLog:[
+      {text:'fs.ls("/a/b")', result:'→ ["c"]', active:false},
+      {text:'fs.ls("/a/b/c/d")', result:'→ ["d"]', active:false},
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello"', active:true}
+    ]
+  },
+  {
+    id:10, phase:'addcontent', phaseLabel:'APPEND', phaseClass:'phase-addcontent',
+    op:'addContentToFile', path:'/a/b/c/d', result:'None', activeLine:18,
+    title:'addContentToFile("/a/b/c/d", " world") — append',
+    text:'Appending " world" to existing file /a/b/c/d. _walk returns node "d" again. node.content += " world". Content was "hello", now becomes "hello world". The += operator handles both creation and appending uniformly.',
+    changed:['op','path','result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'active',children:{},content:'hello world'}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:[],
+    opLog:[
+      {text:'fs.ls("/a/b/c/d")', result:'→ ["d"]', active:false},
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello"', active:false},
+      {text:'fs.addContentToFile("/a/b/c/d"," world")', result:'→ content="hello world"', active:true}
+    ]
+  },
+  {
+    id:11, phase:'readcontent', phaseLabel:'READ', phaseClass:'phase-readcontent',
+    op:'readContentFromFile', path:'/a/b/c/d', result:'"hello world"', activeLine:20,
+    title:'readContentFromFile("/a/b/c/d") — see appended content',
+    text:'Read again after append. node.content = "hello world". The += in addContentToFile correctly concatenated the strings. This confirms our file storage works as a simple string buffer.',
+    changed:['result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'active',children:{},content:'hello world'}}}}}}}}
+    },
+    activeNodes:['d'], newNodes:[],
+    opLog:[
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello"', active:false},
+      {text:'fs.addContentToFile("/a/b/c/d"," world")', result:'', active:false},
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello world"', active:true}
+    ]
+  },
+  {
+    id:12, phase:'mkdir', phaseLabel:'MKDIR', phaseClass:'phase-mkdir',
+    op:'mkdir', path:'/a/e', result:'None', activeLine:15,
+    title:'mkdir("/a/e") — new sibling directory',
+    text:'mkdir("/a/e"): parts=["a","e"]. Walk "a" (exists). Create "e" under "a". Now "a" has two children: "b" (existing dir with subtree) and "e" (new empty dir). This shows the Trie gracefully handles branching.',
+    changed:['op','path'],
+    trie:{
+      root:{state:'root',children:{a:{state:'dir',children:{
+        b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'file',children:{},content:'hello world'}}}}},
+        e:{state:'new',children:{}}
+      }}}}
+    },
+    activeNodes:['e'], newNodes:['e'],
+    opLog:[
+      {text:'fs.addContentToFile("/a/b/c/d"," world")', result:'', active:false},
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello world"', active:false},
+      {text:'fs.mkdir("/a/e")', result:'→ a now has children [b, e]', active:true}
+    ]
+  },
+  {
+    id:13, phase:'ls', phaseLabel:'LS', phaseClass:'phase-ls',
+    op:'ls', path:'/a', result:'["b","e"]', activeLine:14,
+    title:'ls("/a") — see both children, sorted',
+    text:'ls("/a"): walk to node "a". content="" → directory. Return sorted(a.children.keys()) = sorted(["b","e"]) = ["b","e"]. The sort is alphabetical. Both children are visible. The Trie perfectly models the filesystem hierarchy.',
+    changed:['path','result'],
+    trie:{
+      root:{state:'root',children:{a:{state:'active',children:{
+        b:{state:'dir',children:{c:{state:'dir',children:{d:{state:'file',children:{},content:'hello world'}}}}},
+        e:{state:'dir',children:{}}
+      }}}}
+    },
+    activeNodes:['a'], newNodes:[],
+    opLog:[
+      {text:'fs.readContentFromFile("/a/b/c/d")', result:'→ "hello world"', active:false},
+      {text:'fs.mkdir("/a/e")', result:'', active:false},
+      {text:'fs.ls("/a")', result:'→ ["b","e"]', active:true}
+    ]
+  }
+];
+
+// ─── Rendering the Trie ───
+function renderTrie(trieState, activeNodes, newNodes) {
+  const viz = document.getElementById('trie-viz');
+  viz.innerHTML = '';
+
+  function renderNode(name, node, isRoot) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'trie-node';
+
+    const box = document.createElement('div');
+    box.className = 'node-box';
+    const displayName = isRoot ? '/' : name;
+    const isActive = activeNodes.includes(isRoot ? 'root' : name);
+    const isNew = newNodes.includes(isRoot ? 'root' : name);
+
+    if (isActive) box.className += ' active';
+    else if (isNew) box.className += ' new-node';
+    else if (isRoot) box.className += ' root';
+    else if (node.content) box.className += ' file';
+    else box.className += ' dir';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'node-name';
+    nameEl.textContent = displayName;
+    box.appendChild(nameEl);
+
+    if (node.content) {
+      const contentEl = document.createElement('div');
+      contentEl.className = 'node-content';
+      contentEl.textContent = '"' + node.content + '"';
+      box.appendChild(contentEl);
+    }
+    wrapper.appendChild(box);
+
+    const childNames = Object.keys(node.children || {});
+    if (childNames.length > 0) {
+      const connector = document.createElement('div');
+      connector.className = 'node-connector-down';
+      wrapper.appendChild(connector);
+
+      const childrenContainer = document.createElement('div');
+      childrenContainer.className = 'trie-children';
+      if (childNames.length === 1) childrenContainer.style.setProperty('--pseudo-display','none');
+
+      childNames.forEach(childName => {
+        const childNode = node.children[childName];
+        const childWrapper = renderNode(childName, childNode, false);
+        childrenContainer.appendChild(childWrapper);
+      });
+      wrapper.appendChild(childrenContainer);
+    }
+    return wrapper;
+  }
+
+  const rootWrapper = renderNode('root', trieState.root, true);
+  viz.appendChild(rootWrapper);
+}
+
+function renderOpLog(opLog) {
+  const logEl = document.getElementById('op-log');
+  logEl.innerHTML = '';
+  opLog.forEach(item => {
+    const line = document.createElement('div');
+    line.className = 'op-line' + (item.active ? ' active-op' : '');
+    line.textContent = item.text;
+    if (item.result) {
+      const res = document.createElement('span');
+      res.className = 'op-result';
+      res.textContent = '  ' + item.result;
+      line.appendChild(res);
+    }
+    logEl.appendChild(line);
+  });
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// ─── Step Engine ───
+let cur = 0;
+
+function setVarBox(id, changed) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (changed) el.classList.add('changed');
+  else el.classList.remove('changed');
+}
+
+function applyStep(s) {
+  // Phase badge
+  document.getElementById('phase-badge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('phase-badge').textContent = s.phaseLabel;
+
+  // Info card
+  document.getElementById('step-counter').textContent = `Step ${s.id + 1} / ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.text;
+
+  // Var tracker
+  document.getElementById('vv-op').textContent = s.op;
+  document.getElementById('vv-path').textContent = s.path;
+  document.getElementById('vv-result').textContent = s.result;
+
+  const changed = s.changed || [];
+  setVarBox('vb-op', changed.includes('op'));
+  setVarBox('vb-path', changed.includes('path'));
+  setVarBox('vb-result', changed.includes('result'));
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const activeEl = document.getElementById('cl-' + s.activeLine);
+  if (activeEl) activeEl.classList.add('active');
+
+  // Trie
+  renderTrie(s.trie, s.activeNodes || [], s.newNodes || []);
+
+  // Op log
+  renderOpLog(s.opLog || []);
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.remove('active', 'visited');
+    if (i === cur) d.classList.add('active');
+    else if (i < cur) d.classList.add('visited');
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = (cur === 0);
+  document.getElementById('next-btn').disabled = (cur === steps.length - 1);
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  applyStep(steps[cur]);
+}
+
+function reset() {
+  cur = 0;
+  applyStep(steps[0]);
+}
+
+// ─── Section Toggle ───
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = '';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+// ─── Init ───
+window.addEventListener('DOMContentLoaded', () => {
+  const dots = document.getElementById('progress-dots');
+  steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.title = `Step ${i+1}: ${s.title}`;
+    d.addEventListener('click', () => { cur = i; applyStep(steps[cur]); });
+    dots.appendChild(d);
+  });
+  applyStep(steps[0]);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+</script>
+</body>
+</html>

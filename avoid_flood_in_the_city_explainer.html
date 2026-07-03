@@ -1,84 +1,1026 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Avoid Flood in The City — LC #1488</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1488 · Avoid Flood in The City</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6Da; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Day timeline cells */
+.day-timeline{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.idx-row-days{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.idx-slot-day{width:64px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+.day-cell{
+  width:64px;height:68px;border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-family:var(--mono);font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.day-cell .dc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+.day-cell .dc-val{font-size:20px;line-height:1}
+.day-cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.day-cell.rain{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.day-cell.rain .dc-label{color:var(--blue-mid)}
+.day-cell.sunny{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.day-cell.sunny .dc-label{color:var(--text3)}
+.day-cell.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.day-cell.active .dc-label{color:var(--amber-mid)}
+.day-cell.drain-assigned{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.day-cell.drain-assigned .dc-label{color:var(--green-mid)}
+.day-cell.done-rain{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.day-cell.done-rain .dc-label{color:var(--cyan-mid)}
+.day-cell.done-drain{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);opacity:0.7}
+
+/* Lake state indicator */
+.lake-panel{margin:1rem 0 0.75rem}
+.lake-panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;text-align:center}
+.lake-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.lake-indicator{
+  display:flex;flex-direction:column;align-items:center;
+  padding:8px 14px;border-radius:var(--radius);border:2px solid var(--border);
+  background:var(--surface);min-width:80px;
+  transition:background 0.3s,border-color 0.3s;
+}
+.lake-indicator .li-name{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.lake-indicator .li-status{font-family:var(--mono);font-size:13px;font-weight:700}
+.lake-indicator.li-full{background:var(--blue-bg);border-color:var(--blue-border)}
+.lake-indicator.li-full .li-name{color:var(--blue-mid)}
+.lake-indicator.li-full .li-status{color:var(--blue-text)}
+.lake-indicator.li-empty{background:var(--bg2);border-color:var(--border)}
+.lake-indicator.li-empty .li-status{color:var(--text3)}
+.lake-indicator.li-danger{background:var(--red-bg);border-color:var(--red-border)}
+.lake-indicator.li-danger .li-name{color:var(--red-mid)}
+.lake-indicator.li-danger .li-status{color:var(--red-mid)}
+
+/* Result row */
+.result-section{margin-top:0.75rem}
+.result-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);text-align:center;margin-bottom:6px}
+.result-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.result-cell{
+  display:flex;flex-direction:column;align-items:center;
+  padding:6px 10px;border-radius:var(--radius);border:2px solid var(--border);
+  background:var(--surface);min-width:64px;
+  transition:background 0.3s,border-color 0.3s;
+}
+.result-cell .rc-day{font-size:9px;color:var(--text3);margin-bottom:2px;font-family:var(--mono)}
+.result-cell .rc-val{font-family:var(--mono);font-size:16px;font-weight:700}
+.result-cell.rc-rain{background:var(--blue-bg);border-color:var(--blue-border)}
+.result-cell.rc-rain .rc-val{color:var(--blue-mid)}
+.result-cell.rc-drain{background:var(--green-bg);border-color:var(--green-border)}
+.result-cell.rc-drain .rc-val{color:var(--green-mid)}
+.result-cell.rc-placeholder{background:var(--bg2);border-color:var(--border)}
+.result-cell.rc-placeholder .rc-val{color:var(--text3)}
+.result-cell.rc-future{background:var(--surface);border-color:var(--border)}
+.result-cell.rc-future .rc-val{color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-rain{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-sunny{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-assign{background:var(--green-bg);color:var(--green-mid)}
+.phase-danger{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-rain{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-sunny{background:var(--bg2);border-color:var(--border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-drain{background:var(--green-bg);border-color:var(--green-border)}
+.sw-done{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── State Diagram ── */
+.state-flow{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:1.25rem 0;padding:1.25rem;background:var(--bg2);border-radius:var(--radius)}
+.sbox{padding:10px 18px;border-radius:var(--radius);border:2px solid;font-weight:700;font-size:13px;text-align:center;min-width:90px}
+.sbox.s-empty{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
+.sbox.s-full{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.sbox.s-flood{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid)}
+.sbox.s-drained{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid)}
+.sarrow{color:var(--text3);font-size:16px;font-weight:700;padding:0 2px}
+.sarrow-label{font-size:10px;color:var(--text3);text-align:center;font-family:var(--mono)}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Avoid Flood in The City</h1>
-<div class="subtitle">LeetCode #1488 &mdash; Greedy Empty Selection</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Greedy</span><span class="tag tag-pattern">Greedy Empty Selection</span><span class="tag tag-cx">O(n log n) Time &middot; O(n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1488</div>
+  <h1>Avoid Flood in The City</h1>
+  <p class="subtitle">Given a schedule of rain days and sunny days, choose which lake to drain each sunny day so no lake ever floods. Return a valid drain schedule, or [] if impossible.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Greedy</span>
+    <span class="tag tag-pattern">Greedy Empty Selection</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're given an array <code>rains</code> of length <code>n</code>. Each day is one of two types:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;line-height:2.2;font-size:14px">
+      <li><strong>rains[i] &gt; 0</strong>: Lake <code>rains[i]</code> gets rained on and becomes full. If it was already full — the city floods. Return <code>[]</code> immediately.</li>
+      <li><strong>rains[i] = 0</strong>: Sunny day. You must pick exactly one lake and drain it (empty it). Choose wisely!</li>
+    </ul>
+    <p>Return any valid answer array where rain days have <code>-1</code> and sunny days have the lake number you chose to drain. If no valid schedule exists, return <code>[]</code>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Sunny days are <strong>limited free actions</strong>. When a lake is about to be rained on a second time, you need to have already drained it on some previous sunny day. The greedy choice: when the second rain arrives on lake <em>k</em>, find the <strong>earliest available sunny day</strong> in the window between the two rains, and retroactively assign it to drain lake <em>k</em>. Earliest = most future flexibility.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Solvable: [1, 2, 0, 0, 2, 1]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          Day 0: rain lake 1 → full<br>
+          Day 1: rain lake 2 → full<br>
+          Day 2: sunny → ans[2] = ? (decide later)<br>
+          Day 3: sunny → ans[3] = ? (decide later)<br>
+          Day 4: rain lake 2 again! → assign day 2 to drain lake 2<br>
+          Day 5: rain lake 1 again! → assign day 3 to drain lake 1<br>
+          → ans = [-1,-1,2,1,-1,-1] ✓
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Impossible: [1, 2, 0, 1, 2]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          Day 0: rain lake 1 → full<br>
+          Day 1: rain lake 2 → full<br>
+          Day 2: sunny → only 1 slot<br>
+          Day 3: rain lake 1 again!<br>
+          Day 4: rain lake 2 again!<br>
+          Can't drain both 1 &amp; 2 with only 1 sunny.<br>
+          → [] (impossible)
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> All sunny days (drain lake 1 as placeholder). No sunny days but a lake rains twice — always impossible. A sunny day after all rains — assign lake 1 (harmless). Two rains of same lake with zero sunnies between — immediately impossible.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Use a map of lake→last_rain_day. On dry day, greedily empty the lake that rained most recently (but before a future re-rain). Use sorted set to find best dry day for each flood prevention.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Greedy + Sorted Set</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Greedy + Sorted Set</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">full={};dry_days=SortedList()</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each i,lake: if lake==0: add i to dry_days</span></div><div class="step"><span class="snum">3</span><span class="stxt">Else if lake in full: find earliest dry day after full[lake]; use it; else: full[lake]=i</span></div><div class="step"><span class="snum">4</span><span class="stxt">If no dry day available: impossible</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(n log n)</strong> | Space: <strong>O(n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from sortedcontainers import SortedList
-def avoidFlood(rains):
-    result=[1]*len(rains);full={};dry=SortedList()
-    for i,lake in enumerate(rains):
-        if lake==0: dry.add(i)
-        else:
-            if lake in full:
-                idx=dry.bisect_right(full[lake])
-                if idx==len(dry): return []
-                j=dry[idx];result[j]=lake;dry.remove(j)
-            full[lake]=i;result[i]=-1
-    return result</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Greedy: use earliest available dry day that comes after the previous rain of the same lake</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Greedy + Sorted Set</td><td>O(n log n)</td><td>O(n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Task Scheduler</span><span class="pd dm">Medium</span> — Greedy scheduling</li><li><span class="pn">Meeting Rooms II</span><span class="pd dm">Medium</span> — Event-based greedy</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Greedy Empty Selection</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Avoid Flood in The City"}, "title": "Greedy + Sorted Set", "desc": "See code for walkthrough.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Greedy with Sorted-Set Look-ahead</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We scan left to right. Sunny days are collected into a sorted set. When a rain threatens a full lake, we binary-search for the earliest usable sunny day and retroactively assign it. This deferred assignment is the heart of the greedy strategy.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>full = {}</code> (lake → day it last rained), <code>sunny = SortedList()</code> (available sunny day indices), <code>ans = [-1]*n</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>On a sunny day (rains[i] = 0):</strong> Add <code>i</code> to <code>sunny</code>. Set <code>ans[i] = 1</code> as a placeholder (lake 1 is harmless, it'll be overwritten if needed).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>On a rain day for lake r — first rain:</strong> Lake <code>r</code> is not in <code>full</code>, so no conflict. Record <code>full[r] = i</code>. <code>ans[i] = -1</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>On a rain day for lake r — second rain (conflict!):</strong> Binary-search <code>sunny</code> for the earliest index <code>j</code> where <code>full[r] &lt; j &lt; i</code>. If found: set <code>ans[j] = r</code>, remove <code>j</code> from <code>sunny</code>, update <code>full[r] = i</code>. If NOT found: return <code>[]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return ans:</strong> Any remaining sunny days keep the placeholder value 1. The full schedule is valid.</span>
+      </div>
+    </div>
+
+    <div class="state-flow">
+      <div style="text-align:center">
+        <div class="sbox s-empty">EMPTY</div>
+        <div class="sarrow-label">start state</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sarrow">→</div>
+        <div class="sarrow-label">rain hits</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sbox s-full">FULL</div>
+        <div class="sarrow-label">must drain before next rain</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sarrow">→</div>
+        <div class="sarrow-label">sunny used</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sbox s-drained">DRAINED</div>
+        <div class="sarrow-label">safe for next rain</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sarrow">→ no sunny →</div>
+      </div>
+      <div style="text-align:center">
+        <div class="sbox s-flood">FLOOD!</div>
+        <div class="sarrow-label">return []</div>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why a Sorted Set + Binary Search?</div>
+      <p>When lake <code>r</code> gets its second rain on day <code>i</code>, the valid drain window is <code>(full[r], i)</code> — strictly between the two rains. We need the <em>earliest</em> available sunny index in this open interval. A <code>SortedList</code> supports O(log n) <code>bisect_right(full[r])</code> to find that index, and O(log n) <code>remove(j)</code> to consume it. Total: O(n log n) time.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Greedy Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing day <code>i</code>, every lake that is currently "full" either: (a) has no future rain scheduled (fine for now), or (b) will be assigned a drain action on the earliest available sunny day in its conflict window the moment that second rain arrives. No full lake is ever left unprotected against an imminent rain.</p>
+    </div>
+
+    <p><strong>Why picking the earliest sunny day is optimal (Exchange Argument):</strong> Suppose lake <code>k</code> conflicts on day <code>i</code> and we have sunny days <code>j1 &lt; j2</code> both in the valid window. We pick <code>j1</code> (earliest). Could this hurt us? Only if some future lake <code>k'</code> needs <code>j1</code> specifically. But <code>k'</code> would need a sunny day in its own window — if <code>j1</code> works for <code>k'</code>, so does <code>j2</code> (since <code>j2 &gt; j1</code> is also in the window if <code>j1</code> was). So assigning <code>j1</code> to <code>k</code> and leaving <code>j2</code> for <code>k'</code> is never worse than the reverse.</p>
+
+    <p style="margin-top:0.75rem"><strong>Impossibility is tight:</strong> If no sunny day exists in the conflict window <code>(last_rain[r], today)</code>, no amount of future planning can help — the conflict has already occurred. We must return <code>[]</code> immediately.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Using Any Sunny Day</div>
+      <p>A greedy that picks the <em>most recent</em> or <em>latest</em> available sunny day in the window is also correct, but picking a day <em>outside</em> the window (before <code>last_rain[r]</code>) would drain the lake before it was even full — which does nothing. Always restrict the search to strictly after the last rain of that lake.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Greedy + SortedList (Optimal — Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from sortedcontainers import SortedList      </span><span class="aann">← O(log n) insert, remove, bisect</span></div>
+<div class="ann-line"><span class="acode">                                             </span></div>
+<div class="ann-line"><span class="acode">def avoidFlood(rains):                       </span></div>
+<div class="ann-line"><span class="acode">    n = len(rains)</span></div>
+<div class="ann-line"><span class="acode">    ans = [-1] * n                           </span><span class="aann">← default: rain days stay -1</span></div>
+<div class="ann-line"><span class="acode">    full = {}                                </span><span class="aann">← lake → day of its most recent rain</span></div>
+<div class="ann-line"><span class="acode">    sunny = SortedList()                     </span><span class="aann">← sorted indices of unused sunny days</span></div>
+<div class="ann-line"><span class="acode">                                             </span></div>
+<div class="ann-line"><span class="acode">    for i, r in enumerate(rains):            </span></div>
+<div class="ann-line"><span class="acode">        if r == 0:                           </span><span class="aann">← sunny day: collect now, assign later</span></div>
+<div class="ann-line"><span class="acode">            sunny.add(i)                     </span><span class="aann">← O(log n) insert</span></div>
+<div class="ann-line"><span class="acode">            ans[i] = 1                       </span><span class="aann">← placeholder; overwritten if assigned</span></div>
+<div class="ann-line"><span class="acode">        elif r in full:                      </span><span class="aann">← lake r is already full — conflict!</span></div>
+<div class="ann-line"><span class="acode">            # Need a sunny day strictly after full[r] and strictly before i</span></div>
+<div class="ann-line"><span class="acode">            idx = sunny.bisect_right(full[r])</span><span class="aann">← first sunny index > last rain of r</span></div>
+<div class="ann-line"><span class="acode">            if idx == len(sunny) or sunny[idx] >= i:</span><span class="aann">← no valid sunny in window → impossible</span></div>
+<div class="ann-line"><span class="acode">                return []</span></div>
+<div class="ann-line"><span class="acode">            j = sunny[idx]                   </span><span class="aann">← earliest valid sunny day</span></div>
+<div class="ann-line"><span class="acode">            ans[j] = r                       </span><span class="aann">← retroactively assign: drain lake r on day j</span></div>
+<div class="ann-line"><span class="acode">            sunny.remove(j)                  </span><span class="aann">← consume this sunny day, O(log n)</span></div>
+<div class="ann-line"><span class="acode">            full[r] = i                      </span><span class="aann">← lake r refills today</span></div>
+<div class="ann-line"><span class="acode">        else:                                </span><span class="aann">← first rain on lake r</span></div>
+<div class="ann-line"><span class="acode">            full[r] = i                      </span><span class="aann">← record that lake r is now full</span></div>
+<div class="ann-line"><span class="acode">                                             </span></div>
+<div class="ann-line"><span class="acode">    return ans                               </span><span class="aann">← leftover sunny days keep placeholder 1</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why check sunny[idx] &ge; i, not just idx == len(sunny)?</div>
+      <p><code>bisect_right(full[r])</code> finds the first sunny index strictly after <code>full[r]</code>. But we also need that index to be <em>strictly before</em> today's rain day <code>i</code>. If <code>sunny[idx] &ge; i</code>, the found day is today or in the future — we can't drain the lake "after" the second rain already hits. So we return <code>[]</code>.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (O(n²), for understanding only)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def avoidFlood_brute(rains):                 </span><span class="aann">← O(n²) — TLE for n=10⁵</span></div>
+<div class="ann-line"><span class="acode">    ans = [1] * len(rains)                   </span><span class="aann">← start with all sunny = drain lake 1</span></div>
+<div class="ann-line"><span class="acode">    full = {}                                </span><span class="aann">← tracks currently full lakes</span></div>
+<div class="ann-line"><span class="acode">    for i, r in enumerate(rains):            </span></div>
+<div class="ann-line"><span class="acode">        if r == 0:                           </span><span class="aann">← sunny day: nothing to do here</span></div>
+<div class="ann-line"><span class="acode">            continue</span></div>
+<div class="ann-line"><span class="acode">        ans[i] = -1                          </span><span class="aann">← rain day output is -1</span></div>
+<div class="ann-line"><span class="acode">        if r in full:                        </span><span class="aann">← conflict: lake r already full</span></div>
+<div class="ann-line"><span class="acode">            found = False</span></div>
+<div class="ann-line"><span class="acode">            for j in range(full[r]+1, i):    </span><span class="aann">← O(n) scan backward in window</span></div>
+<div class="ann-line"><span class="acode">                if rains[j] == 0 and ans[j] != -1:</span></div>
+<div class="ann-line"><span class="acode">                    ans[j] = r; found = True; break</span></div>
+<div class="ann-line"><span class="acode">            if not found: return []</span></div>
+<div class="ann-line"><span class="acode">        full[r] = i                          </span></div>
+<div class="ann-line"><span class="acode">    return ans</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Greedy + SortedList (Optimal):</strong> Time O(n log n), Space O(n)<br>
+        <strong>Brute Force:</strong> Time O(n²), Space O(n) — fails for n=10⁵<br>
+        <strong>Alternative (no sortedcontainers):</strong> Pre-collect all sunny indices sorted, then use Python's built-in <code>bisect</code> module for the same O(log n) binary search. Mark consumed sunnies in a set. Same complexity, stdlib only.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify the Scheduling Structure</div>
+        <p style="font-size:14px;color:var(--text)">Key signals: "free action on sunny days," "lakes fill and must be drained," "limited resources with deadlines." This is a scheduling problem. Rains create deadlines, sunny days are the slots. Greedy scheduling: match each deadline to the earliest available slot in its window.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force</div>
+        <p style="font-size:14px;color:var(--text)">"When a second rain hits lake k, I can scan backward through its window to find the first unused sunny day and assign it there. O(n) per conflict, O(n²) overall. Correct but too slow for n=10⁵."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize with Binary Search</div>
+        <p style="font-size:14px;color:var(--text)">"The backward scan is slow because we're searching linearly. If I maintain sunny day indices in a sorted data structure, I can binary-search for the first index strictly after last_rain[r] in O(log n). SortedList from sortedcontainers, or pre-sort + bisect from stdlib."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State the Greedy Correctness</div>
+        <p style="font-size:14px;color:var(--text)">"Greedy choice: always pick the <em>earliest</em> available sunny day in the window. Exchange argument: using earliest leaves later sunny days for future conflicts — it's never worse than picking later. Prove: if j1 &lt; j2 both valid for k, swapping them doesn't help any other lake."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll scan left to right, maintaining two structures:<br>
+1) full: dict mapping lake → day it last rained<br>
+2) sunny: SortedList of available sunny day indices<br><br>
+On a sunny day: add index to sunny, set ans[i]=1 placeholder.<br>
+On a rain day for lake r:<br>
+  - If r not in full: first rain, record full[r]=i.<br>
+  - If r in full: conflict! Binary-search sunny for earliest j > full[r] and j &lt; i.<br>
+    If found: ans[j]=r, remove j from sunny, update full[r]=i.<br>
+    If not found: return [] — impossible.<br>
+Return ans. Time O(n log n), Space O(n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do it without sortedcontainers?"</strong> → Pre-collect all sunny indices in sorted order (one pass), then use <code>bisect.bisect_right</code>. Mark used indices in a set. O(n log n) time, stdlib only.</li>
+        <li><strong>"What if we must drain optimally (minimize total sunny days used)?"</strong> → Our greedy naturally minimizes usage — we only drain when a conflict forces it.</li>
+        <li><strong>"What if a lake can hold multiple rain units before flooding?"</strong> → Extension: track a counter per lake; conflict only when counter overflows capacity.</li>
+        <li><strong>"Why does picking the earliest sunny day guarantee optimality?"</strong> → Exchange argument: no lake needs a specific earlier sunny day if we could've used a later one for it too.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: rains = [1, 2, 0, 0, 2, 1]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Day index labels -->
+      <div class="idx-row-days" id="day-idx-row"></div>
+      <!-- Day timeline -->
+      <div class="day-timeline" id="day-timeline"></div>
+
+      <!-- Lake status -->
+      <div class="lake-panel">
+        <div class="lake-panel-title">Lake Fill Status</div>
+        <div class="lake-row" id="lake-row"></div>
+      </div>
+
+      <!-- Result being built -->
+      <div class="result-section">
+        <div class="result-label">Result Array (being built)</div>
+        <div class="result-row" id="result-row"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">day i</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-r">
+          <span class="var-name">rains[i]</span>
+          <span class="var-val" id="vv-r">—</span>
+        </div>
+        <div class="var-box" id="vb-sunny">
+          <span class="var-name">sunny[]</span>
+          <span class="var-val" id="vv-sunny">[ ]</span>
+        </div>
+        <div class="var-box" id="vb-assign">
+          <span class="var-name">action</span>
+          <span class="var-val" id="vv-assign">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def avoidFlood(rains):</div>
+      <div class="code-line" id="cl-1">    ans = [-1] * n; full = {}; sunny = SortedList()</div>
+      <div class="code-line" id="cl-2">    for i, r in enumerate(rains):</div>
+      <div class="code-line" id="cl-3">        if r == 0:           # sunny day</div>
+      <div class="code-line" id="cl-4">            sunny.add(i); ans[i] = 1</div>
+      <div class="code-line" id="cl-5">        elif r in full:      # lake r already full!</div>
+      <div class="code-line" id="cl-6">            idx = sunny.bisect_right(full[r])</div>
+      <div class="code-line" id="cl-7">            if idx == len(sunny) or sunny[idx] >= i:</div>
+      <div class="code-line" id="cl-8">                return []    # impossible</div>
+      <div class="code-line" id="cl-9">            j = sunny[idx]; ans[j] = r; sunny.remove(j)</div>
+      <div class="code-line" id="cl-10">            full[r] = i      # lake r refills today</div>
+      <div class="code-line" id="cl-11">        else:                # first rain on lake r</div>
+      <div class="code-line" id="cl-12">            full[r] = i</div>
+      <div class="code-line" id="cl-13">    return ans</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 10</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to walk through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-rain"></div> Rain day (lake fills)</div>
+      <div class="legend-item"><div class="legend-swatch sw-sunny"></div> Sunny day (available)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Current day being processed</div>
+      <div class="legend-item"><div class="legend-swatch sw-drain"></div> Sunny day assigned to drain</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Sunny days are "free actions" — collect them, assign them later when a conflict forces it</div>
+      <div class="takeaway">Greedy rule: use the <em>earliest</em> available sunny day strictly in the conflict window (exchange argument)</div>
+      <div class="takeaway">Sorted set + binary search lifts the O(n²) brute force to O(n log n)</div>
+      <div class="takeaway">Impossibility is detected immediately: no valid sunny in window → return [] on the spot</div>
+      <div class="takeaway">Leftover sunny days (never triggered a conflict) safely keep placeholder 1</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (backward scan)</td>
+          <td class="mark-bad">O(n²)</td>
+          <td>O(n)</td>
+          <td>TLE for n=10⁵; fine for small inputs</td>
+        </tr>
+        <tr>
+          <td><strong>Greedy + SortedList ✓</strong></td>
+          <td class="mark-good">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Optimal; SortedList or bisect module</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Greedy Empty Selection Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"You have free slots (empty/sunny days) — use them to satisfy future constraints"</li>
+        <li>"Assign resources to time slots before a deadline" → greedy + sorted structure</li>
+        <li>"Find earliest available slot in a range" → binary search on sorted list</li>
+        <li>Signals: limited actions, deadlines imposed by events, retroactive scheduling</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Greedy Scheduling)</div>
+      <div class="related-item"><strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span> — Assign tasks to time slots with cooldown; greedy with frequency counts (#621)</div>
+      <div class="related-item"><strong>Meeting Rooms II</strong><span class="related-diff diff-med">Medium</span> — Minimum rooms for overlapping intervals; greedy heap (#253)</div>
+      <div class="related-item"><strong>Non-overlapping Intervals</strong><span class="related-diff diff-med">Medium</span> — Remove fewest intervals so remainder is non-overlapping; greedy earliest end (#435)</div>
+      <div class="related-item"><strong>Jump Game II</strong><span class="related-diff diff-med">Medium</span> — Min jumps to reach end; greedy earliest-deadline style (#45)</div>
+      <div class="related-item"><strong>Minimum Arrows to Burst Balloons</strong><span class="related-diff diff-med">Medium</span> — Greedy coverage of intervals (#452)</div>
+      <div class="related-item"><strong>Car Pooling</strong><span class="related-diff diff-med">Medium</span> — Assign pick-up / drop-off to capacity; events-based greedy (#1094)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>Main Pattern: <strong>Greedy</strong><br>
+      Sub-Pattern: <strong>Greedy Empty Selection</strong><br>
+      Core technique: "Deferred assignment of free slots to satisfy deadline constraints, using earliest-first greedy with binary search."</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// rains = [1, 2, 0, 0, 2, 1]  →  ans = [-1, -1, 2, 1, -1, -1]
+const RAINS = [1, 2, 0, 0, 2, 1];
+const N = RAINS.length;
+const LAKES = [1, 2];  // unique lake ids
+
+// Steps: process day-by-day with retroactive assignments
+// Each step captures the full visualization state
+const steps = [
+  {
+    id: 0, phase: 'init', phaseLabel: 'INIT', phaseClass: 'phase-init',
+    curDay: -1, activeLine: 1,
+    full: {}, sunny: [], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: 'Initialize',
+    text: 'rains = [1, 2, 0, 0, 2, 1]. We have 6 days: rain lake 1 (day 0), rain lake 2 (day 1), sunny (days 2&3), rain lake 2 again (day 4), rain lake 1 again (day 5). Initialize: full = {} (no lake full yet), sunny = [] (no available sunny days), ans = [-1,-1,1,1,-1,-1] (pre-filled with -1 for rain days and 1 placeholder for sunny days, to be updated).',
+    varI: '—', varR: '—', varSunny: '[ ]', varAssign: 'setup', changedSunny: false, changedAssign: false
+  },
+  {
+    id: 1, phase: 'rain', phaseLabel: 'RAIN', phaseClass: 'phase-rain',
+    curDay: 0, activeLine: 12,
+    full: {1: 0}, sunny: [], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: "Day 0: rains[0] = 1 → First rain on lake 1",
+    text: "It rains on lake 1. Lake 1 is NOT in full (no prior rain), so no conflict. Execute the 'else' branch: full[1] = 0. Lake 1 is now FULL from day 0. ans[0] = -1 (rain day). Sunnies remain empty — no sunny days yet.",
+    varI: '0', varR: '1', varSunny: '[ ]', varAssign: 'fill lake 1', changedSunny: false, changedAssign: true
+  },
+  {
+    id: 2, phase: 'rain', phaseLabel: 'RAIN', phaseClass: 'phase-rain',
+    curDay: 1, activeLine: 12,
+    full: {1: 0, 2: 1}, sunny: [], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: "Day 1: rains[1] = 2 → First rain on lake 2",
+    text: "It rains on lake 2. Lake 2 is NOT in full (first rain), so no conflict. full[2] = 1. Lake 2 is now FULL from day 1. Both lakes 1 and 2 are now full! If either rains again before we drain them, we'll need a sunny day. No sunnies available yet — danger ahead.",
+    varI: '1', varR: '2', varSunny: '[ ]', varAssign: 'fill lake 2', changedSunny: false, changedAssign: true
+  },
+  {
+    id: 3, phase: 'sunny', phaseLabel: 'SUNNY', phaseClass: 'phase-sunny',
+    curDay: 2, activeLine: 4,
+    full: {1: 0, 2: 1}, sunny: [2], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: "Day 2: rains[2] = 0 → Sunny day! Collect index 2",
+    text: "Sunny day! We don't know yet which lake to drain — that decision is made when we discover which lake conflicts next. Add index 2 to sunny. Set ans[2] = 1 as placeholder. sunny = [2]. Both lakes are still full, so we're holding onto this sunny slot for future use.",
+    varI: '2', varR: '0', varSunny: '[2]', varAssign: 'collect sunny', changedSunny: true, changedAssign: false
+  },
+  {
+    id: 4, phase: 'sunny', phaseLabel: 'SUNNY', phaseClass: 'phase-sunny',
+    curDay: 3, activeLine: 4,
+    full: {1: 0, 2: 1}, sunny: [2, 3], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: "Day 3: rains[3] = 0 → Second sunny day! Collect index 3",
+    text: "Another sunny day! Add index 3 to sunny. ans[3] = 1 placeholder. sunny = [2, 3]. We now have TWO available drain slots. Both lakes 1 and 2 are still full. The next rain will force a conflict resolution — we'll binary-search sunny for the right slot then.",
+    varI: '3', varR: '0', varSunny: '[2,3]', varAssign: 'collect sunny', changedSunny: true, changedAssign: false
+  },
+  {
+    id: 5, phase: 'assign', phaseLabel: 'CONFLICT!', phaseClass: 'phase-danger',
+    curDay: 4, activeLine: 6,
+    full: {1: 0, 2: 1}, sunny: [2, 3], ans: [-1,-1,1,1,-1,-1], assignedSunny: [],
+    title: "Day 4: rains[4] = 2 → Lake 2 ALREADY FULL! Resolving...",
+    text: "CONFLICT! rains[4]=2 but lake 2 is already full (full[2]=1). We need to drain lake 2 on some sunny day in the window (1, 4) — strictly after day 1 and strictly before day 4. Binary-search sunny=[2,3] for bisect_right(full[2])=bisect_right(1). The first index in sunny greater than 1 is index 0 → sunny[0]=2. Check: 2 < 4 ✓. Valid! Assign: ans[2] = 2 (drain lake 2 on day 2).",
+    varI: '4', varR: '2', varSunny: '[3]', varAssign: 'assign day 2 → drain lake 2', changedSunny: true, changedAssign: true
+  },
+  {
+    id: 6, phase: 'rain', phaseLabel: 'RAIN', phaseClass: 'phase-rain',
+    curDay: 4, activeLine: 10,
+    full: {1: 0, 2: 4}, sunny: [3], ans: [-1,-1,2,1,-1,-1], assignedSunny: [2],
+    title: "Day 4 continued: Lake 2 drained on day 2, refills today",
+    text: "Retroactive assignment complete: ans[2] = 2 (drain lake 2 on sunny day 2). Remove day 2 from sunny. Update full[2] = 4 (lake 2 refills from today's rain). sunny = [3]. ans so far = [-1,-1,2,1,-1,-1]. Lake 1 is still full from day 0. Lake 2 is full from day 4. One sunny day (day 3) still available.",
+    varI: '4', varR: '2', varSunny: '[3]', varAssign: 'full[2]=4', changedSunny: false, changedAssign: true
+  },
+  {
+    id: 7, phase: 'assign', phaseLabel: 'CONFLICT!', phaseClass: 'phase-danger',
+    curDay: 5, activeLine: 6,
+    full: {1: 0, 2: 4}, sunny: [3], ans: [-1,-1,2,1,-1,-1], assignedSunny: [2],
+    title: "Day 5: rains[5] = 1 → Lake 1 ALREADY FULL! Resolving...",
+    text: "CONFLICT! rains[5]=1 but lake 1 is already full (full[1]=0). Need a sunny day in window (0, 5). Binary-search sunny=[3] for bisect_right(full[1])=bisect_right(0). First index > 0 is index 0 → sunny[0]=3. Check: 3 < 5 ✓. Valid! Assign: ans[3] = 1 (drain lake 1 on day 3). Remove day 3 from sunny. sunny=[].",
+    varI: '5', varR: '1', varSunny: '[]', varAssign: 'assign day 3 → drain lake 1', changedSunny: true, changedAssign: true
+  },
+  {
+    id: 8, phase: 'rain', phaseLabel: 'RAIN', phaseClass: 'phase-rain',
+    curDay: 5, activeLine: 10,
+    full: {1: 5, 2: 4}, sunny: [], ans: [-1,-1,2,1,-1,-1], assignedSunny: [2, 3],
+    title: "Day 5 continued: Lake 1 drained on day 3, refills today",
+    text: "Retroactive assignment complete: ans[3] = 1 (drain lake 1 on day 3). Update full[1] = 5. sunny = [] (empty — all sunny slots used). All 6 days processed! No impossible situations encountered. Final ans = [-1,-1,2,1,-1,-1].",
+    varI: '5', varR: '1', varSunny: '[]', varAssign: 'full[1]=5', changedSunny: false, changedAssign: true
+  },
+  {
+    id: 9, phase: 'result', phaseLabel: 'DONE ✓', phaseClass: 'phase-result',
+    curDay: -1, activeLine: 13,
+    full: {1: 5, 2: 4}, sunny: [], ans: [-1,-1,2,1,-1,-1], assignedSunny: [2, 3],
+    title: 'Return ans = [-1, -1, 2, 1, -1, -1] ✓',
+    text: 'Success! Rain days (0,1,4,5) output -1. Sunny day 2 was assigned to drain lake 2 (preventing the flood on day 4). Sunny day 3 was assigned to drain lake 1 (preventing the flood on day 5). The greedy "earliest available sunny in conflict window" made both assignments correctly. No lakes ever flooded!',
+    varI: '—', varR: '—', varSunny: '[]', varAssign: 'success!', changedSunny: false, changedAssign: false
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Day index row
+  const dir = document.getElementById('day-idx-row');
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement('div');
+    s.className = 'idx-slot-day';
+    s.textContent = 'Day ' + i;
+    dir.appendChild(s);
+  }
+  // Day timeline cells
+  const dt = document.getElementById('day-timeline');
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell normal';
+    cell.id = 'dc-' + i;
+    const top = document.createElement('div');
+    top.className = 'dc-label';
+    top.textContent = RAINS[i] === 0 ? '☀ SUNNY' : '🌧 LAKE ' + RAINS[i];
+    const bot = document.createElement('div');
+    bot.className = 'dc-val';
+    bot.textContent = RAINS[i] === 0 ? '—' : RAINS[i];
+    cell.appendChild(top);
+    cell.appendChild(bot);
+    dt.appendChild(cell);
+  }
+  // Lake indicators
+  const lr = document.getElementById('lake-row');
+  LAKES.forEach(lid => {
+    const cell = document.createElement('div');
+    cell.className = 'lake-indicator li-empty';
+    cell.id = 'li-' + lid;
+    const nm = document.createElement('div');
+    nm.className = 'li-name';
+    nm.textContent = 'Lake ' + lid;
+    const st = document.createElement('div');
+    st.className = 'li-status';
+    st.id = 'lv-' + lid;
+    st.textContent = 'EMPTY';
+    cell.appendChild(nm);
+    cell.appendChild(st);
+    lr.appendChild(cell);
+  });
+  // Result row
+  const rr = document.getElementById('result-row');
+  for (let i = 0; i < N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'result-cell rc-future';
+    cell.id = 'rc-' + i;
+    const top = document.createElement('div');
+    top.className = 'rc-day';
+    top.textContent = 'ans[' + i + ']';
+    const bot = document.createElement('div');
+    bot.className = 'rc-val';
+    bot.id = 'rv-' + i;
+    bot.textContent = '?';
+    cell.appendChild(top);
+    cell.appendChild(bot);
+    rr.appendChild(cell);
+  }
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function render() {
+  const step = steps[current];
+  const isResult = step.phase === 'result';
+
+  // Day cells
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('dc-' + i);
+    cell.className = 'day-cell';
+    if (isResult) {
+      if (RAINS[i] === 0) {
+        cell.classList.add(step.assignedSunny.includes(i) ? 'drain-assigned' : 'done-rain');
+      } else {
+        cell.classList.add('done-rain');
+      }
+    } else if (i === step.curDay) {
+      cell.classList.add('active');
+    } else if (step.curDay > -1 && i < step.curDay) {
+      // Processed
+      if (RAINS[i] === 0) {
+        cell.classList.add(step.assignedSunny.includes(i) ? 'drain-assigned' : 'done-rain');
+      } else {
+        cell.classList.add('done-rain');
+      }
+    } else if (RAINS[i] === 0) {
+      cell.classList.add('sunny');
+    } else {
+      cell.classList.add('rain');
+    }
+  }
+
+  // Lake indicators
+  LAKES.forEach(lid => {
+    const cell = document.getElementById('li-' + lid);
+    const val = document.getElementById('lv-' + lid);
+    if (step.full && step.full[lid] !== undefined) {
+      cell.className = 'lake-indicator li-full';
+      val.textContent = 'FULL (since day ' + step.full[lid] + ')';
+    } else {
+      cell.className = 'lake-indicator li-empty';
+      val.textContent = 'EMPTY';
+    }
+  });
+
+  // Result row
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('rc-' + i);
+    const val = document.getElementById('rv-' + i);
+    const shouldShow = isResult || (step.curDay >= 0 && i <= step.curDay) ||
+                       (step.assignedSunny && step.assignedSunny.includes(i));
+    if (shouldShow || isResult) {
+      const v = step.ans[i];
+      if (RAINS[i] > 0) {
+        cell.className = 'result-cell rc-rain';
+        val.textContent = '-1';
+      } else if (step.assignedSunny && step.assignedSunny.includes(i)) {
+        cell.className = 'result-cell rc-drain';
+        val.textContent = step.ans[i];
+      } else if (i < (step.curDay + 1)) {
+        cell.className = 'result-cell rc-placeholder';
+        val.textContent = '1*';
+      } else {
+        cell.className = 'result-cell rc-future';
+        val.textContent = '?';
+      }
+    } else {
+      cell.className = 'result-cell rc-future';
+      val.textContent = '?';
+    }
+  }
+  // In result step, show final correct values
+  if (isResult) {
+    for (let i = 0; i < N; i++) {
+      const cell = document.getElementById('rc-' + i);
+      const val = document.getElementById('rv-' + i);
+      const v = step.ans[i];
+      if (v === -1) {
+        cell.className = 'result-cell rc-rain';
+        val.textContent = '-1';
+      } else {
+        cell.className = 'result-cell rc-drain';
+        val.textContent = v;
+      }
+    }
+  }
+
+  // Code panel
+  for (let i = 0; i <= 13; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current+1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  document.getElementById('vv-i').textContent = step.varI;
+  document.getElementById('vv-r').textContent = step.varR;
+  document.getElementById('vv-sunny').textContent = step.varSunny;
+  document.getElementById('vv-assign').textContent = step.varAssign;
+  document.getElementById('vb-sunny').classList.toggle('changed', step.changedSunny);
+  document.getElementById('vb-assign').classList.toggle('changed', step.changedAssign);
+  document.getElementById('vb-i').classList.toggle('changed', step.curDay >= 0);
+  document.getElementById('vb-r').classList.toggle('changed', step.curDay >= 0);
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

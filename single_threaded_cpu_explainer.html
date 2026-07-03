@@ -1,236 +1,925 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Single-Threaded CPU – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1834 · Single-Threaded CPU</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── Task Table ── */
+.task-grid{display:grid;grid-template-columns:60px 90px 100px 120px;gap:0;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.tgh{background:var(--bg2);padding:8px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);border-bottom:1px solid var(--border2);text-align:center}
+.tgd{padding:10px 10px;font-family:var(--mono);font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);text-align:center;background:var(--surface);transition:background 0.3s,color 0.3s}
+.tgd.tg-active{background:var(--amber-bg);color:var(--amber-text);font-weight:700}
+.tgd.tg-done{background:var(--green-bg);color:var(--green-mid)}
+.tgd.tg-available{background:var(--blue-bg);color:var(--blue-mid)}
+
+/* ── Heap Visual ── */
+.heap-section{margin-top:0.5rem}
+.heap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.heap-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;min-height:62px}
+.heap-node{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:var(--radius);border:2px solid;min-width:88px;transition:background 0.3s,border-color 0.3s}
+.heap-node.hn-top{background:var(--amber-bg);border-color:var(--amber-border)}
+.heap-node.hn-rest{background:var(--purple-bg);border-color:var(--purple-border)}
+.heap-node-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:4px}
+.heap-node.hn-top .heap-node-lbl{color:var(--amber-mid)}
+.heap-node.hn-rest .heap-node-lbl{color:var(--purple-mid)}
+.heap-node-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
+.heap-node.hn-top .heap-node-val{color:var(--amber-text)}
+.heap-node.hn-rest .heap-node-val{color:var(--purple-text)}
+.heap-empty-msg{font-size:13px;color:var(--text3);font-style:italic;padding:14px 0}
+
+/* ── CPU Timeline ── */
+.cpu-timeline-wrap{margin-top:1.25rem}
+.tl-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.tl-row{display:flex;gap:3px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+.tl-cell{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);flex-shrink:0;transition:background 0.3s}
+.tl-cell.tl-run{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.tl-cell.tl-done{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid)}
+.tl-cell.tl-idle{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.tl-idx-row{display:flex;gap:3px;margin-top:2px;flex-wrap:nowrap;overflow-x:auto}
+.tl-idx{width:34px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-push{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-execute{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-idle{background:var(--bg2);color:var(--text3);border:1px solid var(--border2)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-available{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-running{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-done{background:var(--green-bg);border-color:var(--green-border)}
+.sw-heap{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── State Machine Diagram ── */
+.state-machine{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin:1.5rem 0}
+.sm-node{padding:14px 18px;border-radius:var(--radius-lg);border:2px solid;text-align:center;min-width:120px}
+.sm-sort{background:var(--blue-bg);border-color:var(--blue-border)}
+.sm-push{background:var(--amber-bg);border-color:var(--amber-border)}
+.sm-exec{background:var(--green-bg);border-color:var(--green-border)}
+.sm-node-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.sm-sort .sm-node-title{color:var(--blue-mid)}
+.sm-push .sm-node-title{color:var(--amber-mid)}
+.sm-exec .sm-node-title{color:var(--green-mid)}
+.sm-node-body{font-size:12px;color:var(--text2);line-height:1.5}
+.sm-arrow{font-size:20px;color:var(--text3);flex-shrink:0}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Single-Threaded CPU</h1>
-    <p class="subtitle">LeetCode #1834 — Heaps · Sort + Min Heap</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Heaps</span>
-      <span class="tag tag-complexity">O(n log k) Time</span>
-      <span class="tag tag-complexity">O(k) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Heaps</strong> using the <strong>Sort + Min Heap</strong> technique.</p>
-      <p>Pattern category: <strong>Heaps</strong>. Apply when: <em>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Heap gives O(log n) insert/delete and O(1) min/max access. Use for top-K, median tracking, scheduling.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #1834</div>
+  <h1>Single-Threaded CPU</h1>
+  <p class="subtitle">Given n tasks with enqueue times and processing times, simulate a CPU that always picks the shortest available task. Return the order in which tasks are executed.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Heaps &amp; Priority Queues</span>
+    <span class="tag tag-pattern">Sort + Min Heap</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Sort + Min Heap</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Build heap from initial elements</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each new element: push to heap</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">If heap exceeds size limit: pop smallest/largest</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Top of heap = current kth element</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">For two heaps: balance sizes, rebalance on every push</span></div>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem       -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You have a single CPU and n tasks. Each task is described by <code>[enqueueTime, processingTime]</code>. The CPU follows these rules at every scheduling decision:</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Min-heap: parent ≤ children. Max-heap: parent ≥ children. Heap property maintained after every op.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">→</span>
+        <span class="step-text">At any moment, the CPU picks the <strong>available</strong> task with the <strong>shortest processing time</strong>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">→</span>
+        <span class="step-text">A task is "available" if its <code>enqueueTime &lt;= currentTime</code>. It may not be selected before it arrives.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">→</span>
+        <span class="step-text">On ties in processing time, pick the task with the <strong>smaller original index</strong>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">→</span>
+        <span class="step-text">If <strong>no task is available</strong> when the CPU finishes, <strong>jump time directly</strong> to the next task's enqueue time.</span>
       </div>
     </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is a <strong>greedy scheduling simulation</strong>. At each decision point, we want the shortest available job — Shortest Job First (SJF). A <strong>min-heap keyed by (processing_time, original_index)</strong> gives us the winner in O(log n). The challenge is efficiently tracking which tasks have "arrived" as time advances.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Walkthrough: tasks=[[1,2],[2,4],[3,2],[4,1]]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          t=1: Task 0 available → run (2s)<br>
+          t=3: Tasks 1,2 available → Task 2 wins (pt=2)<br>
+          t=5: Tasks 1,3 available → Task 3 wins (pt=1)<br>
+          t=6: Task 1 only → run (4s)<br>
+          <strong>Output: [0, 2, 3, 1]</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">⚠️ Tricky: CPU Idle / Fast-Forward</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          If heap empties at t=5<br>
+          but next task arrives at t=8,<br>
+          jump to t=8 directly.<br>
+          Incrementing t by 1 gives<br>
+          correct but SLOW O(T) result!
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> All tasks arrive at t=0 (pure SJF, no idle). Single task. Two tasks with equal processing time and equal enqueue time (use original index). Very large enqueue times requiring fast-forward.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">import heapq</div><div class="code-line">def topKFrequent(nums, k):</div><div class="code-line">    freq = {}</div><div class="code-line">    for n in nums: freq[n] = freq.get(n, 0) + 1</div><div class="code-line">    heap = []</div><div class="code-line">    for num, cnt in freq.items():</div><div class="code-line">        heapq.heappush(heap, (cnt, num))</div><div class="code-line">        if len(heap) > k: heapq.heappop(heap)</div><div class="code-line">    return [h[1] for h in heap]</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log k) &nbsp;|&nbsp; Space: O(k)</p>
-    </div>
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                   -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Sort + Min Heap Simulation</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>We need to efficiently answer "which available task has the shortest processing time?" at each moment. The approach: pre-sort by enqueue time, then use a <strong>min-heap</strong> to always surface the optimal task.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
+    <div class="state-machine">
+      <div class="sm-node sm-sort">
+        <div class="sm-node-title">1 · Sort</div>
+        <div class="sm-node-body">Tag each task with its original index. Sort by enqueue time so arrivals are ordered.</div>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Heaps problem using Sort + Min Heap. I'll build heap from initial elements then for each new element: push to heap. Time: O(n log k), Space: O(k)."</div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-node sm-push">
+        <div class="sm-node-title">2 · Push to Heap</div>
+        <div class="sm-node-body">As time advances, sweep new arrivals (enqueue ≤ time) into the min-heap.</div>
+      </div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-node sm-exec">
+        <div class="sm-node-title">3 · Execute</div>
+        <div class="sm-node-body">Pop min. Run it. Advance time. If heap empty → fast-forward. Repeat.</div>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Tag &amp; Sort:</strong> Create <code>indexed = sorted(enumerate(tasks), key=lambda x: x[1][0])</code>. This pairs each task with its original index and sorts by enqueue time, keeping indices intact.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>current_time = first task's enqueue time</code>. Use pointer <code>j = 0</code> to sweep through the sorted list.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Push available tasks:</strong> While <code>indexed[j][1][0] &lt;= current_time</code>, push <code>(proc_time, orig_idx)</code> onto the heap. Increment <code>j</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Fast-forward (idle):</strong> If heap is empty after the sweep, set <code>current_time = indexed[j][1][0]</code> and continue (this skips idle time).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Execute:</strong> Pop <code>(proc, orig_i)</code> from heap. Append <code>orig_i</code> to result. Advance <code>current_time += proc</code>.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Heaps — Sort + Min Heap</div>
-        <div class="takeaway">✓ Heap gives O(log n) insert/delete and O(1) min/max access</div>
-        <div class="takeaway">✓ Time: O(n log k) | Space: O(k)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Last Stone Weight</strong> (Easy) — Max Heap Simulation</li>
-<li><strong>Minimum Cost to Connect Sticks</strong> (Medium) — Min Heap Greedy</li>
-<li><strong>Furthest Building You Can Reach</strong> (Medium) — Min Heap for Ladders</li>
-<li><strong>Process Tasks Using Servers</strong> (Medium) — Two Heaps (Free/Busy)</li>
-<li><strong>Longest Happy String</strong> (Medium) — Max Heap Greedy</li>
-<li><strong>Maximum Performance of a Team</strong> (Hard) — Sort + Min Heap for K Max</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Sort Before Heaping?</div>
+      <p>Sorting by enqueue time lets us use a simple linear sweep with pointer <code>j</code> — we only ever need to look at <code>indexed[j]</code> to know if the next task is ready. Without sorting, we'd scan all n remaining tasks every scheduling step, giving O(n²) total — far too slow for n up to 10⁵.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {heap:[],msg:"Empty min-heap",phase:"INIT"},
-  {heap:[3],msg:"Push 3",phase:"PUSH"},
-  {heap:[1,3],msg:"Push 1 → heapify up",phase:"PUSH"},
-  {heap:[1,3,5],msg:"Push 5",phase:"PUSH"},
-  {heap:[1,3,5,7],msg:"Push 7",phase:"PUSH"},
-  {heap:[3,7,5],top:1,msg:"Pop 1 (min) → heapify down",phase:"POP"},
-  {heap:[3,7,5],msg:"Top=3 (second smallest)",phase:"DONE"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                    -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Heap Invariant</div>
+      <p>At every scheduling decision, the heap contains <strong>exactly all tasks that have arrived (enqueueTime ≤ current_time) but have not yet been executed</strong>. Because of the heap's min-property on <code>(proc, idx)</code>, the top is always the correct greedy choice — shortest job with smallest index on tie.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why Shortest Job First is correct here:</strong> The problem asks for the order defined by the SJF discipline — this is the specification, not an optimization. Any tie (equal processing times) must be broken by original index. Our heap key <code>(proc_time, original_idx)</code> encodes both rules directly into Python's natural lexicographic tuple comparison.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why fast-forward is safe:</strong> When the heap empties and <code>j &lt; n</code>, no task can arrive between <code>current_time</code> and <code>indexed[j][1][0]</code> — if any had, we would have pushed them (they'd have enqueue ≤ current_time). So jumping directly is lossless.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Most Common Bug: Incrementing Time by 1</div>
+      <p>If you write <code>current_time += 1</code> when the heap is empty instead of jumping directly to the next arrival, you'll get the right answer on small inputs but <strong>Time Limit Exceeded</strong> on large inputs where enqueue times can be up to 10⁹. Always jump: <code>current_time = indexed[j][1][0]</code>.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Second most common bug — losing original index:</strong> If you sort the tasks array directly without preserving original indices, you cannot output the correct answer. Always use <code>enumerate</code> before sorting, or store index alongside each task before any rearrangement.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)            -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Sort + Min Heap (Optimal, O(n log n)) — Interview Pick</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span></div>
+<div class="ann-line"><span class="acode">def getOrder(tasks):</span></div>
+<div class="ann-line"><span class="acode">    # Tag each task with its original index, then sort by enqueue time</span></div>
+<div class="ann-line"><span class="acode">    indexed = sorted(enumerate(tasks), key=lambda x: x[1][0])  </span><span class="aann">← enumerate gives (orig_idx, [enq, proc])</span></div>
+<div class="ann-line"><span class="acode">    result = []         </span><span class="aann">← Output: original task indices in execution order</span></div>
+<div class="ann-line"><span class="acode">    heap = []           </span><span class="aann">← Min-heap of (proc_time, orig_idx) for available tasks</span></div>
+<div class="ann-line"><span class="acode">    j = 0               </span><span class="aann">← Pointer into sorted indexed list</span></div>
+<div class="ann-line"><span class="acode">    current_time = indexed[0][1][0]  </span><span class="aann">← Start at first task's arrival time, not 0</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    while len(result) &lt; len(tasks):</span></div>
+<div class="ann-line"><span class="acode">        # Push all tasks that have arrived by current_time onto heap</span></div>
+<div class="ann-line"><span class="acode">        while j &lt; len(indexed) and indexed[j][1][0] &lt;= current_time:  </span><span class="aann">← enqueue ≤ now → available</span></div>
+<div class="ann-line"><span class="acode">            orig_i, (enq, proc) = indexed[j]</span></div>
+<div class="ann-line"><span class="acode">            heapq.heappush(heap, (proc, orig_i))  </span><span class="aann">← (proc, idx): min-heap sorts by proc first, then idx</span></div>
+<div class="ann-line"><span class="acode">            j += 1</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        if not heap:  # CPU idle — no available tasks</span></div>
+<div class="ann-line"><span class="acode">            current_time = indexed[j][1][0]  </span><span class="aann">← Fast-forward; do NOT increment by 1</span></div>
+<div class="ann-line"><span class="acode">            continue</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        proc, orig_i = heapq.heappop(heap)  </span><span class="aann">← Shortest available job (and smallest idx on tie)</span></div>
+<div class="ann-line"><span class="acode">        current_time += proc  </span><span class="aann">← CPU runs task for proc time units</span></div>
+<div class="ann-line"><span class="acode">        result.append(orig_i)  </span><span class="aann">← Record the original task index, not sorted index</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    return result</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why current_time starts at indexed[0][1][0], not 0?</div>
+      <p>The CPU is idle until the first task arrives. If task 0 arrives at t=1000, there's nothing to do before that. Starting at 0 would loop doing nothing (or fast-forward, which is equivalent, but starting at the right time is cleaner and clearer).</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (O(n² + T), to contrast)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def getOrder_brute(tasks):</span></div>
+<div class="ann-line"><span class="acode">    n = len(tasks); done = [False]*n; t = 0; result = []</span></div>
+<div class="ann-line"><span class="acode">    while len(result) &lt; n:</span></div>
+<div class="ann-line"><span class="acode">        available = [(tasks[i][1], i) for i in range(n)  </span><span class="aann">← O(n) scan every iteration</span></div>
+<div class="ann-line"><span class="acode">                     if not done[i] and tasks[i][0] &lt;= t]</span></div>
+<div class="ann-line"><span class="acode">        if not available: t += 1; continue  </span><span class="aann">← O(T) idle: up to 10^9 iterations!</span></div>
+<div class="ann-line"><span class="acode">        proc, pick = min(available)  </span><span class="aann">← O(n) min scan — repeated n times = O(n²)</span></div>
+<div class="ann-line"><span class="acode">        done[pick] = True; t += proc; result.append(pick)</span></div>
+<div class="ann-line"><span class="acode">    return result</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Sort + Min Heap (Optimal):</strong> O(n log n) sort + O(n log n) for n heap operations = <strong>O(n log n)</strong> total. Space O(n).<br>
+        <strong>Brute Force:</strong> O(n² + T) where T = max enqueue time. TLE when n = 10⁵ or T = 10⁹.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy              -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Heap Pattern</div>
+        <p style="font-size:14px;color:var(--text)">"We repeatedly need the minimum from a dynamic, growing set. Classic min-heap. The wrinkle: tasks aren't all available from the start. They arrive over time." This is the Sort + Min Heap template.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Explain the Sort-First Insight</div>
+        <p style="font-size:14px;color:var(--text)">"If I sort by enqueue time, I can use a pointer to efficiently sweep new arrivals into the heap as time passes — one pass, O(n log n) total, instead of O(n) scans per step."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Address the Idle CPU Problem</div>
+        <p style="font-size:14px;color:var(--text)">"When the heap is empty and no tasks are available yet, I jump directly to the next task's arrival time. This avoids an O(T) loop — critical for correctness under TLE."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Confirm Tiebreaking is Automatic</div>
+        <p style="font-size:14px;color:var(--text)">"Heap stores (proc_time, original_idx). Python compares tuples lexicographically — equal proc_times resolve by smaller index first. No custom comparator needed."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"We need the shortest available task at each step — that's a min-heap.<br>
+First I sort tasks by enqueue time (tagging original indices before sorting).<br>
+I simulate time: sweep all tasks with enqueue ≤ current_time into a (proc, idx) heap.<br>
+If heap is empty, fast-forward current_time to next task's arrival — never increment by 1.<br>
+Pop min heap → record original index → advance time by proc_time → repeat.<br>
+Time O(n log n), Space O(n). Handles up to n=10^5 and enqueue up to 10^9."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if there are multiple CPUs?"</strong> → Process Tasks Using Servers (#1882) — two heaps: free/busy servers</li>
+        <li><strong>"Minimize total waiting time instead?"</strong> → Same SJF discipline; heap order unchanged</li>
+        <li><strong>"Tasks with priorities?"</strong> → Change heap key to (priority, proc_time, idx)</li>
+        <li><strong>"What if processing times can change?"</strong> → Mutable priority queue — more complex</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough         -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: tasks = [[1,2],[2,4],[3,2],[4,1]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Task Table -->
+      <div class="task-grid" id="task-grid">
+        <div class="tgh">Idx</div>
+        <div class="tgh">Enqueue</div>
+        <div class="tgh">Process</div>
+        <div class="tgh">Status</div>
+      </div>
+
+      <!-- Min Heap -->
+      <div class="heap-section" style="margin-top:1rem">
+        <div class="heap-title">Min-Heap: (proc_time, orig_idx) — smaller proc_time at front</div>
+        <div class="heap-row" id="heap-row">
+          <span class="heap-empty-msg">empty</span>
+        </div>
+      </div>
+
+      <!-- CPU Timeline -->
+      <div class="cpu-timeline-wrap">
+        <div class="tl-label">CPU Timeline</div>
+        <div class="tl-row" id="tl-cells"></div>
+        <div class="tl-idx-row" id="tl-idx"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-time">
+          <span class="var-name">time</span>
+          <span class="var-val" id="vv-time">1</span>
+        </div>
+        <div class="var-box" id="vb-j">
+          <span class="var-name">ptr j</span>
+          <span class="var-val" id="vv-j">0</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-result">[]</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">indexed = sorted(enumerate(tasks), key=lambda x: x[1][0])</div>
+      <div class="code-line" id="cl-1">result, heap, j = [], [], 0</div>
+      <div class="code-line" id="cl-2">current_time = indexed[0][1][0]</div>
+      <div class="code-line" id="cl-3">while len(result) &lt; len(tasks):</div>
+      <div class="code-line" id="cl-4">    while j &lt; n and indexed[j][1][0] &lt;= current_time:</div>
+      <div class="code-line" id="cl-5">        heapq.heappush(heap, (proc, orig_i));  j += 1</div>
+      <div class="code-line" id="cl-6">    if not heap:</div>
+      <div class="code-line" id="cl-7">        current_time = indexed[j][1][0];  continue</div>
+      <div class="code-line" id="cl-8">    proc, orig_i = heapq.heappop(heap)</div>
+      <div class="code-line" id="cl-9">    current_time += proc</div>
+      <div class="code-line" id="cl-10">    result.append(orig_i)</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to simulate CPU task scheduling.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-available"></div> In heap (available)</div>
+      <div class="legend-item"><div class="legend-swatch sw-running"></div> Currently executing</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Completed</div>
+      <div class="legend-item"><div class="legend-swatch sw-heap"></div> Heap entry (not top)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways         -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Sort by enqueue time first — enables O(n) sweep with pointer instead of O(n²) linear scans</div>
+      <div class="takeaway">Tag with original index BEFORE sorting — heap must output task identity, not sorted position</div>
+      <div class="takeaway">Min-heap on (proc_time, orig_idx) encodes both the greedy rule and tiebreaker simultaneously</div>
+      <div class="takeaway">Fast-forward idle time to next arrival — never increment current_time by 1 during idle</div>
+      <div class="takeaway">Python tuple comparison does the tiebreaking for you — (2,1) &lt; (2,2) naturally</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force Simulation</td>
+          <td class="mark-bad">O(n² + T)</td>
+          <td>O(n)</td>
+          <td>TLE for large n or large enqueue times T</td>
+        </tr>
+        <tr>
+          <td><strong>Sort + Min Heap ✓</strong></td>
+          <td class="mark-good">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Optimal; standard industry / interview answer</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Sort + Min Heap</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Items "arrive" over time and you need the best one available at each step</li>
+        <li>"Pick the cheapest / shortest / most profitable available item" — greedy, dynamic set</li>
+        <li>Events sorted by one criterion (arrival), selected by another (cost/priority)</li>
+        <li>CPU scheduling, meeting rooms, task queues, event simulation</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Sort + Min Heap / Heap Simulation)</div>
+      <div class="related-item"><strong>Process Tasks Using Servers</strong><span class="related-diff diff-med">Medium</span> — Two heaps (free/busy servers); same Sort + Heap skeleton (#1882)</div>
+      <div class="related-item"><strong>Maximum Events That Can Be Attended</strong><span class="related-diff diff-med">Medium</span> — Sort by start day, min-heap on end day, attend earliest-ending each day (#1353)</div>
+      <div class="related-item"><strong>Meeting Rooms II</strong><span class="related-diff diff-med">Medium</span> — Sort by start, min-heap of end times to count concurrent meetings (#253)</div>
+      <div class="related-item"><strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span> — Max-heap with cooldown queue; greedy frequency-based scheduling (#621)</div>
+      <div class="related-item"><strong>Minimum Cost to Connect Sticks</strong><span class="related-diff diff-med">Medium</span> — Min-heap greedy: always merge smallest two (#1167)</div>
+      <div class="related-item"><strong>Furthest Building You Can Reach</strong><span class="related-diff diff-med">Medium</span> — Min-heap to greedily swap ladders for bricks (#1642)</div>
+      <div class="related-item"><strong>Merge k Sorted Lists</strong><span class="related-diff diff-hard">Hard</span> — Min-heap with k pointers; identical push/pop structure (#23)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 13.1 (Heaps &amp; Priority Queues → Heap Operations)<br>
+      Sub-Pattern: <strong>Sort + Min Heap</strong> · Source: Guide Section 13.1</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// tasks = [[enqueue, process], ...]
+const TASKS = [[1,2],[2,4],[3,2],[4,1]];
+
+// Each step describes the FULL state to render
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:0,
+    time:1, j:0, result:[],
+    taskStatus:['waiting','waiting','waiting','waiting'],
+    heap:[], timeline:[],
+    title:'Sort tasks by enqueue time',
+    text:'tasks = [[1,2],[2,4],[3,2],[4,1]]. After enumerate + sort by enqueue, order is still [0,1,2,3] (already sorted). We tag each with its original index. CPU starts at current_time=1 (first task\'s arrival).'
+  },
+  {
+    id:1, phase:'push', phaseLabel:'PUSH', phaseClass:'phase-push', activeLine:4,
+    time:1, j:1, result:[],
+    taskStatus:['available','waiting','waiting','waiting'],
+    heap:[{proc:2, idx:0, top:true}], timeline:[],
+    title:'t=1: Push Task 0 → heap = [(2,0)]',
+    text:'Sweep: indexed[0] is Task 0 with enqueue=1 ≤ current_time=1. Push (proc=2, orig_idx=0). Advance j=1. Next: indexed[1] is Task 1 with enqueue=2 > 1 → stop sweep. Heap = [(2,0)].'
+  },
+  {
+    id:2, phase:'execute', phaseLabel:'EXECUTE', phaseClass:'phase-execute', activeLine:8,
+    time:1, j:1, result:[],
+    taskStatus:['running','waiting','waiting','waiting'],
+    heap:[], timeline:['T0','T0'],
+    title:'t=1: Pop heap → Execute Task 0 (proc=2)',
+    text:'Heap not empty. Pop min: (proc=2, orig_idx=0). CPU runs Task 0 from t=1 to t=3. Advance current_time = 1+2 = 3. Append 0 to result. Task 0 is done!'
+  },
+  {
+    id:3, phase:'execute', phaseLabel:'DONE', phaseClass:'phase-execute', activeLine:10,
+    time:3, j:1, result:[0],
+    taskStatus:['done','waiting','waiting','waiting'],
+    heap:[], timeline:['T0','T0'],
+    title:'t=3: result=[0], sweep again for available tasks',
+    text:'current_time=3. Loop: start inner sweep. Task 1 has enqueue=2 ≤ 3 → push (4,1). Task 2 has enqueue=3 ≤ 3 → push (2,2). Task 3 has enqueue=4 > 3 → stop. j=3.'
+  },
+  {
+    id:4, phase:'push', phaseLabel:'PUSH', phaseClass:'phase-push', activeLine:5,
+    time:3, j:3, result:[0],
+    taskStatus:['done','available','available','waiting'],
+    heap:[{proc:2,idx:2,top:true},{proc:4,idx:1,top:false}], timeline:['T0','T0'],
+    title:'t=3: Pushed Tasks 1 and 2 → heap = [(2,2),(4,1)]',
+    text:'After pushing (4,1) and (2,2), the heap min-heapifies. (2,2) rises to the top because proc=2 < proc=4. Task 2 is the shortest available job despite arriving after Task 1!'
+  },
+  {
+    id:5, phase:'execute', phaseLabel:'EXECUTE', phaseClass:'phase-execute', activeLine:8,
+    time:3, j:3, result:[0],
+    taskStatus:['done','available','running','waiting'],
+    heap:[{proc:4,idx:1,top:true}], timeline:['T0','T0','T2','T2'],
+    title:'t=3: Pop heap → Execute Task 2 (proc=2)',
+    text:'Pop min: (proc=2, orig_idx=2). Task 2 wins over Task 1 because shorter processing time (2 < 4). CPU runs Task 2 from t=3 to t=5. current_time = 3+2 = 5. Append 2 to result.'
+  },
+  {
+    id:6, phase:'execute', phaseLabel:'DONE', phaseClass:'phase-execute', activeLine:10,
+    time:5, j:3, result:[0,2],
+    taskStatus:['done','available','done','waiting'],
+    heap:[{proc:4,idx:1,top:true}], timeline:['T0','T0','T2','T2'],
+    title:'t=5: result=[0,2], sweep for new arrivals',
+    text:'current_time=5. Sweep: indexed[3] is Task 3, enqueue=4 ≤ 5 → push (proc=1, orig_idx=3). j=4. No more tasks. Heap now has [(1,3),(4,1)] — Task 3 with proc=1 rises to the top!'
+  },
+  {
+    id:7, phase:'push', phaseLabel:'PUSH', phaseClass:'phase-push', activeLine:5,
+    time:5, j:4, result:[0,2],
+    taskStatus:['done','available','done','available'],
+    heap:[{proc:1,idx:3,top:true},{proc:4,idx:1,top:false}], timeline:['T0','T0','T2','T2'],
+    title:'t=5: Task 3 pushed → heap = [(1,3),(4,1)]',
+    text:'(1,3) rises to top because proc=1 < proc=4. Task 3 arrived later than Task 1, but its shorter processing time (1 vs 4) wins the scheduling decision. This is the key SJF greedy choice.'
+  },
+  {
+    id:8, phase:'execute', phaseLabel:'EXECUTE', phaseClass:'phase-execute', activeLine:8,
+    time:5, j:4, result:[0,2],
+    taskStatus:['done','available','done','running'],
+    heap:[{proc:4,idx:1,top:true}], timeline:['T0','T0','T2','T2','T3'],
+    title:'t=5: Pop heap → Execute Task 3 (proc=1)',
+    text:'Pop min: (proc=1, orig_idx=3). Task 3 runs from t=5 to t=6. current_time = 5+1 = 6. Append 3 to result. The heap still has (4,1) — Task 1 patiently waits.'
+  },
+  {
+    id:9, phase:'execute', phaseLabel:'DONE', phaseClass:'phase-execute', activeLine:10,
+    time:6, j:4, result:[0,2,3],
+    taskStatus:['done','available','done','done'],
+    heap:[{proc:4,idx:1,top:true}], timeline:['T0','T0','T2','T2','T3'],
+    title:'t=6: result=[0,2,3], one task remains',
+    text:'current_time=6. Sweep: j=4, no more tasks (j >= n). Heap still has (4,1). Pop it: Task 1, proc=4. CPU runs Task 1 from t=6 to t=10.'
+  },
+  {
+    id:10, phase:'execute', phaseLabel:'EXECUTE', phaseClass:'phase-execute', activeLine:8,
+    time:6, j:4, result:[0,2,3],
+    taskStatus:['done','running','done','done'],
+    heap:[], timeline:['T0','T0','T2','T2','T3','T1','T1','T1','T1'],
+    title:'t=6: Pop heap → Execute Task 1 (proc=4)',
+    text:'Pop: (proc=4, orig_idx=1). Task 1 finally runs. It had to wait for Tasks 2 and 3 to execute because both had shorter processing times. CPU runs from t=6 to t=10. current_time = 6+4 = 10.'
+  },
+  {
+    id:11, phase:'result', phaseLabel:'COMPLETE', phaseClass:'phase-result', activeLine:10,
+    time:10, j:4, result:[0,2,3,1],
+    taskStatus:['done','done','done','done'],
+    heap:[], timeline:['T0','T0','T2','T2','T3','T1','T1','T1','T1'],
+    title:'All done! Output = [0, 2, 3, 1]',
+    text:'All 4 tasks executed. Timeline: Task 0 (t=1→3), Task 2 (t=3→5), Task 3 (t=5→6), Task 1 (t=6→10). Shortest-Job-First correctly prioritized Tasks 2 and 3 over Task 1, even though Task 1 arrived before them.'
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+const TASK_LABELS = ['T0','T1','T2','T3'];
+const TASK_COLORS_FOR_TL = {
+  'T0': 'tl-done',
+  'T1': 'tl-done',
+  'T2': 'tl-done',
+  'T3': 'tl-done'
+};
+
+function buildDom() {
+  // Build task table rows
+  const grid = document.getElementById('task-grid');
+  TASKS.forEach((t, i) => {
+    [i, t[0], t[1], '⏳ waiting'].forEach((val, ci) => {
+      const d = document.createElement('div');
+      d.className = 'tgd';
+      d.id = `tg-${i}-${ci}`;
+      d.textContent = val;
+      grid.appendChild(d);
+    });
+  });
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function render() {
+  const step = steps[current];
+
+  // ── Task table ──
+  const statusLabels = {
+    waiting: '⏳ waiting',
+    available: '🔵 in heap',
+    running: '⚡ running',
+    done: '✓ done'
+  };
+  step.taskStatus.forEach((status, i) => {
+    [0,1,2,3].forEach(ci => {
+      const cell = document.getElementById(`tg-${i}-${ci}`);
+      if (!cell) return;
+      cell.className = 'tgd';
+      if (status === 'running') cell.classList.add('tg-active');
+      else if (status === 'done') cell.classList.add('tg-done');
+      else if (status === 'available') cell.classList.add('tg-available');
+    });
+    const sc = document.getElementById(`tg-${i}-3`);
+    if (sc) sc.textContent = statusLabels[status] || status;
+  });
+
+  // ── Heap ──
+  const heapRow = document.getElementById('heap-row');
+  heapRow.innerHTML = '';
+  if (step.heap.length === 0) {
+    heapRow.innerHTML = '<span class="heap-empty-msg">empty</span>';
+  } else {
+    step.heap.forEach((entry, idx) => {
+      const node = document.createElement('div');
+      node.className = 'heap-node ' + (idx === 0 ? 'hn-top' : 'hn-rest');
+      node.innerHTML = `
+        <div class="heap-node-lbl">${idx === 0 ? '▶ MIN' : `[${idx}]`}</div>
+        <div class="heap-node-val">(proc=${entry.proc}, idx=${entry.idx})</div>
+      `;
+      heapRow.appendChild(node);
+    });
+  }
+
+  // ── Timeline ──
+  const tlCells = document.getElementById('tl-cells');
+  const tlIdx = document.getElementById('tl-idx');
+  tlCells.innerHTML = '';
+  tlIdx.innerHTML = '';
+
+  if (step.timeline.length > 0) {
+    step.timeline.forEach((lbl, t) => {
+      const cell = document.createElement('div');
+      cell.className = 'tl-cell ' + (step.phase === 'result' ? 'tl-done' : (t === step.timeline.length - 1 && step.taskStatus.includes('running') ? 'tl-run' : 'tl-done'));
+      cell.textContent = lbl;
+      tlCells.appendChild(cell);
+
+      const ix = document.createElement('div');
+      ix.className = 'tl-idx';
+      ix.textContent = t + 1;
+      tlIdx.appendChild(ix);
+    });
+  }
+
+  // ── Code panel ──
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  const prev = current > 0 ? steps[current - 1] : null;
+  document.getElementById('vv-time').textContent = step.time;
+  document.getElementById('vv-j').textContent = step.j;
+  document.getElementById('vv-result').textContent = '[' + step.result.join(',') + ']';
+  document.getElementById('vb-time').classList.toggle('changed', !!prev && prev.time !== step.time);
+  document.getElementById('vb-j').classList.toggle('changed', !!prev && prev.j !== step.j);
+  document.getElementById('vb-result').classList.toggle('changed', !!prev && JSON.stringify(prev.result) !== JSON.stringify(step.result));
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

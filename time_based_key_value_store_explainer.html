@@ -1,231 +1,1037 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Time Based Key-Value Store – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#981 · Time Based Key-Value Store</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.blue-panel{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.blue-panel .panel-title{color:var(--blue-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Architecture Diagram */
+.arch-diagram{display:flex;flex-direction:column;gap:12px;margin:1rem 0}
+.arch-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.arch-box{padding:10px 16px;border-radius:var(--radius);font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:center;min-width:120px}
+.arch-store{background:var(--blue-bg);border:1.5px solid var(--blue-border);color:var(--blue-text)}
+.arch-list{background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green-text)}
+.arch-bs{background:var(--purple-bg);border:1.5px solid var(--purple-border);color:var(--purple-text)}
+.arch-arrow{font-size:16px;color:var(--text3)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.store-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+
+/* KV store display */
+.kv-store{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.kv-row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--radius);padding:10px 14px;border:1px solid var(--border)}
+.kv-key{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue-mid);min-width:60px;flex-shrink:0}
+.kv-arrow{color:var(--text3);font-size:12px;flex-shrink:0}
+.kv-pairs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kv-pair{display:flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:8px;border:2px solid var(--border2);background:var(--bg2);min-width:60px;transition:background 0.3s,border-color 0.3s}
+.kv-pair.active{background:var(--amber-bg);border-color:var(--amber-border)}
+.kv-pair.found{background:var(--green-bg);border-color:var(--green-border)}
+.kv-ts{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:2px}
+.kv-ts.active-ts{color:var(--amber-mid)}
+.kv-ts.found-ts{color:var(--green-mid)}
+.kv-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
+.kv-val.active-val{color:var(--amber-text)}
+.kv-val.found-val{color:var(--green-text)}
+
+/* Binary search strip */
+.bs-strip-section{margin-top:1.5rem}
+.bs-strip-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.bs-strip{display:flex;gap:6px;flex-wrap:wrap}
+.bs-cell{display:flex;flex-direction:column;align-items:center;width:60px;padding:8px 6px;border-radius:8px;border:2px solid var(--border2);background:var(--surface);transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.bs-cell.lo{background:var(--blue-bg);border-color:var(--blue-border)}
+.bs-cell.hi{background:var(--purple-bg);border-color:var(--purple-border)}
+.bs-cell.mid{background:var(--amber-bg);border-color:var(--amber-border)}
+.bs-cell.found{background:var(--green-bg);border-color:var(--green-border)}
+.bs-cell.eliminated{background:var(--bg2);border-color:var(--border);opacity:0.45}
+.bs-cell-ts{font-size:9px;color:var(--text3);margin-bottom:2px}
+.bs-cell-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)}
+.bs-ptr-row{display:flex;gap:6px;margin-bottom:4px}
+.bs-ptr-slot{width:60px;display:flex;justify-content:center;gap:3px;flex-wrap:wrap}
+.bs-ptr-lbl{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;line-height:1.3}
+.ptr-lo{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-hi{background:var(--purple-bg);color:var(--purple-mid)}
+.ptr-mid{background:var(--amber-bg);color:var(--amber-mid)}
+
+/* Operation panel */
+.op-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-top:1rem;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.op-type{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0}
+.op-set{background:var(--blue-bg);color:var(--blue-mid)}
+.op-get{background:var(--purple-bg);color:var(--purple-mid)}
+.op-detail{font-family:var(--mono);font-size:12px;color:var(--text2);flex:1}
+.op-result{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green-mid)}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-set{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-get{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-set{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-lo{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-hi{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-mid{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+.sw-elim{background:var(--bg2);border-color:var(--border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Time Based Key-Value Store</h1>
-    <p class="subtitle">LeetCode #981 — Data Structure Design · Hash Map + Binary Search</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Design</span>
-      <span class="tag tag-complexity">Varies by design Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Data Structure Design</strong> using the <strong>Hash Map + Binary Search</strong> technique.</p>
-      <p>Pattern category: <strong>Design</strong>. Apply when: <em>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Combine data structures to achieve target complexities. LRU = hash map + doubly linked list for O(1) get/put.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #981</div>
+  <h1>Time Based Key-Value Store</h1>
+  <p class="subtitle">Design a data structure that stores key-value pairs with timestamps, and retrieves the value with the largest timestamp that is less than or equal to a given timestamp.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Hash Map + Binary Search</span>
+    <span class="tag tag-complexity">set: O(1)</span>
+    <span class="tag tag-complexity">get: O(log n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Hash Map + Binary Search</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Identify all required operations and their target complexities</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Choose primary data structure for main storage</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Add auxiliary structure(s) to speed up slow operations</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Implement each operation using both structures</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Keep structures in sync on every mutation</span></div>
-      </div>
-    </div>
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>Imagine a <strong>versioned dictionary</strong>. The same key can hold different values at different points in time. You store ("color", "red", t=1) and ("color", "blue", t=3). Now if someone queries "what was color at t=2?", the answer is "red" — the most recent value <em>at or before</em> t=2.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The problem guarantees that <strong>all <code>set()</code> calls have strictly increasing timestamps</strong>. This single constraint is the unlock: for each key, the stored list of <code>(timestamp, value)</code> pairs is <em>always sorted by timestamp</em>. We never need to sort — and we can binary search directly.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Data structure design: identify all operations needed, their frequency, target complexity. Choose structures accordingly.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">set() — Append Only</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          set("foo","a",1)<br>
+          set("foo","b",3)<br>
+          set("foo","c",5)<br>
+          → store["foo"] = [(1,"a"),(3,"b"),(5,"c")]
+        </p>
+      </div>
+      <div class="panel-box blue-panel">
+        <div class="panel-title">get() — Floor Binary Search</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--blue-text);line-height:1.9">
+          get("foo",4) → "b"  (ts=3 ≤ 4)<br>
+          get("foo",2) → "a"  (ts=1 ≤ 2)<br>
+          get("foo",6) → "c"  (ts=5 ≤ 6)<br>
+          get("foo",0) → ""   (none ≤ 0)
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> Query before any stored timestamp → return <code>""</code>. Key not in store → return <code>""</code>. Query exactly matching a stored timestamp → return that exact value. Different keys are fully independent.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">class LRUCache:</div><div class="code-line">    def __init__(self, capacity):</div><div class="code-line">        from collections import OrderedDict</div><div class="code-line">        self.cap, self.cache = capacity, OrderedDict()</div><div class="code-line"></div><div class="code-line">    def get(self, key):</div><div class="code-line">        if key not in self.cache: return -1</div><div class="code-line">        self.cache.move_to_end(key)</div><div class="code-line">        return self.cache[key]</div><div class="code-line"></div><div class="code-line">    def put(self, key, value):</div><div class="code-line">        if key in self.cache: self.cache.move_to_end(key)</div><div class="code-line">        self.cache[key] = value</div><div class="code-line">        if len(self.cache) > self.cap: self.cache.popitem(last=False)</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: Varies by design &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Hash Map + Binary Search</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
+    <div class="arch-diagram">
+      <div class="arch-row">
+        <div class="arch-box arch-store">dict (hash map)</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box arch-list">key → [(ts₁,v₁),(ts₂,v₂),...] always sorted</div>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Design problem using Hash Map + Binary Search. I'll identify all required operations and their target complexities then choose primary data structure for main storage. Time: Varies by design, Space: O(n)."</div>
+      <div class="arch-row">
+        <div class="arch-box arch-bs">get(key, t)</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box arch-list">binary search: floor of t in timestamps</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box arch-store">value or ""</div>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Data structure choice:</strong> A <code>dict</code> mapping each key to a list of <code>(timestamp, value)</code> tuples. The list is always sorted by timestamp because the problem guarantees strictly increasing timestamps per key on every <code>set()</code> call.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>set(key, value, timestamp):</strong> Simply append <code>(timestamp, value)</code> to <code>store[key]</code>. O(1) amortized. No sorting needed — the guarantee does the work for us.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>get(key, timestamp):</strong> We need the <em>largest</em> stored timestamp that is ≤ the query. This is a classic "floor search" — binary search the timestamps list with <code>bisect_right(timestamps, query) - 1</code>. The result index is the answer, or -1 if none qualifies.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return:</strong> If <code>idx ≥ 0</code>, return <code>pairs[idx][1]</code> (the value). Otherwise return <code>""</code>. The <code>idx &lt; 0</code> case handles queries before all stored timestamps.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Design — Hash Map + Binary Search</div>
-        <div class="takeaway">✓ Combine data structures to achieve target complexities</div>
-        <div class="takeaway">✓ Time: Varies by design | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Logger Rate Limiter</strong> (Easy) — Hash Map Timestamp</li>
-<li><strong>Implement Queue using Stacks</strong> (Easy) — Two Stacks</li>
-<li><strong>Implement Stack using Queues</strong> (Easy) — One Queue, Rotate</li>
-<li><strong>Design Circular Queue</strong> (Medium) — Array with Head/Tail</li>
-<li><strong>Design Circular Deque</strong> (Medium) — Array + Modulo</li>
-<li><strong>Design Hit Counter</strong> (Medium) — Circular Buffer</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The bisect_right - 1 Pattern</div>
+      <p><code>bisect_right(arr, x)</code> returns the index where <code>x</code> would be inserted <em>after</em> any existing equal elements. So <code>bisect_right(arr, x) - 1</code> gives the index of the rightmost element ≤ x — exactly the "floor" we need. If the result is 0, <code>0 - 1 = -1</code>, correctly signaling no valid entry.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[1,3,5,7,9,11,13],lo:0,hi:6,mid:3,target:7,msg:"lo=0,hi=6,mid=3 → arr[3]=7",phase:"INIT"},
-  {arr:[1,3,5,7,9,11,13],lo:0,hi:6,mid:3,target:7,msg:"arr[3]=7 == target → FOUND!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>For any key <code>k</code>, <code>store[k]</code> is a list of <code>(timestamp, value)</code> tuples in <strong>strictly increasing order by timestamp</strong>. This holds because: (1) the problem guarantees timestamps are non-decreasing on each <code>set()</code> call, and (2) we only ever append. Appending a larger value to an already-sorted list keeps it sorted.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why binary search is correct:</strong> Binary search requires a sorted sequence. The invariant above provides exactly that. <code>bisect_right(timestamps, query) - 1</code> computes the floor in O(log n) — this works because the sorted order is guaranteed, not constructed.</p>
+
+    <p style="margin-top:0.75rem"><strong>Proof of correctness for the edge case idx = -1:</strong> <code>bisect_right(arr, x)</code> returns 0 when all elements of <code>arr</code> are > x (the insertion point is before the start). Subtracting 1 gives -1. Our code checks <code>if idx &lt; 0: return ""</code> — this handles "query is before all stored timestamps" correctly.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Using bisect_left for floor search</div>
+      <p>Both <code>bisect_left</code> and <code>bisect_right</code> work here, but they differ on exact matches. <code>bisect_right(arr, x) - 1</code> gives index of rightmost element ≤ x. <code>bisect_left(arr, x) - 1</code> gives index of rightmost element <em>strictly less than</em> x — wrong for exact matches. Prefer <code>bisect_right</code> for floor queries.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Walk-through of get("foo", 4) with pairs=[(1,"a"),(3,"b"),(5,"c")]:</strong> timestamps=[1,3,5]. bisect_right([1,3,5], 4) = 2 (4 would go at index 2). idx = 2-1 = 1. pairs[1] = (3, "b"). Return "b". Correct — 3 is the largest timestamp ≤ 4.</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Hash Map + Binary Search (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from bisect import bisect_right</span><span class="aann">← stdlib; O(log n) floor search</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class TimeMap:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.store = {}              </span><span class="aann">← key → [(ts, val), ...] always sorted by ts</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def set(self, key, value, timestamp):   </span><span class="aann">← O(1) amortized</span></div>
+<div class="ann-line"><span class="acode">        if key not in self.store:</span></div>
+<div class="ann-line"><span class="acode">            self.store[key] = []     </span><span class="aann">← first write for this key</span></div>
+<div class="ann-line"><span class="acode">        self.store[key].append((timestamp, value))  </span><span class="aann">← guaranteed increasing ts → always sorted</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def get(self, key, timestamp):   </span><span class="aann">← O(log n)</span></div>
+<div class="ann-line"><span class="acode">        pairs = self.store.get(key, [])      </span><span class="aann">← [] if key never set</span></div>
+<div class="ann-line"><span class="acode">        if not pairs: return ""      </span><span class="aann">← key missing → empty</span></div>
+<div class="ann-line"><span class="acode">        ts_list = [ts for ts, _ in pairs]   </span><span class="aann">← extract timestamps for bisect</span></div>
+<div class="ann-line"><span class="acode">        idx = bisect_right(ts_list, timestamp) - 1  </span><span class="aann">← floor index</span></div>
+<div class="ann-line"><span class="acode">        return pairs[idx][1] if idx &gt;= 0 else ""   </span><span class="aann">← idx=-1 means no ts ≤ query</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ O(n) Extraction on Every get()</div>
+      <p>The list comprehension <code>[ts for ts, _ in pairs]</code> is O(n) per call. For LeetCode constraints this is acceptable. In production, use two separate parallel lists per key — one for timestamps, one for values — so <code>get()</code> can binary search directly without extraction.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Production-Grade Variant (Parallel Lists, Recommended)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class TimeMap:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.ts   = {}  </span><span class="aann">← key → [t₁, t₂, ...] sorted timestamps</span></div>
+<div class="ann-line"><span class="acode">        self.vals = {}  </span><span class="aann">← key → [v₁, v₂, ...] parallel values</span></div>
+<div class="ann-line"><span class="acode">    def set(self, key, value, timestamp):</span></div>
+<div class="ann-line"><span class="acode">        self.ts.setdefault(key, []).append(timestamp)</span></div>
+<div class="ann-line"><span class="acode">        self.vals.setdefault(key, []).append(value)</span></div>
+<div class="ann-line"><span class="acode">    def get(self, key, timestamp):</span></div>
+<div class="ann-line"><span class="acode">        if key not in self.ts: return ""</span></div>
+<div class="ann-line"><span class="acode">        idx = bisect_right(self.ts[key], timestamp) - 1  </span><span class="aann">← O(log n), no extraction</span></div>
+<div class="ann-line"><span class="acode">        return self.vals[key][idx] if idx &gt;= 0 else ""</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force Linear Scan</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">    def get(self, key, timestamp):         </span><span class="aann">← O(n) scan</span></div>
+<div class="ann-line"><span class="acode">        best = ""</span></div>
+<div class="ann-line"><span class="acode">        for ts, val in self.store.get(key, []):</span></div>
+<div class="ann-line"><span class="acode">            if ts &lt;= timestamp: best = val </span><span class="aann">← last valid overwrite; list is sorted so this is correct</span></div>
+<div class="ann-line"><span class="acode">            else: break                    </span><span class="aann">← sorted order: first ts > query means we're done</span></div>
+<div class="ann-line"><span class="acode">        return best</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>set():</strong> O(1) amortized — append to list<br>
+        <strong>get() optimal:</strong> O(log n) — binary search, n = entries for that key<br>
+        <strong>get() brute:</strong> O(n) — linear scan; acceptable for small n<br>
+        <strong>Space:</strong> O(N) total — one entry per set() call across all keys
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Mine the Constraints</div>
+        <p style="font-size:14px;color:var(--text)">The line <em>"All the timestamps of set are strictly increasing"</em> is the key. It means: the list stays sorted automatically. Without this, you'd need O(log n) inserts with bisect.insort or a SortedList. Always quote constraints back to the interviewer to show you noticed them.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Decompose into Two Dimensions</div>
+        <p style="font-size:14px;color:var(--text)">The problem has two axes: <em>which key</em> and <em>which timestamp</em>. Key lookup → hash map (O(1)). Timestamp floor query → sorted array + binary search (O(log n)). Nesting these gives the solution: <code>dict[key] → sorted list of (ts, val)</code>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Nail the Binary Search Variant</div>
+        <p style="font-size:14px;color:var(--text)">"Largest timestamp ≤ query" is a <strong>floor search</strong>. The pattern is: <code>bisect_right(arr, x) - 1</code>. Memorize: bisect_right gives insertion point after any equal elements → subtract 1 for floor. Edge case: result is -1 when all elements exceed the query.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Walk Through Edge Cases Proactively</div>
+        <p style="font-size:14px;color:var(--text)">Before coding: "Three edge cases I want to handle: (1) key never set → return '', (2) query timestamp before all stored values → idx = -1, return '', (3) exact timestamp match → bisect_right correctly returns the match." Say this out loud — it signals thoroughness.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll design this with a dictionary mapping each key to a sorted list of (timestamp, value) pairs.<br>
+set() just appends — O(1) — because the problem guarantees timestamps are strictly increasing, so the list stays sorted automatically.<br>
+get() needs the largest timestamp ≤ query. Since the list is sorted, I binary search with bisect_right(timestamps, query) - 1 to get the floor index. If that index is negative, no valid entry exists and I return empty string.<br>
+set: O(1) amortized. get: O(log n). Space: O(N) for N total insertions.<br>
+For an even cleaner production version, I'd keep timestamps and values in separate parallel lists to avoid extracting timestamps on every get()."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if timestamps aren't guaranteed increasing?"</strong> → Use <code>bisect.insort</code> for O(n) insert, or a SortedList for O(log n) insert + O(log n) search.</li>
+        <li><strong>"How to support delete?"</strong> → Soft delete: append a sentinel value (None or tombstone). Hard delete: O(n) reconstruction.</li>
+        <li><strong>"How to get all values in a time range [t1, t2]?"</strong> → Two bisect calls: left = bisect_left(ts, t1), right = bisect_right(ts, t2). Slice pairs[left:right].</li>
+        <li><strong>"Scale this to millions of keys?"</strong> → Shard by key hash. Each shard is an independent TimeMap instance.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:1rem">
+      Sequence: <code>set("foo","a",1)</code> · <code>set("foo","b",3)</code> · <code>set("foo","c",5)</code> ·
+      <code>get("foo",4)</code> · <code>get("foo",2)</code> · <code>get("foo",6)</code> · <code>get("foo",0)</code>
+    </p>
+
+    <div class="viz-area">
+      <!-- KV Store -->
+      <div class="store-label">store["foo"] — sorted list of (timestamp, value) pairs</div>
+      <div class="kv-store">
+        <div class="kv-row">
+          <div class="kv-key">"foo"</div>
+          <div class="kv-arrow">→</div>
+          <div class="kv-pairs" id="kv-pairs">
+            <em style="color:var(--text3);font-size:13px">(empty)</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Binary Search strip (hidden during set) -->
+      <div id="bs-section" style="display:none">
+        <div class="bs-strip-label" id="bs-label">Binary Search · query timestamp = ?</div>
+        <div class="bs-ptr-row" id="bs-ptrs"></div>
+        <div class="bs-strip" id="bs-strip"></div>
+      </div>
+
+      <!-- Operation panel -->
+      <div class="op-panel">
+        <div class="op-type" id="op-type">—</div>
+        <div class="op-detail" id="op-detail">Ready</div>
+        <div class="op-result" id="op-result"></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-lo">
+          <span class="var-name">lo</span>
+          <span class="var-val" id="vv-lo">—</span>
+        </div>
+        <div class="var-box" id="vb-hi">
+          <span class="var-name">hi</span>
+          <span class="var-val" id="vv-hi">—</span>
+        </div>
+        <div class="var-box" id="vb-mid">
+          <span class="var-name">mid</span>
+          <span class="var-val" id="vv-mid">—</span>
+        </div>
+        <div class="var-box" id="vb-idx">
+          <span class="var-name">idx (hi)</span>
+          <span class="var-val" id="vv-idx">—</span>
+        </div>
+        <div class="var-box" id="vb-ans">
+          <span class="var-name">return</span>
+          <span class="var-val" id="vv-ans">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def set(self, key, value, timestamp):</div>
+      <div class="code-line" id="cl-1">    self.store[key].append((timestamp, value))</div>
+      <div class="code-line" id="cl-2">def get(self, key, timestamp):</div>
+      <div class="code-line" id="cl-3">    pairs = self.store.get(key, [])</div>
+      <div class="code-line" id="cl-4">    ts_list = [ts for ts, _ in pairs]</div>
+      <div class="code-line" id="cl-5">    lo, hi = 0, len(ts_list) - 1</div>
+      <div class="code-line" id="cl-6">    while lo &lt;= hi:</div>
+      <div class="code-line" id="cl-7">        mid = (lo + hi) // 2</div>
+      <div class="code-line" id="cl-8">        if ts_list[mid] &lt;= timestamp:  # valid floor candidate</div>
+      <div class="code-line" id="cl-9">            lo = mid + 1             # might be a better one on right</div>
+      <div class="code-line" id="cl-10">        else:</div>
+      <div class="code-line" id="cl-11">            hi = mid - 1             # too large, search left</div>
+      <div class="code-line" id="cl-12">    return pairs[hi][1] if hi &gt;= 0 else ""</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 20</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use ← → arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-set"></div> Newly appended</div>
+      <div class="legend-item"><div class="legend-swatch sw-lo"></div> lo pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-hi"></div> hi pointer</div>
+      <div class="legend-item"><div class="legend-swatch sw-mid"></div> mid (being checked)</div>
+      <div class="legend-item"><div class="legend-swatch sw-found"></div> Floor (answer)</div>
+      <div class="legend-item"><div class="legend-swatch sw-elim"></div> Eliminated</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Strictly increasing timestamps = list is always sorted = binary search for free</div>
+      <div class="takeaway">Two orthogonal lookups (key → hash map, timestamp → binary search) compose naturally</div>
+      <div class="takeaway"><code>bisect_right(arr, x) - 1</code> is the canonical floor-search idiom</div>
+      <div class="takeaway">Always check <code>idx &ge; 0</code> before accessing the list — idx = -1 means no valid entry</div>
+      <div class="takeaway">Use parallel timestamp/value lists in production to avoid O(n) extraction on each get()</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>set()</th><th>get()</th><th>Space</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Linear Scan (Brute Force)</td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-bad">O(n)</td>
+          <td>O(N)</td>
+        </tr>
+        <tr>
+          <td><strong>Hash Map + Binary Search ✓</strong></td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-good">O(log n)</td>
+          <td>O(N)</td>
+        </tr>
+        <tr>
+          <td>SortedList (unsorted input)</td>
+          <td class="mark-bad">O(log n)</td>
+          <td class="mark-good">O(log n)</td>
+          <td>O(N)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--text3);margin-top:0.25rem">n = entries for one key; N = total set() calls</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Hash Map + Binary Search</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Multiple values per key, find value at a given index/time" → sorted list + binary search</li>
+        <li>"Data arrives sorted, floor/ceiling query needed" → append + bisect</li>
+        <li>Design problems with two independent lookup dimensions → nest data structures</li>
+        <li>Constraint says "timestamps are strictly increasing" → never sort; binary search directly</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Hash Map + Binary Search)</div>
+      <div class="related-item"><strong>Snapshot Array</strong><span class="related-diff diff-med">Medium</span> — Per-index snapshot list; binary search by snap_id (#1146) — almost identical design</div>
+      <div class="related-item"><strong>My Calendar I</strong><span class="related-diff diff-med">Medium</span> — Store intervals in sorted list; bisect to find conflicts (#729)</div>
+      <div class="related-item"><strong>My Calendar II</strong><span class="related-diff diff-med">Medium</span> — Sorted events; bisect to detect double-bookings (#731)</div>
+      <div class="related-item"><strong>Stock Price Fluctuation</strong><span class="related-diff diff-med">Medium</span> — Timestamped prices with min/max queries; sorted container (#2034)</div>
+      <div class="related-item"><strong>Range Module</strong><span class="related-diff diff-hard">Hard</span> — Sorted interval list; bisect for overlap detection and merging (#715)</div>
+      <div class="related-item"><strong>Design Browser History</strong><span class="related-diff diff-med">Medium</span> — List with a pointer; navigate back/forward in O(1) (#1472)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>Pattern: <strong>Design</strong> · Sub-Pattern: <strong>Hash Map + Binary Search</strong><br>
+      Floor binary search idiom: <code>bisect_right(arr, x) - 1</code></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Values for each entry in the store
+const VALS = {1:'a', 3:'b', 5:'c'};
+
+const steps = [
+  // 0 — Init
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:-1,
+    store:[], showBS:false,
+    opType:'', opClass:'', opDetail:'store is empty — ready to start', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'Welcome: Time-Based Key-Value Store',
+    text:'We will run 7 operations: three set() calls that build store["foo"], then four get() calls that use binary search to find the floor timestamp.'
+  },
+  // 1 — set("foo","a",1) call
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:0,
+    store:[], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'set("foo", "a", 1)', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'set("foo", "a", 1)',
+    text:'We call set("foo", "a", 1). This appends (timestamp=1, value="a") to store["foo"]. Because timestamps are guaranteed to be strictly increasing, the list stays sorted automatically — no sorting step needed.'
+  },
+  // 2 — after set 1
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:1,
+    store:[{ts:1, val:'a', state:'active'}], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'store["foo"].append((1, "a"))', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'Appended (1, "a") — store["foo"] = [(1,"a")]',
+    text:'(1, "a") is now in the store. The list has one sorted entry. Timestamps list = [1].'
+  },
+  // 3 — set("foo","b",3) call
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:0,
+    store:[{ts:1,val:'a',state:'normal'}], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'set("foo", "b", 3)', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'set("foo", "b", 3)',
+    text:'Second set() call. timestamp=3 > 1, so appending to the list preserves sorted order. We append (3, "b").'
+  },
+  // 4 — after set 2
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:1,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'active'}], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'store["foo"].append((3, "b"))', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'Appended (3, "b") — store["foo"] = [(1,"a"),(3,"b")]',
+    text:'Two entries, timestamps [1, 3]. Still sorted. Appending maintained the invariant — no extra work needed.'
+  },
+  // 5 — set("foo","c",5) call
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:0,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'}], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'set("foo", "c", 5)', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'set("foo", "c", 5)',
+    text:'Third set() call. timestamp=5 > 3. Appending (5, "c") gives us three entries in sorted order. The store is now fully built.'
+  },
+  // 6 — after set 3
+  {
+    phase:'set', phaseLabel:'SET', phaseClass:'phase-set', activeLine:1,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'active'}], showBS:false,
+    opType:'set', opClass:'op-set', opDetail:'store["foo"].append((5, "c"))', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'Appended (5, "c") — store["foo"] = [(1,"a"),(3,"b"),(5,"c")]',
+    text:'All three entries stored! Timestamps = [1, 3, 5]. Now we answer get() queries by binary searching this sorted list.'
+  },
+  // 7 — get("foo", 4): start
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:2,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:false,
+    opType:'get', opClass:'op-get', opDetail:'get("foo", 4) — find largest ts ≤ 4', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'get("foo", 4) — Start Binary Search',
+    text:'Query: largest timestamp ≤ 4. From [1,3,5]: 1 ≤ 4 ✓, 3 ≤ 4 ✓, 5 > 4 ✗. We expect timestamp=3 → "b". Binary search will confirm this in O(log 3) steps.'
+  },
+  // 8 — init BS for get(foo,4)
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:5,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:0, bsHi:2, bsMid:-1,
+    bsStates:['normal','normal','normal'],
+    opType:'get', opClass:'op-get', opDetail:'lo=0, hi=2 (len-1), query=4', opResult:'',
+    lo:'0', hi:'2', mid:'—', idx:'—', ans:'—', changed:['lo','hi'],
+    title:'Initialize: lo=0, hi=2',
+    text:'lo=0 (first index), hi=2 (last index). We will shrink the search window until lo > hi, at which point hi holds the floor index.'
+  },
+  // 9 — compute mid=1
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:7,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:0, bsHi:2, bsMid:1,
+    bsStates:['normal','mid','normal'],
+    opType:'get', opClass:'op-get', opDetail:'mid = (0+2)//2 = 1 → ts[1]=3', opResult:'',
+    lo:'0', hi:'2', mid:'1', idx:'—', ans:'—', changed:['mid'],
+    title:'mid = 1, timestamps[1] = 3',
+    text:'mid = (0+2)//2 = 1. timestamps[1] = 3. Is 3 ≤ 4? Yes! This is a valid floor candidate. But there might be a larger valid timestamp to the right, so we move lo to mid+1=2.'
+  },
+  // 10 — ts[mid] ≤ query → lo = mid+1
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:9,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:2, bsHi:2, bsMid:1,
+    bsStates:['eliminated','normal','normal'],
+    opType:'get', opClass:'op-get', opDetail:'ts[1]=3 ≤ 4 ✓ → lo = mid+1 = 2', opResult:'',
+    lo:'2', hi:'2', mid:'1', idx:'—', ans:'—', changed:['lo'],
+    title:'3 ≤ 4 → lo = 2 (search right half for better floor)',
+    text:'3 is a valid floor, but 5 might also be ≤ 4. Move lo to 2 to check. Left half (index 0) is eliminated — we already found a better candidate at index 1.'
+  },
+  // 11 — compute mid=2
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:7,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:2, bsHi:2, bsMid:2,
+    bsStates:['eliminated','normal','mid'],
+    opType:'get', opClass:'op-get', opDetail:'mid = (2+2)//2 = 2 → ts[2]=5', opResult:'',
+    lo:'2', hi:'2', mid:'2', idx:'—', ans:'—', changed:['mid'],
+    title:'mid = 2, timestamps[2] = 5',
+    text:'lo=hi=2, so mid=2. timestamps[2] = 5. Is 5 ≤ 4? No! 5 > 4, so index 2 is NOT a valid floor. Move hi to mid-1=1.'
+  },
+  // 12 — ts[mid] > query → hi = mid-1 → loop ends
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:11,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:2, bsHi:1, bsMid:2,
+    bsStates:['eliminated','normal','eliminated'],
+    opType:'get', opClass:'op-get', opDetail:'ts[2]=5 > 4 ✗ → hi = mid-1 = 1', opResult:'',
+    lo:'2', hi:'1', mid:'2', idx:'—', ans:'—', changed:['hi'],
+    title:'5 > 4 → hi = 1 (loop exits: lo=2 > hi=1)',
+    text:'hi=1, lo=2. Since lo > hi, the while loop exits. hi=1 is our answer index — it points to the floor element we found during the search.'
+  },
+  // 13 — result for get(foo,4)
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:12,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'found'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:4, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:2, bsHi:1, bsMid:2,
+    bsStates:['eliminated','found','eliminated'],
+    opType:'get', opClass:'op-get', opDetail:'hi=1 ≥ 0 → return pairs[1][1] = "b"', opResult:'"b"',
+    lo:'2', hi:'1', mid:'2', idx:'1', ans:'"b"', changed:['idx','ans'],
+    title:'get("foo", 4) → "b" ✓',
+    text:'hi=1 ≥ 0, so return pairs[1][1] = "b". pairs[1] = (3, "b") — timestamp 3 is the largest timestamp ≤ 4. Correct!'
+  },
+  // 14 — get("foo",2): start
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:2,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:false,
+    opType:'get', opClass:'op-get', opDetail:'get("foo", 2) — find largest ts ≤ 2', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'get("foo", 2) — New Query',
+    text:'Query: largest timestamp ≤ 2. From [1,3,5]: only ts=1 qualifies (1≤2; 3>2). Binary search will narrow to hi=0, returning "a". Watch how quickly it eliminates index 1 and 2.'
+  },
+  // 15 — result for get(foo,2) (collapsed for brevity — show final state)
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:12,
+    store:[{ts:1,val:'a',state:'found'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:2, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:1, bsHi:0, bsMid:0,
+    bsStates:['found','eliminated','eliminated'],
+    opType:'get', opClass:'op-get', opDetail:'binary search → hi=0 → pairs[0][1] = "a"', opResult:'"a"',
+    lo:'1', hi:'0', mid:'0', idx:'0', ans:'"a"', changed:['idx','ans'],
+    title:'get("foo", 2) → "a" ✓',
+    text:'Binary search: mid=1 → ts=3 > 2, so hi=0. mid=0 → ts=1 ≤ 2, so lo=1. lo>hi exits. hi=0 → pairs[0][1] = "a". Timestamp 1 is the largest ≤ 2.'
+  },
+  // 16 — get("foo",6): all ≤ query
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:2,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:false,
+    opType:'get', opClass:'op-get', opDetail:'get("foo", 6) — query exceeds all timestamps', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'get("foo", 6) — Query Beyond All Stored Timestamps',
+    text:'Query timestamp=6 is larger than all stored timestamps [1,3,5]. All are valid floors. Binary search will always move lo rightward, ending with hi=2 (the last index).'
+  },
+  // 17 — result for get(foo,6)
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:12,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'found'}],
+    showBS:true, bsQuery:6, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:3, bsHi:2, bsMid:2,
+    bsStates:['eliminated','eliminated','found'],
+    opType:'get', opClass:'op-get', opDetail:'binary search → hi=2 → pairs[2][1] = "c"', opResult:'"c"',
+    lo:'3', hi:'2', mid:'2', idx:'2', ans:'"c"', changed:['idx','ans'],
+    title:'get("foo", 6) → "c" ✓',
+    text:'hi=2 is the last valid index. ts=5 is the largest stored timestamp and 5 ≤ 6. Return "c". When the query exceeds all stored timestamps, the answer is always the most recent value.'
+  },
+  // 18 — get("foo",0): none qualify
+  {
+    phase:'get', phaseLabel:'GET', phaseClass:'phase-get', activeLine:2,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:false,
+    opType:'get', opClass:'op-get', opDetail:'get("foo", 0) — query before ALL timestamps', opResult:'',
+    lo:'—', hi:'—', mid:'—', idx:'—', ans:'—', changed:[],
+    title:'get("foo", 0) — Query Before All Timestamps',
+    text:'Query timestamp=0 is smaller than every stored timestamp [1,3,5]. No valid floor exists. Binary search will find that every element exceeds the query, ending with hi=-1.'
+  },
+  // 19 — result for get(foo,0): hi = -1 → return ""
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:12,
+    store:[{ts:1,val:'a',state:'normal'},{ts:3,val:'b',state:'normal'},{ts:5,val:'c',state:'normal'}],
+    showBS:true, bsQuery:0, bsTSList:[1,3,5], bsVals:['a','b','c'],
+    bsLo:0, bsHi:-1, bsMid:0,
+    bsStates:['eliminated','eliminated','eliminated'],
+    opType:'get', opClass:'op-get', opDetail:'binary search → hi=-1 → return ""', opResult:'""',
+    lo:'0', hi:'-1', mid:'0', idx:'-1', ans:'""', changed:['idx','ans'],
+    title:'get("foo", 0) → "" ✓',
+    text:'hi=-1 because every stored timestamp exceeded the query. The check "if hi >= 0" fails, so we return "". This is the critical edge case: always guard against hi < 0 before indexing.'
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function renderKV(store) {
+  const c = document.getElementById('kv-pairs');
+  if (!store || store.length === 0) {
+    c.innerHTML = '<em style="color:var(--text3);font-size:13px">(empty)</em>';
+    return;
+  }
+  c.innerHTML = '';
+  store.forEach(e => {
+    const p = document.createElement('div');
+    let pClass = 'kv-pair';
+    let tsClass = 'kv-ts';
+    let vClass = 'kv-val';
+    if (e.state === 'active') { pClass += ' active'; tsClass += ' active-ts'; vClass += ' active-val'; }
+    else if (e.state === 'found') { pClass += ' found'; tsClass += ' found-ts'; vClass += ' found-val'; }
+    p.className = pClass;
+    p.innerHTML = '<div class="' + tsClass + '">ts=' + e.ts + '</div><div class="' + vClass + '">"' + e.val + '"</div>';
+    c.appendChild(p);
+  });
+}
+
+function renderBS(s) {
+  const sec = document.getElementById('bs-section');
+  if (!s.showBS) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  document.getElementById('bs-label').textContent =
+    'Binary Search on timestamps=[1,3,5]  ·  query=' + s.bsQuery;
+
+  const ptrsRow = document.getElementById('bs-ptrs');
+  const strip   = document.getElementById('bs-strip');
+  ptrsRow.innerHTML = '';
+  strip.innerHTML   = '';
+
+  const ts  = s.bsTSList;
+  const vals = s.bsVals;
+  const states = s.bsStates || ts.map(() => 'normal');
+
+  ts.forEach((t, i) => {
+    // pointer slot
+    const slot = document.createElement('div');
+    slot.className = 'bs-ptr-slot';
+    const add = (cls, txt) => {
+      const lbl = document.createElement('span');
+      lbl.className = 'bs-ptr-lbl ' + cls;
+      lbl.textContent = txt;
+      slot.appendChild(lbl);
+    };
+    if (i === s.bsLo && s.bsLo >= 0 && s.bsLo < ts.length) add('ptr-lo', 'lo');
+    if (i === s.bsHi && s.bsHi >= 0 && s.bsHi < ts.length) add('ptr-hi', 'hi');
+    if (i === s.bsMid && s.bsMid >= 0) add('ptr-mid', 'mid');
+    ptrsRow.appendChild(slot);
+
+    // cell
+    const cell = document.createElement('div');
+    const st = states[i];
+    let cc = 'bs-cell';
+    if (st === 'mid') cc += ' mid';
+    else if (st === 'found') cc += ' found';
+    else if (st === 'eliminated') cc += ' eliminated';
+    else if (i === s.bsLo && s.bsLo >= 0) cc += ' lo';
+    else if (i === s.bsHi && s.bsHi >= 0) cc += ' hi';
+    cell.className = cc;
+    cell.innerHTML = '<div class="bs-cell-ts">ts=' + t + '</div><div class="bs-cell-val">"' + vals[i] + '"</div>';
+    strip.appendChild(cell);
+  });
+}
+
+function render() {
+  const s = steps[current];
+
+  renderKV(s.store);
+  renderBS(s);
+
+  // Operation panel
+  const opType = document.getElementById('op-type');
+  opType.className = 'op-type ' + (s.opClass || '');
+  opType.textContent = s.opType ? s.opType.toUpperCase() : '—';
+  document.getElementById('op-detail').textContent = s.opDetail || '';
+  const opRes = document.getElementById('op-result');
+  opRes.textContent = s.opResult || '';
+
+  // Code panel
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === s.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + s.phaseClass;
+  badge.textContent = s.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current+1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent  = s.text;
+
+  // Variable tracker
+  const varMap = {lo:s.lo, hi:s.hi, mid:s.mid, idx:s.idx, ans:s.ans};
+  const changed = s.changed || [];
+  Object.keys(varMap).forEach(n => {
+    const box = document.getElementById('vb-' + n);
+    const val = document.getElementById('vv-' + n);
+    if (box && val) {
+      val.textContent = varMap[n] !== undefined ? varMap[n] : '—';
+      box.classList.toggle('changed', changed.includes(n));
+    }
+  });
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('visited', i < current);
+    }
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const n = current + dir;
+  if (n < 0 || n >= steps.length) return;
+  current = n; render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

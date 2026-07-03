@@ -1,234 +1,877 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logger Rate Limiter – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#359 · Logger Rate Limiter</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+p{margin-bottom:0.75rem;font-size:14.5px}
+p:last-child{margin-bottom:0}
+ul{padding-left:1.4rem;margin:0.5rem 0}
+li{font-size:14px;margin-bottom:4px;color:var(--text2)}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:2px 6px;border-radius:4px}
+strong{color:var(--text)}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Design diagram ── */
+.design-diagram{display:flex;gap:1rem;margin:1rem 0;align-items:flex-start;flex-wrap:wrap}
+.design-box{flex:1;min-width:170px;padding:1rem;border-radius:var(--radius);border:2px solid;background:var(--surface)}
+.design-box.input-box{border-color:var(--blue-border);background:var(--blue-bg)}
+.design-box.storage-box{border-color:var(--purple-border);background:var(--purple-bg)}
+.design-box.output-box{border-color:var(--green-border);background:var(--green-bg)}
+.design-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.design-box.input-box .design-box-title{color:var(--blue-mid)}
+.design-box.storage-box .design-box-title{color:var(--purple-mid)}
+.design-box.output-box .design-box-title{color:var(--green-mid)}
+.design-arrow{display:flex;align-items:center;font-size:24px;color:var(--text3);align-self:center}
+
+/* ── Hash Map Display ── */
+.hashmap-display{display:flex;flex-direction:column;gap:6px;margin:1rem 0;min-height:80px}
+.hm-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);transition:background 0.3s,border-color 0.3s;font-family:var(--mono);font-size:13px}
+.hm-row.active-row{background:var(--amber-bg);border-color:var(--amber-border)}
+.hm-row.new-row{background:var(--blue-bg);border-color:var(--blue-border)}
+.hm-row.allow-row{background:var(--green-bg);border-color:var(--green-border)}
+.hm-row.deny-row{background:var(--red-bg);border-color:var(--red-border)}
+.hm-key{font-weight:600;color:var(--blue-mid);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-arrow{color:var(--text3);font-size:16px;flex-shrink:0}
+.hm-val{font-weight:700;color:var(--text);min-width:40px;text-align:right}
+
+/* ── Request Panel ── */
+.request-panel{display:flex;gap:12px;align-items:center;padding:14px 18px;background:var(--surface);border:2px solid var(--border2);border-radius:var(--radius);margin-bottom:1rem;flex-wrap:wrap}
+.req-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:80px}
+.req-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.req-value{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text)}
+.req-result-badge{padding:6px 14px;border-radius:20px;font-size:14px;font-weight:700;flex-shrink:0}
+.req-result-badge.allow{background:var(--green-bg);color:var(--green-mid);border:1.5px solid var(--green-border)}
+.req-result-badge.deny{background:var(--red-bg);color:var(--red-mid);border:1.5px solid var(--red-border)}
+.req-result-badge.pending{background:var(--bg2);color:var(--text3);border:1.5px solid var(--border)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-lookup{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-allow{background:var(--green-bg);color:var(--green-mid)}
+.phase-deny{background:var(--red-bg);color:var(--red-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-new{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-allow{background:var(--green-bg);border-color:var(--green-border)}
+.sw-deny{background:var(--red-bg);border-color:var(--red-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Logger Rate Limiter</h1>
-    <p class="subtitle">LeetCode #359 — Data Structure Design · Hash Map Timestamp</p>
-    <div class="tags">
-      <span class="tag tag-easy">Easy</span>
-      <span class="tag tag-pattern">Design</span>
-      <span class="tag tag-complexity">Varies by design Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Data Structure Design</strong> using the <strong>Hash Map Timestamp</strong> technique.</p>
-      <p>Pattern category: <strong>Design</strong>. Apply when: <em>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Combine data structures to achieve target complexities. LRU = hash map + doubly linked list for O(1) get/put.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #359</div>
+  <h1>Logger Rate Limiter</h1>
+  <p class="subtitle">Design a logger system that limits duplicate messages: a given message can only be printed at most once every 10 seconds.</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Hash Map Timestamp</span>
+    <span class="tag tag-complexity">Time: O(1)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Hash Map Timestamp</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Identify all required operations and their target complexities</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Choose primary data structure for main storage</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Add auxiliary structure(s) to speed up slow operations</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Implement each operation using both structures</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Keep structures in sync on every mutation</span></div>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You're building a <strong>rate-limiting system</strong> for a log printer. In production systems, the same error can fire thousands of times per second — flooding logs and making real issues invisible. The rule: a message can only be <em>printed</em> (return <code>True</code>) if it has never been printed before, or if at least <strong>10 seconds</strong> have passed since its last print.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Data structure design: identify all operations needed, their frequency, target complexity. Choose structures accordingly.</p>
-      </div>
-    </div>
-  </div>
+    <p>The class has two methods: <code>__init__()</code> to set up the data structure, and <code>shouldPrint(timestamp, message)</code> which returns <code>True</code> if the message should print now, or <code>False</code> to suppress it. Timestamps are given in seconds and increase monotonically.</p>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>For each unique message, we only need to remember <strong>one thing</strong>: the timestamp when it was last allowed through. A hash map from message → last_allowed_timestamp gives us an O(1) lookup to answer each query.</p>
     </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">class LRUCache:</div><div class="code-line">    def __init__(self, capacity):</div><div class="code-line">        from collections import OrderedDict</div><div class="code-line">        self.cap, self.cache = capacity, OrderedDict()</div><div class="code-line"></div><div class="code-line">    def get(self, key):</div><div class="code-line">        if key not in self.cache: return -1</div><div class="code-line">        self.cache.move_to_end(key)</div><div class="code-line">        return self.cache[key]</div><div class="code-line"></div><div class="code-line">    def put(self, key, value):</div><div class="code-line">        if key in self.cache: self.cache.move_to_end(key)</div><div class="code-line">        self.cache[key] = value</div><div class="code-line">        if len(self.cache) > self.cap: self.cache.popitem(last=False)</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: Varies by design &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
-  </div>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ shouldPrint Returns True</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          shouldPrint(1, "foo")<br>
+          → "foo" never seen → <strong>True</strong><br><br>
+          shouldPrint(11, "foo")<br>
+          → 11 - 1 = 10 ≥ 10 → <strong>True</strong>
+        </p>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Design problem using Hash Map Timestamp. I'll identify all required operations and their target complexities then choose primary data structure for main storage. Time: Varies by design, Space: O(n)."</div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ shouldPrint Returns False</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.9">
+          shouldPrint(3, "foo")<br>
+          → 3 - 1 = 2 &lt; 10 → <strong>False</strong><br><br>
+          shouldPrint(10, "foo")<br>
+          → 10 - 1 = 9 &lt; 10 → <strong>False</strong>
+        </p>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> Exactly 10 seconds apart (diff = 10) is <em>allowed</em> — the condition is ≥ 10 not > 10. Different messages are completely independent. An empty message string is a valid key. Repeated denied requests should NOT block a message permanently.</p>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Design — Hash Map Timestamp</div>
-        <div class="takeaway">✓ Combine data structures to achieve target complexities</div>
-        <div class="takeaway">✓ Time: Varies by design | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Start with brute force (array/dict). Then optimize: add index structure for O(log n) or O(1) lookup.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Implement Queue using Stacks</strong> (Easy) — Two Stacks</li>
-<li><strong>Implement Stack using Queues</strong> (Easy) — One Queue, Rotate</li>
-<li><strong>Design Circular Queue</strong> (Medium) — Array with Head/Tail</li>
-<li><strong>Design Circular Deque</strong> (Medium) — Array + Modulo</li>
-<li><strong>Design Hit Counter</strong> (Medium) — Circular Buffer</li>
-<li><strong>Design Browser History</strong> (Medium) — List + Two Pointers</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The Rate-Limiting Condition</div>
+      <p>Message <code>m</code> at timestamp <code>t</code> is allowed if: <code>m not in self.log</code> OR <code>t - self.log[m] &gt;= 10</code>. On allow: <code>self.log[m] = t</code>. On deny: do NOT update the map.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Hash Map Timestamp Tracking</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The design stores a dictionary mapping each message string to the <strong>last timestamp at which that message was successfully printed</strong>. Every <code>shouldPrint</code> call is a pure O(1) hash-map lookup followed by a simple arithmetic comparison.</p>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <div class="design-diagram">
+      <div class="design-box input-box">
+        <div class="design-box-title">Input</div>
+        <p style="font-family:var(--mono);font-size:12px;margin:0">shouldPrint(<br>&nbsp;&nbsp;timestamp: int,<br>&nbsp;&nbsp;message: str<br>)</p>
+      </div>
+      <div class="design-arrow">→</div>
+      <div class="design-box storage-box">
+        <div class="design-box-title">Hash Map (self.log)</div>
+        <p style="font-family:var(--mono);font-size:12px;margin:0">"foo" → 1<br>"bar" → 5<br>"baz" → 11<br>...</p>
+      </div>
+      <div class="design-arrow">→</div>
+      <div class="design-box output-box">
+        <div class="design-box-title">Output</div>
+        <p style="font-family:var(--mono);font-size:12px;margin:0">True / False<br><br>(update map<br>only on True)</p>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> Create <code>self.log = {}</code> in <code>__init__</code>. This dictionary maps each message string to the timestamp of its last allowed print.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Look up the message:</strong> Check if <code>message</code> is in <code>self.log</code>. If absent, the message is brand-new — skip to step 4.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Check the cooldown:</strong> If found, compute <code>timestamp - self.log[message]</code>. If the result is <strong>less than 10</strong>, the message is still in its cooldown window — return <code>False</code> without updating the map.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Allow and record:</strong> If the message is new OR the difference is ≥ 10, update <code>self.log[message] = timestamp</code> to reset the cooldown clock, then return <code>True</code>.</span>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Most Common Mistake</div>
+      <p>Never update <code>self.log[message]</code> when returning <code>False</code>. Imagine "foo" is allowed at t=1, then denied at t=5, denied at t=7, denied at t=9. If you kept resetting to 5, 7, 9 on each denial, "foo" would be permanently locked out — a new cooldown starts from each rejected request. The clock must only reset when we actually print.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times, <code>self.log[message]</code> holds the timestamp of the <strong>most recent call that returned True for that message</strong>. This is the "last print time" — the origin of the 10-second cooldown clock. Since we only update on True, this invariant is preserved by every operation.</p>
+    </div>
+
+    <p><strong>Why this guarantees correctness:</strong> The question "has it been at least 10 seconds since we last printed this?" is answered precisely by <code>timestamp - self.log[message] &gt;= 10</code>. Our invariant ensures the stored timestamp is exactly the last print time, making the comparison exact.</p>
+
+    <p style="margin-top:0.75rem"><strong>Proof the invariant holds under denials:</strong> When we deny (return False), we do NOT write to the map. The stored timestamp stays anchored to the last successful print. Therefore, on any future call with timestamp T, the comparison <code>T - self.log[m]</code> correctly measures elapsed time since the last print — not elapsed time since the last request.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why exactly 10 is allowed:</strong> The condition is <code>diff &lt; 10</code> to deny, which means diff ≥ 10 allows. So 10 seconds apart (same as "every 10 seconds") is permitted. If the first print is at t=1, next allowed is t=11 (11-1=10 ≥ 10).</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Analogy: Newspaper Printing</div>
+      <p>Think of each message as a news story. The rule is "don't reprint the same story within 10 days." You keep a ledger of the <em>last publication date</em> for each story. When a new submission arrives, you check the ledger. The ledger date only updates when you actually publish — rejected submissions don't count as publications and don't reset the clock.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Hash Map Timestamp (Optimal · Interview Pick)</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">class Logger:</span><span class="aann">// Design class — holds state across all calls</span></div>
+      <div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+      <div class="ann-line"><span class="acode">        self.log = {}</span><span class="aann">// msg → timestamp of last ALLOWED print (never updated on deny)</span></div>
+      <div class="ann-line"><span class="acode">&nbsp;</span></div>
+      <div class="ann-line"><span class="acode">    def shouldPrint(self, timestamp: int, message: str) -> bool:</span></div>
+      <div class="ann-line"><span class="acode">        if message in self.log \</span><span class="aann">// O(1) hash lookup</span></div>
+      <div class="ann-line"><span class="acode">                and timestamp - self.log[message] &lt; 10:</span><span class="aann">// within cooldown window</span></div>
+      <div class="ann-line"><span class="acode">            return False</span><span class="aann">// suppress — do NOT update self.log here!</span></div>
+      <div class="ann-line"><span class="acode">        self.log[message] = timestamp</span><span class="aann">// reset cooldown clock to NOW</span></div>
+      <div class="ann-line"><span class="acode">        return True</span><span class="aann">// print it — covers both new messages and expired cooldowns</span></div>
+    </div>
+
+    <p><strong>Solution 2 — Brute Force (scan all history, O(n) per call)</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">class LoggerBrute:</span></div>
+      <div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+      <div class="ann-line"><span class="acode">        self.calls = []</span><span class="aann">// store ALL (timestamp, message) pairs ever received</span></div>
+      <div class="ann-line"><span class="acode">&nbsp;</span></div>
+      <div class="ann-line"><span class="acode">    def shouldPrint(self, timestamp: int, message: str) -> bool:</span></div>
+      <div class="ann-line"><span class="acode">        for ts, msg in self.calls:</span><span class="aann">// O(n) scan — degrades with call count</span></div>
+      <div class="ann-line"><span class="acode">            if msg == message and timestamp - ts &lt; 10:</span></div>
+      <div class="ann-line"><span class="acode">                return False</span><span class="aann">// found recent occurrence — suppress</span></div>
+      <div class="ann-line"><span class="acode">        self.calls.append((timestamp, message))</span><span class="aann">// log every call (grows forever)</span></div>
+      <div class="ann-line"><span class="acode">        return True</span></div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Time per Call</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (list scan)</td><td class="mark-bad">O(n)</td><td>O(n) — all calls</td><td>n = total calls; grows unbounded</td></tr>
+        <tr><td><strong>Hash Map (optimal)</strong></td><td class="mark-good">O(1)</td><td>O(m) — unique msgs</td><td>m = unique messages; constant per call</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Brute Force Fails at Scale</div>
+      <p>In a production logging system, millions of requests may arrive per second. With brute force, the 1,000,000th call scans a million records — O(n) quickly becomes seconds of latency. The hash map solution handles any call volume in constant time.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Design Pattern</div>
+        <p>A class with persistent state + a stateful query method = Design problem. The key question: "What is the <em>minimum state</em> needed to answer each query?" Here, each query asks "did this message print recently?" — so we need exactly the last-print-timestamp per message. One value per key → hash map.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose brute force first, then optimize</div>
+        <p>Say: "A naive approach would keep every (timestamp, message) pair and scan on each query — O(n) per call where n is total calls. But notice I only need the <em>most recent</em> allowed timestamp per message — the earlier ones are irrelevant." This telescopes naturally to the O(1) hash map solution.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Implement and emphasize the critical update rule</div>
+        <p>When coding, explicitly comment: "I update the map only when returning True." This is the detail that shows depth. Most candidates will correctly build the lookup but miss the subtle invariant of <em>not updating on deny</em>.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Analyze complexity and discuss trade-offs</div>
+        <p>State: O(1) per call, O(m) space where m = unique messages. Then proactively bring up the follow-up about memory: "In production I'd add TTL-based eviction to bound memory when there are many unique messages over a long period."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a rate-limiting design problem. For each message, all I need to<br>
+track is when it was last printed — so a hash map from message to<br>
+last-allowed-timestamp is the perfect data structure.<br><br>
+The key invariant: I only update the map when returning True. If I also<br>
+updated on False, each denied request would reset the cooldown timer,<br>
+potentially locking a message out permanently.<br><br>
+Complexity: O(1) per shouldPrint call, O(m) total space where m is the<br>
+number of unique messages the system has ever seen."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-Up Questions to Anticipate</div>
+      <ul>
+        <li><strong>"Memory concern if millions of unique messages?"</strong> → Pair with LRU cache or TTL-based eviction; entries unseen for 10+ seconds can be safely evicted</li>
+        <li><strong>"Timestamps arrive out of order?"</strong> → Standard hash map still works; condition T - stored &lt; 10 remains correct for any T</li>
+        <li><strong>"Make it thread-safe?"</strong> → Wrap the dictionary in a lock; or use ConcurrentHashMap in Java</li>
+        <li><strong>"Distributed system version?"</strong> → Redis SETNX with TTL 10; or sorted-set sliding window per message key</li>
+        <li><strong>"Configurable window (not hardcoded 10)?"</strong> → Pass window as constructor parameter: <code>def __init__(self, window=10)</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Step through 10 <code>shouldPrint</code> calls and watch the hash map evolve in real time. Notice how denied calls do not update the map, keeping the cooldown clock anchored to the last true print.</p>
+
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0">
+
+      <!-- Current request display -->
+      <div id="request-panel" class="request-panel">
+        <div class="req-field">
+          <div class="req-label">Message</div>
+          <div class="req-value" id="req-msg">—</div>
+        </div>
+        <div class="req-field">
+          <div class="req-label">Timestamp</div>
+          <div class="req-value" id="req-ts">—</div>
+        </div>
+        <div class="req-field">
+          <div class="req-label">Last Allowed At</div>
+          <div class="req-value" id="req-last">—</div>
+        </div>
+        <div class="req-field">
+          <div class="req-label">Diff (t − last)</div>
+          <div class="req-value" id="req-diff">—</div>
+        </div>
+        <div id="req-result" class="req-result-badge pending">—</div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-total">
+          <span class="var-name">Total Calls</span>
+          <span class="var-val" id="vv-total">0</span>
+        </div>
+        <div class="var-box" id="vb-allowed">
+          <span class="var-name">Allowed</span>
+          <span class="var-val" id="vv-allowed">0</span>
+        </div>
+        <div class="var-box" id="vb-denied">
+          <span class="var-name">Denied</span>
+          <span class="var-val" id="vv-denied">0</span>
+        </div>
+        <div class="var-box" id="vb-size">
+          <span class="var-name">Map Size</span>
+          <span class="var-val" id="vv-size">0</span>
+        </div>
+      </div>
+
+      <!-- Hash map and code side by side -->
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;margin-top:0.5rem">
+        <div style="flex:1;min-width:220px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px">self.log (hash map state)</div>
+          <div class="hashmap-display" id="hashmap-display">
+            <div style="color:var(--text3);font-size:13px;font-style:italic;font-family:var(--mono);padding:8px 14px">{ } (empty)</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px">Code (active line highlighted)</div>
+          <div class="code-panel" id="code-panel">
+            <div class="code-line" id="cl-0">def shouldPrint(self, timestamp, message):</div>
+            <div class="code-line" id="cl-1">    if message in self.log \</div>
+            <div class="code-line" id="cl-2">           and timestamp - self.log[message] &lt; 10:</div>
+            <div class="code-line" id="cl-3">        return False</div>
+            <div class="code-line" id="cl-4">    self.log[message] = timestamp</div>
+            <div class="code-line" id="cl-5">    return True</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info card -->
+      <div class="info-card">
+        <div id="phase-badge" class="phase-badge phase-init">Ready</div>
+        <div id="step-counter" class="step-counter">Step 0 of 10</div>
+        <div id="step-title" class="step-title">Press Next to begin</div>
+        <div id="step-body" class="step-body">Walk through 10 shouldPrint calls. Watch how the hash map grows and how denied calls leave the stored timestamps unchanged.</div>
+      </div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-new"></div> New entry inserted</div>
+      <div class="legend-item"><div class="legend-swatch sw-allow"></div> Allowed (cooldown expired or new)</div>
+      <div class="legend-item"><div class="legend-swatch sw-deny"></div> Denied (cooldown active — map unchanged)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Store <code>message → last_allowed_timestamp</code> — one entry per unique message, not one per call.</div>
+      <div class="takeaway">Only update the map when returning True — denied requests must NOT shift the stored timestamp (the invariant).</div>
+      <div class="takeaway">Diff ≥ 10 is allowed (exactly 10 seconds is the boundary, not 11).</div>
+      <div class="takeaway">O(1) per call: hash map lookup and update are both constant time regardless of call history volume.</div>
+      <div class="takeaway">In production, bound memory with a TTL eviction strategy — entries unseen for ≥ 10s are safe to evict.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern (Hash Map Timestamp)</div>
+      <ul>
+        <li>Design class with persistent state; queries answered by one value per key</li>
+        <li>Rate limiting, cooldown windows, deduplication within a time range</li>
+        <li>O(1) per operation is the stated or implied requirement</li>
+        <li>Signal: "print at most once every N seconds" or "limit to K requests per window"</li>
+      </ul>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin:1rem 0 8px">Related Problems</div>
+    <div class="related-list">
+      <div class="related-item"><strong>LRU Cache</strong> <span class="related-diff diff-med">Medium</span> — Persistent-state design; doubly-linked list + hash map for O(1) get/put</div>
+      <div class="related-item"><strong>Time Based Key-Value Store</strong> <span class="related-diff diff-med">Medium</span> — Hash map + sorted timestamps; binary search for most-recent-at-or-before T</div>
+      <div class="related-item"><strong>Design Hit Counter</strong> <span class="related-diff diff-med">Medium</span> — Count hits in past 3000ms; sliding window with deque or circular buffer</div>
+      <div class="related-item"><strong>Number of Recent Calls</strong> <span class="related-diff diff-easy">Easy</span> — Count pings in past 3000ms; monotone queue, O(1) amortized</div>
+      <div class="related-item"><strong>Design HashMap</strong> <span class="related-diff diff-easy">Easy</span> — Understand the underlying O(1) data structure used in this solution</div>
+      <div class="related-item"><strong>First Unique Character in a String</strong> <span class="related-diff diff-easy">Easy</span> — Same "frequency/timestamp map" intuition: one value per key, O(1) query</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+const steps = [
+  {
+    ts: 1, msg: "foo", last: null, diff: null, result: true,
+    phase: "phase-lookup", phaseTxt: "New Message",
+    title: 'shouldPrint(1, "foo") → True',
+    body: '"foo" is not in self.log at all — it\'s brand-new. We skip the denial check entirely. Record self.log["foo"] = 1 and return True. The cooldown clock for "foo" now starts at timestamp 1.',
+    activeLine: [0, 1, 4, 5],
+    mapState: [{ key: "foo", val: 1, cls: "new-row" }],
+    varTotal: 1, varAllowed: 1, varDenied: 0, varSize: 1, reqResult: "allow"
+  },
+  {
+    ts: 2, msg: "bar", last: null, diff: null, result: true,
+    phase: "phase-lookup", phaseTxt: "New Message",
+    title: 'shouldPrint(2, "bar") → True',
+    body: '"bar" is also absent from self.log. Different messages are completely independent — "foo" at t=1 has no effect on "bar". Allow it and set self.log["bar"] = 2.',
+    activeLine: [0, 1, 4, 5],
+    mapState: [
+      { key: "foo", val: 1, cls: "" },
+      { key: "bar", val: 2, cls: "new-row" }
+    ],
+    varTotal: 2, varAllowed: 2, varDenied: 0, varSize: 2, reqResult: "allow"
+  },
+  {
+    ts: 3, msg: "foo", last: 1, diff: 2, result: false,
+    phase: "phase-deny", phaseTxt: "Denied",
+    title: 'shouldPrint(3, "foo") → False',
+    body: '"foo" is in self.log with last-allowed = 1. Check: 3 - 1 = 2, which is < 10. Cooldown is active! Return False. Crucially we do NOT update self.log — "foo" stays anchored at timestamp 1. The map is unchanged.',
+    activeLine: [0, 1, 2, 3],
+    mapState: [
+      { key: "foo", val: 1, cls: "deny-row" },
+      { key: "bar", val: 2, cls: "" }
+    ],
+    varTotal: 3, varAllowed: 2, varDenied: 1, varSize: 2, reqResult: "deny"
+  },
+  {
+    ts: 8, msg: "bar", last: 2, diff: 6, result: false,
+    phase: "phase-deny", phaseTxt: "Denied",
+    title: 'shouldPrint(8, "bar") → False',
+    body: '"bar" was last allowed at timestamp 2. Check: 8 - 2 = 6, which is < 10. Still within the 10-second window. Return False. The map stays unchanged — "bar" is still anchored at 2.',
+    activeLine: [0, 1, 2, 3],
+    mapState: [
+      { key: "foo", val: 1, cls: "" },
+      { key: "bar", val: 2, cls: "deny-row" }
+    ],
+    varTotal: 4, varAllowed: 2, varDenied: 2, varSize: 2, reqResult: "deny"
+  },
+  {
+    ts: 10, msg: "foo", last: 1, diff: 9, result: false,
+    phase: "phase-deny", phaseTxt: "Denied",
+    title: 'shouldPrint(10, "foo") → False',
+    body: '"foo" last allowed at 1. Check: 10 - 1 = 9. That is < 10 — still one second short! The boundary is ≥ 10, so 9 is not enough. Return False, map unchanged. We need timestamp ≥ 11 for "foo" to be allowed.',
+    activeLine: [0, 1, 2, 3],
+    mapState: [
+      { key: "foo", val: 1, cls: "deny-row" },
+      { key: "bar", val: 2, cls: "" }
+    ],
+    varTotal: 5, varAllowed: 2, varDenied: 3, varSize: 2, reqResult: "deny"
+  },
+  {
+    ts: 11, msg: "foo", last: 1, diff: 10, result: true,
+    phase: "phase-allow", phaseTxt: "Cooldown Expired",
+    title: 'shouldPrint(11, "foo") → True ✓',
+    body: '"foo" last allowed at 1. Check: 11 - 1 = 10, which is ≥ 10. Cooldown has EXACTLY expired! Allow it. Update self.log["foo"] = 11 — the clock resets to 11. Next "foo" will need timestamp ≥ 21.',
+    activeLine: [0, 1, 2, 4, 5],
+    mapState: [
+      { key: "foo", val: 11, cls: "allow-row" },
+      { key: "bar", val: 2, cls: "" }
+    ],
+    varTotal: 6, varAllowed: 3, varDenied: 3, varSize: 2, reqResult: "allow"
+  },
+  {
+    ts: 11, msg: "baz", last: null, diff: null, result: true,
+    phase: "phase-lookup", phaseTxt: "New Message",
+    title: 'shouldPrint(11, "baz") → True',
+    body: '"baz" has never been seen. Allow it and insert self.log["baz"] = 11. Notice same timestamp 11 is used — different messages have completely independent cooldown clocks, so no conflict with "foo" at t=11.',
+    activeLine: [0, 1, 4, 5],
+    mapState: [
+      { key: "foo", val: 11, cls: "" },
+      { key: "bar", val: 2, cls: "" },
+      { key: "baz", val: 11, cls: "new-row" }
+    ],
+    varTotal: 7, varAllowed: 4, varDenied: 3, varSize: 3, reqResult: "allow"
+  },
+  {
+    ts: 12, msg: "bar", last: 2, diff: 10, result: true,
+    phase: "phase-allow", phaseTxt: "Cooldown Expired",
+    title: 'shouldPrint(12, "bar") → True ✓',
+    body: '"bar" was last allowed at 2. Check: 12 - 2 = 10, which is ≥ 10. Cooldown expired! Update self.log["bar"] = 12. Each message maintains its own independent cooldown — "bar\'s" timer is completely separate from "foo\'s".',
+    activeLine: [0, 1, 2, 4, 5],
+    mapState: [
+      { key: "foo", val: 11, cls: "" },
+      { key: "bar", val: 12, cls: "allow-row" },
+      { key: "baz", val: 11, cls: "" }
+    ],
+    varTotal: 8, varAllowed: 5, varDenied: 3, varSize: 3, reqResult: "allow"
+  },
+  {
+    ts: 20, msg: "foo", last: 11, diff: 9, result: false,
+    phase: "phase-deny", phaseTxt: "Denied",
+    title: 'shouldPrint(20, "foo") → False',
+    body: '"foo" was last allowed at 11 (clock reset in step 6). Check: 20 - 11 = 9 < 10. Still one second short! The cooldown restarted from 11, so "foo" needs timestamp ≥ 21. Previous denials at t=3 and t=10 are irrelevant — only the last True matters.',
+    activeLine: [0, 1, 2, 3],
+    mapState: [
+      { key: "foo", val: 11, cls: "deny-row" },
+      { key: "bar", val: 12, cls: "" },
+      { key: "baz", val: 11, cls: "" }
+    ],
+    varTotal: 9, varAllowed: 5, varDenied: 4, varSize: 3, reqResult: "deny"
+  },
+  {
+    ts: 21, msg: "foo", last: 11, diff: 10, result: true,
+    phase: "phase-allow", phaseTxt: "Cooldown Expired",
+    title: 'shouldPrint(21, "foo") → True ✓',
+    body: '"foo" last allowed at 11. Check: 21 - 11 = 10 ≥ 10. Allowed! Update self.log["foo"] = 21. Final tally: 6 allowed, 4 denied, 3 unique messages in the map. Every single hash map operation was O(1).',
+    activeLine: [0, 1, 2, 4, 5],
+    mapState: [
+      { key: "foo", val: 21, cls: "allow-row" },
+      { key: "bar", val: 12, cls: "" },
+      { key: "baz", val: 11, cls: "" }
+    ],
+    varTotal: 10, varAllowed: 6, varDenied: 4, varSize: 3, reqResult: "allow"
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let cur = -1;
+
+function buildDots() {
+  const d = document.getElementById('dots');
+  d.innerHTML = '';
+  steps.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.onclick = () => { cur = i - 1; go(1); };
+    d.appendChild(dot);
+  });
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+  });
+}
+
+function renderHashMap(mapState) {
+  const el = document.getElementById('hashmap-display');
+  if (!mapState || mapState.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:13px;font-style:italic;font-family:var(--mono);padding:8px 14px">{ } (empty)</div>';
+    return;
+  }
+  el.innerHTML = mapState.map(entry => `
+    <div class="hm-row ${entry.cls}">
+      <span class="hm-key">"${entry.key}"</span>
+      <span class="hm-arrow">→</span>
+      <span class="hm-val">${entry.val}</span>
+    </div>
+  `).join('');
+}
+
+function clearActiveLines() {
+  for (let i = 0; i <= 5; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.classList.remove('active');
+  }
+}
+
+function setActiveLines(lines) {
+  clearActiveLines();
+  lines.forEach(l => {
+    const el = document.getElementById('cl-' + l);
+    if (el) el.classList.add('active');
+  });
+}
+
+function render(s) {
+  document.getElementById('req-msg').textContent = '"' + s.msg + '"';
+  document.getElementById('req-ts').textContent = s.ts;
+  document.getElementById('req-last').textContent = s.last === null ? '— (new)' : s.last;
+  document.getElementById('req-diff').textContent = s.diff === null ? 'n/a (new)' : s.diff;
+
+  const badge = document.getElementById('req-result');
+  badge.className = 'req-result-badge ' + s.reqResult;
+  badge.textContent = s.reqResult === 'allow' ? '✓ True' : '✗ False';
+
+  function setVar(boxId, valId, val, prev, prevVal) {
+    const changed = prev === null ? true : prevVal !== val;
+    document.getElementById(boxId).className = 'var-box' + (changed ? ' changed' : '');
+    document.getElementById(valId).textContent = val;
+  }
+  const prev = cur > 0 ? steps[cur - 1] : null;
+  setVar('vb-total',   'vv-total',   s.varTotal,   prev, prev ? prev.varTotal   : null);
+  setVar('vb-allowed', 'vv-allowed', s.varAllowed, prev, prev ? prev.varAllowed : null);
+  setVar('vb-denied',  'vv-denied',  s.varDenied,  prev, prev ? prev.varDenied  : null);
+  setVar('vb-size',    'vv-size',    s.varSize,    prev, prev ? prev.varSize    : null);
+
+  renderHashMap(s.mapState);
+  setActiveLines(s.activeLine);
+
+  const pb = document.getElementById('phase-badge');
+  pb.className = 'phase-badge ' + s.phase;
+  pb.textContent = s.phaseTxt;
+  document.getElementById('step-counter').textContent = `Call ${cur + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  updateDots();
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next < 0 || next >= steps.length) return;
+  cur = next;
+  render(steps[cur]);
+}
+
+function reset() {
+  cur = -1;
+  clearActiveLines();
+  document.getElementById('req-msg').textContent = '—';
+  document.getElementById('req-ts').textContent = '—';
+  document.getElementById('req-last').textContent = '—';
+  document.getElementById('req-diff').textContent = '—';
+  const rb = document.getElementById('req-result');
+  rb.className = 'req-result-badge pending';
+  rb.textContent = '—';
+  ['vb-total','vb-allowed','vb-denied','vb-size'].forEach(id => {
+    document.getElementById(id).className = 'var-box';
+  });
+  ['vv-total','vv-allowed','vv-denied','vv-size'].forEach(id => {
+    document.getElementById(id).textContent = '0';
+  });
+  document.getElementById('hashmap-display').innerHTML =
+    '<div style="color:var(--text3);font-size:13px;font-style:italic;font-family:var(--mono);padding:8px 14px">{ } (empty)</div>';
+  const pb = document.getElementById('phase-badge');
+  pb.className = 'phase-badge phase-init';
+  pb.textContent = 'Ready';
+  document.getElementById('step-counter').textContent = 'Step 0 of 10';
+  document.getElementById('step-title').textContent = 'Press Next to begin';
+  document.getElementById('step-body').textContent = 'Walk through 10 shouldPrint calls. Watch how the hash map grows and how denied calls leave the stored timestamps unchanged.';
+  updateDots();
+  document.getElementById('btn-prev').disabled = true;
+  document.getElementById('btn-next').disabled = false;
+}
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
-render();
+
+buildDots();
 </script>
 </body>
 </html>

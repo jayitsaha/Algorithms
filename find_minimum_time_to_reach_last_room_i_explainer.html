@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#3341 · Find Minimum Time to Reach Last Room I</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Grid Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-container{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:1.25rem}
+.grid-row{display:flex;gap:4px}
+.grid-cell{
+  width:72px;height:56px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;position:relative;
+}
+.grid-cell .cell-coord{font-size:9px;color:var(--text3);font-weight:600;position:absolute;top:3px;left:5px}
+.grid-cell .cell-move{font-size:11px;font-weight:700;color:var(--text2)}
+.grid-cell .cell-dist{font-size:13px;font-weight:700;font-family:var(--mono)}
+.grid-cell.unvisited{background:var(--surface);border-color:var(--border2)}
+.grid-cell.unvisited .cell-dist{color:var(--text3)}
+.grid-cell.in-heap{background:var(--blue-bg);border-color:var(--blue-border)}
+.grid-cell.in-heap .cell-dist{color:var(--blue-text)}
+.grid-cell.in-heap .cell-coord{color:var(--blue-mid)}
+.grid-cell.current{background:var(--amber-bg);border-color:var(--amber-border)}
+.grid-cell.current .cell-dist{color:var(--amber-text)}
+.grid-cell.current .cell-coord{color:var(--amber-mid)}
+.grid-cell.settled{background:var(--green-bg);border-color:var(--green-border)}
+.grid-cell.settled .cell-dist{color:var(--green-text)}
+.grid-cell.settled .cell-coord{color:var(--green-mid)}
+.grid-cell.goal{background:var(--purple-bg);border-color:var(--purple-border)}
+.grid-cell.goal .cell-dist{color:var(--purple-text)}
+.grid-cell.goal .cell-coord{color:var(--purple-mid)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Heap Display ── */
+.heap-display{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin:1rem 0}
+.heap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.heap-items{display:flex;gap:8px;flex-wrap:wrap}
+.heap-item{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:6px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border)}
+.heap-item.top{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-border);font-weight:700}
+.heap-empty{color:var(--text3);font-style:italic;font-size:13px}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-expand{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-relax{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-current{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-heap{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-settled{background:var(--green-bg);border-color:var(--green-border)}
+.sw-goal{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-unvisited{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Dijkstra deep-dive box ── */
+.dijkstra-box{background:var(--cyan-bg);border:1.5px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.dijkstra-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:0.5rem}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #3341</div>
+  <h1>Find Minimum Time to Reach Last Room I</h1>
+  <p class="subtitle">Navigate an n×m dungeon grid where each room has a minimum move time requirement. Find the earliest second you can reach the bottom-right room from (0,0).</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">Modified Dijkstra</span>
+    <span class="tag tag-complexity">Time: O(n·m·log(n·m))</span>
+    <span class="tag tag-complexity">Space: O(n·m)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're given an <strong>n × m grid</strong> (a dungeon). Each cell <code>moveTime[i][j]</code> represents the <em>earliest second</em> at which you are allowed to enter room <code>(i, j)</code>. You start at <code>(0, 0)</code> at second 0, and each move takes <strong>exactly 1 second</strong>. You can move up, down, left, or right between adjacent rooms. The goal: reach <code>(n-1, m-1)</code> in the minimum possible time.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is <strong>not plain BFS</strong> because edge "costs" vary — you might have to <em>wait</em> outside a room if you arrive before its moveTime threshold. This waiting turns it into a <strong>shortest-path problem with variable costs</strong>, which is exactly what Dijkstra's algorithm handles optimally.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Why BFS Fails</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.8">
+          BFS finds shortest hops,<br>
+          not shortest time. If a room<br>
+          has moveTime=10 but BFS<br>
+          reaches it at t=2, we need<br>
+          to wait 8 more seconds —<br>
+          BFS can't model this.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Why Dijkstra Works</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.8">
+          Dijkstra tracks actual arrival<br>
+          time. When relaxing an edge,<br>
+          arrival = max(cur_time, moveTime)<br>
+          + 1. This naturally handles<br>
+          waiting and always expands<br>
+          the earliest-arrival node first.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Worked example (3×3 grid):</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">moveTime = [[0,4],[4,4]]   # 2×2 grid</span></div>
+<div class="ann-line"><span class="acode">Start: (0,0) at t=0</span></div>
+<div class="ann-line"><span class="acode">Move to (0,1): moveTime[0][1]=4, arrive=max(0,4)+1=5  ← must wait until t=4, then 1 sec to move</span></div>
+<div class="ann-line"><span class="acode">Move to (1,1): moveTime[1][1]=4, arrive=max(5,4)+1=6  ← arrive t=5 > 4, no wait needed</span></div>
+<div class="ann-line"><span class="acode">Answer: 6</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> <code>moveTime[0][0]</code> is always 0 (start room). Single-cell grid returns 0. Large moveTime values require waiting, potentially doubling the path length. The constraint says you can always reach the last room.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Modified Dijkstra on a 2D Grid</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Treat the grid as a <strong>weighted directed graph</strong> where each edge weight is dynamic: it depends on when you arrive. The key modification to standard Dijkstra is in how edge weights are computed — instead of a fixed weight, the cost to enter a neighbor is <code>max(current_time, moveTime[neighbor]) + 1</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> Create a <code>dist</code> table with infinity for all cells except <code>dist[0][0] = 0</code>. Push <code>(0, 0, 0)</code> (time, row, col) into a min-heap.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Extract minimum:</strong> Pop <code>(t, r, c)</code> — the unvisited cell reachable in the least time. If <code>t > dist[r][c]</code>, it's a stale entry — skip it (standard Dijkstra lazy deletion).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Early termination:</strong> If we just popped <code>(n-1, m-1)</code>, return its time immediately — Dijkstra guarantees this is optimal.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Relax neighbors:</strong> For each of the 4 adjacent cells <code>(nr, nc)</code>, compute <code>new_t = max(t, moveTime[nr][nc]) + 1</code>. If <code>new_t &lt; dist[nr][nc]</code>, update dist and push to heap.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Repeat</strong> until the heap is empty or we reach the goal. Since the problem guarantees a path exists, we always terminate at step 3.</span>
+      </div>
+    </div>
+
+    <div class="dijkstra-box">
+      <div class="dijkstra-box-title">🔬 The Modified Edge Weight Formula</div>
+      <p>Standard Dijkstra: <code>new_dist = cur_dist + weight</code></p>
+      <p style="margin-top:0.5rem">This problem: <code>new_t = max(cur_t, moveTime[nr][nc]) + 1</code></p>
+      <p style="margin-top:0.5rem">The <code>max</code> represents <strong>waiting</strong>: if you arrive at time 3 but the room opens at time 10, you wait until time 10, then spend 1 second entering. If you arrive at time 12 and the room opened at 10, no waiting needed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — Dijkstra Deep-Dive  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: Dijkstra's Invariant + Algorithm Deep-Dive</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Dijkstra's Core Invariant</div>
+      <p>When a node is <strong>popped from the min-heap</strong>, its recorded distance is <em>guaranteed to be optimal</em>. No future path through unvisited nodes can do better, because all edge weights are non-negative (we can never "un-wait" time).</p>
+    </div>
+
+    <p><strong>Why non-negative weights are required:</strong> The waiting formula <code>max(cur_t, moveTime) + 1</code> always produces a result ≥ <code>cur_t + 1</code> — we always move forward in time. This guarantees non-negative edge costs, making Dijkstra applicable.</p>
+
+    <div class="dijkstra-box" style="margin-top:1rem">
+      <div class="dijkstra-box-title">📖 Dijkstra's Algorithm — Origin & Generalization</div>
+      <p><strong>Origin:</strong> Edsger W. Dijkstra, 1956. Originally conceived to find the shortest path between two cities in a road network. Published in 1959 as a 3-page paper — one of the most influential algorithms ever.</p>
+      <p style="margin-top:0.5rem"><strong>Class of problems:</strong> Single-source shortest path on graphs with non-negative edge weights.</p>
+      <p style="margin-top:0.5rem"><strong>Core invariant:</strong> The min-heap always holds candidates ordered by their tentative shortest distance. When we pop a node, we've "settled" it — its shortest path is known.</p>
+      <p style="margin-top:0.5rem"><strong>Complexity:</strong> O((V + E) log V) with a binary heap. For an n×m grid: V = n·m, E = 2·n·m (4 edges per cell, but undirected) → O(n·m·log(n·m)).</p>
+      <p style="margin-top:0.5rem"><strong>When to recognize it:</strong> "Find minimum cost path", "weighted graph", "can wait but not go back in time", constraints are non-negative.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Not BFS or Dynamic Programming?</div>
+      <p><strong>BFS:</strong> Works for unweighted graphs (all edges = 1 second). Here, effective edge cost = <code>max(cur_t, moveTime[nr][nc]) + 1</code>, which varies by when you arrive. Two paths to the same cell might have different costs depending on timing.<br><br>
+      <strong>Simple DP:</strong> Grid DP assumes you process cells in a fixed order (e.g., top-left → bottom-right). Here, you might profitably revisit cells via a detour, and the optimal sub-structure doesn't align with row/col order.</p>
+    </div>
+
+    <p><strong>Proof sketch for this specific problem:</strong> Since <code>max(cur_t, moveTime[nr][nc]) + 1 ≥ cur_t + 1 > cur_t</code>, time strictly increases along any path. Therefore, once we pop cell <code>(r, c)</code> with time <code>t</code>, any other path reaching <code>(r, c)</code> that hasn't been finalized yet must have cost ≥ <code>t</code> (since min-heap), and any path through later-settled cells can only add more time. The optimality invariant holds.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Modified Dijkstra (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq</span><span class="aann">← Python's min-heap (heapq is a min-heap by default)</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">def minTimeToReach(moveTime):</span></div>
+<div class="ann-line"><span class="acode">    n, m = len(moveTime), len(moveTime[0])     </span><span class="aann">← grid dimensions</span></div>
+<div class="ann-line"><span class="acode">    dist = [[float('inf')] * m for _ in range(n)]  </span><span class="aann">← best known arrival time per cell</span></div>
+<div class="ann-line"><span class="acode">    dist[0][0] = 0                              </span><span class="aann">← start at (0,0) at time 0</span></div>
+<div class="ann-line"><span class="acode">    heap = [(0, 0, 0)]                          </span><span class="aann">← (time, row, col) — min-heap on time</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    while heap:                                 </span><span class="aann">← process until all reachable cells settled</span></div>
+<div class="ann-line"><span class="acode">        t, r, c = heapq.heappop(heap)           </span><span class="aann">← extract cell with lowest arrival time</span></div>
+<div class="ann-line"><span class="acode">        if t > dist[r][c]:                      </span><span class="aann">← stale entry? (better path found later)</span></div>
+<div class="ann-line"><span class="acode">            continue                            </span><span class="aann">← skip — lazy deletion avoids expensive heap updates</span></div>
+<div class="ann-line"><span class="acode">        if r == n-1 and c == m-1:               </span><span class="aann">← reached the goal!</span></div>
+<div class="ann-line"><span class="acode">            return t                            </span><span class="aann">← Dijkstra guarantees this is optimal</span></div>
+<div class="ann-line"><span class="acode">        for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:  </span><span class="aann">← 4-directional neighbors</span></div>
+<div class="ann-line"><span class="acode">            nr, nc = r + dr, c + dc            </span><span class="aann">← candidate neighbor</span></div>
+<div class="ann-line"><span class="acode">            if 0 <= nr < n and 0 <= nc < m:    </span><span class="aann">← bounds check</span></div>
+<div class="ann-line"><span class="acode">                new_t = max(t, moveTime[nr][nc]) + 1  </span><span class="aann">← wait if needed, then 1 sec to move</span></div>
+<div class="ann-line"><span class="acode">                if new_t < dist[nr][nc]:        </span><span class="aann">← found a shorter path to (nr, nc)?</span></div>
+<div class="ann-line"><span class="acode">                    dist[nr][nc] = new_t        </span><span class="aann">← update best known time</span></div>
+<div class="ann-line"><span class="acode">                    heapq.heappush(heap, (new_t, nr, nc))  </span><span class="aann">← push to explore later</span></div>
+<div class="ann-line"><span class="acode">    return dist[n-1][m-1]                       </span><span class="aann">← fallback (problem guarantees path exists)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Check t > dist[r][c]?</div>
+      <p>We use <em>lazy deletion</em>: rather than updating existing heap entries (which is expensive), we push new entries and mark old ones stale. When we pop a stale entry (one where a shorter time was found), we skip it. This is the standard Dijkstra optimization in Python since <code>heapq</code> doesn't support <em>decrease-key</em>.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — BFS with Waiting (Incorrect for General Case, shown for contrast)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode"># ❌ This looks tempting but FAILS — BFS doesn't optimize for min time</span></div>
+<div class="ann-line"><span class="acode"># It visits cells in hop-order, not time-order. A cell reached in fewer</span></div>
+<div class="ann-line"><span class="acode"># hops but with more waiting could be worse than a longer path with no wait.</span></div>
+<div class="ann-line"><span class="acode">from collections import deque</span></div>
+<div class="ann-line"><span class="acode">def minTimeToReach_BFS_WRONG(moveTime):</span></div>
+<div class="ann-line"><span class="acode">    # This would give wrong answer because two paths to same cell</span></div>
+<div class="ann-line"><span class="acode">    # with equal hops can have unequal times due to waitin</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Modified Dijkstra:</strong> Time O(n·m·log(n·m)), Space O(n·m)<br>
+        Each of n·m cells is pushed/popped from the heap at most once per edge (4 neighbors). Heap operations are O(log(n·m)). Space: O(n·m) for the dist table and heap.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Graph Pattern</div>
+        <p style="font-size:14px;color:var(--text)">The grid is a graph: rooms are nodes, adjacency gives edges. The goal is "minimum time from source to destination." This screams <strong>shortest path</strong>. Ask: are edge costs variable? Yes — they depend on when you arrive. So standard BFS (uniform cost) won't work.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Edge Weight Formula</div>
+        <p style="font-size:14px;color:var(--text)">What's the cost to move from <code>(r,c)</code> to <code>(nr,nc)</code>? You must wait if you arrive before <code>moveTime[nr][nc]</code>. So the arrival time at the neighbor is <code>max(current_time, moveTime[nr][nc]) + 1</code>. This is a dynamic/context-dependent edge weight.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Confirm Dijkstra Applies</div>
+        <p style="font-size:14px;color:var(--text)">Check: are all edge costs non-negative? Yes — <code>max(t, moveTime) + 1 ≥ t + 1 > t</code>. Time never decreases. Dijkstra's invariant holds. Use a min-heap prioritized by arrival time, not by hops.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the "Stale Entry" pattern</div>
+        <p style="font-size:14px;color:var(--text)">Python's <code>heapq</code> doesn't support decrease-key. Use lazy deletion: push a new <code>(new_t, nr, nc)</code> whenever you improve a distance. When you pop an entry, check if <code>t > dist[r][c]</code> — if so, skip it. This is a standard Dijkstra interview pattern.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The grid is a weighted graph where edge costs depend on arrival time.<br>
+If I arrive at (r,c) at time t and want to enter (nr,nc),<br>
+I must wait until max(t, moveTime[nr][nc]), then spend 1 second moving.<br>
+Since time only moves forward, all costs are positive — Dijkstra applies.<br>
+I'll use a min-heap sorted by arrival time. Each pop gives me the<br>
+earliest-reachable unvisited cell. I stop when I pop (n-1, m-1).<br>
+Time complexity: O(n·m·log(n·m)), Space: O(n·m)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if moves alternate between 1 and 2 seconds?"</strong> → LeetCode 3342 (same grid, odd/even step cost toggle)</li>
+        <li><strong>"What if you could revisit rooms to reset a counter?"</strong> → Still Dijkstra; dist state must include counter</li>
+        <li><strong>"What if some rooms are blocked?"</strong> → Skip blocked cells in neighbor expansion, check -1</li>
+        <li><strong>"Can you solve with BFS using a different state?"</strong> → Deque-based 0-1 BFS won't help here since weights aren't 0 or 1</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: moveTime = [[0,4],[4,4]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Grid display -->
+      <div style="text-align:center;margin-bottom:0.75rem;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">
+        Grid — cell shows moveTime / arrival dist
+      </div>
+      <div class="grid-container" id="grid-container"></div>
+
+      <!-- Heap display -->
+      <div class="heap-display">
+        <div class="heap-title">Min-Heap (top = next to process)</div>
+        <div class="heap-items" id="heap-items"><span class="heap-empty">empty</span></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-t">
+          <span class="var-name">t (cur time)</span>
+          <span class="var-val" id="vv-t">—</span>
+        </div>
+        <div class="var-box" id="vb-rc">
+          <span class="var-name">cell (r,c)</span>
+          <span class="var-val" id="vv-rc">—</span>
+        </div>
+        <div class="var-box" id="vb-newt">
+          <span class="var-name">new_t</span>
+          <span class="var-val" id="vv-newt">—</span>
+        </div>
+        <div class="var-box" id="vb-action">
+          <span class="var-name">action</span>
+          <span class="var-val" id="vv-action">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">dist[0][0]=0; heap=[(0,0,0)]</div>
+      <div class="code-line" id="cl-1">t,r,c = heapq.heappop(heap)</div>
+      <div class="code-line" id="cl-2">if t > dist[r][c]: continue   # stale?</div>
+      <div class="code-line" id="cl-3">if r==n-1 and c==m-1: return t</div>
+      <div class="code-line" id="cl-4">for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:</div>
+      <div class="code-line" id="cl-5">    nr,nc = r+dr, c+dc</div>
+      <div class="code-line" id="cl-6">    new_t = max(t, moveTime[nr][nc]) + 1</div>
+      <div class="code-line" id="cl-7">    if new_t &lt; dist[nr][nc]:</div>
+      <div class="code-line" id="cl-8">        dist[nr][nc] = new_t</div>
+      <div class="code-line" id="cl-9">        heapq.heappush(heap,(new_t,nr,nc))</div>
+      <div class="code-line" id="cl-10">return dist[n-1][m-1]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to walk through Modified Dijkstra on a 2×2 grid.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-current"></div> Currently processing</div>
+      <div class="legend-item"><div class="legend-swatch sw-heap"></div> In heap (candidate)</div>
+      <div class="legend-item"><div class="legend-swatch sw-settled"></div> Settled (optimal found)</div>
+      <div class="legend-item"><div class="legend-swatch sw-goal"></div> Goal cell</div>
+      <div class="legend-item"><div class="legend-swatch sw-unvisited"></div> Unvisited</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Grid-to-graph reduction: rooms = nodes, adjacency = edges, time = cost</div>
+      <div class="takeaway">Modified edge weight: <code>max(cur_t, moveTime[nr][nc]) + 1</code> captures both waiting and moving</div>
+      <div class="takeaway">Dijkstra applies because time never decreases (non-negative edge costs)</div>
+      <div class="takeaway">Lazy deletion (<code>if t > dist[r][c]: continue</code>) avoids expensive heap updates</div>
+      <div class="takeaway">Early termination: return as soon as the goal is popped from the min-heap</div>
+      <div class="takeaway">Pattern: "minimum cost to reach destination" on weighted graph → Dijkstra</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>BFS (hop count)</td>
+          <td class="mark-bad">O(n·m)</td>
+          <td>O(n·m)</td>
+          <td>❌ Ignores waiting — gives wrong answer</td>
+        </tr>
+        <tr>
+          <td><strong>Modified Dijkstra ✓</strong></td>
+          <td class="mark-good">O(n·m·log(n·m))</td>
+          <td class="mark-good">O(n·m)</td>
+          <td>Optimal; handles variable wait costs</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Modified Dijkstra Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Minimum time / cost to reach a destination" → Dijkstra</li>
+        <li>Edge cost depends on state (arrival time, day, resource level) → Modified Dijkstra</li>
+        <li>Grid problem where BFS gives wrong answer due to variable costs → Weighted graph shortest path</li>
+        <li>Can wait at a node but not go back in time → Non-negative costs, Dijkstra valid</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Modified Dijkstra)</div>
+      <div class="related-item"><strong>Find Minimum Time to Reach Last Room II</strong><span class="related-diff diff-med">Medium</span> — Same grid, moves alternate between cost 1 and cost 2 (#3342)</div>
+      <div class="related-item"><strong>Network Delay Time</strong><span class="related-diff diff-med">Medium</span> — Classic Dijkstra: find how long for a signal to reach all nodes (#743)</div>
+      <div class="related-item"><strong>Path with Minimum Effort</strong><span class="related-diff diff-med">Medium</span> — Dijkstra on grid where cost = max height difference in path (#1631)</div>
+      <div class="related-item"><strong>Cheapest Flights Within K Stops</strong><span class="related-diff diff-med">Medium</span> — Dijkstra with state augmented by stop count (#787)</div>
+      <div class="related-item"><strong>Swim in Rising Water</strong><span class="related-diff diff-hard">Hard</span> — Dijkstra on grid where cost = max cell value in path (#778)</div>
+      <div class="related-item"><strong>Minimum Cost to Make at Least One Valid Path in a Grid</strong><span class="related-diff diff-hard">Hard</span> — 0-1 BFS / Dijkstra where forced moves cost 0, others cost 1 (#1368)</div>
+      <div class="related-item"><strong>The Maze II</strong><span class="related-diff diff-med">Medium</span> — Dijkstra where a ball rolls until hitting a wall, counting steps (#505)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section: Graph Algorithms → Dijkstra (Modified)<br>
+      Sub-Pattern: <strong>Modified Dijkstra</strong> · Source: Analysis (variant of standard Dijkstra with dynamic edge weights)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Grid: moveTime = [[0,4],[4,4]], 2×2
+const MOVE_TIME = [[0,4],[4,4]];
+const N = 2, M = 2;
+
+// Steps for the walkthrough
+const steps = [
+  {
+    id: 0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    activeLine: 0,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'unvisited',move:4,dist:'∞'}],
+      [{state:'unvisited',move:4,dist:'∞'}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: ['(0,0,0)'],
+    heapTop: '(0,0,0)',
+    vars: {t:'—', rc:'—', newt:'—', action:'start'},
+    changed: [],
+    title: 'Initialize Dijkstra',
+    text: 'moveTime=[[0,4],[4,4]]. Set dist[0][0]=0, all others=∞. Push (time=0, row=0, col=0) onto the min-heap. The goal is cell (1,1).'
+  },
+  {
+    id: 1, phase:'expand', phaseLabel:'POP HEAP', phaseClass:'phase-expand',
+    activeLine: 1,
+    grid: [
+      [{state:'current',move:0,dist:0}, {state:'unvisited',move:4,dist:'∞'}],
+      [{state:'unvisited',move:4,dist:'∞'}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: [],
+    heapTop: '(0,0,0)',
+    vars: {t:'0', rc:'(0,0)', newt:'—', action:'pop'},
+    changed: ['t','rc'],
+    title: 'Pop (t=0, r=0, c=0) from heap',
+    text: 'Extract the minimum-time entry: cell (0,0) at time t=0. Heap is now empty. Check: is t=0 > dist[0][0]=0? No — this entry is fresh, proceed to process.'
+  },
+  {
+    id: 2, phase:'expand', phaseLabel:'CHECK GOAL', phaseClass:'phase-expand',
+    activeLine: 3,
+    grid: [
+      [{state:'current',move:0,dist:0}, {state:'unvisited',move:4,dist:'∞'}],
+      [{state:'unvisited',move:4,dist:'∞'}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: [],
+    heapTop: '',
+    vars: {t:'0', rc:'(0,0)', newt:'—', action:'not goal'},
+    changed: [],
+    title: 'Goal check: (0,0) ≠ (1,1)',
+    text: 'Is (r=0, c=0) == (n-1=1, m-1=1)? No — we have not reached the goal yet. Continue to explore neighbors of (0,0).'
+  },
+  {
+    id: 3, phase:'relax', phaseLabel:'RELAX NEIGHBOR', phaseClass:'phase-relax',
+    activeLine: 6,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'in-heap',move:4,dist:5}],
+      [{state:'unvisited',move:4,dist:'∞'}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: ['(5,0,1)'],
+    heapTop: '(5,0,1)',
+    vars: {t:'0', rc:'(0,0)', newt:'5', action:'push(0,1)'},
+    changed: ['newt'],
+    title: 'Relax neighbor (0,1): new_t = max(0,4)+1 = 5',
+    text: 'Neighbor (0,1): moveTime=4. new_t = max(cur_t=0, moveTime=4) + 1 = 4+1 = 5. Since 5 < ∞ = dist[0][1], update dist[0][1]=5 and push (5,0,1) to heap. We must wait at (0,0) until t=4, then move.'
+  },
+  {
+    id: 4, phase:'relax', phaseLabel:'RELAX NEIGHBOR', phaseClass:'phase-relax',
+    activeLine: 6,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'in-heap',move:4,dist:5}],
+      [{state:'in-heap',move:4,dist:5}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: ['(5,0,1)','(5,1,0)'],
+    heapTop: '(5,0,1)',
+    vars: {t:'0', rc:'(0,0)', newt:'5', action:'push(1,0)'},
+    changed: ['newt'],
+    title: 'Relax neighbor (1,0): new_t = max(0,4)+1 = 5',
+    text: 'Neighbor (1,0): moveTime=4. new_t = max(0, 4)+1 = 5. Since 5 < ∞ = dist[1][0], update dist[1][0]=5 and push (5,1,0). Both (0,1) and (1,0) take equally long to reach — symmetric grid!'
+  },
+  {
+    id: 5, phase:'expand', phaseLabel:'POP HEAP', phaseClass:'phase-expand',
+    activeLine: 1,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'current',move:4,dist:5}],
+      [{state:'in-heap',move:4,dist:5}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: ['(5,1,0)'],
+    heapTop: '(5,0,1)',
+    vars: {t:'5', rc:'(0,1)', newt:'—', action:'pop'},
+    changed: ['t','rc'],
+    title: 'Pop (t=5, r=0, c=1) from heap',
+    text: 'Min-heap gives us t=5, cell (0,1). Check: t=5 > dist[0][1]=5? No — fresh entry. Proceed. Heap still has (5,1,0).'
+  },
+  {
+    id: 6, phase:'expand', phaseLabel:'CHECK GOAL', phaseClass:'phase-expand',
+    activeLine: 3,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'current',move:4,dist:5}],
+      [{state:'in-heap',move:4,dist:5}, {state:'goal',move:4,dist:'∞'}]
+    ],
+    heap: ['(5,1,0)'],
+    heapTop: '',
+    vars: {t:'5', rc:'(0,1)', newt:'—', action:'not goal'},
+    changed: [],
+    title: 'Goal check: (0,1) ≠ (1,1)',
+    text: 'Is (r=0, c=1) == (1,1)? No. Explore neighbors of (0,1).'
+  },
+  {
+    id: 7, phase:'relax', phaseLabel:'RELAX NEIGHBOR', phaseClass:'phase-relax',
+    activeLine: 6,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'settled',move:4,dist:5}],
+      [{state:'in-heap',move:4,dist:5}, {state:'goal',move:4,dist:6}]
+    ],
+    heap: ['(5,1,0)','(6,1,1)'],
+    heapTop: '(5,1,0)',
+    vars: {t:'5', rc:'(0,1)', newt:'6', action:'push(1,1)'},
+    changed: ['newt'],
+    title: 'Relax (1,1): new_t = max(5,4)+1 = 6',
+    text: 'Neighbor (1,1): the goal! moveTime=4. new_t = max(cur_t=5, moveTime=4)+1 = 5+1 = 6. No wait needed — we arrive at t=5 > moveTime=4. Update dist[1][1]=6, push (6,1,1). Also check (0,0): max(5,0)+1=6 but dist[0][0]=0, so no update.'
+  },
+  {
+    id: 8, phase:'expand', phaseLabel:'POP HEAP', phaseClass:'phase-expand',
+    activeLine: 1,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'settled',move:4,dist:5}],
+      [{state:'current',move:4,dist:5}, {state:'goal',move:4,dist:6}]
+    ],
+    heap: ['(6,1,1)'],
+    heapTop: '(5,1,0)',
+    vars: {t:'5', rc:'(1,0)', newt:'—', action:'pop'},
+    changed: ['t','rc'],
+    title: 'Pop (t=5, r=1, c=0) from heap',
+    text: 'Next minimum: t=5, cell (1,0). Check: t=5 > dist[1][0]=5? No — fresh. Explore (1,0)\'s neighbors.'
+  },
+  {
+    id: 9, phase:'relax', phaseLabel:'RELAX NEIGHBOR', phaseClass:'phase-relax',
+    activeLine: 7,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'settled',move:4,dist:5}],
+      [{state:'settled',move:4,dist:5}, {state:'goal',move:4,dist:6}]
+    ],
+    heap: ['(6,1,1)'],
+    heapTop: '(6,1,1)',
+    vars: {t:'5', rc:'(1,0)', newt:'6', action:'no update(1,1)'},
+    changed: ['newt'],
+    title: 'Relax (1,1) from (1,0): new_t = max(5,4)+1 = 6',
+    text: 'From (1,0): neighbor (1,1) gets new_t = max(5,4)+1 = 6. But dist[1][1] is already 6! Since 6 is NOT < 6, we do NOT push a duplicate. The dist array prevents redundant heap entries.'
+  },
+  {
+    id: 10, phase:'expand', phaseLabel:'POP HEAP', phaseClass:'phase-expand',
+    activeLine: 1,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'settled',move:4,dist:5}],
+      [{state:'settled',move:4,dist:5}, {state:'current',move:4,dist:6}]
+    ],
+    heap: [],
+    heapTop: '(6,1,1)',
+    vars: {t:'6', rc:'(1,1)', newt:'—', action:'pop'},
+    changed: ['t','rc'],
+    title: 'Pop (t=6, r=1, c=1) — GOAL REACHED!',
+    text: 'Extract minimum: t=6, cell (1,1). Check staleness: t=6 > dist[1][1]=6? No — fresh. Now check goal: r=1 == n-1=1, c=1 == m-1=1. YES! We\'ve reached the goal!'
+  },
+  {
+    id: 11, phase:'result', phaseLabel:'RETURN 6', phaseClass:'phase-result',
+    activeLine: 3,
+    grid: [
+      [{state:'settled',move:0,dist:0}, {state:'settled',move:4,dist:5}],
+      [{state:'settled',move:4,dist:5}, {state:'goal',move:4,dist:6}]
+    ],
+    heap: [],
+    heapTop: '',
+    vars: {t:'6', rc:'(1,1)', newt:'—', action:'DONE ✓'},
+    changed: ['t','rc'],
+    title: 'Return 6 ✓ — Optimal Answer!',
+    text: 'Dijkstra guarantees that the first time we pop the goal cell, its time is optimal. The path was: (0,0) at t=0 → wait until t=4 → enter (0,1) at t=5 → enter (1,1) at t=6. Answer = 6.'
+  }
+];
+
+let current = 0;
+
+function buildGrid() {
+  const container = document.getElementById('grid-container');
+  for (let r = 0; r < N; r++) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    for (let c = 0; c < M; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell unvisited';
+      cell.id = 'gc-' + r + '-' + c;
+      cell.innerHTML = `<span class="cell-coord">${r},${c}</span>`
+                      + `<span class="cell-move" id="gm-${r}-${c}">t≥${MOVE_TIME[r][c]}</span>`
+                      + `<span class="cell-dist" id="gd-${r}-${c}">∞</span>`;
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+}
+
+function buildDots() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // Update grid cells
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < M; c++) {
+      const cellEl = document.getElementById('gc-' + r + '-' + c);
+      const distEl = document.getElementById('gd-' + r + '-' + c);
+      const cellData = step.grid[r][c];
+
+      // Map state to CSS class
+      const stateMap = {
+        'unvisited': 'unvisited',
+        'in-heap': 'in-heap',
+        'current': 'current',
+        'settled': 'settled',
+        'goal': 'goal'
+      };
+      cellEl.className = 'grid-cell ' + (stateMap[cellData.state] || 'unvisited');
+      distEl.textContent = cellData.dist;
+    }
+  }
+
+  // Update heap display
+  const heapEl = document.getElementById('heap-items');
+  if (!step.heap || step.heap.length === 0) {
+    heapEl.innerHTML = '<span class="heap-empty">empty</span>';
+  } else {
+    heapEl.innerHTML = step.heap.map((item, idx) => {
+      const isTop = idx === 0 && step.heapTop === item;
+      return `<span class="heap-item${isTop ? ' top' : ''}">${item}</span>`;
+    }).join('');
+  }
+
+  // Update variable tracker
+  const vars = step.vars;
+  document.getElementById('vv-t').textContent = vars.t || '—';
+  document.getElementById('vv-rc').textContent = vars.rc || '—';
+  document.getElementById('vv-newt').textContent = vars.newt || '—';
+  document.getElementById('vv-action').textContent = vars.action || '—';
+
+  const changed = step.changed || [];
+  document.getElementById('vb-t').classList.toggle('changed', changed.includes('t'));
+  document.getElementById('vb-rc').classList.toggle('changed', changed.includes('rc'));
+  document.getElementById('vb-newt').classList.toggle('changed', changed.includes('newt'));
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildGrid();
+buildDots();
+render();
+</script>
+</body>
+</html>

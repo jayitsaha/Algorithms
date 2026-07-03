@@ -1,81 +1,946 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Cracking the Safe — LC #753</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#753 · Cracking the Safe</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── De Bruijn Diagram ── */
+.debruijn-diagram{display:flex;justify-content:center;margin:1.25rem 0}
+.debruijn-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;text-align:center;max-width:500px;width:100%}
+.debruijn-box h4{font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+.db-nodes{display:flex;gap:32px;justify-content:center;align-items:center;margin-bottom:16px}
+.db-node{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--blue-bg);border:2.5px solid var(--blue-border);
+  color:var(--blue-text);font-family:var(--mono);font-size:15px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.db-edge-list{font-family:var(--mono);font-size:12px;line-height:2.1;color:var(--text2);text-align:left;padding:8px 0}
+
+/* ── Viz Area (Graph) ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.graph-container{display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.graph-row-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
+.graph-nodes-row{display:flex;gap:32px;justify-content:center;align-items:center}
+.gnode{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;
+  border:3px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+  position:relative;
+}
+.gnode.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.gnode.current{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.gnode.visited{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.gnode.start-node{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.node-label{position:absolute;bottom:-22px;font-size:10px;font-weight:600;color:var(--text3);white-space:nowrap}
+
+/* ── Output String Display ── */
+.output-display{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:0.5rem}
+.output-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
+.output-chars{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:46px;align-items:center}
+.ochars-cell{
+  width:40px;height:40px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text3);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.ochars-cell.start-char{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.ochars-cell.added{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.ochars-cell.just-added{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.ochars-cell.placeholder{background:var(--bg2);border-color:var(--border);color:var(--text3);opacity:0.5}
+
+/* ── Edges Grid ── */
+.edges-section{display:flex;flex-direction:column;align-items:center;gap:8px}
+.edges-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
+.edges-grid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.edge-pill{
+  padding:5px 14px;border-radius:20px;
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text3);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  min-width:48px;text-align:center;
+}
+.edge-pill.unvisited{background:var(--surface);border-color:var(--border2);color:var(--text3)}
+.edge-pill.just-used{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text);font-weight:700}
+.edge-pill.used{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:36px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-dfs{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-back{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){opacity:0.88}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:14px;height:14px;border-radius:50%;border:2px solid}
+.sw-start{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-current{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-visited{background:var(--green-bg);border-color:var(--green-border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Cracking the Safe</h1>
-<div class="subtitle">LeetCode #753 &mdash; De Bruijn Sequence</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">De Bruijn Sequence</span><span class="tag tag-cx">O(k^n) Time &middot; O(k^n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #753</div>
+  <h1>Cracking the Safe</h1>
+  <p class="subtitle">Find the shortest string that contains every possible k-digit password (using digits 0..n-1) as a contiguous substring.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">De Bruijn Sequence</span>
+    <span class="tag tag-pattern">Eulerian Circuit</span>
+    <span class="tag tag-complexity">Time: O(n^k)</span>
+    <span class="tag tag-complexity">Space: O(n^k)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Imagine a digital safe: you enter a sequence of digits and whenever the last <strong>k</strong> digits match the password, it unlocks. You don't know the password, but you want to enter the <em>shortest possible string</em> that guarantees you've tried every possible k-digit combination at some point as a sliding window.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>There are <strong>n<sup>k</sup></strong> possible k-digit passwords (each of the k positions can be any of n digits). The shortest string that contains all of them as substrings is called a <strong>De Bruijn sequence</strong>. It has length exactly <strong>n<sup>k</sup> + k − 1</strong> — each new character typed creates exactly one new k-digit window. The key: model this as finding an <strong>Eulerian circuit</strong> in a directed graph.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ n=2, k=2: Answer "00110"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          Windows in "00110":<br>
+          pos 0-1: <strong>00</strong> ✓<br>
+          pos 1-2: <strong>01</strong> ✓<br>
+          pos 2-3: <strong>11</strong> ✓<br>
+          pos 3-4: <strong>10</strong> ✓<br>
+          All 4 covered in 5 chars!
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naive: just concatenate all passwords</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.9">
+          "00" + "01" + "10" + "11"<br>
+          = "00011011" (8 chars)<br>
+          <br>
+          Wastes k-1=1 overlap on<br>
+          every transition. Suboptimal!
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> k=1 means single-digit passwords — answer is "012...n-1" (n chars). n=1 means only digit 0 — answer is "000...0" (k chars). The optimal length is always n<sup>k</sup> + k − 1, which grows exponentially with k.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Generate De Bruijn sequence: every possible length-n combination appears exactly once. Treat as Euler circuit on (n-1)-digit nodes.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: De Bruijn Sequence via Hierholzer's</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: De Bruijn Sequence via Hierholzer's</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">node=(n-1)-gram; edges=n-grams</span></div><div class="step"><span class="snum">2</span><span class="stxt">Hierholzer's Euler circuit: start from '0'*(n-1)</span></div><div class="step"><span class="snum">3</span><span class="stxt">Result = start node + edge labels</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(k^n)</strong> | Space: <strong>O(k^n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def crackSafe(n, k):
-    if n==1: return ''.join(map(str,range(k)))
-    seen=set(); result=[]; start='0'*(n-1)
-    def dfs(node):
-        for c in map(str,range(k-1,-1,-1)):
-            edge=node+c
-            if edge not in seen: seen.add(edge); dfs(edge[1:]); result.append(c)
-    dfs(start)
-    return start+''.join(reversed(result))</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">De Bruijn sequence has all k^n combinations; length = k^n + n - 1</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>De Bruijn Sequence via Hierholzer's</td><td>O(k^n)</td><td>O(k^n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Reconstruct Itinerary</span><span class="pd dh">Hard</span> — Euler path application</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>De Bruijn Sequence</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Cracking the Safe"}, "title": "De Bruijn Sequence via Hierholzer's", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: De Bruijn Graph + Hierholzer's Eulerian Circuit</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The breakthrough is mapping the problem to graph theory. Construct a <strong>De Bruijn graph</strong>: each node is a <strong>(k−1)-digit string</strong>. A directed edge from node <code>u</code> to node <code>v</code> exists if <code>u[1:] == v[:-1]</code> — meaning: drop the first digit of u, append any digit d, and get v. That edge represents the k-digit combination <code>u + d</code>.</p>
+
+    <div class="debruijn-diagram">
+      <div class="debruijn-box">
+        <h4>De Bruijn Graph: n=2, k=2</h4>
+        <div class="db-nodes">
+          <div class="db-node">"0"</div>
+          <div style="font-family:var(--mono);color:var(--text3);font-size:12px;text-align:center;line-height:1.8">
+            "0"→"0" via digit 0 = combo "00"<br>
+            "0"→"1" via digit 1 = combo "01"<br>
+            "1"→"0" via digit 0 = combo "10"<br>
+            "1"→"1" via digit 1 = combo "11"
+          </div>
+          <div class="db-node">"1"</div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);font-style:italic">Each edge = one k-digit combination. Every node has out-degree = in-degree = n.</div>
+      </div>
+    </div>
+
+    <p>An <strong>Eulerian circuit</strong> — a cycle that traverses every edge exactly once — covers all n<sup>k</sup> combinations exactly once. We find it using <strong>Hierholzer's algorithm</strong>, which runs in O(E) time via DFS with post-order collection.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Start from node "0"*(k-1)</strong> — the all-zeros node. Maintain a <code>visited</code> set of edges (encoded as node+digit strings, which are exactly the k-digit combinations).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>DFS: try each digit 0..n-1</strong> from the current node. For each digit d, the edge is <code>node + str(d)</code>. If not yet visited, mark it and recurse into the next node <code>node[1:] + str(d)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Post-order collection (Hierholzer's trick):</strong> After returning from recursion, append the digit <code>d</code> to the result list. This builds the circuit in reverse — the last edge explored gets appended first.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Build final string:</strong> Reverse the result list (to get forward order), then prepend the starting node "0"*(k-1). Total length = (k-1) + n<sup>k</sup> = n<sup>k</sup> + k − 1.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why an Eulerian Circuit Exists</div>
+      <p>In the De Bruijn graph, every node representing a (k-1)-string has exactly <strong>n outgoing edges</strong> (append digit 0, 1, ..., n-1) and exactly <strong>n incoming edges</strong> (from each node that matches on k-2 chars). Since in-degree equals out-degree at every node, and the graph is strongly connected, Euler's theorem guarantees an Eulerian circuit exists.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>Each directed edge in the De Bruijn graph corresponds to exactly one unique k-digit combination — there is a perfect bijection between edges and combinations. Visiting every edge exactly once (Eulerian circuit) means reading off every k-digit combination exactly once as we traverse the graph. The string produced by the circuit contains each combination as a contiguous window.</p>
+    </div>
+
+    <p><strong>Why Hierholzer's post-order trick is correct:</strong> When DFS backtracks, it has fully explored all paths forward from the current edge. By appending the digit <em>after</em> returning from recursion, we record edges in the order of last-exit — exactly the reverse of the Eulerian circuit traversal. Reversing the collected list reconstructs the forward Eulerian path. This avoids the classical pitfall of getting "stuck" at a dead end before visiting all edges — the post-order collection always produces a valid complete circuit.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why the result is shortest possible:</strong> The starting (k-1) characters are fixed. Each subsequent character typed creates exactly one new k-digit window. Since there are n<sup>k</sup> combinations to cover and each new character covers exactly one, we need at least n<sup>k</sup> additional characters. Total minimum = (k-1) + n<sup>k</sup> = n<sup>k</sup> + k − 1. The De Bruijn sequence achieves this bound.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Trap: Greedy Digit Order vs. Correctness</div>
+      <p>Trying digits in ascending order (0, 1, 2...) is one valid strategy — any complete ordering works. The post-order Hierholzer approach is what guarantees we don't dead-end early. A naive greedy that stops at any dead-end without backtracking would produce an incorrect incomplete sequence.</p>
+    </div>
+
+    <p><strong>Analogy:</strong> Think of laying a path through a maze where every corridor (edge) must be walked exactly once. Hierholzer says: walk greedily, and when you hit a dead end, back up and splice your walked path into the circuit. The post-order collection does exactly this splicing automatically via recursion.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Hierholzer's Eulerian Circuit DFS (Optimal — Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def crackSafe(n: int, k: int) -> str:</span></div>
+<div class="ann-line"><span class="acode">    visited = set()                      </span><span class="aann">← Visited edges, encoded as node+digit = k-char combo string</span></div>
+<div class="ann-line"><span class="acode">    result = []                          </span><span class="aann">← Post-order digit collection (Hierholzer trick)</span></div>
+<div class="ann-line"><span class="acode">    start = "0" * (k - 1)               </span><span class="aann">← Starting node is (k-1) zeros; k=1 means start=""</span></div>
+<div class="ann-line"><span class="acode">    def dfs(node):                       </span><span class="aann">← DFS from current (k-1)-digit node in De Bruijn graph</span></div>
+<div class="ann-line"><span class="acode">        for d in range(n):               </span><span class="aann">← Try each digit in order (ascending gives lex-smallest result)</span></div>
+<div class="ann-line"><span class="acode">            edge = node + str(d)         </span><span class="aann">← This edge label = the k-digit combination (node prefix + digit)</span></div>
+<div class="ann-line"><span class="acode">            if edge not in visited:      </span><span class="aann">← Only traverse each k-combination once</span></div>
+<div class="ann-line"><span class="acode">                visited.add(edge)        </span><span class="aann">← Mark edge used BEFORE recursing (important: pre-mark to avoid revisit)</span></div>
+<div class="ann-line"><span class="acode">                dfs(node[1:] + str(d))   </span><span class="aann">← Move to next node: slide window — drop first char, append digit</span></div>
+<div class="ann-line"><span class="acode">                result.append(str(d))    </span><span class="aann">← POST-ORDER: append digit AFTER full subtree explored</span></div>
+<div class="ann-line"><span class="acode">    dfs(start)                           </span><span class="aann">← Launch DFS from all-zeros node</span></div>
+<div class="ann-line"><span class="acode">    return start + "".join(reversed(result))  </span><span class="aann">← Reverse (post-order→forward) then prepend starting node</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why reversed(result)?</div>
+      <p>Hierholzer's post-order collects digits in the order DFS unwinds — last-in, first-out. The deepest recursive call (the last digit of the circuit) gets appended first to <code>result</code>. Reversing restores the correct forward traversal order. Equivalently: the result is built like a stack that we read in reverse.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Backtracking (Brute Force, simpler to derive)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def crackSafe_backtrack(n: int, k: int) -> str:</span></div>
+<div class="ann-line"><span class="acode">    target = n ** k                      </span><span class="aann">← Need to cover all n^k combinations</span></div>
+<div class="ann-line"><span class="acode">    visited = set()                      </span><span class="aann">← Track which k-combos have been covered</span></div>
+<div class="ann-line"><span class="acode">    result = list("0" * k)               </span><span class="aann">← Start with "000...0" (covers first combo)</span></div>
+<div class="ann-line"><span class="acode">    visited.add("0" * k)                 </span><span class="aann">← Mark initial combo as covered</span></div>
+<div class="ann-line"><span class="acode">    def backtrack() -> bool:</span></div>
+<div class="ann-line"><span class="acode">        if len(visited) == target:        </span><span class="aann">← All combos covered → success</span></div>
+<div class="ann-line"><span class="acode">            return True</span></div>
+<div class="ann-line"><span class="acode">        node = "".join(result[-(k-1):])  </span><span class="aann">← Current (k-1)-suffix = current De Bruijn graph node</span></div>
+<div class="ann-line"><span class="acode">        for d in range(n - 1, -1, -1):  </span><span class="aann">← Try digits (descending = heuristic for fewer backtracks)</span></div>
+<div class="ann-line"><span class="acode">            nxt = node + str(d)          </span><span class="aann">← Candidate next k-combo</span></div>
+<div class="ann-line"><span class="acode">            if nxt not in visited:</span></div>
+<div class="ann-line"><span class="acode">                visited.add(nxt); result.append(str(d))</span></div>
+<div class="ann-line"><span class="acode">                if backtrack(): return True</span></div>
+<div class="ann-line"><span class="acode">                visited.discard(nxt); result.pop()  </span><span class="aann">← Undo and try next option</span></div>
+<div class="ann-line"><span class="acode">        return False</span></div>
+<div class="ann-line"><span class="acode">    backtrack()</span></div>
+<div class="ann-line"><span class="acode">    return "".join(result)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Algorithm Deep-Dive: Hierholzer's Algorithm</div>
+      <p><strong>Origin:</strong> Carl Hierholzer, 1873. Finds Eulerian circuits in O(E) time and O(E) space.</p>
+      <p style="margin-top:0.5rem"><strong>Core invariant:</strong> When DFS exits from an edge, all edges reachable via that edge have already been processed. Post-order collection therefore places each edge exactly where it belongs in the final circuit — in reverse.</p>
+      <p style="margin-top:0.5rem"><strong>When to recognize:</strong> "Visit every edge exactly once" + directed graph with equal in/out degrees + strongly connected → Hierholzer's Eulerian circuit. Classic problems: Reconstruct Itinerary, Valid Arrangement of Pairs, this problem.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the overlap structure</div>
+        <p style="font-size:14px;color:var(--text)">Notice that consecutive k-digit passwords share k-1 digits of overlap. "001" and "010" share "01". This screams "sliding window" and "graph where nodes are (k-1)-length strings". State this observation aloud.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Build the De Bruijn graph</div>
+        <p style="font-size:14px;color:var(--text)">"Nodes = (k-1)-digit strings. Edges = k-digit combinations. There's an edge from node u to node v when v = u[1:] + some digit. Each edge represents one k-combination. I need to traverse every edge exactly once — this is an Eulerian circuit problem."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Prove Eulerian circuit exists</div>
+        <p style="font-size:14px;color:var(--text)">"Every node has n outgoing edges (append any of n digits) and n incoming edges (from n possible predecessors). In-degree equals out-degree everywhere → Eulerian circuit guaranteed by Euler's theorem."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Apply Hierholzer's DFS</div>
+        <p style="font-size:14px;color:var(--text)">"Run DFS marking visited edges. Collect digits in post-order and reverse at the end. This is Hierholzer's algorithm — finds Eulerian circuit in O(E) = O(n^k) time and space."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is equivalent to finding a De Bruijn sequence.<br>
+Model as a directed graph: (k-1)-length strings as nodes, k-length combinations as edges.<br>
+Every node has equal in/out degree n → Eulerian circuit exists.<br>
+Find it with Hierholzer's DFS: mark edges visited, collect digits post-order, then reverse.<br>
+Prepend the start node. Result length = n^k + k - 1, which is provably optimal.<br>
+Time and space are both O(n^k)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"How many valid answers exist?"</strong> → Exponentially many; any edge-traversal order gives a valid De Bruijn sequence</li>
+        <li><strong>"What's the output length?"</strong> → n<sup>k</sup> + k − 1 (prove: k-1 start chars + n<sup>k</sup> edges, one char per edge)</li>
+        <li><strong>"Can you do it iteratively?"</strong> → Yes, use an explicit stack instead of recursion for Hierholzer's</li>
+        <li><strong>"What if not all digits need to appear?"</strong> → Generalize: any k-digit alphabet, same approach</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=2, k=2 → "00110"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="graph-container">
+        <!-- Graph nodes -->
+        <div class="graph-row-label">De Bruijn Graph Nodes (k−1 = 1 digit each)</div>
+        <div class="graph-nodes-row">
+          <div class="gnode start-node" id="gnode-0">
+            "0"
+            <span class="node-label">start</span>
+          </div>
+          <div class="gnode normal" id="gnode-1">
+            "1"
+          </div>
+        </div>
+
+        <!-- Output string being built -->
+        <div class="output-display">
+          <div class="output-label">Result String</div>
+          <div class="output-chars" id="output-chars">
+            <div class="ochars-cell placeholder" id="oc-0">?</div>
+            <div class="ochars-cell placeholder" id="oc-1">?</div>
+            <div class="ochars-cell placeholder" id="oc-2">?</div>
+            <div class="ochars-cell placeholder" id="oc-3">?</div>
+            <div class="ochars-cell placeholder" id="oc-4">?</div>
+          </div>
+        </div>
+
+        <!-- Edge coverage tracker -->
+        <div class="edges-section">
+          <div class="edges-label">K-Combos Covered (4 total edges)</div>
+          <div class="edges-grid">
+            <div class="edge-pill unvisited" id="ep-00">"00"</div>
+            <div class="edge-pill unvisited" id="ep-01">"01"</div>
+            <div class="edge-pill unvisited" id="ep-10">"10"</div>
+            <div class="edge-pill unvisited" id="ep-11">"11"</div>
+          </div>
+        </div>
+
+        <!-- Variable tracker -->
+        <div class="var-tracker">
+          <div class="var-box" id="vb-node">
+            <span class="var-name">node</span>
+            <span class="var-val" id="vv-node">"0"</span>
+          </div>
+          <div class="var-box" id="vb-digit">
+            <span class="var-name">digit d</span>
+            <span class="var-val" id="vv-digit">—</span>
+          </div>
+          <div class="var-box" id="vb-covered">
+            <span class="var-name">covered</span>
+            <span class="var-val" id="vv-covered">0/4</span>
+          </div>
+          <div class="var-box" id="vb-result">
+            <span class="var-name">result[]</span>
+            <span class="var-val" id="vv-result">[]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def crackSafe(n, k):</div>
+      <div class="code-line" id="cl-1">    visited = set(); result = []</div>
+      <div class="code-line" id="cl-2">    start = "0" * (k - 1)  # → "0"</div>
+      <div class="code-line" id="cl-3">    def dfs(node):</div>
+      <div class="code-line" id="cl-4">        for d in range(n):   # d = 0, 1</div>
+      <div class="code-line" id="cl-5">            edge = node + str(d)</div>
+      <div class="code-line" id="cl-6">            if edge not in visited:</div>
+      <div class="code-line" id="cl-7">                visited.add(edge)</div>
+      <div class="code-line" id="cl-8">                dfs(node[1:] + str(d))</div>
+      <div class="code-line" id="cl-9">                result.append(str(d))</div>
+      <div class="code-line" id="cl-10">    dfs(start)</div>
+      <div class="code-line" id="cl-11">    return start + "".join(reversed(result))</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Welcome to Cracking the Safe</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the Hierholzer DFS on the De Bruijn graph for n=2, k=2.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-start"></div> Start node</div>
+      <div class="legend-item"><div class="legend-swatch sw-current"></div> Currently in DFS</div>
+      <div class="legend-item"><div class="legend-swatch sw-visited"></div> Returned from (done)</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> Unvisited</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Model consecutive passwords as edges in a directed graph — (k-1)-strings are nodes, k-combos are edges</div>
+      <div class="takeaway">Equal in/out degree at every node → Eulerian circuit guaranteed (Euler's theorem)</div>
+      <div class="takeaway">Hierholzer's DFS: mark edges before recursing, append digits post-order, then reverse</div>
+      <div class="takeaway">Result length n<sup>k</sup> + k − 1 is provably optimal — one new k-window per character appended</div>
+      <div class="takeaway">Any digit-visit order in DFS gives a valid De Bruijn sequence; ascending order gives lexicographically smallest</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Backtracking (brute)</td>
+          <td class="mark-bad">O(n<sup>k</sup> · k) worst</td>
+          <td>O(n<sup>k</sup>)</td>
+          <td>Easier to derive; slow for large inputs</td>
+        </tr>
+        <tr>
+          <td><strong>Hierholzer DFS ✓</strong></td>
+          <td class="mark-good">O(n<sup>k</sup>)</td>
+          <td class="mark-good">O(n<sup>k</sup>)</td>
+          <td>Optimal; provably linear in output size</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Shortest string containing every k-length combination" → De Bruijn sequence + Eulerian circuit</li>
+        <li>"Visit every edge exactly once in a directed graph" → Hierholzer's algorithm</li>
+        <li>"Directed graph with equal in/out degree at every node" → Eulerian circuit exists</li>
+        <li>"Sliding window over a sequence where overlap matters" → consider De Bruijn graph model</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same technique: Eulerian Circuit / De Bruijn)</div>
+      <div class="related-item"><strong>Reconstruct Itinerary</strong><span class="related-diff diff-hard">Hard</span> — Eulerian path in directed graph of flight segments; same Hierholzer's DFS (#332)</div>
+      <div class="related-item"><strong>Valid Arrangement of Pairs</strong><span class="related-diff diff-hard">Hard</span> — Find Eulerian path in directed graph of pairs (#2097)</div>
+      <div class="related-item"><strong>Find the Shortest Superstring</strong><span class="related-diff diff-hard">Hard</span> — DP on subsets + string overlap; related coverage problem (#943)</div>
+      <div class="related-item"><strong>Concatenated Words</strong><span class="related-diff diff-hard">Hard</span> — Check if words can be built from other words — string coverage (#472)</div>
+      <div class="related-item"><strong>Maximum Number of Occurrences of a Substring</strong><span class="related-diff diff-med">Medium</span> — Frequency analysis of k-length substrings (#1297)</div>
+      <div class="related-item"><strong>Count Unique Characters of All Substrings of a Given String</strong><span class="related-diff diff-hard">Hard</span> — Sliding window over all k-substrings (#828)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference &amp; Classification</div>
+      <p>Main Pattern: <strong>Graph</strong> — specifically Eulerian Circuit<br>
+      Sub-Pattern: <strong>De Bruijn Sequence</strong> (Eulerian Circuit on De Bruijn Graph)<br>
+      Named Algorithm: <strong>Hierholzer's Algorithm</strong> (1873) for finding Eulerian circuits in O(E)<br>
+      Source: Analysis (De Bruijn Sequence is a specialized sub-pattern)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// Walkthrough data for n=2, k=2
+// DFS trace:
+//   dfs("0"):
+//     d=0: edge "00" not visited → mark, recurse dfs("0") [inner]
+//       d=0: "00" visited → skip
+//       d=1: "01" not visited → mark, recurse dfs("1")
+//         d=0: "10" not visited → mark, recurse dfs("0") [deep]
+//           d=0: "00" visited; d=1: "01" visited → return
+//         post-order: result.append("0") → ["0"]
+//         d=1: "11" not visited → mark, recurse dfs("1") [deep2]
+//           d=0: "10" visited; d=1: "11" visited → return
+//         post-order: result.append("1") → ["0","1"]
+//       post-order: result.append("1") → ["0","1","1"]
+//     post-order (for d=0 from outer): result.append("0") → ["0","1","1","0"]
+//   d=1: "01" visited → skip
+// reversed(["0","1","1","0"]) = "0","1","1","0" → string "0110"
+// start + "0110" = "0" + "0110" = "00110"
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    currentNodes:['0'], visitedEdges:[], justUsed:null, result:[],
+    outputStr:'', activeLine:1,
+    title:'Initialize — n=2, k=2',
+    text:'n=2 digits (0,1), k=2 length passwords. Total passwords = 2²=4. De Bruijn graph: nodes are (k-1)=1-digit strings: "0" and "1". Each edge is a 2-digit combination. We need an Eulerian circuit — traverse all 4 edges exactly once.',
+    changedVars:[]
+  },
+  {
+    id:1, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['0'], visitedEdges:[], justUsed:null, result:[],
+    outputStr:'', activeLine:4,
+    title:'dfs("0") starts — try digit d=0',
+    text:'Launch DFS from start node "0". The for loop begins: d=0. Compute edge = "0" + "0" = "00". Is "00" in visited? No → it\'s a new combination to explore.',
+    changedVars:['node','digit']
+  },
+  {
+    id:2, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['0'], visitedEdges:['00'], justUsed:'00', result:[],
+    outputStr:'', activeLine:7,
+    title:'Mark edge "00" visited, recurse into dfs("0")',
+    text:'Add "00" to visited set. Next node = "0"[1:] + "0" = "" + "0" = "0". Recurse: dfs("0"). Combination "00" is now locked — that password window is covered.',
+    changedVars:['covered']
+  },
+  {
+    id:3, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['0'], visitedEdges:['00'], justUsed:null, result:[],
+    outputStr:'', activeLine:4,
+    title:'dfs("0") [inner] — d=0: "00" already visited, d=1: "01" is new',
+    text:'Inner recursive call to dfs("0"). d=0: edge "00" is in visited — skip. d=1: edge "01" not visited! New unvisited edge found.',
+    changedVars:['digit']
+  },
+  {
+    id:4, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['1'], visitedEdges:['00','01'], justUsed:'01', result:[],
+    outputStr:'', activeLine:7,
+    title:'Mark "01" visited, recurse into dfs("1")',
+    text:'Add "01" to visited. Next node = "0"[1:] + "1" = "" + "1" = "1". Recurse: dfs("1"). Two combinations covered: "00" and "01".',
+    changedVars:['node','covered']
+  },
+  {
+    id:5, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['0'], visitedEdges:['00','01','10'], justUsed:'10', result:[],
+    outputStr:'', activeLine:7,
+    title:'dfs("1") — d=0: "10" not visited → mark, recurse dfs("0")',
+    text:'At node "1", d=0: edge "10" not visited → add to visited. Next node = "1"[1:] + "0" = "0". Recurse: dfs("0"). Three combinations covered: "00", "01", "10".',
+    changedVars:['node','covered']
+  },
+  {
+    id:6, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['0'], visitedEdges:['00','01','10'], justUsed:null, result:[],
+    outputStr:'', activeLine:4,
+    title:'dfs("0") [deep] — both edges "00","01" already visited → dead end',
+    text:'At node "0" (deep call). d=0: "00" visited. d=1: "01" visited. No new edges from here! The for loop finishes without recursing. Return from this deep call.',
+    changedVars:[]
+  },
+  {
+    id:7, phase:'back', phaseLabel:'BACKTRACK', phaseClass:'phase-back',
+    currentNodes:['1'], visitedEdges:['00','01','10'], justUsed:null, result:['0'],
+    outputStr:'', activeLine:9,
+    title:'Post-order: append "0" to result',
+    text:'Returned from deep dfs("0"). Back in dfs("1"), completing the d=0 branch. POST-ORDER: result.append("0"). result = ["0"]. This digit "0" corresponds to the edge "10" we explored.',
+    changedVars:['result']
+  },
+  {
+    id:8, phase:'dfs', phaseLabel:'DFS', phaseClass:'phase-dfs',
+    currentNodes:['1'], visitedEdges:['00','01','10','11'], justUsed:'11', result:['0'],
+    outputStr:'', activeLine:7,
+    title:'dfs("1") — d=1: "11" not visited → mark, recurse dfs("1")',
+    text:'Continuing in dfs("1"), now d=1: edge "11" not visited → add it. Next node = "1"[1:] + "1" = "1". Recurse: dfs("1"). ALL 4 combinations now visited: "00","01","10","11"!',
+    changedVars:['covered']
+  },
+  {
+    id:9, phase:'back', phaseLabel:'BACKTRACK', phaseClass:'phase-back',
+    currentNodes:['1'], visitedEdges:['00','01','10','11'], justUsed:null, result:['0','1'],
+    outputStr:'', activeLine:9,
+    title:'dfs("1") [deep2]: all edges visited → return. Append "1".',
+    text:'In deeper dfs("1"): d=0: "10" visited. d=1: "11" visited. No new edges. Return. Back in previous dfs("1"), completing d=1 branch. POST-ORDER: result.append("1"). result = ["0","1"].',
+    changedVars:['result']
+  },
+  {
+    id:10, phase:'back', phaseLabel:'BACKTRACK', phaseClass:'phase-back',
+    currentNodes:['0'], visitedEdges:['00','01','10','11'], justUsed:null, result:['0','1','1'],
+    outputStr:'', activeLine:9,
+    title:'Return from dfs("1"). Back in inner dfs("0") — append "1".',
+    text:'Returned from dfs("1"). Back in inner dfs("0") completing the d=1 branch ("01" edge). POST-ORDER: result.append("1"). result = ["0","1","1"]. The d loop is done. Return.',
+    changedVars:['result']
+  },
+  {
+    id:11, phase:'back', phaseLabel:'BACKTRACK', phaseClass:'phase-back',
+    currentNodes:['0'], visitedEdges:['00','01','10','11'], justUsed:null, result:['0','1','1','0'],
+    outputStr:'', activeLine:9,
+    title:'Return from inner dfs("0"). Outer dfs("0") — append "0".',
+    text:'Returned from inner dfs("0"). Back in outermost dfs("0") completing the d=0 branch ("00" edge). POST-ORDER: result.append("0"). result = ["0","1","1","0"]. d=1: "01" visited → skip. DFS complete!',
+    changedVars:['result']
+  },
+  {
+    id:12, phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result',
+    currentNodes:[], visitedEdges:['00','01','10','11'], justUsed:null, result:['0','1','1','0'],
+    outputStr:'00110', activeLine:11,
+    title:'Final Answer: "00110" — All 4 passwords covered!',
+    text:'reversed(["0","1","1","0"]) → "0110". Prepend start "0": "0" + "0110" = "00110". Length = 5 = n^k + k-1 = 4+1 = 5. Verify windows: "00"✓ "01"✓ "11"✓ "10"✓. The safe is cracked!',
+    changedVars:['output']
+  }
+];
+
+let current = 0;
+
+const ALL_EDGES = ['00','01','10','11'];
+
+function render() {
+  const step = steps[current];
+
+  // ── Graph Nodes ──
+  ['0','1'].forEach(n => {
+    const el = document.getElementById('gnode-' + n);
+    el.className = 'gnode';
+    const isCurrent = step.currentNodes.includes(n) && step.phase !== 'result';
+    const isDone = step.phase === 'result';
+    if (isDone) {
+      el.classList.add('visited');
+    } else if (isCurrent) {
+      // If it's the very first step, keep purple start styling for "0"
+      if (current === 0 && n === '0') {
+        el.classList.add('start-node');
+      } else {
+        el.classList.add('current');
+      }
+    } else if (step.visitedEdges.length > 0) {
+      el.classList.add('normal');
+    } else {
+      el.classList.add('normal');
+    }
+  });
+
+  // ── Output string chars ──
+  const finalStr = step.outputStr;
+  for (let i = 0; i < 5; i++) {
+    const cell = document.getElementById('oc-' + i);
+    if (step.phase === 'result') {
+      cell.className = 'ochars-cell added';
+      cell.textContent = finalStr[i] || '?';
+    } else if (i === 0) {
+      // Start char always shown
+      cell.className = 'ochars-cell start-char';
+      cell.textContent = '0';
+    } else {
+      cell.className = 'ochars-cell placeholder';
+      cell.textContent = '?';
+    }
+  }
+
+  // ── Edge pills ──
+  ALL_EDGES.forEach(e => {
+    const pill = document.getElementById('ep-' + e);
+    if (e === step.justUsed) {
+      pill.className = 'edge-pill just-used';
+    } else if (step.visitedEdges.includes(e)) {
+      pill.className = 'edge-pill used';
+    } else {
+      pill.className = 'edge-pill unvisited';
+    }
+  });
+
+  // ── Code panel ──
+  for (let i = 0; i <= 11; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Variable tracker ──
+  const nodeStr = step.currentNodes.length > 0 ? '"' + step.currentNodes[0] + '"' : '—';
+  const digitStr = (step.phase === 'dfs' && step.justUsed !== null)
+    ? step.justUsed.slice(-1)
+    : (step.phase === 'dfs' ? '…' : '—');
+  const coveredStr = step.visitedEdges.length + '/4';
+  const resultStr = '[' + step.result.map(d => '"'+d+'"').join(',') + ']';
+
+  document.getElementById('vv-node').textContent = nodeStr;
+  document.getElementById('vv-digit').textContent = digitStr;
+  document.getElementById('vv-covered').textContent = coveredStr;
+  document.getElementById('vv-result').textContent = resultStr;
+
+  document.getElementById('vb-node').classList.toggle('changed', step.changedVars.includes('node'));
+  document.getElementById('vb-digit').classList.toggle('changed', step.changedVars.includes('digit'));
+  document.getElementById('vb-covered').classList.toggle('changed', step.changedVars.includes('covered'));
+  document.getElementById('vb-result').classList.toggle('changed', step.changedVars.includes('result'));
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

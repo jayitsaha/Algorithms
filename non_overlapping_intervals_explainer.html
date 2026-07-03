@@ -1,234 +1,832 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Non-overlapping Intervals – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#435 · Non-overlapping Intervals</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Timeline Diagram */
+.timeline-wrapper{overflow-x:auto;margin:1.25rem 0}
+.timeline-diagram{position:relative;min-width:500px;background:var(--bg2);border-radius:var(--radius);padding:16px 16px 36px 48px}
+.tl-axis{position:absolute;bottom:24px;left:48px;right:16px;height:2px;background:var(--border2)}
+.tl-tick{position:absolute;bottom:18px;width:1px;background:var(--border2);height:8px}
+.tl-tick-lbl{position:absolute;bottom:4px;font-size:9px;font-family:var(--mono);color:var(--text3);transform:translateX(-50%)}
+.tl-bar{position:absolute;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:700;font-family:var(--mono);white-space:nowrap}
+.tl-bar.keep{background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green-text)}
+.tl-bar.remove{background:var(--red-bg);border:1.5px solid var(--red-border);color:var(--red-text);opacity:0.8}
+.tl-row-lbl{position:absolute;left:4px;font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono)}
+
+/* Viz Area */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Interval Cards */
+.interval-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;justify-content:center}
+.iv-card{
+  min-width:76px;padding:10px 12px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;
+  border:2px solid var(--border2);background:var(--surface);
+  font-family:var(--mono);font-size:14px;font-weight:600;
+  transition:all 0.3s;flex-shrink:0;
+}
+.iv-card .iv-idx{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.iv-card .iv-val{color:var(--text)}
+.iv-card.normal{background:var(--surface);border-color:var(--border2)}
+.iv-card.current{background:var(--blue-bg);border-color:var(--blue-mid)}
+.iv-card.current .iv-val{color:var(--blue-text)}
+.iv-card.keep{background:var(--green-bg);border-color:var(--green-border)}
+.iv-card.keep .iv-val{color:var(--green-text)}
+.iv-card.removed{background:var(--red-bg);border-color:var(--red-border);opacity:0.75}
+.iv-card.removed .iv-val{color:var(--red-text);text-decoration:line-through}
+.iv-card.done{background:var(--bg2);border-color:var(--border)}
+.iv-card.done .iv-val{color:var(--text3)}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-scan{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-keep{background:var(--green-bg);color:var(--green-mid)}
+.phase-remove{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-cur{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-keep{background:var(--green-bg);border-color:var(--green-border)}
+.sw-rem{background:var(--red-bg);border-color:var(--red-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Non-overlapping Intervals</h1>
-    <p class="subtitle">LeetCode #435 — Intervals · Sort by End, Count Removals</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Intervals</span>
-      <span class="tag tag-complexity">O(n log n) Time</span>
-      <span class="tag tag-complexity">O(n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Intervals</strong> using the <strong>Sort by End, Count Removals</strong> technique.</p>
-      <p>Pattern category: <strong>Intervals</strong>. Apply when: <em>Merge: sort+scan. Insert: find insert position+merge. Meeting rooms: min-heap of end times.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Sort by start time. Merge overlapping by extending end. Meeting rooms: sort+min-heap tracks ongoing meetings.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #435</div>
+  <h1>Non-overlapping Intervals</h1>
+  <p class="subtitle">Given an array of intervals, return the minimum number of intervals you need to remove to make the rest non-overlapping.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Intervals</span>
+    <span class="tag tag-pattern">Greedy · Sort by End</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(1)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Sort by End, Count Removals</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Sort intervals by start time</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Initialize result with first interval</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">For each subsequent interval:</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">  If overlap (curr.start ≤ prev.end): merge by extending end</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">  Else: append new interval</span></div>
-<div class="algo-step"><span class="step-num">6</span><span class="step-text">Return result</span></div>
-      </div>
-    </div>
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You're given a list of intervals on a number line. Some of them may overlap — they share a stretch of time. Your goal is to find the <strong>minimum number of intervals to delete</strong> so the rest are all non-overlapping.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight — Flip the Question</div>
+      <p>Don't think "what is the minimum to remove?" Think instead: <strong>"what is the maximum number I can KEEP?"</strong> Because removals = total − kept, maximizing kept automatically minimizes removals. This reframe transforms a confusing minimization into a clean maximization — one solvable with a classic greedy trick.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>After sorting by start: if current.start <= prev.end → overlap. Merge by taking max(end). Non-overlap → add new.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Input: may overlap</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          [1,3], [2,4], [3,5], [0,6]<br>
+          [2,4] overlaps [1,3]<br>
+          [0,6] overlaps everything<br>
+          Must remove some.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Output: max non-overlapping</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          Keep: [1,3], [3,5]<br>
+          They share only endpoint 3<br>
+          (touching = NOT overlapping)<br>
+          Removals: 2 → Answer: 2
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Overlap definition:</strong> Intervals A=[a1,a2] and B=[b1,b2] overlap if a1 &lt; b2 AND b1 &lt; a2. Touching at a single endpoint (e.g., [1,3] and [3,5]) does <em>not</em> count as overlapping.</p>
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> empty array → 0; all identical intervals → n−1; already all non-overlapping → 0; single interval → 0.</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">def merge(intervals):</div><div class="code-line">    intervals.sort(key=lambda x: x[0])</div><div class="code-line">    result = [intervals[0]]</div><div class="code-line">    for start, end in intervals[1:]:</div><div class="code-line">        if start <= result[-1][1]:</div><div class="code-line">            result[-1][1] = max(result[-1][1], end)</div><div class="code-line">        else:</div><div class="code-line">            result.append([start, end])</div><div class="code-line">    return result</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log n) &nbsp;|&nbsp; Space: O(n)</p>
-    </div>
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Greedy — Sort by End Time</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>This problem is equivalent to the <strong>Activity Selection Problem</strong> — a classic greedy problem. The insight: always prefer the interval that <em>ends earliest</em>, because it leaves the most room for future intervals on the timeline.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Merge: sort+scan. Insert: find insert position+merge. Meeting rooms: min-heap of end times.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Sort by end time:</strong> <code>intervals.sort(key=lambda x: x[1])</code>. After sorting we process intervals in order of when they finish — "earliest finisher first".</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Intervals problem using Sort by End, Count Removals. I'll sort intervals by start time then initialize result with first interval. Time: O(n log n), Space: O(n)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize:</strong> <code>count = 0</code> (removals so far) and <code>prev_end = -infinity</code> (no interval kept yet — anything can start here).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>No overlap (start ≥ prev_end):</strong> The current interval starts at or after the last kept interval ended. Keep it! Set <code>prev_end = current_end</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Overlap (start &lt; prev_end):</strong> Conflict! We must remove one. Remove the current interval (which ends later, since we sorted by end). Increment <code>count</code>. Do NOT update <code>prev_end</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return count:</strong> Every removal we counted was the minimum necessary decision. The total is the answer.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Sort by End, NOT by Start?</div>
+      <p>Sorting by start fails. Example: <code>[[0,10],[1,2],[2,3]]</code> sorted by start keeps [0,10] first (it starts earliest), then rejects [1,2] and [2,3] — that's 2 removals. But the optimal is to remove only [0,10] and keep [1,2] and [2,3] — just 1 removal. Sorting by <strong>end</strong> greedily keeps the interval that "frees up" the most future space.</p>
     </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+    <!-- Static timeline diagram -->
+    <p style="font-size:14px;font-weight:600;color:var(--text2);margin-top:1rem">Visual: Intervals sorted by end — greedy decision at each step</p>
+    <div class="timeline-wrapper">
+      <div class="timeline-diagram" style="height:196px">
+        <!-- axis 0 to 6, unit = 68px -->
+        <div class="tl-axis"></div>
+        <div class="tl-tick" style="left:0px"><span class="tl-tick-lbl" style="left:0px">0</span></div>
+        <div class="tl-tick" style="left:68px"><span class="tl-tick-lbl" style="left:68px">1</span></div>
+        <div class="tl-tick" style="left:136px"><span class="tl-tick-lbl" style="left:136px">2</span></div>
+        <div class="tl-tick" style="left:204px"><span class="tl-tick-lbl" style="left:204px">3</span></div>
+        <div class="tl-tick" style="left:272px"><span class="tl-tick-lbl" style="left:272px">4</span></div>
+        <div class="tl-tick" style="left:340px"><span class="tl-tick-lbl" style="left:340px">5</span></div>
+        <!-- Row labels -->
+        <span class="tl-row-lbl" style="top:20px">1.</span>
+        <span class="tl-row-lbl" style="top:50px">2.</span>
+        <span class="tl-row-lbl" style="top:80px">3.</span>
+        <span class="tl-row-lbl" style="top:110px">4.</span>
+        <span class="tl-row-lbl" style="top:140px">Legend:</span>
+        <!-- Bars: [1,2] KEEP -->
+        <div class="tl-bar keep" style="left:68px;width:68px;top:14px">[1,2] KEEP ✓</div>
+        <!-- [2,3] KEEP -->
+        <div class="tl-bar keep" style="left:136px;width:68px;top:44px">[2,3] KEEP ✓</div>
+        <!-- [1,3] REMOVE -->
+        <div class="tl-bar remove" style="left:68px;width:136px;top:74px">[1,3] REMOVE ✗</div>
+        <!-- [3,5] KEEP -->
+        <div class="tl-bar keep" style="left:204px;width:136px;top:104px">[3,5] KEEP ✓</div>
+        <!-- Legend swatches -->
+        <div class="tl-bar keep" style="left:68px;width:50px;top:134px;font-size:9px">kept</div>
+        <div class="tl-bar remove" style="left:128px;width:60px;top:134px;font-size:9px">removed</div>
+      </div>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Intervals — Sort by End, Count Removals</div>
-        <div class="takeaway">✓ Sort by start time</div>
-        <div class="takeaway">✓ Time: O(n log n) | Space: O(n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Merge: sort+scan. Insert: find insert position+merge. Meeting rooms: min-heap of end times.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Summary Ranges</strong> (Easy) — Track Range Start/End</li>
-<li><strong>Meeting Rooms</strong> (Easy) — Sort + Check Overlap</li>
-<li><strong>Meeting Rooms II</strong> (Medium) — Min Heap or Sweep Line</li>
-<li><strong>Meeting Scheduler</strong> (Medium) — Two Pointers on Sorted</li>
-<li><strong>Interval List Intersections</strong> (Medium) — Two Pointers</li>
-<li><strong>Car Pooling</strong> (Medium) — Difference Array or Sweep</li></ul>
-      </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Which Interval Do We Remove in a Conflict?</div>
+      <p>When two intervals overlap, we always remove the <strong>current one</strong> (which ends later in sorted order). We keep <code>prev_end</code> unchanged — the earlier-ending interval remains our boundary. Keeping the earlier-ending interval can never be worse for future choices: it frees up more of the timeline.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Greedy Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every step, <code>prev_end</code> holds the <strong>minimum possible end time</strong> achievable for the same number of kept intervals. In other words, the greedy selection up to this point is optimal: no other choice of which intervals to keep could yield a smaller <code>prev_end</code> with the same count.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Proof sketch (exchange argument):</strong> Suppose an optimal solution keeps interval X at some position, but the greedy algorithm keeps interval Y instead, where Y ends no later than X (Y.end ≤ X.end). We can swap X for Y in the optimal solution and the result remains valid — Y.end ≤ X.end means no future interval that was compatible with X becomes incompatible with Y. The swap preserves or improves the solution.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why smaller prev_end is always better:</strong> A smaller <code>prev_end</code> means more future intervals on the timeline can start before the boundary. More future options = easier to avoid conflicts. Greedily picking the smallest possible <code>prev_end</code> at each step maximizes future flexibility.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The &gt;= vs &gt; Bug — Most Common Mistake</div>
+      <p>Intervals that touch at a single point like [1,3] and [3,5] are <strong>not overlapping</strong> by this problem's definition. The non-overlap check must be <code>start &gt;= prev_end</code> (greater-than-or-equal), NOT <code>start &gt; prev_end</code>. Using strict inequality will incorrectly count touching intervals as overlapping, over-counting removals.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Equal end times:</strong> If two intervals have the same end time and one must be removed, it doesn't matter which — <code>prev_end</code> ends up the same value either way. The greedy still works correctly.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — Greedy: Sort by End (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def eraseOverlapIntervals(intervals):           </span><span class="aann">← input: list of [start, end] pairs</span></div>
+<div class="ann-line"><span class="acode">    intervals.sort(key=lambda x: x[1])          </span><span class="aann">← sort by END time — the greedy insight</span></div>
+<div class="ann-line"><span class="acode">    count = 0                                    </span><span class="aann">← removals so far</span></div>
+<div class="ann-line"><span class="acode">    prev_end = float('-inf')                     </span><span class="aann">← end of last KEPT interval; -inf = nothing kept yet</span></div>
+<div class="ann-line"><span class="acode">    for start, end in intervals:                 </span><span class="aann">← process in sorted order</span></div>
+<div class="ann-line"><span class="acode">        if start >= prev_end:                    </span><span class="aann">← no overlap: starts at or after last kept ended</span></div>
+<div class="ann-line"><span class="acode">            prev_end = end                       </span><span class="aann">← keep it; advance our boundary</span></div>
+<div class="ann-line"><span class="acode">        else:                                    </span><span class="aann">← overlap: start < prev_end</span></div>
+<div class="ann-line"><span class="acode">            count += 1                           </span><span class="aann">← remove current (later-ending) interval</span></div>
+<div class="ann-line"><span class="acode">    return count                                 </span><span class="aann">← minimum removals needed</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why don't we update prev_end when removing?</div>
+      <p>When we remove the current interval, <code>prev_end</code> stays pointing to the last <em>kept</em> interval's end. We removed the current (which ends later) precisely because it conflicts with the kept one. The kept interval remains our reference for future comparisons.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — DP: Longest Non-overlapping Chain (O(n²))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def eraseOverlapIntervals_dp(intervals):        </span><span class="aann">← O(n²) time, O(n) space</span></div>
+<div class="ann-line"><span class="acode">    if not intervals: return 0</span></div>
+<div class="ann-line"><span class="acode">    intervals.sort()                             </span><span class="aann">← sort by START for this DP variant</span></div>
+<div class="ann-line"><span class="acode">    n = len(intervals)</span></div>
+<div class="ann-line"><span class="acode">    dp = [1] * n                                 </span><span class="aann">← dp[i] = max non-overlapping ending at i</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, n):</span></div>
+<div class="ann-line"><span class="acode">        for j in range(i):                       </span><span class="aann">← check all prior intervals</span></div>
+<div class="ann-line"><span class="acode">            if intervals[j][1] &lt;= intervals[i][0]:</span></div>
+<div class="ann-line"><span class="acode">                dp[i] = max(dp[i], dp[j] + 1)   </span><span class="aann">← extend chain: j then i is valid</span></div>
+<div class="ann-line"><span class="acode">    return n - max(dp)                           </span><span class="aann">← total - max we can keep = min to remove</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Comparison</div>
+      <table class="cmp-table" style="margin-top:0.5rem">
+        <tr><th>Solution</th><th>Time</th><th>Space</th><th>Interview?</th></tr>
+        <tr><td>Greedy (Sort by End)</td><td class="mark-good">O(n log n)</td><td class="mark-good">O(1)</td><td class="mark-good">Yes — use this</td></tr>
+        <tr><td>DP (LIS-style)</td><td class="mark-bad">O(n²)</td><td>O(n)</td><td>Mention as naive</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Reframe from Removals to Kept</div>
+        <p style="font-size:14px;color:var(--text)">"Minimum removals = n − maximum kept. So I'll maximize the number of non-overlapping intervals I can keep."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Recognize Activity Selection</div>
+        <p style="font-size:14px;color:var(--text)">"This is the classic Activity Selection Problem. Select the maximum number of non-conflicting intervals. Greedy: sort by end time and always pick the earliest-finishing compatible interval."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Justify the Greedy</div>
+        <p style="font-size:14px;color:var(--text)">"By exchange argument: if we keep an interval that ends later when we could have kept one ending sooner, we can always swap without making things worse — the earlier-ending interval is at least as good for future compatibility."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Implement and Check Edge Cases</div>
+        <p style="font-size:14px;color:var(--text)">"Sort by end. Track prev_end = -∞. For each interval: if start ≥ prev_end → keep (update prev_end). Else → count removal. Edge: touching intervals (start == prev_end) are valid and should be kept."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll reframe: minimum removals = n − maximum kept intervals.<br>
+This is Activity Selection — greedy: sort by end time, take the earliest-finishing compatible interval.<br>
+Sort by end. Track prev_end (end of last kept interval), count removals.<br>
+For each interval: if start >= prev_end, no overlap, keep it and update prev_end.<br>
+Otherwise: overlap — remove the current (it ends later). count++. prev_end stays.<br>
+Key subtlety: >= not > since touching at a point is not overlapping.<br>
+Time O(n log n) for sort, O(n) for scan. Space O(1) extra."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if touching intervals count as overlapping?"</strong> → Change <code>&gt;=</code> to <code>&gt;</code> in the keep condition</li>
+        <li><strong>"Return which intervals to remove, not just the count?"</strong> → Track indices alongside the greedy scan</li>
+        <li><strong>"Minimum arrows to burst all balloons (LC 452)?"</strong> → Identical greedy, different framing</li>
+        <li><strong>"Merge overlapping intervals (LC 56)?"</strong> → Sort by start, merge when overlap instead</li>
+        <li><strong>"Minimum meeting rooms needed (LC 253)?"</strong> → Sort by start + min-heap on end times</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:0.5rem">Input: <code>[[1,2],[2,3],[3,4],[1,3]]</code> → sorted by end: <code>[[1,2],[2,3],[1,3],[3,4]]</code> → Expected: 1 removal</p>
+
+    <div class="viz-area">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px;text-align:center">Intervals (sorted by end time)</p>
+      <div class="interval-row" id="ivRow"></div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-idx"><span class="var-name">index</span><span class="var-val" id="vv-idx">—</span></div>
+        <div class="var-box" id="vb-prevEnd"><span class="var-name">prev_end</span><span class="var-val" id="vv-prevEnd">—</span></div>
+        <div class="var-box" id="vb-count"><span class="var-name">count</span><span class="var-val" id="vv-count">0</span></div>
+        <div class="var-box" id="vb-action"><span class="var-name">action</span><span class="var-val" id="vv-action" style="font-size:12px">—</span></div>
+      </div>
+
+      <div class="code-panel" id="codePanel">
+<div class="code-line" id="cl0">def eraseOverlapIntervals(intervals):</div>
+<div class="code-line" id="cl1">    intervals.sort(key=lambda x: x[1])</div>
+<div class="code-line" id="cl2">    count = 0</div>
+<div class="code-line" id="cl3">    prev_end = float('-inf')</div>
+<div class="code-line" id="cl4">    for start, end in intervals:</div>
+<div class="code-line" id="cl5">        if start >= prev_end:</div>
+<div class="code-line" id="cl6">            prev_end = end</div>
+<div class="code-line" id="cl7">        else:</div>
+<div class="code-line" id="cl8">            count += 1</div>
+<div class="code-line" id="cl9">    return count</div>
+      </div>
+
+      <div class="info-card">
+        <span class="phase-badge" id="phaseBadge">Init</span>
+        <div class="step-counter" id="stepCounter">Step 0 of 16</div>
+        <div class="step-title" id="stepTitle">Getting Ready</div>
+        <div class="step-body" id="stepBody">We will sort the intervals by end time, then make one greedy pass — keeping intervals that don't conflict, removing those that do.</div>
+      </div>
+    </div>
+
+    <div class="progress-dots" id="progressDots"></div>
+
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>&#8592; Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next &#8594;</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use &#8592; &#8594; arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div>Current interval</div>
+      <div class="legend-item"><div class="legend-swatch sw-keep"></div>Kept (compatible)</div>
+      <div class="legend-item"><div class="legend-swatch sw-rem"></div>Removed (overlap)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div>Already processed</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary & Key Takeaways -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Reframe "minimum removals" as "maximum kept" — they are equivalent but the greedy solution flows from the latter.</div>
+      <div class="takeaway">Sort intervals by END time. This is the Activity Selection greedy principle: earliest finisher first maximizes future options.</div>
+      <div class="takeaway">When two intervals conflict, remove the current (later-ending) one. Keep prev_end pointing to the earlier-ending kept interval.</div>
+      <div class="takeaway">Use start &gt;= prev_end (not &gt;) — touching at an endpoint is NOT an overlap by this problem's definition.</div>
+      <div class="takeaway">Time O(n log n) dominated by sort; Space O(1) — only two scalar variables beyond the sorted input.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Problem involves intervals, events, meetings, or activities with start/end times</li>
+        <li>Goal is to maximize compatible selections OR minimize conflicts/removals</li>
+        <li>Keywords: "non-overlapping", "maximum non-conflicting", "minimum to remove"</li>
+        <li>After reframing: "pick the most items with no pairwise conflict" → Activity Selection</li>
+        <li>Always ask: sort by start or end? End → maximize kept. Start → merge/cover problems.</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:1rem;font-weight:600">Related Problems:</p>
+    <div class="related-list">
+      <div class="related-item"><strong>Minimum Number of Arrows to Burst Balloons</strong><span class="related-diff diff-med">Medium</span> — #452: identical greedy! Sort by end, shoot only when start &gt; prev_end</div>
+      <div class="related-item"><strong>Maximum Length of Pair Chain</strong><span class="related-diff diff-med">Medium</span> — #646: same Activity Selection on pairs (a,b), maximize chain</div>
+      <div class="related-item"><strong>Merge Intervals</strong><span class="related-diff diff-med">Medium</span> — #56: sort by start, merge when overlap — complement of this problem</div>
+      <div class="related-item"><strong>Meeting Rooms I</strong><span class="related-diff diff-easy">Easy</span> — #252: can one person attend all? Sort by start, check consecutive non-overlap</div>
+      <div class="related-item"><strong>Meeting Rooms II</strong><span class="related-diff diff-med">Medium</span> — #253: minimum rooms needed; sort by start + min-heap on end times</div>
+      <div class="related-item"><strong>Insert Interval</strong><span class="related-diff diff-med">Medium</span> — #57: merge a new interval into a sorted non-overlapping list</div>
+      <div class="related-item"><strong>Video Stitching</strong><span class="related-diff diff-med">Medium</span> — #1024: cover range [0,T] with minimum clips; interval scheduling variant</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>Main Pattern: <strong>Intervals</strong> — Sub-Pattern: <strong>Sort by End, Count Removals</strong>. This is the Activity Selection greedy: sort by finish time, always greedily select the next compatible interval. Proven optimal by exchange argument.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+/* ── Step Data ──
+   Intervals sorted by end: [[1,2],[2,3],[1,3],[3,4]]
+   Indices:                    0      1      2      3   */
+const INTERVALS = [[1,2],[2,3],[1,3],[3,4]];
+
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:0,
+    idx:-1, prevEnd:null, count:0,
+    states:['normal','normal','normal','normal'],
+    title:'Start: Sort by End Time',
+    text:'Input [[1,2],[2,3],[3,4],[1,3]] sorted by end time becomes [[1,2],[2,3],[1,3],[3,4]]. We process intervals in order of when they finish — earliest finisher first.',
+    varChanged:[]
+  },
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:1,
+    idx:-1, prevEnd:null, count:0,
+    states:['normal','normal','normal','normal'],
+    title:'Sort by end time',
+    text:'intervals.sort(key=lambda x: x[1]) sorts by each interval\'s end value. Note: [1,3] (end=3) comes before [3,4] (end=4). Among equal end values, Python\'s stable sort preserves relative order.',
+    varChanged:[]
+  },
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:2,
+    idx:-1, prevEnd:null, count:0,
+    states:['normal','normal','normal','normal'],
+    title:'Initialize count = 0',
+    text:'count tracks how many intervals we must remove. Starts at 0 — we haven\'t removed anything yet.',
+    varChanged:['count']
+  },
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:3,
+    idx:-1, prevEnd:-Infinity, count:0,
+    states:['normal','normal','normal','normal'],
+    title:'Initialize prev_end = -infinity',
+    text:'prev_end is the end time of the last kept interval. Starting at -infinity means no interval has been kept — any interval\'s start will satisfy start >= -inf, so the very first interval is always kept.',
+    varChanged:['prevEnd']
+  },
+  {
+    phase:'scan', phaseClass:'phase-scan', activeLine:4,
+    idx:0, prevEnd:-Infinity, count:0,
+    states:['current','normal','normal','normal'],
+    title:'Loop index=0: interval = [1,2]',
+    text:'Enter the loop. Current interval [1,2]: start=1, end=2. We check whether it conflicts with what we\'ve kept so far (nothing yet, prev_end = -infinity).',
+    varChanged:['idx']
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:5,
+    idx:0, prevEnd:-Infinity, count:0,
+    states:['current','normal','normal','normal'],
+    title:'Check: 1 >= -inf? YES — no overlap',
+    text:'start=1 >= prev_end=-infinity is True. This interval does not conflict. We will keep [1,2].',
+    varChanged:[]
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:6,
+    idx:0, prevEnd:2, count:0,
+    states:['keep','normal','normal','normal'],
+    title:'KEEP [1,2] — update prev_end = 2',
+    text:'We keep [1,2]. prev_end is updated to 2 (this interval\'s end). count stays 0. Our kept set: {[1,2]}.',
+    varChanged:['prevEnd']
+  },
+  {
+    phase:'scan', phaseClass:'phase-scan', activeLine:4,
+    idx:1, prevEnd:2, count:0,
+    states:['done','current','normal','normal'],
+    title:'Loop index=1: interval = [2,3]',
+    text:'Next interval [2,3]: start=2, end=3. Check against prev_end=2.',
+    varChanged:['idx']
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:5,
+    idx:1, prevEnd:2, count:0,
+    states:['done','current','normal','normal'],
+    title:'Check: 2 >= 2? YES — touching is NOT overlapping',
+    text:'start=2 >= prev_end=2 is True. Intervals [1,2] and [2,3] share only endpoint 2 — that\'s NOT an overlap by this problem\'s definition. We keep [2,3].',
+    varChanged:[]
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:6,
+    idx:1, prevEnd:3, count:0,
+    states:['done','keep','normal','normal'],
+    title:'KEEP [2,3] — update prev_end = 3',
+    text:'Keep [2,3], update prev_end = 3. count still 0. Kept set: {[1,2], [2,3]}.',
+    varChanged:['prevEnd']
+  },
+  {
+    phase:'scan', phaseClass:'phase-scan', activeLine:4,
+    idx:2, prevEnd:3, count:0,
+    states:['done','done','current','normal'],
+    title:'Loop index=2: interval = [1,3]',
+    text:'Next interval [1,3]: start=1, end=3. Check against prev_end=3.',
+    varChanged:['idx']
+  },
+  {
+    phase:'remove', phaseClass:'phase-remove', activeLine:5,
+    idx:2, prevEnd:3, count:0,
+    states:['done','done','current','normal'],
+    title:'Check: 1 >= 3? NO — OVERLAP DETECTED',
+    text:'start=1 < prev_end=3 means [1,3] starts inside the kept zone [1,2]∪[2,3]. It overlaps! We must remove one. Our greedy rule: remove the current interval [1,3] (which ends at 3, same as prev_end — it started earlier and conflicts). We keep our already-established boundary.',
+    varChanged:[]
+  },
+  {
+    phase:'remove', phaseClass:'phase-remove', activeLine:8,
+    idx:2, prevEnd:3, count:1,
+    states:['done','done','removed','normal'],
+    title:'REMOVE [1,3] — count = 1',
+    text:'count becomes 1. Crucially, prev_end stays at 3 — we did NOT update it. We\'re keeping the earlier-ending intervals already accepted. [1,3] is crossed out.',
+    varChanged:['count']
+  },
+  {
+    phase:'scan', phaseClass:'phase-scan', activeLine:4,
+    idx:3, prevEnd:3, count:1,
+    states:['done','done','removed','current'],
+    title:'Loop index=3: interval = [3,4]',
+    text:'Last interval [3,4]: start=3, end=4. Check against prev_end=3.',
+    varChanged:['idx']
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:5,
+    idx:3, prevEnd:3, count:1,
+    states:['done','done','removed','current'],
+    title:'Check: 3 >= 3? YES — touching is fine',
+    text:'start=3 >= prev_end=3 is True. [3,4] starts right where the last kept interval ended — no overlap. Keep it!',
+    varChanged:[]
+  },
+  {
+    phase:'keep', phaseClass:'phase-keep', activeLine:6,
+    idx:3, prevEnd:4, count:1,
+    states:['done','done','removed','keep'],
+    title:'KEEP [3,4] — update prev_end = 4',
+    text:'Keep [3,4], update prev_end = 4. count is still 1. Final kept set: {[1,2], [2,3], [3,4]} — three non-overlapping intervals.',
+    varChanged:['prevEnd']
+  },
+  {
+    phase:'result', phaseClass:'phase-result', activeLine:9,
+    idx:-1, prevEnd:4, count:1,
+    states:['done','done','removed','done'],
+    title:'Return count = 1',
+    text:'We removed exactly 1 interval ([1,3]). The remaining set {[1,2],[2,3],[3,4]} is fully non-overlapping. The greedy algorithm found the optimal answer in O(n log n) time, O(1) space.',
+    varChanged:[]
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+/* DOM refs */
+let cur = 0;
+const ivRow      = document.getElementById('ivRow');
+const phaseBadge = document.getElementById('phaseBadge');
+const stepCtr    = document.getElementById('stepCounter');
+const stepTitle  = document.getElementById('stepTitle');
+const stepBody   = document.getElementById('stepBody');
+const vbIdx      = document.getElementById('vb-idx');
+const vbPrevEnd  = document.getElementById('vb-prevEnd');
+const vbCount    = document.getElementById('vb-count');
+const vbAction   = document.getElementById('vb-action');
+const vvIdx      = document.getElementById('vv-idx');
+const vvPrevEnd  = document.getElementById('vv-prevEnd');
+const vvCount    = document.getElementById('vv-count');
+const vvAction   = document.getElementById('vv-action');
+const dotsEl     = document.getElementById('progressDots');
+const btnPrev    = document.getElementById('btnPrev');
+const btnNext    = document.getElementById('btnNext');
+
+function buildIntervalCards() {
+  ivRow.innerHTML = '';
+  INTERVALS.forEach((iv, i) => {
+    const card = document.createElement('div');
+    card.className = 'iv-card normal';
+    card.id = 'iv-' + i;
+    card.innerHTML = '<span class="iv-idx">i=' + i + '</span><span class="iv-val">[' + iv[0] + ',' + iv[1] + ']</span>';
+    ivRow.appendChild(card);
+  });
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function buildDots() {
+  dotsEl.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.title = 'Step ' + i;
+    d.onclick = () => { cur = i; render(); };
+    dotsEl.appendChild(d);
+  });
+}
+
+function render() {
+  const s = steps[cur];
+
+  phaseBadge.className = 'phase-badge ' + s.phaseClass;
+  phaseBadge.textContent = s.phase.charAt(0).toUpperCase() + s.phase.slice(1);
+  stepCtr.textContent = 'Step ' + cur + ' of ' + (steps.length - 1);
+  stepTitle.textContent = s.title;
+  stepBody.textContent = s.text;
+
+  INTERVALS.forEach((_, i) => {
+    const card = document.getElementById('iv-' + i);
+    card.className = 'iv-card ' + (s.states[i] || 'normal');
+  });
+
+  const peStr = s.prevEnd === null ? '—' : (s.prevEnd === -Infinity ? '-∞' : String(s.prevEnd));
+  vvIdx.textContent     = s.idx < 0 ? '—' : String(s.idx);
+  vvPrevEnd.textContent = peStr;
+  vvCount.textContent   = String(s.count);
+
+  const actionMap = {init:'—', scan:'scan', keep:'KEEP', remove:'REMOVE', result:'done'};
+  vvAction.textContent = actionMap[s.phase] || '—';
+
+  [vbIdx, vbPrevEnd, vbCount, vbAction].forEach(el => el.classList.remove('changed'));
+  if (s.varChanged.includes('idx'))     vbIdx.classList.add('changed');
+  if (s.varChanged.includes('prevEnd')) vbPrevEnd.classList.add('changed');
+  if (s.varChanged.includes('count'))   vbCount.classList.add('changed');
+
+  // Color the action box
+  vbAction.style.borderColor = '';
+  vbAction.style.background  = '';
+  if (s.phase === 'keep')   { vbAction.style.borderColor = 'var(--green-border)'; vbAction.style.background = 'var(--green-bg)'; }
+  if (s.phase === 'remove') { vbAction.style.borderColor = 'var(--red-border)';   vbAction.style.background = 'var(--red-bg)'; }
+
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const cl = document.getElementById('cl' + s.activeLine);
+  if (cl) cl.classList.add('active');
+
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active',  i === cur);
+    d.classList.toggle('visited', i < cur);
+  });
+
+  btnPrev.disabled = cur === 0;
+  btnNext.disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  render();
+}
+function reset() { cur = 0; render(); }
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon    = header.querySelector('.collapse-icon');
+  const collapsed = content.classList.toggle('collapsed');
+  if (icon) icon.style.transform = collapsed ? 'rotate(-90deg)' : '';
+}
+
+buildIntervalCards();
+buildDots();
 render();
 </script>
 </body>

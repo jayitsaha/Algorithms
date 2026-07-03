@@ -1,232 +1,994 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kth Largest Element in a Stream – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#703 · Kth Largest Element in a Stream</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-easy{background:var(--green-bg);color:var(--green-mid)}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Heap Visualisation ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.heap-container{display:flex;flex-direction:column;align-items:center;gap:0.75rem}
+.heap-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0.25rem;text-align:center}
+.heap-cells-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.heap-cell{
+  width:56px;height:56px;border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:20px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;
+}
+.heap-cell .cell-rank{font-size:9px;color:var(--text3);font-family:var(--sans);margin-top:2px;font-weight:500}
+.heap-cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.heap-cell.heap-top{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.heap-cell.incoming{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.heap-cell.answer-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.heap-cell.empty-cell{background:var(--bg2);border-color:var(--border);color:var(--text3);font-size:11px;font-weight:400}
+
+.stream-section{margin-bottom:1.25rem}
+.stream-cells{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.stream-cell{
+  width:44px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s;
+  flex-shrink:0;
+}
+.stream-cell.s-current{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.stream-cell.s-done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.stream-cell.s-normal{background:var(--surface);border-color:var(--border2)}
+.stream-sep{width:3px;background:var(--border2);border-radius:2px;margin:0 4px}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-push{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-pop{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-return{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+.sw-top{background:var(--red-bg);border-color:var(--red-border)}
+.sw-incoming{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-answer{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Heap Tree Diagram ── */
+.heap-diagram{background:var(--bg2);border-radius:var(--radius);padding:1.25rem;margin:1rem 0;text-align:center}
+.tree-level{display:flex;justify-content:center;gap:2rem;margin-bottom:0.25rem}
+.tree-node{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:16px;border:2px solid var(--blue-border);background:var(--blue-bg);color:var(--blue-text);margin:4px auto}
+.tree-node.root-node{border-color:var(--red-border);background:var(--red-bg);color:var(--red-text)}
+.tree-edge{display:flex;justify-content:center;gap:4rem;height:18px}
+.tree-edge::before,.tree-edge::after{content:'';display:block;width:30px;border-bottom:1px solid var(--border2);transform:rotate(-30deg);transform-origin:right bottom;margin-top:8px}
+.tree-edge::after{transform:rotate(30deg);transform-origin:left bottom}
+.heap-caption{font-size:12px;color:var(--text3);margin-top:0.75rem}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Kth Largest Element in a Stream</h1>
-    <p class="subtitle">LeetCode #703 — Top K Elements · Min Heap of Size K</p>
-    <div class="tags">
-      <span class="tag tag-easy">Easy</span>
-      <span class="tag tag-pattern">Heaps</span>
-      <span class="tag tag-complexity">O(n log k) Time</span>
-      <span class="tag tag-complexity">O(k) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
+<header>
+  <div class="problem-number">LeetCode #703</div>
+  <h1>Kth Largest Element in a Stream</h1>
+  <p class="subtitle">Design a class that tracks the k-th largest element in a stream of integers. Each <code>add(val)</code> call inserts a value and returns the current k-th largest.</p>
+  <div class="tags">
+    <span class="tag tag-easy">Easy</span>
+    <span class="tag tag-pattern">Heaps</span>
+    <span class="tag tag-pattern">Min Heap of Size K</span>
+    <span class="tag tag-complexity">Time: O(n log k)</span>
+    <span class="tag tag-complexity">Space: O(k)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You're building a live leaderboard that must always answer: "what is the k-th best score we've ever seen?" New scores keep arriving one by one in a stream. After every new score, you must report the k-th largest score across all scores received so far.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The k-th largest element is the <strong>smallest number in the top-k set</strong>. If you maintain exactly the k largest values seen so far in a <em>min</em>-heap, the heap's root — the minimum of those k values — is always your answer. It's the element that "just barely" earned a spot in the top k.</p>
     </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Top K Elements</strong> using the <strong>Min Heap of Size K</strong> technique.</p>
-      <p>Pattern category: <strong>Heaps</strong>. Apply when: <em>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Heap gives O(log n) insert/delete and O(1) min/max access. Use for top-K, median tracking, scheduling.</p>
+
+    <p style="margin-top:0.75rem">Let's make this concrete. With k=3 and stream = [4, 5, 8, 2]:</p>
+    <div class="two-col" style="margin-top:0.75rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Correct: Min-Heap of size 3</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          Top-3 of [4,5,8,2] → {4, 5, 8}<br>
+          3rd largest = 4 = min of top-3<br>
+          heap = [4, 5, 8]  heap[0] = 4<br>
+          → Answer is always heap[0]
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naive: Sort entire stream</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.9">
+          Each add() → sort O(n log n)<br>
+          100 adds → O(100 × n log n)<br>
+          Heap: each add → O(log k) only<br>
+          100 adds → O(100 × log k) ✓
+        </p>
       </div>
     </div>
-  </div>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Min Heap of Size K</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Build heap from initial elements</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each new element: push to heap</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">If heap exceeds size limit: pop smallest/largest</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Top of heap = current kth element</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">For two heaps: balance sizes, rebalance on every push</span></div>
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> The initial <code>nums</code> list may have fewer than k elements — that is valid, and the heap simply grows toward size k. The problem guarantees that by the time we query for the k-th largest (via <code>add</code>), at least k elements will have been seen in total. Duplicate values are handled naturally by the heap.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Min-Heap of Size K</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain a <strong>min-heap limited to exactly k elements</strong> — those k elements are always the k largest values seen so far. A min-heap surfaces its smallest element at index 0, so <code>heap[0]</code> is always the k-th largest of everything we've processed.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Store k, initialize empty heap.</strong> Then call <code>self.add(num)</code> for each element in the initial <code>nums</code> list — this reuses the same push+trim logic and avoids code duplication.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Push the new value</strong> onto the min-heap with <code>heapq.heappush</code>. The heap may now temporarily contain k+1 elements.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>If heap size exceeds k</strong>, pop the minimum element with <code>heapq.heappop</code>. The popped element is smaller than all others in the heap — it cannot be in the top-k, so discarding it is safe.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return <code>heap[0]</code></strong> — the minimum of the top-k values, which is the k-th largest element across the entire stream seen so far.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Min-Heap for k-th LARGEST? (Counterintuitive!)</div>
+      <p>It feels backwards: we want the k-th largest but we use a min-heap. The trick: we're maintaining the top-k club. To find which candidate should be evicted from the club, we want to know the weakest member — the minimum. A min-heap gives us that in O(1). When a new challenger arrives and beats the weakest member, we evict the weakest and add the challenger.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Min-heap: parent ≤ children. Max-heap: parent ≥ children. Heap property maintained after every op.</p>
+
+    <div class="heap-diagram">
+      <p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:0.75rem">Min-heap structure (k=3, values {4,5,8}):</p>
+      <div class="tree-level">
+        <div class="tree-node root-node">4</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:2.5rem;height:18px">
+        <div style="width:1px;height:100%;background:var(--border2);transform:rotate(-25deg);transform-origin:top center"></div>
+        <div style="width:1px;height:100%;background:var(--border2);transform:rotate(25deg);transform-origin:top center"></div>
+      </div>
+      <div class="tree-level">
+        <div class="tree-node">5</div>
+        <div class="tree-node">8</div>
+      </div>
+      <p class="heap-caption">Root = 4 = 3rd largest (min of top-3). Children are larger — heap property maintained.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After every <code>add(val)</code> call, the min-heap contains <strong>exactly the k largest values seen so far</strong> (or all values seen if fewer than k have arrived). Therefore <code>heap[0]</code> — the minimum of those k values — is the k-th largest across the entire stream.</p>
+    </div>
+
+    <p><strong>Why the invariant holds after every push+pop:</strong></p>
+    <ul style="padding-left:1.25rem;line-height:2;margin:0.5rem 0">
+      <li>If the new value is <em>larger</em> than the current k-th largest (<code>heap[0]</code>): it pushes the old k-th largest down to (k+1)th place. We pop the min — the old k-th largest — and the new value earns its top-k spot.</li>
+      <li>If the new value is <em>smaller or equal</em> to <code>heap[0]</code>: it gets pushed in and immediately popped as the new minimum. The top-k set is unchanged.</li>
+    </ul>
+    <p style="margin-top:0.5rem">Either way, after the push+pop, the heap has exactly k elements which are the k largest seen so far.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting to Pop</div>
+      <p>If you push but never pop when <code>len(heap) &gt; k</code>, the heap grows to O(n) elements. Then <code>heap[0]</code> becomes the overall minimum of the stream — not the k-th largest. Always pop when size exceeds k.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why we can pop <em>before</em> checking size</div>
+      <p>An alternative (equally correct) implementation pops only when size exceeds k, not before. Some solutions write: <code>if len(heap) &gt; k: heappop(heap)</code>. Both approaches preserve the invariant. The version in our code is idiomatic Python — push first, then trim.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Min-Heap of Size K</strong> &nbsp;<span style="background:var(--green-bg);color:var(--green-mid);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">INTERVIEW PICK</span></p>
+
+    <div class="ann-code">
+      <div class="ann-line">
+        <span class="acode">import heapq</span>
+        <span class="aann">← Python's built-in min-heap; heapq.heappush/heappop, and heap[0] = minimum</span>
+      </div>
+      <div class="ann-line" style="margin-top:0.5rem">
+        <span class="acode">class KthLargest:</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">    def __init__(self, k, nums):</span>
+        <span class="aann">← k = the rank; nums = initial stream values (may be empty or < k elements)</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        self.k = k</span>
+        <span class="aann">← store k so add() can access it</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        self.heap = []</span>
+        <span class="aann">← start with empty heap; will hold at most k elements</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        for num in nums:</span>
+        <span class="aann">← process each initial element through add() — reuse the same logic</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">            self.add(num)</span>
+        <span class="aann">← DRY: no duplicated push+trim code in __init__</span>
+      </div>
+      <div class="ann-line" style="margin-top:0.5rem">
+        <span class="acode">    def add(self, val):</span>
+        <span class="aann">← insert a new stream element and return the current k-th largest</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        heapq.heappush(self.heap, val)</span>
+        <span class="aann">← O(log k) push; heap is now at most k+1 elements</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        if len(self.heap) > self.k:</span>
+        <span class="aann">← if heap overflows our k-slot budget...</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">            heapq.heappop(self.heap)</span>
+        <span class="aann">← ...evict the minimum (it's the (k+1)-th largest, not wanted)</span>
+      </div>
+      <div class="ann-line">
+        <span class="acode">        return self.heap[0]</span>
+        <span class="aann">← min of top-k = k-th largest overall; O(1) read</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force: Sort on Every Add</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">class KthLargestBrute:</span></div>
+      <div class="ann-line"><span class="acode">    def __init__(self, k, nums): self.k = k; self.data = list(nums)</span></div>
+      <div class="ann-line"><span class="acode">    def add(self, val):</span></div>
+      <div class="ann-line"><span class="acode">        self.data.append(val)</span><span class="aann">← add to list</span></div>
+      <div class="ann-line"><span class="acode">        self.data.sort(reverse=True)</span><span class="aann">← O(n log n) every call — slow!</span></div>
+      <div class="ann-line"><span class="acode">        return self.data[self.k - 1]</span><span class="aann">← k-1 index in 0-based sorted-desc list</span></div>
     </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">import heapq</div><div class="code-line">def topKFrequent(nums, k):</div><div class="code-line">    freq = {}</div><div class="code-line">    for n in nums: freq[n] = freq.get(n, 0) + 1</div><div class="code-line">    heap = []</div><div class="code-line">    for num, cnt in freq.items():</div><div class="code-line">        heapq.heappush(heap, (cnt, num))</div><div class="code-line">        if len(heap) > k: heapq.heappop(heap)</div><div class="code-line">    return [h[1] for h in heap]</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log k) &nbsp;|&nbsp; Space: O(k)</p>
-    </div>
-  </div>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Approach</th><th>add() Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute force (sort)</td><td class="mark-bad">O(n log n)</td><td class="mark-bad">O(n)</td><td>Correct but slow; degrades with stream length</td></tr>
+        <tr><td><strong>Min-heap size k</strong></td><td class="mark-good">O(log k)</td><td class="mark-good">O(k)</td><td>Independent of stream length; fixed memory</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
       <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p style="font-size:14px;line-height:1.5">The phrase "k-th largest" + "stream" (or "dynamically added") is the clearest signal for a min-heap of size k. Whenever a problem asks for a rank-based order statistic in a dynamic dataset, heap = your first tool.</p>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Heaps problem using Min Heap of Size K. I'll build heap from initial elements then for each new element: push to heap. Time: O(n log k), Space: O(k)."</div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: State the Brute Force</div>
+        <p style="font-size:14px;line-height:1.5">"I could keep all values in a list, sort on every add, and return index k-1. That's O(n log n) per add — too slow if there are many adds. I need O(log k)."</p>
       </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Arrive at the Heap Insight</div>
+        <p style="font-size:14px;line-height:1.5">"I don't need all n values — just the top k. If I maintain exactly the top-k values in a min-heap, the heap root is always the k-th largest. Each add is O(log k) and space is O(k), independent of total stream size."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Min vs Max Confusion</div>
+        <p style="font-size:14px;line-height:1.5">"I use a min-heap, not a max-heap — this is counterintuitive. The reason: I need to quickly evict the weakest member of the top-k club when a stronger element arrives. The weakest member is the minimum, so a min-heap makes eviction O(log k)."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a streaming top-k problem. Key insight: k-th largest = minimum of top-k.<br>
+I'll use a min-heap of fixed size k. Each add() does heappush then, if size &gt; k, heappop.<br>
+That's O(log k) per add, O(k) space — independent of how many elements we've seen total.<br>
+For __init__, I'll feed the initial nums through the same add() to avoid duplicate logic.<br>
+The heap root heap[0] is always the answer — O(1) to read."
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔮 Follow-Up Questions to Expect</div>
+      <ul style="margin-top:0.5rem;padding-left:1.25rem;line-height:2">
+        <li><strong>k-th smallest?</strong> — Use a max-heap of size k (negate values for Python's min-heap).</li>
+        <li><strong>Find median from data stream?</strong> — Two heaps: max-heap (lower half) + min-heap (upper half).</li>
+        <li><strong>k-th largest in a static array?</strong> — Use Quickselect: O(n) average, O(n log n) worst.</li>
+        <li><strong>What if k == 1?</strong> — Just track the maximum. Heap works but a simple variable suffices.</li>
+        <li><strong>What if the stream is too large for memory?</strong> — Heap still works: O(k) memory only!</li>
+      </ul>
     </div>
   </div>
+</div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:1rem">
+      Trace: <code>k=3</code>, <code>nums=[4,5,8,2]</code>, then <code>add(3)</code>, <code>add(5)</code>, <code>add(10)</code>, <code>add(9)</code>, <code>add(4)</code>
+    </p>
+
+    <div class="viz-area">
+      <!-- Stream row -->
+      <div class="stream-section">
+        <div class="heap-section-label">Stream Values (init | streaming adds)</div>
+        <div class="stream-cells" id="streamRow"></div>
       </div>
+
+      <!-- Heap display -->
+      <div class="heap-container">
+        <div class="heap-section-label">Min-Heap (top k=3 largest) — sorted ascending</div>
+        <div class="heap-cells-row" id="heapRow"></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vk">
+          <span class="var-name">k</span>
+          <span class="var-val" id="vk-val">3</span>
+        </div>
+        <div class="var-box" id="vsize">
+          <span class="var-name">heap size</span>
+          <span class="var-val" id="vsize-val">0</span>
+        </div>
+        <div class="var-box" id="vcurval">
+          <span class="var-name">val (incoming)</span>
+          <span class="var-val" id="vcurval-val">—</span>
+        </div>
+        <div class="var-box" id="vans">
+          <span class="var-name">answer (heap[0])</span>
+          <span class="var-val" id="vans-val">—</span>
+        </div>
+      </div>
+
+      <!-- Code panel -->
+      <div class="code-panel" id="codePanel">
+        <div class="code-line" id="cl0">import heapq</div>
+        <div class="code-line" id="cl1">class KthLargest:</div>
+        <div class="code-line" id="cl2">    def __init__(self, k, nums):</div>
+        <div class="code-line" id="cl3">        self.k = k; self.heap = []</div>
+        <div class="code-line" id="cl4">        for num in nums: self.add(num)</div>
+        <div class="code-line" id="cl5">    def add(self, val):</div>
+        <div class="code-line" id="cl6">        heapq.heappush(self.heap, val)</div>
+        <div class="code-line" id="cl7">        if len(self.heap) > self.k:</div>
+        <div class="code-line" id="cl8">            heapq.heappop(self.heap)</div>
+        <div class="code-line" id="cl9">        return self.heap[0]</div>
+      </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="phase-badge" id="phaseBadge">Init</div>
+      <div class="step-counter" id="stepCounter">Step 1 / 17</div>
+      <div class="step-title" id="stepTitle">KthLargest(k=3, nums=[4,5,8,2])</div>
+      <div class="step-body" id="stepBody">Initializing with k=3. We create an empty min-heap and will call add() for each element in nums=[4,5,8,2]. After init, the heap will hold the 3 largest from the initial list.</div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> In heap</div>
+      <div class="legend-item"><div class="legend-swatch sw-top"></div> Heap root = k-th largest</div>
+      <div class="legend-item"><div class="legend-swatch sw-incoming"></div> Incoming / just pushed</div>
+      <div class="legend-item"><div class="legend-swatch sw-answer"></div> Answer returned</div>
     </div>
   </div>
+</div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A min-heap of size k always holds the k largest elements seen so far.</div>
+      <div class="takeaway"><code>heap[0]</code> = minimum of top-k = k-th largest overall. O(1) to read.</div>
+      <div class="takeaway">Each <code>add()</code> is O(log k) — independent of total stream length n.</div>
+      <div class="takeaway">Space is O(k) — we never store more than k elements at once.</div>
+      <div class="takeaway">For k-th <em>smallest</em>: use a max-heap of size k (negate values in Python).</div>
+      <div class="takeaway">Reusing <code>add()</code> in <code>__init__</code> is the clean DRY pattern for this class design.</div>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Heaps — Min Heap of Size K</div>
-        <div class="takeaway">✓ Heap gives O(log n) insert/delete and O(1) min/max access</div>
-        <div class="takeaway">✓ Time: O(n log k) | Space: O(k)</div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-top:0.5rem;padding-left:1.25rem;line-height:2">
+        <li>"k-th largest/smallest" + dynamic/streaming data → min/max-heap of size k</li>
+        <li>Need top-k elements with efficient updates → heap beats sorting</li>
+        <li>Memory constraint: you can't store all n elements → heap stores only k</li>
+        <li>Running order statistic: answer must update with each new element</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Related Problems Using the Same Technique</div>
+      <div class="related-item">
+        <strong>Kth Largest Element in an Array</strong><span class="related-diff diff-med">Medium</span>
+        — Static version. Use Quickselect O(n) avg or this same min-heap approach O(n log k).
       </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
+      <div class="related-item">
+        <strong>Find Median from Data Stream</strong><span class="related-diff diff-hard">Hard</span>
+        — Two heaps: max-heap for lower half + min-heap for upper half. Extension of this pattern.
       </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Top K Frequent Elements</strong> (Medium) — Heap or Bucket Sort</li>
-<li><strong>K Closest Points to Origin</strong> (Medium) — Max Heap of Size K</li></ul>
+      <div class="related-item">
+        <strong>Top K Frequent Elements</strong><span class="related-diff diff-med">Medium</span>
+        — Min-heap of size k tracking (frequency, element) pairs. Same size-k trim logic.
+      </div>
+      <div class="related-item">
+        <strong>K Closest Points to Origin</strong><span class="related-diff diff-med">Medium</span>
+        — Max-heap of size k tracking distance. Discard farthest when size exceeds k.
+      </div>
+      <div class="related-item">
+        <strong>Merge K Sorted Lists</strong><span class="related-diff diff-hard">Hard</span>
+        — Min-heap stores one node per list; always pop the global minimum to build result.
+      </div>
+      <div class="related-item">
+        <strong>Ugly Number II</strong><span class="related-diff diff-med">Medium</span>
+        — Min-heap generates the next ugly number on demand (heap as priority queue).
+      </div>
+      <div class="related-item">
+        <strong>Task Scheduler</strong><span class="related-diff diff-med">Medium</span>
+        — Max-heap to always schedule the most frequent remaining task (greedy + heap).
       </div>
     </div>
   </div>
 </div>
 
+</div><!-- end .page-wrapper -->
+
 <script>
-const STEPS = [
-  {heap:[],msg:"Empty min-heap",phase:"INIT"},
-  {heap:[3],msg:"Push 3",phase:"PUSH"},
-  {heap:[1,3],msg:"Push 1 → heapify up",phase:"PUSH"},
-  {heap:[1,3,5],msg:"Push 5",phase:"PUSH"},
-  {heap:[1,3,5,7],msg:"Push 7",phase:"PUSH"},
-  {heap:[3,7,5],top:1,msg:"Pop 1 (min) → heapify down",phase:"POP"},
-  {heap:[3,7,5],msg:"Top=3 (second smallest)",phase:"DONE"},
+// ─── Step Data ───────────────────────────────────────────────────────────────
+// Sequence: k=3, init=[4,5,8,2], then add(3), add(5), add(10), add(9), add(4)
+// Each step captures a meaningful state change
+
+const INIT_VALS = [4, 5, 8, 2];
+const ADD_VALS  = [3, 5, 10, 9, 4];
+const K = 3;
+
+const steps = [
+  // 0 — Start
+  {
+    phase:'init', activeLine:2,
+    heap:[], incoming:null,
+    sPhase:'none', sIdx:-1,
+    size:0, curval:'—', answer:'—',
+    title:'KthLargest(k=3, nums=[4,5,8,2])',
+    text:'We store k=3 and create an empty heap. We\'ll call add() for each number in the initial list. Using add() in __init__ is the clean pattern — one push+trim logic path serves both initialization and streaming.'
+  },
+  // 1 — push 4 (init)
+  {
+    phase:'push', activeLine:6,
+    heap:[4], incoming:4,
+    sPhase:'init', sIdx:0,
+    size:1, curval:4, answer:'—',
+    title:'add(4): heappush(4)',
+    text:'Push 4. Heap: [4]. Size=1, which is ≤ k=3, so no trim needed. The heap is below capacity — we can\'t yet report a k-th largest.'
+  },
+  // 2 — push 5 (init)
+  {
+    phase:'push', activeLine:6,
+    heap:[4,5], incoming:5,
+    sPhase:'init', sIdx:1,
+    size:2, curval:5, answer:'—',
+    title:'add(5): heappush(5)',
+    text:'Push 5. Heap rebalances to [4, 5] (4 remains at root as minimum). Size=2 ≤ k=3. Still below capacity, no trim.'
+  },
+  // 3 — push 8 (init) — heap full
+  {
+    phase:'push', activeLine:6,
+    heap:[4,5,8], incoming:8,
+    sPhase:'init', sIdx:2,
+    size:3, curval:8, answer:'—',
+    title:'add(8): heappush(8) — heap now full!',
+    text:'Push 8. Heap: [4, 5, 8]. Size=3 = k=3. Heap is exactly full. No trim needed. heap[0]=4, meaning the 3rd largest of {4,5,8} is 4. Correct!'
+  },
+  // 4 — push 2 (init) → overflow → pop 2
+  {
+    phase:'push', activeLine:6,
+    heap:[2,4,5,8], incoming:2,
+    sPhase:'init', sIdx:3,
+    size:4, curval:2, answer:'—',
+    title:'add(2): heappush(2) → size=4 > k=3, must pop!',
+    text:'Push 2. Heap temporarily has 4 elements. Min-heap root becomes 2 (the new minimum). Size exceeds k=3 — we must evict to restore the top-k invariant.'
+  },
+  // 5 — pop 2 (init)
+  {
+    phase:'pop', activeLine:8,
+    heap:[4,5,8], incoming:null,
+    sPhase:'init', sIdx:3,
+    size:3, curval:2, answer:'—',
+    title:'heappop() removes 2 — it\'s not in top 3',
+    text:'Pop 2 (the minimum). 2 is smaller than our current 3rd largest (4), so it cannot belong in the top-3. After eviction: heap = [4, 5, 8]. heap[0]=4. The 3 largest of [4,5,8,2] are correctly {4,5,8}.'
+  },
+  // 6 — init complete, start add(3)
+  {
+    phase:'push', activeLine:6,
+    heap:[3,5,8,4], incoming:3,
+    sPhase:'adds', sIdx:0,
+    size:4, curval:3, answer:'—',
+    title:'add(3): First streaming call. heappush(3).',
+    text:'Init complete! Now streaming add(3). Push 3 onto the heap. Temporarily 4 elements: [3,4,5,8] (min-heap sorted). Size=4 > k=3. Must pop.'
+  },
+  // 7 — pop 3, return 4
+  {
+    phase:'return', activeLine:9,
+    heap:[4,5,8], incoming:null,
+    sPhase:'adds', sIdx:0,
+    size:3, curval:3, answer:4,
+    title:'heappop() removes 3 → return heap[0]=4',
+    text:'Pop 3 — smaller than 4 (current 3rd largest), so it can\'t be in top-3. Heap = [4,5,8]. heap[0]=4. Answer: 4. The 3rd largest of all 5 values seen [4,5,8,2,3] is indeed 4. ✓'
+  },
+  // 8 — add(5), push
+  {
+    phase:'push', activeLine:6,
+    heap:[4,5,5,8], incoming:5,
+    sPhase:'adds', sIdx:1,
+    size:4, curval:5, answer:'—',
+    title:'add(5): heappush(5). Interesting: duplicate!',
+    text:'Push 5. Heap temporarily: [4,5,5,8]. Both 5s are candidates for the top-3. Size=4 > k=3. Pop the minimum.'
+  },
+  // 9 — pop 4, return 5
+  {
+    phase:'return', activeLine:9,
+    heap:[5,5,8], incoming:null,
+    sPhase:'adds', sIdx:1,
+    size:3, curval:5, answer:5,
+    title:'heappop() removes 4 → return heap[0]=5',
+    text:'Pop 4. New top-3 is {5,5,8}. Both 5s are in the top-3 — duplicates are handled correctly. heap[0]=5 = 3rd largest of [4,5,8,2,3,5]. ✓ The answer changed from 4 to 5!'
+  },
+  // 10 — add(10), push
+  {
+    phase:'push', activeLine:6,
+    heap:[5,5,8,10], incoming:10,
+    sPhase:'adds', sIdx:2,
+    size:4, curval:10, answer:'—',
+    title:'add(10): Large new value! heappush(10).',
+    text:'Push 10. Heap temporarily: [5,5,8,10]. 10 is clearly in the top-3. Size=4 > k=3. Pop the minimum to evict the weakest candidate.'
+  },
+  // 11 — pop 5, return 8
+  {
+    phase:'return', activeLine:9,
+    heap:[5,8,10], incoming:null,
+    sPhase:'adds', sIdx:2,
+    size:3, curval:10, answer:8,
+    title:'heappop() removes 5 → return heap[0]=8',
+    text:'Pop one 5. Top-3 is now {5,8,10}. The arrival of 10 bumped a 5 out of the top-3! heap[0]=8. The 3rd largest of all 7 values is 8. ✓ Bigger arrivals improve (raise) the k-th largest answer.'
+  },
+  // 12 — add(9), push
+  {
+    phase:'push', activeLine:6,
+    heap:[5,8,9,10], incoming:9,
+    sPhase:'adds', sIdx:3,
+    size:4, curval:9, answer:'—',
+    title:'add(9): heappush(9).',
+    text:'Push 9. Heap temporarily: [5,8,9,10]. Size=4 > k=3. Pop minimum.'
+  },
+  // 13 — pop 5, return 9
+  {
+    phase:'return', activeLine:9,
+    heap:[8,9,10], incoming:null,
+    sPhase:'adds', sIdx:3,
+    size:3, curval:9, answer:9,
+    title:'heappop() removes 5 → return heap[0]=9',
+    text:'Pop 5. Top-3 is {8,9,10}. heap[0]=9. Another new arrival (9) raised the k-th largest answer again! The remaining 5 from our earlier duplicate is finally evicted.'
+  },
+  // 14 — add(4), push
+  {
+    phase:'push', activeLine:6,
+    heap:[4,8,9,10], incoming:4,
+    sPhase:'adds', sIdx:4,
+    size:4, curval:4, answer:'—',
+    title:'add(4): Small value. heappush(4).',
+    text:'Push 4. Heap temporarily: [4,8,9,10]. 4 is clearly below the current 3rd largest (9). It will be immediately evicted. Size=4 > k=3. Pop minimum.'
+  },
+  // 15 — pop 4, return 9 (unchanged)
+  {
+    phase:'return', activeLine:9,
+    heap:[8,9,10], incoming:null,
+    sPhase:'adds', sIdx:4,
+    size:3, curval:4, answer:9,
+    title:'heappop() removes 4 → return heap[0]=9 (unchanged)',
+    text:'Pop 4 — it was the minimum and it just pushed itself in and out. Top-3 remains {8,9,10}. heap[0]=9. The answer didn\'t change! Small arrivals below the current k-th largest have no effect. This is why the heap is so efficient: irrelevant values get ejected immediately.'
+  }
 ];
+
+// ─── State ───────────────────────────────────────────────────────────────────
 let cur = 0;
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+const BADGE_LABELS = {
+  'init': 'Init', 'push': 'Push', 'pop': 'Pop', 'return': 'Return'
+};
+const BADGE_CLASSES = {
+  'init': 'phase-init', 'push': 'phase-push', 'pop': 'phase-pop', 'return': 'phase-return'
+};
+
+// ─── Build Dots ───────────────────────────────────────────────────────────────
+function buildDots() {
+  const container = document.getElementById('progressDots');
+  container.innerHTML = '';
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.onclick = (idx => () => { cur = idx; render(); })(i);
+    container.appendChild(d);
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+// ─── Render Stream ────────────────────────────────────────────────────────────
+function renderStream(step) {
+  const row = document.getElementById('streamRow');
+  row.innerHTML = '';
+
+  // Build items: init values then add values with separator
+  const initItems = INIT_VALS.map((v, i) => ({v, phase: 'init', idx: i}));
+  const addItems  = ADD_VALS.map((v, i)  => ({v, phase: 'adds', idx: i}));
+
+  // Separator
+  const sep = document.createElement('div');
+  sep.className = 'stream-sep';
+
+  initItems.forEach(item => {
+    const cell = document.createElement('div');
+    let cls = 's-normal';
+    if (step.sPhase === 'init' && step.sIdx === item.idx) {
+      cls = 's-current';
+    } else if (
+      step.sPhase === 'adds' ||
+      (step.sPhase === 'init' && item.idx < step.sIdx) ||
+      (step.sPhase === 'init' && item.idx === step.sIdx && step.incoming === null)
+    ) {
+      cls = 's-done';
+    }
+    cell.className = `stream-cell ${cls}`;
+    cell.textContent = item.v;
+    row.appendChild(cell);
+  });
+
+  row.appendChild(sep);
+
+  addItems.forEach(item => {
+    const cell = document.createElement('div');
+    let cls = 's-normal';
+    if (step.sPhase === 'adds' && step.sIdx === item.idx) {
+      cls = 's-current';
+    } else if (step.sPhase === 'adds' && item.idx < step.sIdx) {
+      cls = 's-done';
+    }
+    cell.className = `stream-cell ${cls}`;
+    cell.textContent = item.v;
+    row.appendChild(cell);
+  });
+}
+
+// ─── Render Heap ──────────────────────────────────────────────────────────────
+function renderHeap(step) {
+  const row = document.getElementById('heapRow');
+  row.innerHTML = '';
+
+  const heapVals = [...step.heap].sort((a, b) => a - b);
+
+  if (heapVals.length === 0) {
+    const cell = document.createElement('div');
+    cell.className = 'heap-cell empty-cell';
+    cell.textContent = 'empty';
+    row.appendChild(cell);
+    return;
+  }
+
+  heapVals.forEach((val, idx) => {
+    const cell = document.createElement('div');
+    let cls = 'normal';
+
+    if (step.phase === 'return' && idx === 0) {
+      cls = 'answer-cell';
+    } else if (idx === 0) {
+      cls = 'heap-top';
+    } else if (step.incoming !== null && val === step.incoming) {
+      cls = 'incoming';
+    }
+
+    cell.className = `heap-cell ${cls}`;
+    const rankLabel = idx === 0 ? `${K - idx}rd largest` : idx === 1 ? `${K - idx}nd` : `1st`;
+    cell.innerHTML = `${val}<span class="cell-rank">${idx === 0 ? `${K}th (root)` : `top-${idx+1}`}</span>`;
+    row.appendChild(cell);
+  });
+}
+
+// ─── Render Variables ─────────────────────────────────────────────────────────
+function renderVars(step, prev) {
+  const fields = [
+    {boxId: 'vsize',    valId: 'vsize-val',    key: 'size'},
+    {boxId: 'vcurval',  valId: 'vcurval-val',  key: 'curval'},
+    {boxId: 'vans',     valId: 'vans-val',     key: 'answer'},
+  ];
+  fields.forEach(f => {
+    const box = document.getElementById(f.boxId);
+    const el  = document.getElementById(f.valId);
+    const changed = prev && String(step[f.key]) !== String(prev[f.key]);
+    box.classList.toggle('changed', !!changed);
+    el.textContent = step[f.key];
+  });
+}
+
+// ─── Render Code ──────────────────────────────────────────────────────────────
+function renderCode(step) {
+  for (let i = 0; i <= 9; i++) {
+    const el = document.getElementById('cl' + i);
+    if (el) el.classList.toggle('active', i === step.activeLine);
+  }
+}
+
+// ─── Main Render ─────────────────────────────────────────────────────────────
+function render() {
+  const step = steps[cur];
+  const prev = cur > 0 ? steps[cur - 1] : null;
+
+  // Badge
+  const badge = document.getElementById('phaseBadge');
+  badge.className = 'phase-badge ' + (BADGE_CLASSES[step.phase] || 'phase-init');
+  badge.textContent = BADGE_LABELS[step.phase] || step.phase;
+
+  // Info card
+  document.getElementById('stepCounter').textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById('stepTitle').textContent = step.title;
+  document.getElementById('stepBody').textContent = step.text;
+
+  renderStream(step);
+  renderHeap(step);
+  renderVars(step, prev);
+  renderCode(step);
+
+  // Dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.remove('active', 'visited');
+    if (i === cur) d.classList.add('active');
+    else if (i < cur) d.classList.add('visited');
+  });
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < steps.length) { cur = next; render(); }
+}
+
+function reset() { cur = 0; render(); }
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+// ─── Card Toggle ─────────────────────────────────────────────────────────────
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildDots();
 render();
 </script>
 </body>

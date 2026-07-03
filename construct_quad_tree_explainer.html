@@ -1,230 +1,1004 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Construct Quad Tree – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#427 · Construct Quad Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.quad-layout{display:flex;gap:2rem;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.grid-section{flex:0 0 auto}
+.grid-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+
+/* 4x4 grid */
+.grid-4{display:grid;grid-template-columns:repeat(4,52px);grid-template-rows:repeat(4,52px);gap:3px}
+.gcell{
+  width:52px;height:52px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:20px;font-weight:700;
+  border:2px solid var(--border2);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+}
+.gcell.val-0{background:var(--surface);border-color:var(--border2);color:var(--text3)}
+.gcell.val-1{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.gcell.hl-all{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.gcell.hl-tl{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.gcell.hl-tr{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.gcell.hl-bl{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.gcell.hl-br{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+
+/* Tree viz */
+.tree-section{flex:0 0 auto}
+.tree-canvas{position:relative;width:310px;height:210px}
+.tnode{
+  position:absolute;width:56px;height:38px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  border:2px solid var(--border2);background:var(--surface);color:var(--text3);
+  transition:all 0.3s;
+  white-space:pre;text-align:center;line-height:1.3;
+}
+.tnode.leaf-1{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.tnode.leaf-0{background:var(--bg2);border-color:var(--border2);color:var(--text3)}
+.tnode.inner{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.tnode.active{box-shadow:0 0 0 3px var(--amber-mid);z-index:2}
+.tnode.future{opacity:0.22}
+.tedge{position:absolute;height:2px;background:var(--border2);transform-origin:0 50%}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);min-width:44px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-check{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-divide{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-leaf{background:var(--green-bg);color:var(--green-mid)}
+.phase-inner{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-1{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-0{background:var(--surface);border-color:var(--border2)}
+.sw-tl{background:var(--green-bg);border-color:var(--green-border)}
+.sw-tr{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-bl{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-br{background:var(--red-bg);border-color:var(--red-border)}
+.sw-all{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Quadrant Diagram ── */
+.quad-diagram{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:180px;margin:1rem auto;border:2px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.qd-cell{padding:12px 6px;text-align:center;font-size:12px;font-weight:700}
+.qd-tl{background:var(--green-bg);color:var(--green-mid)}
+.qd-tr{background:var(--amber-bg);color:var(--amber-mid)}
+.qd-bl{background:var(--purple-bg);color:var(--purple-mid)}
+.qd-br{background:var(--red-bg);color:var(--red-mid)}
+.qd-sub{font-size:9px;opacity:0.75;display:block;font-weight:400;margin-top:2px}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Construct Quad Tree</h1>
-    <p class="subtitle">LeetCode #427 — Divide and Conquer · Recursive Quadrant Division</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Divide and Conquer</span>
-      <span class="tag tag-complexity">O(n log n) Time</span>
-      <span class="tag tag-complexity">O(log n) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Divide and Conquer</strong> using the <strong>Recursive Quadrant Division</strong> technique.</p>
-      <p>Pattern category: <strong>Divide and Conquer</strong>. Apply when: <em>Think: can I find a natural split point? Often the middle. Recursion tree: O(log n) levels.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Split problem in half, solve independently, combine. Key: combine step. Mergesort combines in O(n).</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #427</div>
+  <h1>Construct Quad Tree</h1>
+  <p class="subtitle">Given an n×n grid of 0s and 1s, build a Quad Tree by recursively dividing mixed regions into four quadrants until every region is uniform.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Divide and Conquer</span>
+    <span class="tag tag-pattern">Recursive Quadrant Division</span>
+    <span class="tag tag-complexity">Time: O(n² log n)</span>
+    <span class="tag tag-complexity">Space: O(log n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Recursive Quadrant Division</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Find split point (midpoint, max element, etc.)</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Recursively solve left half</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Recursively solve right half</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Combine results</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Handle base case (single element)</span></div>
-      </div>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>A <strong>Quad Tree</strong> encodes a 2D binary grid hierarchically. Every node covers a rectangular region of the grid. If the region is <em>uniform</em> (all 0s or all 1s), it becomes a <strong>leaf node</strong> — no children, just a value. If the region is <em>mixed</em>, it becomes an <strong>internal node</strong> with exactly four children, each covering one quadrant.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <p style="margin-top:0.75rem">Each <code>Node</code> has two key fields:</p>
+    <ul style="margin-left:1.5rem;margin-top:0.5rem;font-size:14px;line-height:2">
+      <li><code>isLeaf</code> — <code>True</code> if all cells in this region are the same value</li>
+      <li><code>val</code> — The value (0 or 1 for leaves; 1 by convention for internal nodes)</li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A Quad Tree is a <strong>spatial compression</strong> scheme. Uniform regions collapse to a single leaf, saving space. Mixed regions are split until they become uniform. The recursion stops when a region is either all-0 or all-1 — or when it's a single cell (always uniform).</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>After recursive calls, each half is solved. Combine step assumes both halves are correct.</p>
+
+    <div class="quad-diagram">
+      <div class="qd-cell qd-tl">TL<span class="qd-sub">top-left</span></div>
+      <div class="qd-cell qd-tr">TR<span class="qd-sub">top-right</span></div>
+      <div class="qd-cell qd-bl">BL<span class="qd-sub">bot-left</span></div>
+      <div class="qd-cell qd-br">BR<span class="qd-sub">bot-right</span></div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:-0.5rem;margin-bottom:1rem">Each non-uniform region splits into four equal quadrants</p>
+
+    <div class="two-col">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Leaf Node (uniform)</div>
+        <p style="font-family:var(--mono);font-size:13px;color:var(--green-text);line-height:2">
+          All cells = 1 → isLeaf=True, val=1<br>
+          All cells = 0 → isLeaf=True, val=0<br>
+          Single cell → always a leaf
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Internal Node (mixed)</div>
+        <p style="font-family:var(--mono);font-size:13px;color:var(--red-text);line-height:2">
+          Has both 0s and 1s → isLeaf=False<br>
+          val = 1 (convention, ignored)<br>
+          Has exactly 4 children
+        </p>
       </div>
     </div>
+
+    <p><strong>Edge Cases:</strong> 1×1 grid (root is always a leaf), all-uniform grid (root is a leaf — no splitting), checkerboard pattern (recurses all the way to 1×1 cells at max depth).</p>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">def sortArray(nums):</div><div class="code-line">    if len(nums) <= 1: return nums</div><div class="code-line">    mid   = len(nums) // 2</div><div class="code-line">    left  = sortArray(nums[:mid])</div><div class="code-line">    right = sortArray(nums[mid:])</div><div class="code-line">    return merge(left, right)</div><div class="code-line"></div><div class="code-line">def merge(left, right):</div><div class="code-line">    result, i, j = [], 0, 0</div><div class="code-line">    while i < len(left) and j < len(right):</div><div class="code-line">        if left[i] <= right[j]: result.append(left[i]); i+=1</div><div class="code-line">        else:                   result.append(right[j]); j+=1</div><div class="code-line">    return result + left[i:] + right[j:]</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log n) &nbsp;|&nbsp; Space: O(log n)</p>
-    </div>
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Recursive Quadrant Division</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>The core function is <code>solve(r, c, size)</code> — it builds the quad tree node for the <code>size × size</code> region whose top-left corner is at row <code>r</code>, column <code>c</code>.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Think: can I find a natural split point? Often the middle. Recursion tree: O(log n) levels.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Uniformity check:</strong> Count the number of 1s in the region. If count equals 0 → all zeros. If count equals <code>size²</code> → all ones. Either way, return a leaf node with the appropriate value.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Divide and Conquer problem using Recursive Quadrant Division. I'll find split point (midpoint, max element, etc.) then recursively solve left half. Time: O(n log n), Space: O(log n)."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Divide:</strong> If the region is mixed, compute <code>half = size // 2</code>. The four quadrants are: TL at <code>(r, c)</code>, TR at <code>(r, c+half)</code>, BL at <code>(r+half, c)</code>, BR at <code>(r+half, c+half)</code>. Each covers exactly <code>half × half</code> cells.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Conquer:</strong> Recurse on each of the four quadrants: <code>tl = solve(r, c, half)</code>, <code>tr = solve(r, c+half, half)</code>, <code>bl = solve(r+half, c, half)</code>, <code>br = solve(r+half, c+half, half)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Combine:</strong> Return an internal node: <code>Node(val=1, isLeaf=False, topLeft=tl, topRight=tr, bottomLeft=bl, bottomRight=br)</code>. The four subtrees are attached as children.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Divide and Conquer — Recursive Quadrant Division</div>
-        <div class="takeaway">✓ Split problem in half, solve independently, combine</div>
-        <div class="takeaway">✓ Time: O(n log n) | Space: O(log n)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Think: can I find a natural split point? Often the middle. Recursion tree: O(log n) levels.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Longest Nice Substring</strong> (Easy) — Divide on Invalid Chars</li>
-<li><strong>Convert Sorted List to Binary Search Tree</strong> (Medium) — Find Mid, Recurse</li>
-<li><strong>Maximum Binary Tree</strong> (Medium) — Find Max, Build Left/Right</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🚀 Optimization: 2D Prefix Sum</div>
+      <p>Without optimization, the uniformity check scans all <code>size²</code> cells — O(n²) per call. With a 2D prefix sum array built in O(n²) upfront, any subgrid sum is O(1). This transforms the total complexity from <strong>O(n⁴)</strong> worst case to <strong>O(n² log n)</strong>. The formula: <code>sum(r,c,size) = pre[r+size][c+size] - pre[r][c+size] - pre[r+size][c] + pre[r][c]</code>.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"Initialize: left=0, right=3",phase:"INIT"},
-  {arr:[2,7,11,15],lo:0,hi:3,target:9,msg:"sum=2+15=17 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:2,target:9,msg:"sum=2+11=13 > 9 → move right",phase:"CHECK"},
-  {arr:[2,7,11,15],lo:0,hi:1,target:9,msg:"sum=2+7=9 == 9 → FOUND [0,1]!",phase:"FOUND"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>Every call to <code>solve(r, c, size)</code> returns a correct quad tree node for exactly the <code>size × size</code> region at <code>(r, c)</code>: either a leaf (if uniform) or an internal node whose four children together tile the region exactly — no overlap, no gap.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why the recursion terminates:</strong> Each recursive call handles a subgrid of size <code>half = size // 2</code>. Since the problem guarantees n is a power of 2, each halving produces integers: 4 → 2 → 1. At size 1, the region is a single cell — always uniform → always a leaf → no further recursion. Maximum depth is log₂(n).</p>
+
+    <p style="margin-top:0.75rem"><strong>Why the four quadrants partition the parent exactly:</strong> The top-left corner of the four sub-regions are at offsets (0,0), (0,half), (half,0), (half,half) from the parent's top-left. Each covers <code>half × half</code> cells. Since <code>half = size/2</code>, two halves in each dimension reconstruct the full <code>size × size</code> square with no gaps and no overlaps.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Dividing Uniform Regions</div>
+      <p>Always check uniformity <em>before</em> dividing. If you skip the check and always divide, a uniform region would produce four identical leaf children instead of one leaf — the tree would be deeper than necessary and technically incorrect for the quad tree spec.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — Naive Recursion (Brute Force)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def construct(grid):                          </span><span class="aann">← entry: n×n grid (n = power of 2)</span></div>
+<div class="ann-line"><span class="acode">    def solve(r, c, n):                       </span><span class="aann">← subgrid top-left=(r,c), size=n</span></div>
+<div class="ann-line"><span class="acode">        if n == 1:                            </span><span class="aann">← base case: 1×1 is always a leaf</span></div>
+<div class="ann-line"><span class="acode">            return Node(grid[r][c], True)     </span><span class="aann">← val = cell value, isLeaf=True</span></div>
+<div class="ann-line"><span class="acode">        val = grid[r][c]                      </span><span class="aann">← reference value for uniformity</span></div>
+<div class="ann-line"><span class="acode">        uniform = all(                        </span><span class="aann">← O(n²) scan: do all cells equal val?</span></div>
+<div class="ann-line"><span class="acode">            grid[r+i][c+j] == val</span></div>
+<div class="ann-line"><span class="acode">            for i in range(n) for j in range(n))</span></div>
+<div class="ann-line"><span class="acode">        if uniform:                           </span><span class="aann">← uniform → leaf, stop here</span></div>
+<div class="ann-line"><span class="acode">            return Node(val, True)</span></div>
+<div class="ann-line"><span class="acode">        half = n // 2                         </span><span class="aann">← split each dimension in half</span></div>
+<div class="ann-line"><span class="acode">        return Node(1, False,                 </span><span class="aann">← internal node; val=1 by convention</span></div>
+<div class="ann-line"><span class="acode">            solve(r,      c,      half),      </span><span class="aann">← top-left quadrant</span></div>
+<div class="ann-line"><span class="acode">            solve(r,      c+half, half),      </span><span class="aann">← top-right quadrant</span></div>
+<div class="ann-line"><span class="acode">            solve(r+half, c,      half),      </span><span class="aann">← bottom-left quadrant</span></div>
+<div class="ann-line"><span class="acode">            solve(r+half, c+half, half))      </span><span class="aann">← bottom-right quadrant</span></div>
+<div class="ann-line"><span class="acode">    return solve(0, 0, len(grid))             </span><span class="aann">← kick off from full grid</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why val=1 for Internal Nodes?</div>
+      <p>The problem spec says internal node <code>val</code> is irrelevant — only leaf node <code>val</code> carries meaning. Setting it to 1 is a common convention. Don't try to set it to anything meaningful; it just needs to be a valid integer.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Prefix Sum Optimization (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def construct(grid):</span></div>
+<div class="ann-line"><span class="acode">    n = len(grid)</span></div>
+<div class="ann-line"><span class="acode">    # Build 2D prefix sum (1-indexed for easier boundary math)</span></div>
+<div class="ann-line"><span class="acode">    pre = [[0]*(n+1) for _ in range(n+1)]    </span><span class="aann">← (n+1)×(n+1) with sentinel border of zeros</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, n+1):</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n+1):</span></div>
+<div class="ann-line"><span class="acode">            pre[i][j] = (grid[i-1][j-1]      </span><span class="aann">← current cell (0-indexed grid)</span></div>
+<div class="ann-line"><span class="acode">                + pre[i-1][j] + pre[i][j-1]  </span><span class="aann">← add row above and col to left</span></div>
+<div class="ann-line"><span class="acode">                - pre[i-1][j-1])              </span><span class="aann">← subtract overlap (inclusion-exclusion)</span></div>
+<div class="ann-line"><span class="acode">    def rsum(r, c, sz):                       </span><span class="aann">← O(1) sum of [r..r+sz) × [c..c+sz)</span></div>
+<div class="ann-line"><span class="acode">        r2, c2 = r+sz, c+sz</span></div>
+<div class="ann-line"><span class="acode">        return pre[r2][c2]-pre[r][c2]-pre[r2][c]+pre[r][c]  </span><span class="aann">← classic 2D prefix formula</span></div>
+<div class="ann-line"><span class="acode">    def solve(r, c, sz):</span></div>
+<div class="ann-line"><span class="acode">        s = rsum(r, c, sz)                    </span><span class="aann">← count of 1s in this subgrid in O(1)</span></div>
+<div class="ann-line"><span class="acode">        if s == 0:   return Node(0, True)     </span><span class="aann">← all zeros → leaf val=0</span></div>
+<div class="ann-line"><span class="acode">        if s == sz*sz: return Node(1, True)   </span><span class="aann">← all ones → leaf val=1</span></div>
+<div class="ann-line"><span class="acode">        h = sz // 2                           </span><span class="aann">← mixed → divide into four halves</span></div>
+<div class="ann-line"><span class="acode">        return Node(1, False,</span></div>
+<div class="ann-line"><span class="acode">            solve(r,   c,   h), solve(r,   c+h, h),</span></div>
+<div class="ann-line"><span class="acode">            solve(r+h, c,   h), solve(r+h, c+h, h))</span></div>
+<div class="ann-line"><span class="acode">    return solve(0, 0, n)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Naive:</strong> Time O(n⁴) worst case (O(n²) scan per call × O(n²) nodes). Space O(log n) stack.<br>
+        <strong>Prefix Sum:</strong> Time <strong>O(n² log n)</strong> (O(n²) prefix build + O(1) per node × O(n²·log n) nodes). Space O(n²) prefix + O(log n) stack.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Divide and Conquer Signal</div>
+        <p style="font-size:14px;color:var(--text)">The problem literally defines the structure: "divide into four quadrants and recurse." Any time you see "split a 2D region into four equal sub-regions and process each independently," that's Recursive Quadrant Division. Related signals: spatial indexing, image compression, hierarchical grid encoding.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the Recursive State Clearly</div>
+        <p style="font-size:14px;color:var(--text)">State: <code>solve(r, c, size)</code> — top-left row, top-left col, and current region size. These three values uniquely define any subgrid. State the invariant: "This function returns the quad tree node for the <code>size × size</code> region starting at <code>(r, c)</code>."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Identify Both Termination Conditions</div>
+        <p style="font-size:14px;color:var(--text)">There are two leaf conditions, not one: (1) all zeros (sum=0), (2) all ones (sum=size²). Handle both before dividing. The implicit third: size=1 (always uniform, always a leaf — covered by conditions 1 and 2).</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Offer the Prefix Sum Optimization Proactively</div>
+        <p style="font-size:14px;color:var(--text)">Start with the naive O(n⁴) solution, then immediately say: "I can reduce the uniformity check from O(n²) to O(1) using a 2D prefix sum precomputed in O(n²). This gives total O(n² log n) time." This demonstrates awareness of standard 2D range query techniques.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use divide and conquer. Define solve(r, c, size) for any subgrid.<br>
+First, check if the region is uniform: count 1s. If count=0, return leaf(0). If count=size², return leaf(1).<br>
+Otherwise, split into four equal quadrants and recurse on each.<br>
+Naive: O(n²) scan per call → O(n⁴) worst case.<br>
+Optimization: precompute a 2D prefix sum in O(n²). Then uniformity check is O(1).<br>
+Total: O(n² log n) time, O(log n) stack space (plus O(n²) for prefix sum)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Logical OR of two quad trees?"</strong> → LeetCode #558 — merge two trees node-by-node</li>
+        <li><strong>"How to serialize this tree?"</strong> → BFS, encode each node as (isLeaf, val) pair</li>
+        <li><strong>"What if n is not a power of 2?"</strong> → Pad to next power of 2, or generalize to unequal splits</li>
+        <li><strong>"Where are quad trees used in practice?"</strong> → Game maps, geographic data, image compression, collision detection</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: 4×4 Grid</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="quad-layout">
+        <div class="grid-section">
+          <div class="grid-label">Grid (4×4)</div>
+          <div class="grid-4" id="main-grid"></div>
+        </div>
+        <div class="tree-section">
+          <div class="grid-label">Quad Tree (building...)</div>
+          <div class="tree-canvas" id="tree-canvas"></div>
+        </div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-call">
+          <span class="var-name">call</span>
+          <span class="var-val" id="vv-call">—</span>
+        </div>
+        <div class="var-box" id="vb-size">
+          <span class="var-name">size</span>
+          <span class="var-val" id="vv-size">—</span>
+        </div>
+        <div class="var-box" id="vb-sum">
+          <span class="var-name">sum</span>
+          <span class="var-val" id="vv-sum">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def solve(r, c, sz):</div>
+      <div class="code-line" id="cl-1">    s = rsum(r, c, sz)           # count 1s</div>
+      <div class="code-line" id="cl-2">    if s == 0:                   # all zeros</div>
+      <div class="code-line" id="cl-3">        return Node(0, True)     # leaf val=0</div>
+      <div class="code-line" id="cl-4">    if s == sz * sz:             # all ones</div>
+      <div class="code-line" id="cl-5">        return Node(1, True)     # leaf val=1</div>
+      <div class="code-line" id="cl-6">    h = sz // 2                  # divide</div>
+      <div class="code-line" id="cl-7">    return Node(1, False,</div>
+      <div class="code-line" id="cl-8">        solve(r,   c,   h),  # TL</div>
+      <div class="code-line" id="cl-9">        solve(r,   c+h, h),  # TR</div>
+      <div class="code-line" id="cl-10">        solve(r+h, c,   h),  # BL</div>
+      <div class="code-line" id="cl-11">        solve(r+h, c+h, h))  # BR</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 11</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to walk through Quad Tree construction on a 4×4 grid.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-1"></div> Cell = 1</div>
+      <div class="legend-item"><div class="legend-swatch sw-0"></div> Cell = 0</div>
+      <div class="legend-item"><div class="legend-swatch sw-all"></div> Active region (full)</div>
+      <div class="legend-item"><div class="legend-swatch sw-tl"></div> Top-Left quadrant</div>
+      <div class="legend-item"><div class="legend-swatch sw-tr"></div> Top-Right quadrant</div>
+      <div class="legend-item"><div class="legend-swatch sw-bl"></div> Bottom-Left quadrant</div>
+      <div class="legend-item"><div class="legend-swatch sw-br"></div> Bottom-Right quadrant</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A region is a leaf when all values are identical — check sum = 0 or sum = size²</div>
+      <div class="takeaway">Check uniformity BEFORE dividing — don't recurse into uniform regions</div>
+      <div class="takeaway">2D prefix sum enables O(1) uniformity checks, cutting total time to O(n² log n)</div>
+      <div class="takeaway">Recursion depth is log₂(n) — the problem guarantees n is a power of 2</div>
+      <div class="takeaway">Internal node val is conventional (1); only leaf val encodes real grid data</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Naive Recursion</td>
+          <td class="mark-bad">O(n⁴)</td>
+          <td>O(log n)</td>
+          <td>O(n²) uniformity scan per call</td>
+        </tr>
+        <tr>
+          <td><strong>Prefix Sum Recursion ✓</strong></td>
+          <td class="mark-good">O(n² log n)</td>
+          <td>O(n²)</td>
+          <td>O(1) range sum; optimal for interviews</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Recursive Quadrant Division</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Build a spatial tree from a 2D binary grid" → Quad Tree / Recursive Quadrant</li>
+        <li>"Uniform subregion collapses to a single node" → classic quad tree compression</li>
+        <li>"Divide a 2D region into 4 equal parts and recurse" → Recursive Quadrant Division</li>
+        <li>Range sum queries on subgrids → 2D prefix sum naturally pairs with this</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Divide and Conquer / Recursive Quadrant Division)</div>
+      <div class="related-item"><strong>Logical OR of Two Quad Trees</strong><span class="related-diff diff-med">Medium</span> — Merge two quad trees with OR logic; identical recursive shape (#558)</div>
+      <div class="related-item"><strong>Maximum Binary Tree</strong><span class="related-diff diff-med">Medium</span> — Find max element, recurse on left/right subarrays; same D&amp;C skeleton (#654)</div>
+      <div class="related-item"><strong>Convert Sorted List to BST</strong><span class="related-diff diff-med">Medium</span> — Find midpoint, recurse on two halves; D&amp;C on 1D structure (#109)</div>
+      <div class="related-item"><strong>Longest Nice Substring</strong><span class="related-diff diff-easy">Easy</span> — Divide on invalid characters and recurse; same section 8.2 pattern (#1763)</div>
+      <div class="related-item"><strong>Range Sum Query 2D — Immutable</strong><span class="related-diff diff-med">Medium</span> — The 2D prefix sum technique used to optimize quad tree uniformity check (#304)</div>
+      <div class="related-item"><strong>Count of Range Sum</strong><span class="related-diff diff-hard">Hard</span> — Merge-sort D&amp;C; count target ranges across sorted halves (#327)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 8.2 (Recursion &amp; Divide and Conquer → Divide and Conquer)<br>
+      Sub-Pattern: <strong>Recursive Quadrant Division</strong> · Source: Guide Section 8.2</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// 4×4 grid used for walkthrough
+const GRID = [
+  [1, 0, 1, 1],
+  [1, 0, 1, 1],
+  [0, 0, 0, 1],
+  [0, 0, 0, 1]
+];
+const N = 4;
+
+/*
+  steps[] — each step drives all UI updates.
+  highlight: { r, c, size, quad: 'all'|'tl'|'tr'|'bl'|'br'|null }
+  treeNodes: array of { id, x, y, label, cls }
+*/
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'START', phaseClass:'phase-init',
+    highlight:{r:0,c:0,size:4,quad:'all'},
+    call:'solve(0,0,4)', size:'4', sum:'?', result:'?',
+    changed:[],
+    activeLine:1,
+    title:'Start: evaluate the full 4×4 grid',
+    text:'We call solve(0, 0, 4) for the entire grid. First step: compute the region sum — count how many 1s are present. We need to check if the whole grid is uniform before deciding whether to divide.',
+    treeNodes:[{id:'root',x:127,y:8,label:'solve\n(0,0,4)',cls:'inner active'}]
+  },
+  {
+    id:1, phase:'check', phaseLabel:'CHECK', phaseClass:'phase-check',
+    highlight:{r:0,c:0,size:4,quad:'all'},
+    call:'solve(0,0,4)', size:'4', sum:'9', result:'inner',
+    changed:['sum','result'],
+    activeLine:1,
+    title:'sum=9 — region is mixed, must divide',
+    text:'rsum(0,0,4) = 9. Not 0 (not all zeros) and not 16 (not all ones). This 4×4 region is heterogeneous. We compute half = 4//2 = 2 and will recurse on four 2×2 quadrants.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner active'},
+      {id:'tl',x:22,y:100,label:'TL\n(0,0,2)',cls:'future'},
+      {id:'tr',x:90,y:100,label:'TR\n(0,2,2)',cls:'future'},
+      {id:'bl',x:158,y:100,label:'BL\n(2,0,2)',cls:'future'},
+      {id:'br',x:228,y:100,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:2, phase:'check', phaseLabel:'CHECK TL', phaseClass:'phase-check',
+    highlight:{r:0,c:0,size:2,quad:'tl'},
+    call:'solve(0,0,2)', size:'2', sum:'2', result:'inner',
+    changed:['call','size','sum'],
+    activeLine:1,
+    title:'Top-Left: solve(0, 0, 2) — sum=2, mixed',
+    text:'Top-Left covers rows 0-1, cols 0-1: values [1,0,1,0] → sum=2. Not 0, not 4. Mixed! We set half=1 and will recurse into four 1×1 sub-cells. Each single cell is trivially a leaf.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:100,label:'TL-inner\n(0,0,2)',cls:'inner active'},
+      {id:'tr',x:90,y:100,label:'TR\n(0,2,2)',cls:'future'},
+      {id:'bl',x:158,y:100,label:'BL\n(2,0,2)',cls:'future'},
+      {id:'br',x:228,y:100,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:3, phase:'leaf', phaseLabel:'LEAVES', phaseClass:'phase-leaf',
+    highlight:{r:0,c:0,size:2,quad:'tl'},
+    call:'TL children', size:'1', sum:'0 or 1', result:'4 leaves',
+    changed:['call','size','sum','result'],
+    activeLine:4,
+    title:'Top-Left children: four 1×1 leaves',
+    text:'TL(0,0,2) → half=1 → four 1×1 cells. grid[0][0]=1 (L:1), grid[0][1]=0 (L:0), grid[1][0]=1 (L:1), grid[1][1]=0 (L:0). Each is a leaf. sum=1 equals sz²=1 or sum=0 — both leaf conditions.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1 active'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'TR\n(0,2,2)',cls:'future'},
+      {id:'bl',x:176,y:85,label:'BL\n(2,0,2)',cls:'future'},
+      {id:'br',x:240,y:85,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:4, phase:'check', phaseLabel:'CHECK TR', phaseClass:'phase-check',
+    highlight:{r:0,c:2,size:2,quad:'tr'},
+    call:'solve(0,2,2)', size:'2', sum:'4', result:'?',
+    changed:['call','sum','result'],
+    activeLine:4,
+    title:'Top-Right: solve(0, 2, 2) — sum=4, ALL ONES!',
+    text:'Top-Right covers rows 0-1, cols 2-3: values [1,1,1,1] → sum=4 = sz²=4. This region is UNIFORM — all ones. Return Node(1, True) immediately. No recursion needed!',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'TR\n(0,2,2)',cls:'inner active'},
+      {id:'bl',x:176,y:85,label:'BL\n(2,0,2)',cls:'future'},
+      {id:'br',x:240,y:85,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:5, phase:'leaf', phaseLabel:'LEAF val=1', phaseClass:'phase-leaf',
+    highlight:{r:0,c:2,size:2,quad:'tr'},
+    call:'solve(0,2,2)', size:'2', sum:'4', result:'leaf,val=1',
+    changed:['result'],
+    activeLine:5,
+    title:'Top-Right → leaf(val=1) — compression in action!',
+    text:'sum=4 = 2×2. All ones → Node(1, isLeaf=True). This 4-cell region becomes a SINGLE leaf node. Quad trees shine here: four identical cells collapse into one node, saving space.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1 active'},
+      {id:'bl',x:176,y:85,label:'BL\n(2,0,2)',cls:'future'},
+      {id:'br',x:240,y:85,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:6, phase:'check', phaseLabel:'CHECK BL', phaseClass:'phase-check',
+    highlight:{r:2,c:0,size:2,quad:'bl'},
+    call:'solve(2,0,2)', size:'2', sum:'0', result:'?',
+    changed:['call','sum','result'],
+    activeLine:2,
+    title:'Bottom-Left: solve(2, 0, 2) — sum=0, ALL ZEROS!',
+    text:'Bottom-Left covers rows 2-3, cols 0-1: values [0,0,0,0] → sum=0. Condition s==0 → return Node(0, True). Another uniform region collapses to a single leaf, no recursion.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1'},
+      {id:'bl',x:176,y:85,label:'BL\n(2,0,2)',cls:'inner active'},
+      {id:'br',x:240,y:85,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:7, phase:'leaf', phaseLabel:'LEAF val=0', phaseClass:'phase-leaf',
+    highlight:{r:2,c:0,size:2,quad:'bl'},
+    call:'solve(2,0,2)', size:'2', sum:'0', result:'leaf,val=0',
+    changed:['result'],
+    activeLine:3,
+    title:'Bottom-Left → leaf(val=0)',
+    text:'sum=0 → Node(0, True). The all-zeros 2×2 bottom-left becomes a single leaf node. Two of four level-1 quadrants are leaves already — the tree is lean.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1'},
+      {id:'bl',x:176,y:85,label:'L:0\n(leaf)',cls:'leaf-0 active'},
+      {id:'br',x:240,y:85,label:'BR\n(2,2,2)',cls:'future'},
+    ]
+  },
+  {
+    id:8, phase:'check', phaseLabel:'CHECK BR', phaseClass:'phase-check',
+    highlight:{r:2,c:2,size:2,quad:'br'},
+    call:'solve(2,2,2)', size:'2', sum:'2', result:'inner',
+    changed:['call','sum','result'],
+    activeLine:1,
+    title:'Bottom-Right: solve(2, 2, 2) — sum=2, mixed',
+    text:'Bottom-Right covers rows 2-3, cols 2-3: values [0,1,0,1] → sum=2. Mixed! Must recurse into four 1×1 cells: grid[2][2]=0, grid[2][3]=1, grid[3][2]=0, grid[3][3]=1.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1'},
+      {id:'bl',x:152,y:85,label:'L:0\n(leaf)',cls:'leaf-0'},
+      {id:'br',x:220,y:85,label:'BR-inner\n(2,2,2)',cls:'inner active'},
+    ]
+  },
+  {
+    id:9, phase:'leaf', phaseLabel:'BR LEAVES', phaseClass:'phase-leaf',
+    highlight:{r:2,c:2,size:2,quad:'br'},
+    call:'BR children', size:'1', sum:'0 or 1', result:'4 leaves',
+    changed:['call','size','sum','result'],
+    activeLine:4,
+    title:'Bottom-Right children: four 1×1 leaves',
+    text:'BR(2,2,2) → half=1 → four 1×1 cells. grid[2][2]=0 (L:0), grid[2][3]=1 (L:1), grid[3][2]=0 (L:0), grid[3][3]=1 (L:1). All four single-cell leaves. BR becomes an internal node with these children.',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'inner\nval=1',cls:'inner'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1'},
+      {id:'bl',x:152,y:85,label:'L:0\n(leaf)',cls:'leaf-0'},
+      {id:'br',x:220,y:85,label:'BR-inner\n(2,2,2)',cls:'inner'},
+      {id:'br-tl',x:188,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'br-tr',x:214,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'br-bl',x:240,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'br-br',x:266,y:160,label:'L:1',cls:'leaf-1 active'},
+    ]
+  },
+  {
+    id:10, phase:'result', phaseLabel:'DONE', phaseClass:'phase-result',
+    highlight:{r:0,c:0,size:4,quad:'all'},
+    call:'solve(0,0,4)', size:'4', sum:'9', result:'root node',
+    changed:['call','size','result'],
+    activeLine:7,
+    title:'Root returned — Quad Tree complete!',
+    text:'All four level-1 quadrants resolved: TL=inner(4 leaves), TR=leaf(1), BL=leaf(0), BR=inner(4 leaves). Root is an internal node with these four children. Total nodes: 1 root + 4 level-1 + 4(TL) + 4(BR) = 13 nodes vs 16 raw cells. Compression achieved!',
+    treeNodes:[
+      {id:'root',x:127,y:8,label:'ROOT\ninner',cls:'inner active'},
+      {id:'tl',x:22,y:85,label:'TL-inner\n(0,0,2)',cls:'inner'},
+      {id:'tl-tl',x:-16,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-tr',x:16,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tl-bl',x:48,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'tl-br',x:80,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'tr',x:112,y:85,label:'L:1\n(leaf)',cls:'leaf-1'},
+      {id:'bl',x:152,y:85,label:'L:0\n(leaf)',cls:'leaf-0'},
+      {id:'br',x:220,y:85,label:'BR-inner\n(2,2,2)',cls:'inner'},
+      {id:'br-tl',x:188,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'br-tr',x:214,y:160,label:'L:1',cls:'leaf-1'},
+      {id:'br-bl',x:240,y:160,label:'L:0',cls:'leaf-0'},
+      {id:'br-br',x:266,y:160,label:'L:1',cls:'leaf-1'},
+    ]
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+// Edge parent map: childId -> parentId
+const PARENT = {
+  'tl':'root','tr':'root','bl':'root','br':'root',
+  'tl-tl':'tl','tl-tr':'tl','tl-bl':'tl','tl-br':'tl',
+  'br-tl':'br','br-tr':'br','br-bl':'br','br-br':'br'
+};
+
+function getCellClass(r, c, step) {
+  const h = step.highlight;
+  if (!h || !h.quad) return GRID[r][c] === 1 ? 'val-1' : 'val-0';
+  const half = h.size / 2;
+  if (h.quad === 'all') {
+    if (r >= h.r && r < h.r + h.size && c >= h.c && c < h.c + h.size) return 'hl-all';
+  } else if (h.quad === 'tl') {
+    if (r >= h.r && r < h.r + half && c >= h.c && c < h.c + half) return 'hl-tl';
+  } else if (h.quad === 'tr') {
+    if (r >= h.r && r < h.r + half && c >= h.c + half && c < h.c + h.size) return 'hl-tr';
+  } else if (h.quad === 'bl') {
+    if (r >= h.r + half && r < h.r + h.size && c >= h.c && c < h.c + half) return 'hl-bl';
+  } else if (h.quad === 'br') {
+    if (r >= h.r + half && r < h.r + h.size && c >= h.c + half && c < h.c + h.size) return 'hl-br';
+  }
+  return GRID[r][c] === 1 ? 'val-1' : 'val-0';
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function buildDom() {
+  const grid = document.getElementById('main-grid');
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'gcell';
+      cell.id = 'gc-' + r + '-' + c;
+      cell.textContent = GRID[r][c];
+      grid.appendChild(cell);
+    }
+  }
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function renderTree(nodes) {
+  const canvas = document.getElementById('tree-canvas');
+  canvas.innerHTML = '';
+  if (!nodes) return;
+  const nodeMap = {};
+  nodes.forEach(n => nodeMap[n.id] = n);
+  // Edges first (behind nodes)
+  nodes.forEach(n => {
+    const parentId = PARENT[n.id];
+    if (!parentId) return;
+    const parent = nodeMap[parentId];
+    if (!parent) return;
+    const px = parent.x + 28, py = parent.y + 19;
+    const cx = n.x + 28,    cy = n.y + 19;
+    const dx = cx - px, dy = cy - py;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const edge = document.createElement('div');
+    edge.className = 'tedge';
+    edge.style.cssText = `left:${px}px;top:${py}px;width:${len}px;transform:rotate(${angle}deg)`;
+    canvas.appendChild(edge);
+  });
+  // Nodes on top
+  nodes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'tnode ' + n.cls;
+    el.style.left = n.x + 'px';
+    el.style.top  = n.y + 'px';
+    el.textContent = n.label;
+    canvas.appendChild(el);
+  });
+}
+
+function render() {
+  const step = steps[current];
+  // Grid
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++)
+      document.getElementById('gc-' + r + '-' + c).className = 'gcell ' + getCellClass(r, c, step);
+  // Tree
+  renderTree(step.treeNodes);
+  // Code
+  for (let i = 0; i <= 11; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent  = step.title;
+  document.getElementById('step-body').textContent   = step.text;
+  // Var tracker
+  ['call','size','sum','result'].forEach(v => {
+    document.getElementById('vv-' + v).textContent = step[v] || '—';
+    document.getElementById('vb-' + v).classList.toggle('changed', step.changed.includes(v));
+  });
+  // Progress
+  steps.forEach((_, i) => {
+    document.getElementById('dot-' + i).classList.toggle('active', i === current);
+    document.getElementById('dot-' + i).classList.toggle('visited', i < current);
+  });
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const n = current + dir;
+  if (n < 0 || n >= steps.length) return;
+  current = n; render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#715 · Range Module</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+/* ── Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.numline-wrap{position:relative;height:52px;margin:0 0 8px}
+.numline-axis{position:absolute;bottom:18px;left:0;right:0;height:2px;background:var(--border2)}
+.numline-labels{display:flex;justify-content:space-between;margin-top:2px}
+.numline-lbl{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.intervals-track{position:absolute;bottom:20px;left:0;right:0;height:18px}
+.ibar{position:absolute;height:18px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--mono);white-space:nowrap;transition:all 0.4s ease;overflow:hidden}
+.ibar-blue{background:var(--blue-bg);border:1.5px solid var(--blue-border);color:var(--blue-mid)}
+.ibar-amber{background:var(--amber-bg);border:1.5px solid var(--amber-border);color:var(--amber-mid)}
+.ibar-green{background:var(--green-bg);border:1.5px solid var(--green-border);color:var(--green-mid)}
+.ibar-red{background:var(--red-bg);border:1.5px solid var(--red-border);color:var(--red-mid)}
+.ibar-purple{background:var(--purple-bg);border:1.5px solid var(--purple-border);color:var(--purple-mid)}
+/* sorted map display */
+.smap-area{margin:1.25rem 0}
+.smap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+.smap-entries{display:flex;gap:8px;flex-wrap:wrap}
+.smap-entry{padding:6px 12px;border-radius:var(--radius);border:1.5px solid;font-family:var(--mono);font-size:12px;transition:all 0.3s}
+.smap-entry.sblue{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.smap-entry.samber{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.smap-entry.sgreen{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid)}
+.smap-entry.sgray{background:var(--bg2);border-color:var(--border2);color:var(--text3)}
+.smap-empty{font-size:12px;color:var(--text3);font-style:italic;padding:6px 0}
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);min-width:50px;text-align:center}
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-add{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-query{background:var(--green-bg);color:var(--green-mid)}
+.phase-remove{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-blue{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-amber{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-green{background:var(--green-bg);border-color:var(--green-border)}
+.sw-red{background:var(--red-bg);border-color:var(--red-border)}
+.sw-purple{background:var(--purple-bg);border-color:var(--purple-border)}
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #715</div>
+  <h1>Range Module</h1>
+  <p class="subtitle">Design a data structure that tracks ranges of numbers on a number line. Support addRange, removeRange, and queryRange on half-open intervals [left, right).</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">TreeMap Intervals</span>
+    <span class="tag tag-complexity">Time: O(n log n) per op</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Think of a coverage tracker for a streaming service. The number line represents timestamps. You can <strong>mark a range as watched</strong>, <strong>unmark a range</strong>, and <strong>check whether a range is fully covered</strong>. Ranges can overlap, merge, and split dynamically.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>All intervals are <strong>half-open [left, right)</strong>: left is included, right is excluded. We only need to store the <em>boundaries</em> of tracked ranges in sorted order. A sorted map <code>start → end</code> perfectly represents the entire state.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>The three operations illustrated:</strong></p>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:1rem;margin:1rem 0;font-size:13px;font-family:var(--mono);line-height:2">
+      <div>addRange(10, 20)  → tracked: [10,20)</div>
+      <div>addRange(30, 45)  → tracked: [10,20), [30,45)</div>
+      <div>queryRange(10,20) → True  (fully covered by [10,20))</div>
+      <div>queryRange(20,25) → False (gap between 20 and 30)</div>
+      <div>removeRange(14,20)→ tracked: [10,14), [30,45)  (split!)</div>
+      <div>addRange(18, 35)  → tracked: [10,14), [18,45)  (merge!)</div>
+    </div>
+
+    <p><strong>Why "half-open"?</strong> Half-open intervals compose cleanly: <code>[a,b) + [b,c) = [a,c)</code>. Adjacent intervals with no gap between them can merge by simply joining at the shared boundary point.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases:</strong> Adding a range that fully encloses existing ones (absorb all), removing a range that splits one interval into two, querying partially overlapping ranges, consecutive adds that should merge into one contiguous block.</p>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Sorted Map of Intervals</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain a <strong>sorted dictionary</strong> mapping interval <em>start</em> → interval <em>end</em>. Python's <code>SortedDict</code> from <code>sortedcontainers</code> provides O(log n) binary search to find neighboring intervals. At all times, stored intervals are non-overlapping, non-adjacent, and sorted.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Sorted Map, Not List or Set?</div>
+      <p>We need to efficiently find the interval <em>just before</em> a given point (floor query) and iterate forward from there. A sorted map gives us <code>bisect_right(x) - 1</code> for the floor in O(log n), then O(k) to scan k overlapping intervals — total O((k+1) log n) per operation.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>addRange(left, right) — merge overlapping intervals:</strong></p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Find left neighbor:</strong> Use <code>bisect_right(left) - 1</code> to find the rightmost interval starting at or before <code>left</code>. If it reaches into our new range (its end ≥ left), absorb it: expand <code>left</code> to its start and <code>right</code> to max of both ends.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Absorb rightward:</strong> Scan forward while the next interval's start ≤ right (touches or overlaps). Expand <code>right</code> to max of both ends. Delete all absorbed intervals.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Insert merged result:</strong> Store <code>ranges[left] = right</code>. Invariant is restored.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>removeRange(left, right) — cut and save tails:</strong></p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Find overlapping intervals:</strong> Same floor query. Scan forward while start &lt; right.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Save tails before deleting:</strong> If an overlapping interval starts before <code>left</code>, save <code>[start, left)</code>. If it ends after <code>right</code>, save <code>[right, end)</code>. These are the portions outside the removal zone.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Delete, then re-insert tails:</strong> Remove all overlapping intervals, then write back any saved tails.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>queryRange(left, right) — single floor lookup:</strong></p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Floor query:</strong> Find the rightmost interval with start ≤ left. If none exists, return False.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Single check:</strong> Return <code>True</code> iff that interval's end ≥ right. Since intervals are non-overlapping, if this one doesn't cover [left, right), nothing can.</span>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Critical: Adjacent Intervals Must Merge</div>
+      <p>When checking overlap in <code>addRange</code>, use <code>start &lt;= right</code> (not <code>&lt; right</code>). Intervals <code>[10,20)</code> and <code>[20,30)</code> are adjacent (20 is the boundary) — they must merge to <code>[10,30)</code>. Using strict <code>&lt;</code> would leave them as two separate entries, breaking the non-adjacent invariant.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After every operation, <code>self.ranges</code> contains <strong>non-overlapping, non-adjacent, sorted</strong> half-open intervals that exactly represent all tracked points. No two entries touch or cross; every tracked point belongs to exactly one stored interval.</p>
+    </div>
+
+    <p><strong>Why queryRange is O(log n):</strong> Since intervals never overlap and are sorted, there is at most <em>one</em> stored interval that could contain <code>[left, right)</code> — the one with the largest start ≤ left. One binary search + one comparison. Done.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why addRange maintains the invariant:</strong> The sweep in step 2 is exhaustive — we keep absorbing forward while any interval's start ≤ right (touching counts as overlapping due to half-open semantics). After the sweep, the merged interval has strictly the largest possible start and end, with no overlapping neighbors remaining.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why removeRange maintains the invariant:</strong> We save <em>both</em> possible tails before deleting. The left tail (if any) ends at <code>left</code>, the right tail (if any) starts at <code>right</code>. Since the removal zone is <code>[left, right)</code>, neither tail overlaps it or each other.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Valid Map State</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          {5:10, 20:35, 50:70}<br>
+          Intervals: [5,10) [20,35) [50,70)<br>
+          Each sorted, non-overlapping<br>
+          No adjacency (10≠20, 35≠50)
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Invalid (never stored)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          {5:15, 10:25}<br>
+          [5,15) overlaps [10,25)<br>
+          Must merge to [5,25)<br>
+          addRange always merges!
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — SortedDict (Optimal, Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from sortedcontainers import SortedDict</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">class RangeModule:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self):</span></div>
+<div class="ann-line"><span class="acode">        self.ranges = SortedDict()          </span><span class="aann">← sorted map: start → end for each [start,end)</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def addRange(self, left: int, right: int) -&gt; None:</span></div>
+<div class="ann-line"><span class="acode">        i = self.ranges.bisect_right(left) - 1 </span><span class="aann">← index of rightmost start ≤ left</span></div>
+<div class="ann-line"><span class="acode">        if i &gt;= 0:</span></div>
+<div class="ann-line"><span class="acode">            s, e = self.ranges.keys()[i], self.ranges.values()[i]</span></div>
+<div class="ann-line"><span class="acode">            if e &gt;= left:                   </span><span class="aann">← left neighbor overlaps or touches our range</span></div>
+<div class="ann-line"><span class="acode">                left = s                    </span><span class="aann">← absorb: expand left boundary</span></div>
+<div class="ann-line"><span class="acode">                right = max(right, e)       </span><span class="aann">← absorb: expand right boundary</span></div>
+<div class="ann-line"><span class="acode">                del self.ranges[s]          </span><span class="aann">← remove absorbed interval</span></div>
+<div class="ann-line"><span class="acode">        while self.ranges:                  </span><span class="aann">← absorb any overlapping intervals to the right</span></div>
+<div class="ann-line"><span class="acode">            j = self.ranges.bisect_left(left)</span></div>
+<div class="ann-line"><span class="acode">            if j &gt;= len(self.ranges): break</span></div>
+<div class="ann-line"><span class="acode">            s, e = self.ranges.keys()[j], self.ranges.values()[j]</span></div>
+<div class="ann-line"><span class="acode">            if s &gt; right: break             </span><span class="aann">← next interval starts beyond our right — stop</span></div>
+<div class="ann-line"><span class="acode">            right = max(right, e)           </span><span class="aann">← extend our right to cover absorbed interval</span></div>
+<div class="ann-line"><span class="acode">            del self.ranges[s]              </span><span class="aann">← remove absorbed interval</span></div>
+<div class="ann-line"><span class="acode">        self.ranges[left] = right           </span><span class="aann">← insert merged result</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def removeRange(self, left: int, right: int) -&gt; None:</span></div>
+<div class="ann-line"><span class="acode">        i = self.ranges.bisect_right(left) - 1</span></div>
+<div class="ann-line"><span class="acode">        to_del, save = [], []</span></div>
+<div class="ann-line"><span class="acode">        start_scan = i if i &gt;= 0 else 0    </span><span class="aann">← begin from left neighbor (may extend into [left,right))</span></div>
+<div class="ann-line"><span class="acode">        for j in range(start_scan, len(self.ranges)):</span></div>
+<div class="ann-line"><span class="acode">            s, e = self.ranges.keys()[j], self.ranges.values()[j]</span></div>
+<div class="ann-line"><span class="acode">            if s &gt;= right: break            </span><span class="aann">← no more overlapping intervals</span></div>
+<div class="ann-line"><span class="acode">            if e &lt;= left: continue          </span><span class="aann">← left neighbor ends before our range — skip</span></div>
+<div class="ann-line"><span class="acode">            to_del.append(s)                </span><span class="aann">← mark for deletion</span></div>
+<div class="ann-line"><span class="acode">            if s &lt; left:  save.append((s, left))   </span><span class="aann">← left tail: portion before removal zone</span></div>
+<div class="ann-line"><span class="acode">            if e &gt; right: save.append((right, e))  </span><span class="aann">← right tail: portion after removal zone</span></div>
+<div class="ann-line"><span class="acode">        for s in to_del: del self.ranges[s]</span></div>
+<div class="ann-line"><span class="acode">        for s, e in save: self.ranges[s] = e       </span><span class="aann">← re-insert preserved tails</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def queryRange(self, left: int, right: int) -&gt; bool:</span></div>
+<div class="ann-line"><span class="acode">        i = self.ranges.bisect_right(left) - 1     </span><span class="aann">← rightmost interval starting ≤ left</span></div>
+<div class="ann-line"><span class="acode">        if i &lt; 0: return False              </span><span class="aann">← no interval starts at or before left</span></div>
+<div class="ann-line"><span class="acode">        e = self.ranges.values()[i]</span></div>
+<div class="ann-line"><span class="acode">        return e &gt;= right                   </span><span class="aann">← that interval's end must cover right endpoint</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Left Neighbor</div>
+      <p>Beginners only check intervals starting at or after <code>left</code>. But an existing interval <code>[5, 15)</code> will overlap a new range <code>[10, 20)</code> even though its start (5) is before our new left (10). Always check the floor interval (rightmost start ≤ left) first.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Pure Sorted List (no external library)</strong><br>
+    If you can't use <code>sortedcontainers</code>, maintain a sorted list of <code>[start, end]</code> pairs and use <code>bisect</code> manually. Same logic, slightly more verbose index arithmetic. O(n) insert/delete in worst case due to list shifting, but often acceptable.</p>
+
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import bisect</span></div>
+<div class="ann-line"><span class="acode">class RangeModuleList:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self): self.ivs = []       </span><span class="aann">← sorted list of [start, end] pairs</span></div>
+<div class="ann-line"><span class="acode">    def addRange(self, l, r):</span></div>
+<div class="ann-line"><span class="acode">        ivs, nl, nr = self.ivs, l, r</span></div>
+<div class="ann-line"><span class="acode">        i = bisect.bisect_left(ivs, [l])    </span><span class="aann">← first interval with start ≥ l</span></div>
+<div class="ann-line"><span class="acode">        if i &gt; 0 and ivs[i-1][1] &gt;= l:     </span><span class="aann">← left neighbor overlaps</span></div>
+<div class="ann-line"><span class="acode">            i -= 1; nl = ivs[i][0]; nr = max(nr, ivs[i][1])</span></div>
+<div class="ann-line"><span class="acode">        j = i</span></div>
+<div class="ann-line"><span class="acode">        while j &lt; len(ivs) and ivs[j][0] &lt;= nr:</span></div>
+<div class="ann-line"><span class="acode">            nr = max(nr, ivs[j][1]); j += 1</span></div>
+<div class="ann-line"><span class="acode">        self.ivs[i:j] = [[nl, nr]]          </span><span class="aann">← splice: replace absorbed entries with merged one</span></div>
+<div class="ann-line"><span class="acode">    def queryRange(self, l, r):</span></div>
+<div class="ann-line"><span class="acode">        i = bisect.bisect_right(self.ivs, [l, float('inf')]) - 1</span></div>
+<div class="ann-line"><span class="acode">        return i &gt;= 0 and self.ivs[i][1] &gt;= r</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>SortedDict (Solution 1):</strong> O(log n) per query, O((k+1)·log n) per add/remove where k = intervals absorbed<br>
+        <strong>Sorted List (Solution 2):</strong> O(log n) query, O(n) add/remove worst case (list shifting)<br>
+        <strong>Space:</strong> O(n) where n = number of distinct tracked intervals
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify the Core Need</div>
+        <p style="font-size:14px;color:var(--text)">Ask yourself: "What operations do I need, and how do I find overlapping intervals efficiently?" Three operations need O(log n) lookup by value — that screams sorted structure with binary search. A hash map won't work because we need range queries.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Choose Sorted Map Over Sorted Set</div>
+        <p style="font-size:14px;color:var(--text)">We need to store pairs (start, end) and look them up by start. A sorted map (dict keyed by start) lets us find the floor in O(log n) and store the paired end value. If the interviewer doesn't allow external libs, mention bisect on a list of pairs.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Design Each Operation</div>
+        <p style="font-size:14px;color:var(--text)">Start with queryRange (simplest — floor + one check), then addRange (find all overlapping, merge), then removeRange (find all overlapping, cut out the middle, re-insert tails). Each shares the same "floor lookup + forward scan" pattern.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle Adjacency Carefully</div>
+        <p style="font-size:14px;color:var(--text)">Walk through the example where two intervals meet exactly: [10,20) and [20,30). Show that the condition for merging in addRange must use ≤ (not &lt;) so adjacent intervals collapse. This shows you understand the half-open interval semantics.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I need to store a dynamic set of non-overlapping intervals sorted by start.<br>
+I'll use a SortedDict mapping start → end. All ops share a floor lookup pattern.<br>
+queryRange: find largest start ≤ left, check if its end ≥ right. O(log n).<br>
+addRange: find floor, absorb all intervals touching [left,right), insert merged. O((k+1)logn).<br>
+removeRange: find overlapping intervals, save any left/right tails outside [left,right),<br>
+delete overlapping entries, re-insert tails. Same complexity.<br>
+Key invariant: after every op, stored intervals are non-overlapping, non-adjacent, sorted."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if you can't import sortedcontainers?"</strong> → Use bisect on a sorted list of [start,end] pairs</li>
+        <li><strong>"How would you serialize/restore the module?"</strong> → Just serialize the sorted list of intervals</li>
+        <li><strong>"How would you count total tracked numbers?"</strong> → Sum (end - start) for all intervals in O(n)</li>
+        <li><strong>"What if intervals can be 64-bit integers?"</strong> → No change — we store boundaries, not bitmaps</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Tracing: addRange(10,20) → addRange(30,45) → queryRange(10,20) → queryRange(20,25) → removeRange(14,20) → addRange(18,35) → queryRange(18,45)</p>
+
+    <div class="viz-area">
+      <!-- Number line: range 0..50 -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px">Number Line (0–50)</div>
+      <div class="numline-wrap">
+        <div class="intervals-track" id="intervals-track"></div>
+        <div class="numline-axis"></div>
+      </div>
+      <div class="numline-labels" id="numline-labels"></div>
+
+      <!-- Sorted Map Display -->
+      <div style="margin-top:1.5rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">Sorted Map: start → end</div>
+        <div id="smap-entries" style="display:flex;gap:8px;flex-wrap:wrap;min-height:32px"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-op">
+          <span class="var-name">operation</span>
+          <span class="var-val" id="vv-op">—</span>
+        </div>
+        <div class="var-box" id="vb-args">
+          <span class="var-name">args</span>
+          <span class="var-val" id="vv-args">—</span>
+        </div>
+        <div class="var-box" id="vb-result">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-result">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def addRange(self, left, right):</div>
+      <div class="code-line" id="cl-1">    # find floor interval, absorb left neighbor</div>
+      <div class="code-line" id="cl-2">    i = self.ranges.bisect_right(left) - 1</div>
+      <div class="code-line" id="cl-3">    if i &gt;= 0 and self.ranges.values()[i] &gt;= left:</div>
+      <div class="code-line" id="cl-4">        left, right = merge(left_neighbor)</div>
+      <div class="code-line" id="cl-5">    while next_interval.start &lt;= right:  # absorb right</div>
+      <div class="code-line" id="cl-6">        right = max(right, next.end); delete next</div>
+      <div class="code-line" id="cl-7">    self.ranges[left] = right  # insert merged</div>
+      <div class="code-line" id="cl-8">def removeRange(self, left, right):</div>
+      <div class="code-line" id="cl-9">    # find overlapping, save tails, delete, re-insert</div>
+      <div class="code-line" id="cl-10">    save left_tail if interval.start &lt; left</div>
+      <div class="code-line" id="cl-11">    save right_tail if interval.end &gt; right</div>
+      <div class="code-line" id="cl-12">    delete overlapping; re-insert tails</div>
+      <div class="code-line" id="cl-13">def queryRange(self, left, right):</div>
+      <div class="code-line" id="cl-14">    i = self.ranges.bisect_right(left) - 1</div>
+      <div class="code-line" id="cl-15">    if i &lt; 0: return False</div>
+      <div class="code-line" id="cl-16">    return self.ranges.values()[i] &gt;= right</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Ready to begin</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through each operation.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-blue"></div>Tracked interval</div>
+      <div class="legend-item"><div class="legend-swatch sw-amber"></div>Operation target</div>
+      <div class="legend-item"><div class="legend-swatch sw-green"></div>Merged result</div>
+      <div class="legend-item"><div class="legend-swatch sw-red"></div>Removed zone</div>
+      <div class="legend-item"><div class="legend-swatch sw-purple"></div>Query range</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Store intervals in a sorted map (start → end); never store overlapping or adjacent pairs</div>
+      <div class="takeaway">All three operations share the same "floor lookup via bisect_right(x)-1" entry point</div>
+      <div class="takeaway">addRange merges by absorbing the left neighbor and then sweeping rightward</div>
+      <div class="takeaway">removeRange saves left/right tails before deleting, then re-inserts them</div>
+      <div class="takeaway">queryRange needs only a single floor lookup + one bound check — O(log n)</div>
+      <div class="takeaway">Adjacency condition: use ≤ not &lt; when checking overlap to merge touching intervals</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>addRange</th><th>queryRange</th><th>removeRange</th><th>Space</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute set of integers</td>
+          <td class="mark-bad">O(range)</td>
+          <td class="mark-bad">O(range)</td>
+          <td class="mark-bad">O(range)</td>
+          <td class="mark-bad">O(MAX)</td>
+        </tr>
+        <tr>
+          <td>Sorted list of pairs</td>
+          <td>O(n)</td>
+          <td class="mark-good">O(log n)</td>
+          <td>O(n)</td>
+          <td>O(n)</td>
+        </tr>
+        <tr>
+          <td><strong>SortedDict ✓</strong></td>
+          <td class="mark-good">O(k log n)</td>
+          <td class="mark-good">O(log n)</td>
+          <td class="mark-good">O(k log n)</td>
+          <td class="mark-good">O(n)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the TreeMap Intervals Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Design a data structure" + "ranges/intervals" + dynamic insertions/deletions</li>
+        <li>Need to merge overlapping intervals on-the-fly (not a one-time sort)</li>
+        <li>Floor query: "find the interval containing point x"</li>
+        <li>Equivalent Java solution: <code>TreeMap&lt;Integer,Integer&gt;</code> with <code>floorKey()</code> and <code>higherKey()</code></li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (TreeMap Intervals / Design)</div>
+      <div class="related-item"><strong>My Calendar I</strong><span class="related-diff diff-med">Medium</span> — Add events without double-booking; sorted map of booked intervals (#729)</div>
+      <div class="related-item"><strong>My Calendar II</strong><span class="related-diff diff-med">Medium</span> — Allow at most double-booking; track single and double-booked ranges (#731)</div>
+      <div class="related-item"><strong>My Calendar III</strong><span class="related-diff diff-hard">Hard</span> — Find maximum k-booking using difference array or segment tree (#732)</div>
+      <div class="related-item"><strong>Data Stream as Disjoint Intervals</strong><span class="related-diff diff-hard">Hard</span> — Add integers one by one, return merged intervals; same SortedDict pattern (#352)</div>
+      <div class="related-item"><strong>Merge Intervals</strong><span class="related-diff diff-med">Medium</span> — One-time merge of a static list; simpler because no dynamic updates (#56)</div>
+      <div class="related-item"><strong>Insert Interval</strong><span class="related-diff diff-med">Medium</span> — Insert one new interval into sorted non-overlapping list; single addRange operation (#57)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>Pattern: <strong>Design</strong> · Sub-Pattern: <strong>TreeMap Intervals</strong> (Analysis — Design section)<br>
+      Java equivalent uses <code>TreeMap.floorKey()</code> and <code>TreeMap.higherKey()</code> for the same floor/ceiling lookups.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Number line: 0..50, pixel width maps 0..50 → 0..100%
+// Each interval: {left, right, color}
+// 0=blue(tracked), 1=amber(op target), 2=green(merged), 3=red(removed), 4=purple(query)
+
+// Build tick labels
+const TICKS = [0,5,10,15,20,25,30,35,40,45,50];
+const numlineLabels = document.getElementById('numline-labels');
+TICKS.forEach(t => {
+  const d = document.createElement('div');
+  d.style.cssText='font-size:10px;color:var(--text3);font-family:var(--mono)';
+  d.textContent = t;
+  numlineLabels.appendChild(d);
+});
+
+const steps = [
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    op:'—', args:'—', result:'—', opChanged:false, argsChanged:false, resultChanged:false,
+    intervals: [],
+    smap: [],
+    activeLine: -1,
+    title: 'Empty Range Module',
+    text: 'The RangeModule starts with an empty SortedDict. No ranges are tracked yet. The number line is entirely uncovered.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(10, 20)', result:'—',
+    intervals: [{l:10,r:20,c:'amber'}],
+    smap: [],
+    activeLine: 2,
+    title: 'addRange(10, 20) — Find floor interval',
+    text: 'bisect_right(10) - 1 = -1. No existing interval starts at or before 10. No left neighbor to check. Proceed to rightward sweep.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(10, 20)', result:'—',
+    intervals: [{l:10,r:20,c:'amber'}],
+    smap: [],
+    activeLine: 5,
+    title: 'addRange(10, 20) — Rightward sweep',
+    text: 'No existing intervals — nothing to absorb to the right either. The sweep loop exits immediately.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(10, 20)', result:'done',
+    intervals: [{l:10,r:20,c:'blue'}],
+    smap: [{k:10,v:20,c:'sblue'}],
+    activeLine: 7,
+    title: 'addRange(10, 20) — Insert [10, 20)',
+    text: 'ranges[10] = 20. Sorted map now: {10: 20}. The interval [10,20) is tracked. Number line shows coverage from 10 to 20.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(30, 45)', result:'—',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'amber'}],
+    smap: [{k:10,v:20,c:'sblue'}],
+    activeLine: 2,
+    title: 'addRange(30, 45) — Find floor interval',
+    text: 'bisect_right(30) - 1 = 0. Floor interval is [10,20). Its end=20 < 30 (does NOT reach our new left of 30). No overlap — do not absorb.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(30, 45)', result:'—',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'amber'}],
+    smap: [{k:10,v:20,c:'sblue'}],
+    activeLine: 5,
+    title: 'addRange(30, 45) — Rightward sweep',
+    text: 'The next interval after 30 would be... there is none. The sweep loop exits. left=30, right=45 unchanged.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(30, 45)', result:'done',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'blue'}],
+    smap: [{k:10,v:20,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 7,
+    title: 'addRange(30, 45) — Insert [30, 45)',
+    text: 'ranges[30] = 45. Map now {10:20, 30:45}. Two separate non-overlapping intervals. The gap [20,30) is NOT covered.'
+  },
+  {
+    phase:'query', phaseLabel:'QUERY', phaseClass:'phase-query',
+    op:'queryRange', args:'(10, 20)', result:'True ✓',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'blue'},{l:10,r:20,c:'purple'}],
+    smap: [{k:10,v:20,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 14,
+    title: 'queryRange(10, 20) → True',
+    text: 'Floor lookup: bisect_right(10)-1 = 0 → interval [10,20). Check: end(20) >= right(20)? Yes! The query range is fully contained. Return True.'
+  },
+  {
+    phase:'query', phaseLabel:'QUERY', phaseClass:'phase-query',
+    op:'queryRange', args:'(20, 25)', result:'False ✗',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'blue'},{l:20,r:25,c:'purple'}],
+    smap: [{k:10,v:20,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 16,
+    title: 'queryRange(20, 25) → False',
+    text: 'Floor lookup: bisect_right(20)-1 = 0 → interval [10,20). Check: end(20) >= right(25)? NO! 20 < 25. The interval does not extend far enough. Return False. (The gap [20,30) is uncovered.)'
+  },
+  {
+    phase:'remove', phaseLabel:'REMOVE', phaseClass:'phase-remove',
+    op:'removeRange', args:'(14, 20)', result:'—',
+    intervals: [{l:10,r:20,c:'blue'},{l:30,r:45,c:'blue'},{l:14,r:20,c:'red'}],
+    smap: [{k:10,v:20,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 9,
+    title: 'removeRange(14, 20) — Find overlapping intervals',
+    text: 'Floor: bisect_right(14)-1 = 0 → [10,20). Does it overlap [14,20)? Its end=20 > 14=left → yes! Mark for deletion. Its start=10 < 14=left → save left tail [10,14). Its end=20 = right=20 → no right tail.'
+  },
+  {
+    phase:'remove', phaseLabel:'REMOVE', phaseClass:'phase-remove',
+    op:'removeRange', args:'(14, 20)', result:'done',
+    intervals: [{l:10,r:14,c:'blue'},{l:30,r:45,c:'blue'}],
+    smap: [{k:10,v:14,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 12,
+    title: 'removeRange(14, 20) — Delete and re-insert tail',
+    text: 'Delete [10,20). Re-insert left tail: ranges[10]=14. Map is now {10:14, 30:45}. The range [10,14) is preserved; [14,20) is removed. The number line now shows a gap from 14 to 30.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(18, 35)', result:'—',
+    intervals: [{l:10,r:14,c:'blue'},{l:30,r:45,c:'blue'},{l:18,r:35,c:'amber'}],
+    smap: [{k:10,v:14,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 3,
+    title: 'addRange(18, 35) — Check left neighbor',
+    text: 'Floor: bisect_right(18)-1 = 0 → [10,14). End=14 < 18. Does NOT overlap our new [18,35). left stays 18, right stays 35.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(18, 35)', result:'—',
+    intervals: [{l:10,r:14,c:'blue'},{l:30,r:45,c:'blue'},{l:18,r:35,c:'amber'}],
+    smap: [{k:10,v:14,c:'sblue'},{k:30,v:45,c:'sblue'}],
+    activeLine: 5,
+    title: 'addRange(18, 35) — Rightward sweep absorbs [30,45)',
+    text: 'Next interval: [30,45). Its start=30 <= right=35? YES — absorbs! right = max(35, 45) = 45. Delete [30,45). Continue sweep: no more intervals. Final: left=18, right=45.'
+  },
+  {
+    phase:'add', phaseLabel:'ADD RANGE', phaseClass:'phase-add',
+    op:'addRange', args:'(18, 35)', result:'done',
+    intervals: [{l:10,r:14,c:'blue'},{l:18,r:45,c:'green'}],
+    smap: [{k:10,v:14,c:'sblue'},{k:18,v:45,c:'sgreen'}],
+    activeLine: 7,
+    title: 'addRange(18, 35) — Merged to [18, 45)',
+    text: 'ranges[18] = 45. Map: {10:14, 18:45}. The new range [18,35) merged with existing [30,45) producing [18,45). Two intervals remain, non-overlapping.'
+  }
+];
+
+let current = 0;
+
+function pct(v) { return (v / 50 * 100) + '%'; }
+function pctW(l, r) { return ((r-l) / 50 * 100) + '%'; }
+
+const colorMap = {
+  blue: 'ibar-blue', amber: 'ibar-amber', green: 'ibar-green',
+  red: 'ibar-red', purple: 'ibar-purple'
+};
+
+function renderIntervals(intervals) {
+  const track = document.getElementById('intervals-track');
+  track.innerHTML = '';
+  // Render at two vertical layers if overlapping colors exist
+  const layers = {};
+  intervals.forEach((iv, idx) => {
+    const bar = document.createElement('div');
+    bar.className = 'ibar ' + colorMap[iv.c];
+    bar.style.left = pct(iv.l);
+    bar.style.width = pctW(iv.l, iv.r);
+    const layerKey = iv.c === 'purple' || iv.c === 'red' ? 'top' : 'bot';
+    if (layerKey === 'top') {
+      bar.style.bottom = '20px';
+    }
+    track.appendChild(bar);
+    const lbl = document.createElement('span');
+    lbl.style.cssText='font-size:9px;font-weight:700;pointer-events:none;overflow:hidden;white-space:nowrap';
+    lbl.textContent = '['+iv.l+','+iv.r+')';
+    bar.appendChild(lbl);
+  });
+}
+
+function renderSmap(smap) {
+  const el = document.getElementById('smap-entries');
+  el.innerHTML = '';
+  if (!smap || smap.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText='font-size:12px;color:var(--text3);font-style:italic;padding:6px 0';
+    empty.textContent = '(empty)';
+    el.appendChild(empty);
+    return;
+  }
+  smap.forEach(e => {
+    const entry = document.createElement('div');
+    entry.className = 'smap-entry ' + e.c;
+    entry.textContent = e.k + ' → ' + e.v;
+    el.appendChild(entry);
+  });
+}
+
+function render() {
+  const step = steps[current];
+
+  renderIntervals(step.intervals);
+  renderSmap(step.smap);
+
+  // Variable tracker
+  const setVar = (id, val, changed) => {
+    document.getElementById('vv-'+id).textContent = val;
+    document.getElementById('vb-'+id).classList.toggle('changed', !!changed);
+  };
+  const prev = current > 0 ? steps[current-1] : null;
+  setVar('op', step.op, prev && step.op !== prev.op);
+  setVar('args', step.args, prev && step.args !== prev.args);
+  setVar('result', step.result, prev && step.result !== prev.result && step.result !== '—');
+
+  // Code panel
+  for (let i = 0; i <= 16; i++) {
+    const cl = document.getElementById('cl-'+i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step '+(current+1)+' / '+steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-'+i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function buildDots() {
+  const pd = document.getElementById('progress-dots');
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-'+i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  });
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next; render();
+}
+function reset() { current = 0; render(); }
+function toggle(header) {
+  header.nextElementSibling.classList.toggle('collapsed');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDots();
+render();
+</script>
+</body>
+</html>

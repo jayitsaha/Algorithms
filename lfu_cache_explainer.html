@@ -1,91 +1,949 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>LFU Cache — LC #460</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#460 · LFU Cache</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── LFU Data Structure Diagram ── */
+.ds-diagram{display:flex;gap:16px;align-items:flex-start;margin:1rem 0;flex-wrap:wrap}
+.ds-box{border-radius:var(--radius);padding:12px 16px;min-width:160px}
+.ds-box.keymap{background:var(--blue-bg);border:2px solid var(--blue-border)}
+.ds-box.freqmap{background:var(--amber-bg);border:2px solid var(--amber-border)}
+.ds-box.minbox{background:var(--purple-bg);border:2px solid var(--purple-border)}
+.ds-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.ds-box.keymap .ds-box-title{color:var(--blue-mid)}
+.ds-box.freqmap .ds-box-title{color:var(--amber-mid)}
+.ds-box.minbox .ds-box-title{color:var(--purple-mid)}
+.ds-arrow{display:flex;align-items:center;color:var(--text3);font-size:22px;font-weight:700;padding-top:20px}
+.ds-entry{font-family:var(--mono);font-size:12px;color:var(--text2);line-height:2}
+
+/* ── Cache Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.viz-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+
+.kv-store{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;min-height:80px;align-items:flex-start}
+.kv-entry{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);min-width:72px;transition:background 0.3s,border-color 0.3s}
+.kv-entry.active{border-color:var(--blue-border);background:var(--blue-bg)}
+.kv-entry.evicting{border-color:var(--red-border);background:var(--red-bg)}
+.kv-entry.new-entry{border-color:var(--green-border);background:var(--green-bg)}
+.kv-key{font-family:var(--mono);font-size:11px;color:var(--text3);font-weight:600}
+.kv-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);line-height:1.2}
+.kv-freq{font-size:10px;font-weight:600;margin-top:2px;padding:2px 6px;border-radius:10px;background:var(--bg2)}
+.kv-entry.active .kv-key{color:var(--blue-mid)}
+.kv-entry.active .kv-val{color:var(--blue-text)}
+.kv-entry.evicting .kv-key{color:var(--red-mid)}
+.kv-entry.evicting .kv-val{color:var(--red-text);text-decoration:line-through}
+.kv-entry.new-entry .kv-key{color:var(--green-mid)}
+.kv-entry.new-entry .kv-val{color:var(--green-text)}
+
+.freq-buckets{display:flex;gap:10px;flex-wrap:wrap;min-height:100px;align-items:flex-end}
+.bucket{border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);padding:10px 14px;min-width:96px;transition:border-color 0.3s,background 0.3s}
+.bucket.min-freq{border-color:var(--amber-border);background:var(--amber-bg)}
+.bucket-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:6px;letter-spacing:0.5px}
+.bucket.min-freq .bucket-label{color:var(--amber-mid)}
+.bucket-items{display:flex;flex-direction:column;gap:4px}
+.bucket-item{font-family:var(--mono);font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--bg2);color:var(--text);transition:background 0.3s,color 0.3s;white-space:nowrap}
+.bucket-item.recently-accessed{background:var(--blue-bg);color:var(--blue-mid)}
+.bucket-item.being-evicted{background:var(--red-bg);color:var(--red-mid);text-decoration:line-through}
+.bucket-item.just-inserted{background:var(--green-bg);color:var(--green-mid)}
+.bucket-item.lru-label{font-size:9px;font-weight:400;opacity:0.7}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-get{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-put{background:var(--green-bg);color:var(--green-mid)}
+.phase-evict{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-new{background:var(--green-bg);border-color:var(--green-border)}
+.sw-evict{background:var(--red-bg);border-color:var(--red-border)}
+.sw-min{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>LFU Cache</h1>
-<div class="subtitle">LeetCode #460 &mdash; Multiple Data Structures</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Sorting</span><span class="tag tag-pattern">Multiple Data Structures</span><span class="tag tag-cx">O(1) per op Time &middot; O(capacity) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #460</div>
+  <h1>LFU Cache</h1>
+  <p class="subtitle">Design and implement a Least Frequently Used (LFU) cache — evict the item accessed fewest times; break ties by Least Recently Used order.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Design</span>
+    <span class="tag tag-pattern">Multiple Data Structures</span>
+    <span class="tag tag-complexity">Time: O(1)</span>
+    <span class="tag tag-complexity">Space: O(capacity)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>An <strong>LFU Cache</strong> is a fixed-size key-value store with an automatic eviction policy: when full and a new key arrives, it evicts the key that has been <em>accessed the fewest times</em>. If multiple keys tie for the minimum access count, the one that was least recently used (among those tied) is evicted.</p>
+
+    <p style="margin-top:0.75rem">We must support two operations, each in <strong>O(1) time</strong>:</p>
+    <ul style="margin:0.5rem 0 0.5rem 1.25rem;line-height:2;font-size:14px">
+      <li><code>get(key)</code> — return value if key exists, else -1. <em>Counts as one access.</em></li>
+      <li><code>put(key, value)</code> — insert or update. If full and new key, evict first. <em>Counts as one access.</em></li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Scanning all keys to find the minimum-frequency one takes O(n) — too slow. Instead, <strong>group items by their access count</strong> using a hash map of ordered buckets. Keep a single <code>min_freq</code> integer so you can jump directly to the eviction target in O(1). The only data structures you need are two dicts and Python's <code>OrderedDict</code>.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ LRU Cache (simpler)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          One linked list — ordered<br>
+          by recency only.<br>
+          Evict the least-recently-used.<br>
+          <br>
+          LFU adds a <em>frequency</em><br>
+          dimension on top of LRU.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ LFU Cache (this problem)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          One linked list <em>per frequency</em>.<br>
+          Evict from the min-freq list,<br>
+          breaking ties by LRU order<br>
+          within that list.<br>
+          Three structures total.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Trace with capacity=2:</strong></p>
+    <div style="font-family:var(--mono);font-size:13px;line-height:2.2;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);margin-top:8px">
+      put(1,1)  → {1→(1,f=1)}<br>
+      put(2,2)  → {1→(1,f=1), 2→(2,f=1)}<br>
+      get(1)    → 1  │ key 1 now f=2  │ {1→(1,f=2), 2→(2,f=1)}<br>
+      put(3,3)  → FULL → evict key 2 (f=1, LRU) → {1→(1,f=2), 3→(3,f=1)}<br>
+      get(2)    → -1  (evicted)<br>
+      get(3)    → 3   │ key 3 now f=2 │ {1→(1,f=2), 3→(3,f=2)}<br>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> capacity=0 (always -1 on get, no-op on put), updating an existing key (no eviction, just update value + increment freq), single-capacity cache (every put of a new key evicts the previous one).</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Track key→(val,freq), freq→OrderedDict of keys, min_freq. On get/put: increment freq, update freq maps. On evict: remove LRU from min_freq bucket.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: LFU with Three Hash Maps</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: LFU with Three Hash Maps</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">key_val, key_freq, freq_keys (OrderedDict per freq), min_freq</span></div><div class="step"><span class="snum">2</span><span class="stxt">get: update freq; put: add/update, evict LFU if over capacity</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(1) per op</strong> | Space: <strong>O(capacity)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import defaultdict, OrderedDict
-class LFUCache:
-    def __init__(self, capacity):
-        self.cap=capacity; self.min_freq=0
-        self.key_val={}; self.key_freq={}; self.freq_keys=defaultdict(OrderedDict)
-    def _update(self, key):
-        f=self.key_freq[key]; self.freq_keys[f].pop(key)
-        if not self.freq_keys[f] and f==self.min_freq: self.min_freq+=1
-        self.key_freq[key]=f+1; self.freq_keys[f+1][key]=None
-    def get(self, key):
-        if key not in self.key_val: return -1
-        self._update(key); return self.key_val[key]
-    def put(self, key, value):
-        if not self.cap: return
-        if key in self.key_val: self._update(key); self.key_val[key]=value; return
-        if len(self.key_val)==self.cap:
-            evict=next(iter(self.freq_keys[self.min_freq]))
-            self.freq_keys[self.min_freq].pop(evict); del self.key_val[evict]; del self.key_freq[evict]
-        self.key_val[key]=value; self.key_freq[key]=1; self.freq_keys[1][key]=None; self.min_freq=1</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">min_freq tracks current minimum frequency for O(1) eviction</span></div><div class="step"><span class="snum">2</span><span class="stxt">OrderedDict maintains insertion order within same frequency</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>LFU with Three Hash Maps</td><td>O(1) per op</td><td>O(capacity)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">LRU Cache</span><span class="pd dm">Medium</span> — Simpler version without frequency</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Multiple Data Structures</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "LFU Cache"}, "title": "LFU with Three Hash Maps", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Three Coordinated Structures</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Every O(1) cache design problem asks: "what do I need to look up instantly, and what structure gives me that?" For LFU we need three instant lookups:</p>
+
+    <div class="ds-diagram">
+      <div class="ds-box keymap">
+        <div class="ds-box-title">key_map</div>
+        <div class="ds-entry">key → [value, freq]<br>1 → [100, 3]<br>2 → [200, 1]<br>5 → [500, 2]</div>
+      </div>
+      <div class="ds-arrow">+</div>
+      <div class="ds-box freqmap">
+        <div class="ds-box-title">freq_map</div>
+        <div class="ds-entry">freq → OrderedDict<br>1 → {2: 200}<br>2 → {5: 500}<br>3 → {1: 100}</div>
+      </div>
+      <div class="ds-arrow">+</div>
+      <div class="ds-box minbox">
+        <div class="ds-box-title">min_freq</div>
+        <div class="ds-entry">Integer: the current<br>minimum frequency<br>across all live keys.<br><br>= 1 here</div>
+      </div>
+    </div>
+
+    <p style="margin-top:0.5rem">Each frequency bucket is a Python <strong>OrderedDict</strong> — a hash map that also preserves insertion order. This gives us O(1) insert, O(1) delete-by-key, and O(1) "peek at oldest entry" via <code>next(iter(d))</code> or <code>popitem(last=False)</code>. The oldest entry in a bucket is the LRU within that frequency tier — exactly the one we want to evict.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">G</span>
+        <span class="step-text"><strong>get(key):</strong> If key not in key_map → return -1. Otherwise call <code>_increment(key)</code> to move the key up one freq bucket, then return <code>key_map[key][0]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">U</span>
+        <span class="step-text"><strong>put(key, value) — existing key:</strong> Update value in key_map[key][0]. Call <code>_increment(key)</code> to promote its frequency. No eviction — we're not adding a new key.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">I</span>
+        <span class="step-text"><strong>put(key, value) — new key, cache not full:</strong> Set key_map[key] = [value, 1]. Add key to freq_map[1] (tail = MRU). Set min_freq = 1. Done.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">E</span>
+        <span class="step-text"><strong>put(key, value) — new key, cache full → evict first:</strong> <code>freq_map[min_freq].popitem(last=False)</code> removes the oldest key from the min-frequency bucket. Delete that key from key_map. Then insert the new key at freq=1 and reset min_freq = 1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">△</span>
+        <span class="step-text"><strong>_increment(key) helper:</strong> Read old_freq. Remove key from freq_map[old_freq]. If that bucket is now empty <em>and</em> old_freq == min_freq → min_freq += 1. Insert key at tail of freq_map[old_freq+1]. Update key_map[key][1] = old_freq+1.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why min_freq resets to 1 on every new insertion</div>
+      <p>Any brand-new key starts at frequency 1, regardless of what other frequencies exist. Even if all live keys have freq=5, a newly inserted key has freq=1 — the new global minimum. So after any successful new insertion, min_freq is always reset to 1. This is the <em>only</em> event that can lower min_freq.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Three Invariants</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Invariant 1 — key_map is the single source of truth</div>
+      <p>At all times, <code>key_map[key] = [value, freq]</code> for every live key. A key is "in the cache" if and only if it is in key_map. Eviction removes the key from key_map immediately, so any future get on that key correctly returns -1.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Invariant 2 — freq_map mirrors key_map exactly</div>
+      <p>Every live key appears in exactly one bucket in freq_map — the bucket numbered by its current frequency. When we call <code>_increment(key)</code>, we atomically remove from the old bucket and append to the new bucket's tail. Ordering within each bucket is insertion order = access-time order = LRU order for that frequency tier.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Invariant 3 — min_freq is always exact</div>
+      <p><code>min_freq</code> can only change in two ways: (1) increment by 1 when <code>_increment</code> empties the current min-freq bucket, or (2) reset to 1 when a new key is inserted. Because increments happen one-at-a-time and each moves a key exactly one level up, and because new insertions always enter at freq=1, <code>min_freq</code> always equals the true minimum frequency across all live keys.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why eviction is O(1):</strong> <code>freq_map[min_freq]</code> is a direct dict lookup — O(1). <code>popitem(last=False)</code> on an OrderedDict removes the oldest entry — O(1). No heap, no scan, no sort.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Bug: Not checking if old bucket empties at min_freq</div>
+      <p>After removing a key from freq_map[old_freq], if the bucket is now empty <em>and</em> old_freq equals min_freq, you must increment min_freq. If you skip this check, min_freq becomes stale — pointing to an empty bucket — and the next eviction will crash or evict incorrectly. The condition is <em>both</em>: empty AND equals min_freq (it's fine if a non-min bucket becomes empty).</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Bug: popitem() vs popitem(last=False)</div>
+      <p>Python's <code>OrderedDict.popitem()</code> with no arguments removes the <strong>last</strong> (newest) item — that's MRU, which is backwards. You need <code>popitem(last=False)</code> to remove the <strong>first</strong> (oldest) = LRU. Always verify this in your implementation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution — HashMap + OrderedDict Buckets (Interview Pick, O(1) all ops)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import defaultdict, OrderedDict</span><span class="aann">← both stdlib; no external deps</span></div>
+<div class="ann-line"></div>
+<div class="ann-line"><span class="acode">class LFUCache:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, capacity: int):</span></div>
+<div class="ann-line"><span class="acode">        self.cap = capacity                     </span><span class="aann">← 0 is valid; handled in put</span></div>
+<div class="ann-line"><span class="acode">        self.min_freq = 0                       </span><span class="aann">← will be set to 1 on first insert</span></div>
+<div class="ann-line"><span class="acode">        self.key_map  = {}                      </span><span class="aann">← key → [value, freq] (mutable list)</span></div>
+<div class="ann-line"><span class="acode">        self.freq_map = defaultdict(OrderedDict)</span><span class="aann">← freq → {key: val}; auto-creates new buckets</span></div>
+<div class="ann-line"></div>
+<div class="ann-line"><span class="acode">    def get(self, key: int) -> int:</span></div>
+<div class="ann-line"><span class="acode">        if key not in self.key_map:</span><span class="aann">← cache miss</span></div>
+<div class="ann-line"><span class="acode">            return -1</span></div>
+<div class="ann-line"><span class="acode">        self._increment(key)                    </span><span class="aann">← access counts; move key up one freq bucket</span></div>
+<div class="ann-line"><span class="acode">        return self.key_map[key][0]             </span><span class="aann">← return value (index 0)</span></div>
+<div class="ann-line"></div>
+<div class="ann-line"><span class="acode">    def put(self, key: int, value: int) -> None:</span></div>
+<div class="ann-line"><span class="acode">        if self.cap == 0: return                </span><span class="aann">← edge: zero-capacity cache is no-op</span></div>
+<div class="ann-line"><span class="acode">        if key in self.key_map:                 </span><span class="aann">← UPDATE existing key (no eviction!)</span></div>
+<div class="ann-line"><span class="acode">            self.key_map[key][0] = value        </span><span class="aann">←   overwrite value in place</span></div>
+<div class="ann-line"><span class="acode">            self._increment(key)                </span><span class="aann">←   count this put as an access</span></div>
+<div class="ann-line"><span class="acode">            return</span></div>
+<div class="ann-line"><span class="acode">        if len(self.key_map) == self.cap:       </span><span class="aann">← EVICT: new key but cache is full</span></div>
+<div class="ann-line"><span class="acode">            evict_key, _ = self.freq_map[self.min_freq].popitem(last=False)</span><span class="aann">← pop LRU from min-freq bucket</span></div>
+<div class="ann-line"><span class="acode">            del self.key_map[evict_key]         </span><span class="aann">←   remove from key_map too</span></div>
+<div class="ann-line"><span class="acode">        self.key_map[key] = [value, 1]          </span><span class="aann">← INSERT: new key starts at freq=1</span></div>
+<div class="ann-line"><span class="acode">        self.freq_map[1][key] = value           </span><span class="aann">← add to tail of freq-1 bucket (MRU position)</span></div>
+<div class="ann-line"><span class="acode">        self.min_freq = 1                       </span><span class="aann">← new key has freq=1 → global min must be 1</span></div>
+<div class="ann-line"></div>
+<div class="ann-line"><span class="acode">    def _increment(self, key: int):</span></div>
+<div class="ann-line"><span class="acode">        val, freq = self.key_map[key]           </span><span class="aann">← read current state</span></div>
+<div class="ann-line"><span class="acode">        del self.freq_map[freq][key]            </span><span class="aann">← remove from old bucket</span></div>
+<div class="ann-line"><span class="acode">        if not self.freq_map[freq]:             </span><span class="aann">← if old bucket is now empty…</span></div>
+<div class="ann-line"><span class="acode">            if freq == self.min_freq:           </span><span class="aann">←   …AND it was the min bucket…</span></div>
+<div class="ann-line"><span class="acode">                self.min_freq += 1             </span><span class="aann">←   …raise min_freq by exactly 1</span></div>
+<div class="ann-line"><span class="acode">        self.freq_map[freq + 1][key] = val      </span><span class="aann">← append at tail of next bucket (MRU position)</span></div>
+<div class="ann-line"><span class="acode">        self.key_map[key] = [val, freq + 1]     </span><span class="aann">← update freq in key_map</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Brute Force Alternative — O(n) per eviction (for comparison)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def put_slow(self, key, value):              </span><span class="aann">← just to illustrate what we avoid</span></div>
+<div class="ann-line"><span class="acode">    if key not in self.cache:</span></div>
+<div class="ann-line"><span class="acode">        if len(self.cache) == self.cap:      </span><span class="aann">← need to evict</span></div>
+<div class="ann-line"><span class="acode">            # find min-freq key — O(n) scan!</span></div>
+<div class="ann-line"><span class="acode">            min_key = min(self.freq, key=self.freq.get)</span></div>
+<div class="ann-line"><span class="acode">            del self.cache[min_key], self.freq[min_key]</span></div>
+<div class="ann-line"><span class="acode">    self.cache[key] = value</span></div>
+<div class="ann-line"><span class="acode">    self.freq[key] = self.freq.get(key,0)+1  </span><span class="aann">← O(n) on evict; doesn't even break LRU ties correctly</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>get:</strong> O(1) — one dict lookup, one _increment call (all O(1) dict ops)<br>
+        <strong>put:</strong> O(1) — one lookup + at most one eviction (OrderedDict popitem) + one insert<br>
+        <strong>_increment:</strong> O(1) — one del + one insert in two OrderedDicts + two key_map writes<br>
+        <strong>Space:</strong> O(capacity) — key_map has ≤ capacity entries; freq_map mirrors them
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Start from LRU Cache (the simpler sibling)</div>
+        <p style="font-size:14px;color:var(--text)">LRU uses a dict + doubly-linked list (or OrderedDict). "LFU is LRU plus a frequency dimension. Instead of one recency list, I need one recency list per frequency. That maps to a dict of OrderedDicts."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Name the three structures and their roles</div>
+        <p style="font-size:14px;color:var(--text)">"I need: (1) key_map for O(1) value + frequency lookup by key; (2) freq_map to find all keys at a given frequency with O(1) LRU ordering; (3) min_freq integer so I know which bucket to evict from instantly."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Walk through _increment logic carefully</div>
+        <p style="font-size:14px;color:var(--text)">Interviewers specifically probe the min_freq update: "min_freq only rises when the current min bucket empties due to an increment. It resets to 1 only on new insertion. I never need to scan for the next minimum — incrementing by 1 is always correct because you can only reach freq f+1 via freq f."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Clarify "update" vs "insert" for put()</div>
+        <p style="font-size:14px;color:var(--text)">Many candidates forget: if the key already exists, put() is an update — no eviction, just change the value and increment frequency. Only when the key is truly new and the cache is full do we evict. State this explicitly before coding.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use three structures: key_map maps each key to [value, freq]. freq_map maps each<br>
+frequency to an OrderedDict of keys at that frequency, ordered oldest-first so I can<br>
+evict the LRU in O(1) via popitem(last=False). min_freq tracks the current minimum.<br>
+<br>
+For get: look up key_map, call _increment to promote the key's frequency, return value.<br>
+For put with existing key: update value, call _increment, return early — no eviction.<br>
+For put with new key and full cache: evict oldest from freq_map[min_freq], delete from<br>
+key_map, then insert new key at freq=1 and reset min_freq=1.<br>
+<br>
+In _increment: move key from freq f to f+1 in freq_map. If bucket f becomes empty<br>
+AND f == min_freq, bump min_freq to f+1."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"How would you implement in Java?"</strong> → LinkedHashSet per freq bucket gives O(1) add/remove/first; or a manual DLL with a set for O(1) everything</li>
+        <li><strong>"What if we want most-frequently-used eviction?"</strong> → Symmetric: track max_freq, evict from freq_map[max_freq] newest item</li>
+        <li><strong>"Can freq_map grow unboundedly?"</strong> → Yes in pathological cases (always access the same key), but bounded by capacity × max_freq; in practice freq_map holds at most capacity non-empty buckets at any time</li>
+        <li><strong>"LFU vs LRU — which is better in practice?"</strong> → LRU is simpler and usually better for temporal locality; LFU is better when popular items should stay even if not recently accessed (e.g., CDN assets)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: capacity=2</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="viz-label">Cache contents (key → value, frequency)</div>
+      <div class="kv-store" id="kv-store"></div>
+
+      <div class="viz-label" style="margin-top:1.25rem">Frequency buckets — leftmost item in each bucket = LRU (eviction candidate)</div>
+      <div class="freq-buckets" id="freq-buckets"></div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-op">
+          <span class="var-name">operation</span>
+          <span class="var-val" id="vv-op">—</span>
+        </div>
+        <div class="var-box" id="vb-min">
+          <span class="var-name">min_freq</span>
+          <span class="var-val" id="vv-min">—</span>
+        </div>
+        <div class="var-box" id="vb-size">
+          <span class="var-name">size</span>
+          <span class="var-val" id="vv-size">0</span>
+        </div>
+        <div class="var-box" id="vb-ret">
+          <span class="var-name">returns</span>
+          <span class="var-val" id="vv-ret">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def __init__(self, capacity):  self.cap=capacity; self.min_freq=0</div>
+      <div class="code-line" id="cl-1">                               self.key_map={}; self.freq_map=defaultdict(OrderedDict)</div>
+      <div class="code-line" id="cl-2">def get(self, key):</div>
+      <div class="code-line" id="cl-3">    if key not in self.key_map: return -1</div>
+      <div class="code-line" id="cl-4">    self._increment(key); return self.key_map[key][0]</div>
+      <div class="code-line" id="cl-5">def put(self, key, value):</div>
+      <div class="code-line" id="cl-6">    if key in self.key_map:  # UPDATE existing</div>
+      <div class="code-line" id="cl-7">        self.key_map[key][0]=value; self._increment(key); return</div>
+      <div class="code-line" id="cl-8">    if len(self.key_map)==self.cap:  # EVICT</div>
+      <div class="code-line" id="cl-9">        evict_key,_=self.freq_map[self.min_freq].popitem(last=False)</div>
+      <div class="code-line" id="cl-10">       del self.key_map[evict_key]</div>
+      <div class="code-line" id="cl-11">   self.key_map[key]=[value,1]; self.freq_map[1][key]=value; self.min_freq=1</div>
+      <div class="code-line" id="cl-12">def _increment(self, key):  val,freq=self.key_map[key]</div>
+      <div class="code-line" id="cl-13">    del self.freq_map[freq][key]  # remove from old bucket</div>
+      <div class="code-line" id="cl-14">    if not self.freq_map[freq] and freq==self.min_freq: self.min_freq+=1</div>
+      <div class="code-line" id="cl-15">    self.freq_map[freq+1][key]=val; self.key_map[key]=[val,freq+1]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 17</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use ← → arrow keys to walk through the LFU Cache operations step by step.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Accessed / Updated key</div>
+      <div class="legend-item"><div class="legend-swatch sw-new"></div> Newly inserted key</div>
+      <div class="legend-item"><div class="legend-swatch sw-evict"></div> Being evicted</div>
+      <div class="legend-item"><div class="legend-swatch sw-min"></div> Min-frequency bucket</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Three structures: key_map (key→val+freq), freq_map (freq→OrderedDict), min_freq integer</div>
+      <div class="takeaway">min_freq rises by 1 when the min bucket empties on increment; resets to 1 on new insert</div>
+      <div class="takeaway">Eviction = popitem(last=False) on freq_map[min_freq] — O(1), no scan</div>
+      <div class="takeaway">Updating an existing key's value is NOT eviction — just value update + _increment</div>
+      <div class="takeaway">popitem(last=False) = remove oldest (LRU); popitem() = remove newest — critical distinction</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time (get/put)</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Linear scan</td>
+          <td class="mark-bad">O(n)</td>
+          <td>O(n)</td>
+          <td>Scan all keys for min freq; doesn't handle LRU tie-breaking</td>
+        </tr>
+        <tr>
+          <td>Min-heap</td>
+          <td class="mark-bad">O(log n)</td>
+          <td>O(n)</td>
+          <td>Heap of (freq, timestamp, key); lazy deletion on stale entries</td>
+        </tr>
+        <tr>
+          <td><strong>HashMap + OrderedDicts ✓</strong></td>
+          <td class="mark-good">O(1)</td>
+          <td class="mark-good">O(capacity)</td>
+          <td>Optimal. The standard interview answer.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Multiple Data Structures Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"All operations must be O(1)" with a non-trivial eviction/ordering rule → need ≥2 structures</li>
+        <li>"Design a cache / store / counter" → identify what you must look up instantly → one structure per lookup type</li>
+        <li>Evict by frequency + recency → two orderings needed → two structures per key</li>
+        <li>Any time you see "O(1) inc/dec/getMax/getMin" — think dict + ordered set/list pair</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Multiple Data Structures)</div>
+      <div class="related-item"><strong>LRU Cache</strong><span class="related-diff diff-med">Medium</span> — The simpler sibling: dict + OrderedDict; one LRU list instead of one per frequency (#146)</div>
+      <div class="related-item"><strong>All O(1) Data Structure</strong><span class="related-diff diff-hard">Hard</span> — O(1) inc/dec/getMaxKey/getMinKey: two dicts + doubly-linked list of value-sets (#432)</div>
+      <div class="related-item"><strong>Design Twitter</strong><span class="related-diff diff-med">Medium</span> — Combine heap for merge + dict for follows/tweets; real-time feed in O(k log n) (#355)</div>
+      <div class="related-item"><strong>Design Search Autocomplete System</strong><span class="related-diff diff-hard">Hard</span> — Trie + frequency map + heap for top-3 suggestions (#642)</div>
+      <div class="related-item"><strong>Snapshot Array</strong><span class="related-diff diff-med">Medium</span> — Dict per index + binary search for O(1) snap, O(log n) get (#1146)</div>
+      <div class="related-item"><strong>Maximum Frequency Stack</strong><span class="related-diff diff-hard">Hard</span> — Freq map + group map to pop the most-frequent, LRU tie-break (#895)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Design Pattern, Sub-Pattern: Multiple Data Structures<br>
+      LFU Cache is the canonical example of coordinating a key map, a frequency-grouped ordered store, and a scalar tracker to achieve O(1) for all operations simultaneously.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Step data for LFU Cache walkthrough, capacity=2 ──
+// Operations: put(1,1), put(2,2), get(1), put(3,3), get(2), get(3), put(4,4), get(1), get(3)
+//
+// cache: { key: {val, freq, state} } state = 'normal'|'active'|'evicting'|'new'
+// buckets: { freq: [keys in LRU→MRU order] } — front is oldest (LRU/eviction candidate)
+
+const steps = [
+  {
+    op:'init', opClass:'phase-init', activeLine:0, minFreq:0, size:0, ret:'—',
+    cache:{}, buckets:{},
+    title:'Initialize LFUCache(capacity=2)',
+    text:'The cache starts empty. key_map = {}, freq_map = {}, min_freq = 0. Capacity is 2 — we can hold at most 2 key-value pairs before eviction is triggered.'
+  },
+  {
+    op:'put(1,1)', opClass:'phase-put', activeLine:11, minFreq:1, size:1, ret:'—',
+    cache:{1:{val:1,freq:1,state:'new'}},
+    buckets:{1:['1']},
+    title:'put(1, 1) — Insert new key',
+    text:'Cache is not full (0 < 2). Key 1 is new. Execute: key_map[1]=[1,1], freq_map[1][1]=1, min_freq=1. Bucket freq=1 now holds key 1. (Arrow shows LRU←→MRU; with one item, it is both.)'
+  },
+  {
+    op:'put(2,2)', opClass:'phase-put', activeLine:11, minFreq:1, size:2, ret:'—',
+    cache:{1:{val:1,freq:1,state:'normal'},2:{val:2,freq:1,state:'new'}},
+    buckets:{1:['1','2']},
+    title:'put(2, 2) — Insert second key, cache now full',
+    text:'Cache is not full yet (1 < 2). Key 2 is new: key_map[2]=[2,1], freq_map[1][2]=2, min_freq stays 1. Bucket freq=1 now holds [1, 2] — key 1 is LRU (inserted first), key 2 is MRU (inserted last). Cache is now at capacity.'
+  },
+  {
+    op:'get(1)', opClass:'phase-get', activeLine:4, minFreq:1, size:2, ret:'1',
+    cache:{1:{val:1,freq:2,state:'active'},2:{val:2,freq:1,state:'normal'}},
+    buckets:{1:['2'],2:['1']},
+    title:'get(1) → returns 1; key 1 promoted to freq=2',
+    text:"Key 1 is in cache. _increment(1): del freq_map[1][1] (bucket 1 now only has key 2 — not empty, so min_freq stays 1). Add 1 to freq_map[2]: freq_map[2]={1:1}. key_map[1]=[1,2]. Returns 1. Now key 1 is at freq=2 (safe), key 2 is at freq=1 (the LFU)."
+  },
+  {
+    op:'put(3,3)', opClass:'phase-evict', activeLine:9, minFreq:1, size:2, ret:'—',
+    cache:{1:{val:1,freq:2,state:'normal'},3:{val:3,freq:1,state:'new'},2:{val:2,freq:1,state:'evicting'}},
+    buckets:{1:['3'],2:['1']},
+    title:'put(3, 3) — Cache full! Evict key=2 (LFU + LRU)',
+    text:"Cache is full (2==2). Key 3 is new → must evict. min_freq=1, freq_map[1]={2:2} — only key 2 is there. popitem(last=False) evicts key 2 (the sole LRU in min-freq bucket). del key_map[2]. Then insert key 3: key_map[3]=[3,1], freq_map[1][3]=3, min_freq=1."
+  },
+  {
+    op:'get(2)', opClass:'phase-get', activeLine:3, minFreq:1, size:2, ret:'-1',
+    cache:{1:{val:1,freq:2,state:'normal'},3:{val:3,freq:1,state:'normal'}},
+    buckets:{1:['3'],2:['1']},
+    title:'get(2) → returns -1 (evicted)',
+    text:'Key 2 was evicted in the previous step. key_map does not contain key 2. Return -1. Cache unchanged: key 1 at freq=2, key 3 at freq=1.'
+  },
+  {
+    op:'get(3)', opClass:'phase-get', activeLine:4, minFreq:2, size:2, ret:'3',
+    cache:{1:{val:1,freq:2,state:'normal'},3:{val:3,freq:2,state:'active'}},
+    buckets:{2:['1','3']},
+    title:'get(3) → returns 3; key 3 promoted, min_freq rises to 2',
+    text:"Key 3 is in cache at freq=1. _increment(3): del freq_map[1][3] → bucket 1 is now EMPTY. And 1 == min_freq → min_freq becomes 2. Add 3 to freq_map[2]: freq_map[2]={1:1, 3:3}. key_map[3]=[3,2]. Returns 3. Now both keys are at freq=2. Key 1 is LRU (older), key 3 is MRU."
+  },
+  {
+    op:'put(4,4)', opClass:'phase-evict', activeLine:9, minFreq:2, size:2, ret:'—',
+    cache:{3:{val:3,freq:2,state:'normal'},4:{val:4,freq:1,state:'new'},1:{val:1,freq:2,state:'evicting'}},
+    buckets:{1:['4'],2:['3']},
+    title:'put(4, 4) — Evict key=1 (LRU among freq=2 ties)',
+    text:"Cache is full. Key 4 is new. min_freq=2, freq_map[2]={1:1, 3:3}. popitem(last=False) pops the oldest → evicts key 1 (it was inserted into bucket 2 before key 3). del key_map[1]. Insert key 4: key_map[4]=[4,1], freq_map[1][4]=4, min_freq=1."
+  },
+  {
+    op:'get(1)', opClass:'phase-get', activeLine:3, minFreq:1, size:2, ret:'-1',
+    cache:{3:{val:3,freq:2,state:'normal'},4:{val:4,freq:1,state:'normal'}},
+    buckets:{1:['4'],2:['3']},
+    title:'get(1) → returns -1 (key 1 just evicted)',
+    text:'Key 1 was evicted in the previous put(4,4). key_map does not contain key 1. Return -1. Cache: key 3 at freq=2, key 4 at freq=1.'
+  },
+  {
+    op:'get(3)', opClass:'phase-get', activeLine:4, minFreq:1, size:2, ret:'3',
+    cache:{3:{val:3,freq:3,state:'active'},4:{val:4,freq:1,state:'normal'}},
+    buckets:{1:['4'],3:['3']},
+    title:'get(3) → returns 3; key 3 promoted to freq=3',
+    text:"Key 3 at freq=2. _increment(3): del freq_map[2][3] → bucket 2 is now empty. But 2 != min_freq (min_freq=1) → min_freq stays 1. Add 3 to freq_map[3]. key_map[3]=[3,3]. Returns 3. Now: key 4 at freq=1 (still the LFU), key 3 at freq=3."
+  },
+  {
+    op:'put(3,30)', opClass:'phase-put', activeLine:7, minFreq:1, size:2, ret:'—',
+    cache:{3:{val:30,freq:4,state:'active'},4:{val:4,freq:1,state:'normal'}},
+    buckets:{1:['4'],4:['3']},
+    title:'put(3, 30) — Update existing key (no eviction!)',
+    text:"Key 3 already exists in key_map. This is an UPDATE — no eviction. key_map[3][0]=30 (new value). _increment(3): del freq_map[3][3] (empty, 3 != min_freq=1 → no min_freq change). Add 3 to freq_map[4]. key_map[3]=[30,4]. Value updated to 30; frequency is now 4."
+  },
+  {
+    op:'get(3)', opClass:'phase-get', activeLine:4, minFreq:1, size:2, ret:'30',
+    cache:{3:{val:30,freq:5,state:'active'},4:{val:4,freq:1,state:'normal'}},
+    buckets:{1:['4'],5:['3']},
+    title:'get(3) → returns 30 (updated value); key 3 now at freq=5',
+    text:"Key 3 is in cache with value=30, freq=4. _increment(3): del freq_map[4][3] (empty, 4 != min_freq=1 → no change). Add to freq_map[5]. Returns 30. Notice min_freq is still 1 — key 4 anchors it there."
+  },
+  {
+    op:'put(5,5)', opClass:'phase-evict', activeLine:9, minFreq:1, size:2, ret:'—',
+    cache:{3:{val:30,freq:5,state:'normal'},5:{val:5,freq:1,state:'new'},4:{val:4,freq:1,state:'evicting'}},
+    buckets:{1:['5'],5:['3']},
+    title:'put(5, 5) — Evict key=4 (the long-neglected LFU)',
+    text:"Cache is full. Key 5 is new. min_freq=1, freq_map[1]={4:4}. popitem(last=False) evicts key 4 — it has been at freq=1 the entire time, never accessed since insertion. del key_map[4]. Insert key 5: key_map[5]=[5,1], freq_map[1][5]=5, min_freq=1."
+  },
+  {
+    op:'get(4)', opClass:'phase-get', activeLine:3, minFreq:1, size:2, ret:'-1',
+    cache:{3:{val:30,freq:5,state:'normal'},5:{val:5,freq:1,state:'normal'}},
+    buckets:{1:['5'],5:['3']},
+    title:'get(4) → returns -1 (evicted, never accessed since put)',
+    text:'Key 4 was never accessed via get() — it started at freq=1 and stayed there until evicted. get(4) now returns -1. This illustrates the core LFU principle: items that are never reused get evicted, even if they were inserted recently.'
+  },
+  {
+    op:'get(5)', opClass:'phase-get', activeLine:4, minFreq:2, size:2, ret:'5',
+    cache:{3:{val:30,freq:5,state:'normal'},5:{val:5,freq:2,state:'active'}},
+    buckets:{2:['5'],5:['3']},
+    title:'get(5) → returns 5; min_freq rises to 2',
+    text:"Key 5 at freq=1. _increment(5): del freq_map[1][5] → bucket 1 is now EMPTY. And 1 == min_freq → min_freq becomes 2. Add to freq_map[2]. key_map[5]=[5,2]. Returns 5. Now: key 5 at freq=2, key 3 at freq=5. Next eviction candidate: key 5 (freq=2, and it's alone in bucket 2)."
+  },
+  {
+    op:'put(6,6)', opClass:'phase-evict', activeLine:9, minFreq:1, size:2, ret:'—',
+    cache:{3:{val:30,freq:5,state:'normal'},6:{val:6,freq:1,state:'new'},5:{val:5,freq:2,state:'evicting'}},
+    buckets:{1:['6'],5:['3']},
+    title:'put(6, 6) — Evict key=5 (LFU=freq-2); new key enters at freq=1',
+    text:"Cache is full. Key 6 is new. min_freq=2, freq_map[2]={5:5}. popitem(last=False) evicts key 5. del key_map[5]. Insert key 6: key_map[6]=[6,1], freq_map[1][6]=6, min_freq=1. Note: key 3 survives with freq=5 because frequent access provides immunity from eviction!"
+  }
+];
+
+let current = 0;
+
+function renderKVStore(step) {
+  const container = document.getElementById('kv-store');
+  container.innerHTML = '';
+  const keys = Object.keys(step.cache).map(Number);
+  if (keys.length === 0) {
+    container.innerHTML = '<span style="color:var(--text3);font-size:13px">(empty)</span>';
+    return;
+  }
+  keys.forEach(k => {
+    const e = step.cache[k];
+    const div = document.createElement('div');
+    let cls = 'kv-entry';
+    if (e.state === 'active') cls += ' active';
+    else if (e.state === 'evicting') cls += ' evicting';
+    else if (e.state === 'new') cls += ' new-entry';
+    div.className = cls;
+    const valDisplay = e.state === 'evicting' ? '✗' : e.val;
+    div.innerHTML = `<div class="kv-key">key=${k}</div><div class="kv-val">${valDisplay}</div><div class="kv-freq">f=${e.freq}</div>`;
+    container.appendChild(div);
+  });
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function renderBuckets(step) {
+  const container = document.getElementById('freq-buckets');
+  container.innerHTML = '';
+  const freqs = Object.keys(step.buckets).map(Number).sort((a, b) => a - b);
+  if (freqs.length === 0) {
+    container.innerHTML = '<span style="color:var(--text3);font-size:13px">(no buckets)</span>';
+    return;
+  }
+  freqs.forEach(f => {
+    const keys = step.buckets[f];
+    if (!keys || keys.length === 0) return;
+    const isMin = f === step.minFreq;
+    const div = document.createElement('div');
+    div.className = 'bucket' + (isMin ? ' min-freq' : '');
+    const label = document.createElement('div');
+    label.className = 'bucket-label';
+    label.textContent = 'freq=' + f + (isMin ? ' ★ MIN' : '');
+    div.appendChild(label);
+    const items = document.createElement('div');
+    items.className = 'bucket-items';
+    keys.forEach((k, idx) => {
+      const ki = parseInt(k);
+      const cacheEntry = step.cache[ki];
+      const item = document.createElement('div');
+      let cls = 'bucket-item';
+      if (cacheEntry) {
+        if (cacheEntry.state === 'active') cls += ' recently-accessed';
+        else if (cacheEntry.state === 'evicting') cls += ' being-evicted';
+        else if (cacheEntry.state === 'new') cls += ' just-inserted';
+      }
+      const isLRU = idx === 0 && keys.length > 1;
+      const isMRU = idx === keys.length - 1 && keys.length > 1;
+      const lbl = isLRU ? ' LRU' : (isMRU ? ' MRU' : '');
+      item.className = cls;
+      item.textContent = 'k=' + k + lbl;
+      items.appendChild(item);
+    });
+    div.appendChild(items);
+    container.appendChild(div);
+  });
+}
+
+function render() {
+  const step = steps[current];
+  const prev = current > 0 ? steps[current - 1] : null;
+
+  renderKVStore(step);
+  renderBuckets(step);
+
+  // Variable tracker
+  document.getElementById('vv-op').textContent = step.op;
+  document.getElementById('vv-min').textContent = step.minFreq === 0 ? '—' : String(step.minFreq);
+  document.getElementById('vv-size').textContent = String(step.size);
+  document.getElementById('vv-ret').textContent = String(step.ret);
+
+  document.getElementById('vb-op').classList.add('changed');
+  document.getElementById('vb-min').classList.toggle('changed', !!prev && step.minFreq !== prev.minFreq);
+  document.getElementById('vb-size').classList.toggle('changed', !!prev && step.size !== prev.size);
+  document.getElementById('vb-ret').classList.toggle('changed', step.ret !== '—');
+
+  // Code panel
+  for (let i = 0; i <= 15; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.opClass;
+  badge.textContent = step.op;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('visited', i < current);
+    }
+  });
+
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+// Build progress dots
+(function buildDots() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx) { return function() { current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+})();
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
 </script>
-</body></html>
+</body>
+</html>

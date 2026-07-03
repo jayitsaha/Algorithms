@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#757 · Set Intersection Size At Least Two</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Interval Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.intervals-container{position:relative;margin-bottom:1.5rem}
+.interval-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;min-height:40px}
+.interval-label{width:80px;font-family:var(--mono);font-size:12px;color:var(--text3);flex-shrink:0;text-align:right}
+.interval-bar-wrap{flex:1;position:relative;height:30px;min-width:200px}
+.number-axis{display:flex;gap:0;margin-bottom:4px;margin-left:90px}
+.axis-tick{flex:1;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);border-left:1px solid var(--border);padding-top:2px;min-width:28px}
+
+/* ── Chosen Set Viz ── */
+.chosen-set{display:flex;gap:8px;flex-wrap:wrap;margin:1rem 0;align-items:center}
+.chosen-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-right:4px}
+.chosen-el{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:700;border:2px solid;transition:background 0.3s,border-color 0.3s}
+.chosen-el.normal{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.chosen-el.new{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.chosen-el.empty{background:var(--surface);border-color:var(--border);color:var(--text3);font-size:11px}
+
+/* ── Interval Rows ── */
+.int-row{display:flex;align-items:center;gap:0;margin-bottom:6px}
+.int-cell{width:40px;height:32px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.int-cell.in-range{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.int-cell.selected{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);font-weight:700}
+.int-cell.active-interval{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.int-cell.covered{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.int-cell.none{background:var(--surface);border-color:var(--border);color:var(--text3)}
+.int-row-label{width:80px;font-family:var(--mono);font-size:11px;color:var(--text3);flex-shrink:0;text-align:right;padding-right:8px}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-sort{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-process{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-add{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-cover{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-select{background:var(--green-bg);border-color:var(--green-border)}
+.sw-new{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Diagram ── */
+.greedy-diagram{display:flex;flex-direction:column;gap:6px;margin:1rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius)}
+.diag-row{display:flex;align-items:center;gap:8px;font-size:13px}
+.diag-key{width:90px;font-family:var(--mono);font-size:12px;color:var(--text3);flex-shrink:0}
+.diag-bar{height:24px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:11px;font-weight:700;color:white;transition:width 0.3s}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #757</div>
+  <h1>Set Intersection Size At Least Two</h1>
+  <p class="subtitle">An integer interval [a, b] represents the set of integers from a to b. Find the minimum set S of integers such that for every interval in a list, at least two integers from S lie in the interval.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Greedy</span>
+    <span class="tag tag-pattern">Sort by End</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We have a list of integer intervals — e.g., <code>[1,3]</code>, <code>[2,5]</code>, <code>[4,6]</code>. We need to build the <strong>smallest possible set S of integers</strong> such that every interval contains <strong>at least 2</strong> members of S.</p>
+
+    <p style="margin-top:0.75rem">Think of it as: we're placing "pins" on a number line, and every interval must catch at least 2 pins. We want to minimize total pins used.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The constraint "at least 2" (not "at least 1") makes this fundamentally harder than the classic interval piercing problem. A single element only satisfies <em>half</em> the requirement for each interval. Crucially, an interval must contribute <strong>2 distinct integers</strong> — you can't count the same number twice.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ S = {2} — Fails</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Interval [1,3]: 2 ∈ S ✓ but only 1 element<br>
+          Need AT LEAST 2 per interval.<br>
+          This set does not satisfy the problem.
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ S = {2, 3} — Works</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          [1,3]: {2,3} both in range → 2 elements ✓<br>
+          [2,5]: {2,3} both in range → 2 elements ✓<br>
+          [4,6]: only {none} — STILL FAILS!
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Worked example:</strong> For intervals <code>[[1,3],[3,7],[8,9]]</code>, the minimum set is <code>{1,2,3,8,9}</code> with size 5. Each interval gets exactly 2 elements: [1,3] → {1,2} or {2,3}, [3,7] → {3, anything 4-7} — but we already have 3, so add a second. [8,9] → needs {8,9}. A clever greedy can do this in 5 total.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases:</strong> A single-element interval <code>[a,a]</code> is impossible to satisfy (you can't fit 2 distinct integers in a range of size 1) — but the problem guarantees <code>a ≤ b</code>, so the minimum interval size is 2. An interval of size exactly 2, like <code>[3,4]</code>, forces us to include both 3 and 4.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Greedy — Sort by End, Place Rightmost</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>This is a classic <strong>greedy interval coverage</strong> problem solved by sorting intervals by their <em>right endpoint</em> and greedily placing integers as far right as possible (within the interval) to maximize coverage of future intervals.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Sort by End?</div>
+      <p>An interval with an <strong>earlier right endpoint</strong> is "tighter" — it leaves fewer options for future intervals to share its coverage. By handling tight intervals first, we ensure their constraints are satisfied. Numbers we place near the right end of a tight interval are most likely to also fall inside later, wider intervals.</p>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Sort by end, break ties by start descending.</strong> Sort intervals by right endpoint ascending. For ties in right endpoint, sort by left endpoint descending — this ensures a narrower interval (larger start) comes before a wider one with the same end, so we handle the harder constraint first.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Maintain a running "tail" — last two chosen integers.</strong> Track the two rightmost chosen integers as <code>p</code> and <code>q</code> (where <code>q</code> is the largest). These are the two numbers most likely to cover future intervals.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>For each interval, count how many of {p, q} fall inside it.</strong> If both p and q are ≥ the interval's start, we need 0 new integers (the interval already has 2 elements from S). If only q is inside, we need 1 more. If neither, we need 2 new integers.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Add minimum needed integers as far right as possible.</strong> Place new integers at the rightmost positions of the current interval (end, end-1). This maximizes the chance they'll satisfy future intervals too — "greedy right placement."</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return total count.</strong> The size of S is the answer. We don't need to enumerate S explicitly — just count how many integers we added.</span>
+      </div>
+    </div>
+
+    <!-- Greedy decision diagram -->
+    <div style="margin-top:1rem;font-size:13px;font-weight:700;color:var(--text)">Decision Tree per Interval:</div>
+    <div class="greedy-diagram">
+      <div class="diag-row">
+        <div class="diag-key">0 covered:</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;font-size:13px">
+          <span>Neither p nor q is inside the interval.</span>
+          <span style="color:var(--red-mid);font-weight:700">→ Add 2 new integers (at end and end−1). New p=end−1, q=end.</span>
+        </div>
+      </div>
+      <div class="diag-row">
+        <div class="diag-key">1 covered:</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;font-size:13px">
+          <span>Only q (the larger) is inside.</span>
+          <span style="color:var(--amber-mid);font-weight:700">→ Add 1 new integer at end. New p=q, q=end.</span>
+        </div>
+      </div>
+      <div class="diag-row">
+        <div class="diag-key">2 covered:</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;font-size:13px">
+          <span>Both p and q are inside.</span>
+          <span style="color:var(--green-mid);font-weight:700">→ Add 0 integers. S already covers this interval.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Only q Could Be Inside, Not p?</div>
+      <p>Since intervals are sorted by end, and p &lt; q, if p is inside the interval (p ≥ start), then q (which is larger) is also ≥ start. So the only asymmetric case is: q ≥ start but p &lt; start — meaning only the larger element is covered. This happens when p "fell off" an earlier, narrower interval's left boundary.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing each interval in sorted order, the two most recently added integers (q and p, with p &lt; q) are the rightmost elements of S. Any future interval that starts at or before q already contains q — meaning it needs at most 1 more integer. Any future interval that starts at or before p already contains both p and q — meaning it is fully satisfied.</p>
+    </div>
+
+    <p><strong>Why placing integers at the rightmost positions is optimal:</strong> When we must add a new integer for the current interval, we place it as far right as possible (at the interval's end). Any future interval [a, b] has its left boundary a ≥ a', the left boundary of the current interval (since we process in non-decreasing order of right endpoints). A right-placed integer is guaranteed to be reachable by more future intervals than a left-placed one.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why sorting by end with ties broken by start descending works:</strong> Consider two intervals with the same end — say [1,5] and [3,5]. If we process [1,5] first, we'd place integers at 4,5. Then [3,5] is covered because 4≥3 and 5≥3. If we processed [3,5] first (narrower), we'd also place at 4,5 and [1,5] is still covered. However, if intervals were [1,5] and [4,5], placing at 4,5 covers both. The descending start tie-break ensures narrower intervals (harder constraints) come first, preventing a case where a wider interval's placement doesn't cover the narrower one.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Proof Sketch</div>
+      <p>Assume an optimal solution O and our greedy solution G. G never places more integers than O in any prefix of intervals (exchange argument). If G adds an integer at position r (right end), and O uses position r' &lt; r instead, we can swap r' for r in O — it still satisfies the current interval and is more likely to satisfy future ones. Hence G is optimal.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge: tight intervals [a, a+1].</strong> A size-2 interval forces us to include both a and a+1 (there's no flexibility). The greedy places them at a+1 and a (end, end-1), which is exactly {a, a+1}. No alternative exists, so this is always globally optimal.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Greedy (Sort by End + Rightmost Placement) — Optimal, O(n log n)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def intersectionSizeTwo(intervals):                          </span></div>
+<div class="ann-line"><span class="acode">    # Sort by end asc; for same end, sort by start desc      </span><span class="aann">← Narrower intervals (larger start, same end) come first</span></div>
+<div class="ann-line"><span class="acode">    intervals.sort(key=lambda x: (x[1], -x[0]))             </span></div>
+<div class="ann-line"><span class="acode">    p, q = -1, -1  # Two rightmost integers in S so far      </span><span class="aann">← Sentinels: neither is inside any real interval initially</span></div>
+<div class="ann-line"><span class="acode">    count = 0                                                </span><span class="aann">← Total size of S (our answer)</span></div>
+<div class="ann-line"><span class="acode">    for a, b in intervals:                                   </span><span class="aann">← Process each interval in sorted order</span></div>
+<div class="ann-line"><span class="acode">        if p >= a:                                           </span><span class="aann">← Both p and q are inside [a,b] (since p < q, if p>=a then q>=a too)</span></div>
+<div class="ann-line"><span class="acode">            pass  # Already satisfied — 0 new integers needed</span></div>
+<div class="ann-line"><span class="acode">        elif q >= a:                                         </span><span class="aann">← Only q is inside [a,b]; p < a (fell outside left boundary)</span></div>
+<div class="ann-line"><span class="acode">            p = q; q = b                                    </span><span class="aann">← Place 1 new integer at b (rightmost). Shift: old q becomes p.</span></div>
+<div class="ann-line"><span class="acode">            count += 1                                       </span></div>
+<div class="ann-line"><span class="acode">        else:                                               </span><span class="aann">← Neither p nor q is inside [a,b]. Need 2 new integers.</span></div>
+<div class="ann-line"><span class="acode">            p = b - 1; q = b                                </span><span class="aann">← Place at b-1 and b (rightmost two positions in [a,b])</span></div>
+<div class="ann-line"><span class="acode">            count += 2                                       </span></div>
+<div class="ann-line"><span class="acode">    return count                                             </span><span class="aann">← Size of the minimum set S</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Placing at Left Instead of Right</div>
+      <p>Beginners often place new integers at the leftmost positions (a, a+1). This is wrong! Placing at the RIGHT end (b-1, b) maximizes the chance these integers fall inside future intervals (which start at ≥ some value but end later). Left-placed integers are quickly "left behind" by narrower future intervals.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why -x[0] in Sort Key?</div>
+      <p>For intervals with the same right endpoint, we process narrower intervals (larger start = smaller range) <em>first</em>. Consider [1,5] and [3,5]: if we process [3,5] first and add integers at 4,5, then [1,5] gets both 4≥1 and 5≥1 — satisfied. If instead we process [1,5] first and add 4,5, then [3,5] gets 4≥3 and 5≥3 — also satisfied. In this example both orderings work. But for [4,5] and [1,5]: adding 4,5 covers [4,5] with p=4, q=5 and [1,5] with p=4≥1 — OK. The descending start tie-break guarantees safety in general by always handling the tightest constraint first.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (O(n · R) time) — for understanding only</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def intersectionSizeTwo_brute(intervals):                   </span></div>
+<div class="ann-line"><span class="acode">    if not intervals: return 0                              </span></div>
+<div class="ann-line"><span class="acode">    max_val = max(b for a, b in intervals)                  </span></div>
+<div class="ann-line"><span class="acode">    S = set()                                               </span><span class="aann">← Try all integers from 0 to max_val</span></div>
+<div class="ann-line"><span class="acode">    while any(sum(1 for x in S if a<=x<=b) < 2            </span></div>
+<div class="ann-line"><span class="acode">              for a, b in intervals):                       </span><span class="aann">← While some interval is uncovered (< 2 elements from S)</span></div>
+<div class="ann-line"><span class="acode">        # Find the integer that covers the most intervals   </span></div>
+<div class="ann-line"><span class="acode">        best = max(range(max_val + 1),                     </span></div>
+<div class="ann-line"><span class="acode">               key=lambda x: sum(1 for a,b in intervals    </span></div>
+<div class="ann-line"><span class="acode">                                if a<=x<=b and             </span></div>
+<div class="ann-line"><span class="acode">                                sum(1 for s in S if a<=s<=b)<2))</span></div>
+<div class="ann-line"><span class="acode">        S.add(best)                                         </span></div>
+<div class="ann-line"><span class="acode">    return len(S)                                           </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Greedy (Optimal):</strong> Time O(n log n) for sort + O(n) for scan = O(n log n). Space O(1) extra (sort in-place).<br>
+        <strong>Brute Force:</strong> Time O(n · R²) where R is the value range. Completely impractical for large inputs.<br>
+        The greedy solution is the expected interview answer. The brute force is shown only to build intuition.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Greedy Interval Pattern</div>
+        <p style="font-size:14px;color:var(--text)">Key signals: "intervals," "minimum set," "coverage requirement." This looks like interval piercing (find minimum points that hit all intervals) — but with a twist: you need 2 per interval instead of 1. That twist changes the solution from a single-pass to a two-element tracking approach.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Why Sort by End?</div>
+        <p style="font-size:14px;color:var(--text)">In all interval greedy problems, sorting by right endpoint is the key move. The interval that ends soonest is most "critical" — if we don't place integers there now, we'll be forced to use extra integers later. By handling early-ending intervals first, we make decisions that defer to future flexibility.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Track Only 2 Values</div>
+        <p style="font-size:14px;color:var(--text)">"I don't need to track the entire set S — I only need to track the two rightmost integers, because only they can possibly satisfy future intervals. Older integers are too small to fall inside future intervals (future intervals start at higher values on average)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Three Cases for Each Interval</div>
+        <p style="font-size:14px;color:var(--text)">For each interval [a, b], check how many of {p, q} are ≥ a. If both: add 0. If only q: add 1 at b (update p=q, q=b). If neither: add 2 at b-1 and b (p=b-1, q=b). Always add at the rightmost position for maximum future coverage.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a greedy interval problem. I'll sort by right endpoint to process tightest intervals first.<br>
+I'll track p and q — the two largest integers in S so far.<br>
+For each interval [a, b]: if p ≥ a, both are inside — no new integers needed.<br>
+If only q ≥ a, I need one more — I place it at b (rightmost, for max future coverage).<br>
+If neither is inside, I need two — I place at b-1 and b.<br>
+Time O(n log n) from sort. Space O(1) extra. Result is total count added."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if k=1 instead of 2?"</strong> → Classic interval piercing: sort by end, track 1 rightmost. O(n log n).</li>
+        <li><strong>"What if k=3 or arbitrary k?"</strong> → Track k rightmost integers. Add at b, b-1, ..., b-(needed-1).</li>
+        <li><strong>"Return the actual set, not just the count?"</strong> → Replace count with a list; append the new integers.</li>
+        <li><strong>"Minimum number of arrows to burst all balloons?"</strong> → Exact same pattern but k=1.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: intervals = [[1,3],[1,4],[2,5],[3,5]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Number axis -->
+      <div style="display:flex;align-items:center;margin-bottom:6px">
+        <div style="width:88px;flex-shrink:0"></div>
+        <div id="axis-row" style="display:flex;gap:0"></div>
+      </div>
+      <!-- Interval rows -->
+      <div id="interval-rows"></div>
+
+      <!-- Chosen set -->
+      <div style="margin-top:1rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Chosen Set S</div>
+        <div class="chosen-set" id="chosen-set">
+          <div class="chosen-el empty" id="ce-placeholder">∅</div>
+        </div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-p">
+          <span class="var-name">p (2nd largest)</span>
+          <span class="var-val" id="vv-p">—</span>
+        </div>
+        <div class="var-box" id="vb-q">
+          <span class="var-name">q (largest)</span>
+          <span class="var-val" id="vv-q">—</span>
+        </div>
+        <div class="var-box" id="vb-count">
+          <span class="var-name">count</span>
+          <span class="var-val" id="vv-count">0</span>
+        </div>
+        <div class="var-box" id="vb-interval">
+          <span class="var-name">interval [a,b]</span>
+          <span class="var-val" id="vv-interval">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">intervals.sort(key=lambda x: (x[1], -x[0]))</div>
+      <div class="code-line" id="cl-1">p, q = -1, -1</div>
+      <div class="code-line" id="cl-2">count = 0</div>
+      <div class="code-line" id="cl-3">for a, b in intervals:</div>
+      <div class="code-line" id="cl-4">    if p >= a:          # Both p and q inside</div>
+      <div class="code-line" id="cl-5">        pass</div>
+      <div class="code-line" id="cl-6">    elif q >= a:        # Only q inside</div>
+      <div class="code-line" id="cl-7">        p = q; q = b; count += 1</div>
+      <div class="code-line" id="cl-8">    else:               # Neither inside</div>
+      <div class="code-line" id="cl-9">        p = b-1; q = b; count += 2</div>
+      <div class="code-line" id="cl-10">return count</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 12</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the greedy algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Active interval</div>
+      <div class="legend-item"><div class="legend-swatch sw-cover"></div> Covered by S already</div>
+      <div class="legend-item"><div class="legend-swatch sw-select"></div> Satisfies requirement</div>
+      <div class="legend-item"><div class="legend-swatch sw-new"></div> Newly added to S</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Sort intervals by right endpoint (ascending) — tight intervals must be satisfied first</div>
+      <div class="takeaway">Track only p and q (two rightmost chosen integers) — these are the only ones that can help future intervals</div>
+      <div class="takeaway">Always place new integers at the rightmost positions (b, b-1) — maximizes future coverage</div>
+      <div class="takeaway">Three cases: 0 covered → add 2; 1 covered (q only) → add 1; both covered → add 0</div>
+      <div class="takeaway">Tie-break: same end → sort by start descending (handle narrower first)</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (try all integers)</td>
+          <td class="mark-bad">O(n · R²)</td>
+          <td>O(R)</td>
+          <td>R = value range; impractical</td>
+        </tr>
+        <tr>
+          <td><strong>Greedy (Sort by End) ✓</strong></td>
+          <td class="mark-good">O(n log n)</td>
+          <td class="mark-good">O(1)</td>
+          <td>Optimal; interview answer</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Minimum number of integers/points that satisfy all intervals" → Sort by end, greedy</li>
+        <li>"At least k elements from S in each interval" → Track k rightmost, add at right end</li>
+        <li>"Intervals must each be 'hit' a certain number of times" → Greedy interval coverage</li>
+        <li>If k=1 → Classic interval piercing (arrows to burst balloons)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Sort by End + Greedy)</div>
+      <div class="related-item"><strong>Minimum Number of Arrows to Burst Balloons</strong><span class="related-diff diff-med">Medium</span> — Same pattern but k=1 pierce per interval (#452)</div>
+      <div class="related-item"><strong>Non-overlapping Intervals</strong><span class="related-diff diff-med">Medium</span> — Sort by end, greedily keep non-overlapping intervals (#435)</div>
+      <div class="related-item"><strong>Remove Covered Intervals</strong><span class="related-diff diff-med">Medium</span> — Sort and track max end to identify covered intervals (#1288)</div>
+      <div class="related-item"><strong>Partition Labels</strong><span class="related-diff diff-med">Medium</span> — Track last occurrence as a greedy "end" boundary (#763)</div>
+      <div class="related-item"><strong>Interval List Intersections</strong><span class="related-diff diff-med">Medium</span> — Two-pointer on sorted interval lists (#986)</div>
+      <div class="related-item"><strong>Meeting Rooms II</strong><span class="related-diff diff-med">Medium</span> — Greedy room allocation with min-heap on sorted intervals (#253)</div>
+      <div class="related-item"><strong>Jump Game II</strong><span class="related-diff diff-med">Medium</span> — Track current/next boundary — greedy coverage analogy (#45)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 16 (Greedy)<br>
+      Sub-Pattern: <strong>Sort by End + Greedy</strong> · Source: Guide Section 16</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── Data ───
+// Sorted intervals: [[1,3],[1,4],[2,5],[3,5]]
+// After sort (end asc, start desc for ties): [[1,3],[1,4],[2,5],[3,5]]
+// Actual sorted: [1,3] end=3; [1,4] end=4; [2,5],[3,5] end=5
+// Tie at end=5: start=3 vs start=2 -> descending start -> [3,5] then [2,5]
+// Final sorted: [[1,3],[1,4],[3,5],[2,5]]
+// Let's trace:
+// Start: p=-1, q=-1, count=0
+// [1,3]: neither -1>=-1... wait: p=-1, a=1, p<a. q=-1<a. Neither inside. Add 2: p=2,q=3, count=2
+// [1,4]: p=2, a=1. p>=a -> both inside. Pass.
+// [3,5]: p=2, a=3. p<a. q=3>=a. Only q inside. Add 1 at b=5: p=3,q=5, count=3
+// [2,5]: p=3, a=2. p>=a -> both inside. Pass.
+// Final count = 3. S = {2,3,5}
+
+const SORTED_INTERVALS = [[1,3],[1,4],[3,5],[2,5]];
+const NUM_MIN = 1, NUM_MAX = 5;
+const NUMS = [1,2,3,4,5];
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    p:-1, q:-1, count:0, activeInterval:-1,
+    S:[], newAdded:[],
+    activeLine:0,
+    title:'Sort Intervals',
+    text:'Sort intervals by right endpoint (ascending). For same right endpoint, sort by left endpoint descending (narrower intervals first). Input [[1,3],[1,4],[2,5],[3,5]] becomes [[1,3],[1,4],[3,5],[2,5]]. Initialize p=-1 (sentinel), q=-1 (sentinel), count=0.',
+    changedVars:[]
+  },
+  {
+    id:1, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    p:-1, q:-1, count:0, activeInterval:-1,
+    S:[], newAdded:[],
+    activeLine:1,
+    title:'Initialize p, q, count',
+    text:'p and q are the two rightmost integers in S. Both start at -1 (sentinel — not a real integer). Count = 0. We\'ll track how many integers we add.',
+    changedVars:['p','q','count']
+  },
+  {
+    id:2, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process',
+    p:-1, q:-1, count:0, activeInterval:0,
+    S:[], newAdded:[],
+    activeLine:3,
+    title:'Interval 0: [1, 3]',
+    text:'Processing first interval [a=1, b=3]. Check: is p=-1 >= a=1? No. Is q=-1 >= a=1? No. Neither of our two tracked integers is inside [1,3]. We need to add 2 new integers.',
+    changedVars:['interval']
+  },
+  {
+    id:3, phase:'add', phaseLabel:'ADD 2', phaseClass:'phase-add',
+    p:2, q:3, count:2, activeInterval:0,
+    S:[2,3], newAdded:[2,3],
+    activeLine:9,
+    title:'Add 2 integers at b-1=2 and b=3',
+    text:'Neither p nor q was inside [1,3]. Place 2 new integers at the rightmost positions: p = b-1 = 2, q = b = 3. Count += 2 → count = 2. These are now the two rightmost elements in S = {2, 3}.',
+    changedVars:['p','q','count']
+  },
+  {
+    id:4, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process',
+    p:2, q:3, count:2, activeInterval:1,
+    S:[2,3], newAdded:[],
+    activeLine:3,
+    title:'Interval 1: [1, 4]',
+    text:'Processing interval [a=1, b=4]. Check: is p=2 >= a=1? YES! Both p=2 and q=3 are inside [1,4]. This interval already has 2 elements from S. No new integers needed!',
+    changedVars:['interval']
+  },
+  {
+    id:5, phase:'process', phaseLabel:'SATISFIED', phaseClass:'phase-sort',
+    p:2, q:3, count:2, activeInterval:1,
+    S:[2,3], newAdded:[],
+    activeLine:5,
+    title:'[1, 4] — Already satisfied (add 0)',
+    text:'p=2 >= a=1, so both p=2 and q=3 are inside [1,4]. Condition p >= a is TRUE. The pass statement executes — zero integers added. Count stays at 2. The interval [1,4] is covered by {2,3}.',
+    changedVars:[]
+  },
+  {
+    id:6, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process',
+    p:2, q:3, count:2, activeInterval:2,
+    S:[2,3], newAdded:[],
+    activeLine:3,
+    title:'Interval 2: [3, 5]',
+    text:'Processing interval [a=3, b=5]. Check: is p=2 >= a=3? No (2 < 3). Is q=3 >= a=3? YES! Only q=3 is inside [3,5]. We need 1 more integer.',
+    changedVars:['interval']
+  },
+  {
+    id:7, phase:'add', phaseLabel:'ADD 1', phaseClass:'phase-add',
+    p:3, q:5, count:3, activeInterval:2,
+    S:[2,3,5], newAdded:[5],
+    activeLine:7,
+    title:'Add 1 integer at b=5',
+    text:'Only q=3 was inside [3,5]. Place 1 new integer at rightmost position b=5. Update: p becomes old q=3, q becomes b=5. Count += 1 → count = 3. S = {2, 3, 5}. Now q=5 can help future intervals.',
+    changedVars:['p','q','count']
+  },
+  {
+    id:8, phase:'process', phaseLabel:'PROCESS', phaseClass:'phase-process',
+    p:3, q:5, count:3, activeInterval:3,
+    S:[2,3,5], newAdded:[],
+    activeLine:3,
+    title:'Interval 3: [2, 5]',
+    text:'Processing interval [a=2, b=5]. Check: is p=3 >= a=2? YES! Both p=3 and q=5 are inside [2,5]. This interval already has 2 elements from S. No new integers needed!',
+    changedVars:['interval']
+  },
+  {
+    id:9, phase:'process', phaseLabel:'SATISFIED', phaseClass:'phase-sort',
+    p:3, q:5, count:3, activeInterval:3,
+    S:[2,3,5], newAdded:[],
+    activeLine:5,
+    title:'[2, 5] — Already satisfied (add 0)',
+    text:'p=3 >= a=2, so both p=3 and q=5 are inside [2,5]. Condition p >= a is TRUE. Zero integers added. Count stays at 3. S = {2, 3, 5} covers [2,5] with elements 3 and 5.',
+    changedVars:[]
+  },
+  {
+    id:10, phase:'result', phaseLabel:'DONE', phaseClass:'phase-result',
+    p:3, q:5, count:3, activeInterval:-1,
+    S:[2,3,5], newAdded:[],
+    activeLine:10,
+    title:'All intervals processed — Return 3',
+    text:'All 4 intervals satisfied. Final S = {2, 3, 5} with |S| = 3. Verify: [1,3] → {2,3} ✓ (2 elements); [1,4] → {2,3} ✓; [3,5] → {3,5} ✓; [2,5] → {3,5} ✓. Minimum set size is 3.',
+    changedVars:[]
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build number axis
+  const axisRow = document.getElementById('axis-row');
+  NUMS.forEach(n => {
+    const tick = document.createElement('div');
+    tick.style.cssText = 'width:40px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);border-left:1px solid var(--border);padding-top:2px;flex-shrink:0';
+    tick.textContent = n;
+    axisRow.appendChild(tick);
+  });
+
+  // Build interval rows
+  const container = document.getElementById('interval-rows');
+  SORTED_INTERVALS.forEach((interval, rowIdx) => {
+    const row = document.createElement('div');
+    row.className = 'int-row'; row.id = 'irow-' + rowIdx;
+    const label = document.createElement('div');
+    label.className = 'int-row-label';
+    label.textContent = '[' + interval[0] + ',' + interval[1] + ']';
+    row.appendChild(label);
+    NUMS.forEach(n => {
+      const cell = document.createElement('div');
+      cell.className = 'int-cell'; cell.id = 'ic-' + rowIdx + '-' + n;
+      const inRange = n >= interval[0] && n <= interval[1];
+      cell.classList.add(inRange ? 'in-range' : 'none');
+      if (inRange) cell.textContent = n;
+      row.appendChild(cell);
+    });
+    container.appendChild(row);
+  });
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // ── Interval rows ──
+  SORTED_INTERVALS.forEach((interval, rowIdx) => {
+    NUMS.forEach(n => {
+      const cell = document.getElementById('ic-' + rowIdx + '-' + n);
+      const inRange = n >= interval[0] && n <= interval[1];
+      cell.className = 'int-cell';
+      if (!inRange) {
+        cell.classList.add('none');
+        cell.textContent = '';
+      } else {
+        cell.textContent = n;
+        const inS = step.S.includes(n);
+        const isNew = step.newAdded.includes(n) && rowIdx === step.activeInterval;
+        const isActive = rowIdx === step.activeInterval;
+        if (isNew && isActive) {
+          cell.classList.add('selected');
+        } else if (inS && inRange) {
+          cell.classList.add('covered');
+        } else if (isActive) {
+          cell.classList.add('active-interval');
+        } else {
+          cell.classList.add('in-range');
+        }
+      }
+    });
+  });
+
+  // ── Chosen set ──
+  const cs = document.getElementById('chosen-set');
+  cs.innerHTML = '';
+  if (step.S.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'chosen-el empty'; empty.textContent = '∅';
+    cs.appendChild(empty);
+  } else {
+    step.S.forEach(n => {
+      const el = document.createElement('div');
+      el.className = 'chosen-el ' + (step.newAdded.includes(n) ? 'new' : 'normal');
+      el.textContent = n;
+      cs.appendChild(el);
+    });
+  }
+
+  // ── Variable tracker ──
+  const vars = {p: step.p === -1 ? '—' : step.p, q: step.q === -1 ? '—' : step.q, count: step.count};
+  document.getElementById('vv-p').textContent = vars.p;
+  document.getElementById('vv-q').textContent = vars.q;
+  document.getElementById('vv-count').textContent = vars.count;
+  document.getElementById('vv-interval').textContent = step.activeInterval >= 0 ?
+    '[' + SORTED_INTERVALS[step.activeInterval][0] + ',' + SORTED_INTERVALS[step.activeInterval][1] + ']' : '—';
+
+  document.getElementById('vb-p').classList.toggle('changed', step.changedVars.includes('p'));
+  document.getElementById('vb-q').classList.toggle('changed', step.changedVars.includes('q'));
+  document.getElementById('vb-count').classList.toggle('changed', step.changedVars.includes('count'));
+  document.getElementById('vb-interval').classList.toggle('changed', step.changedVars.includes('interval'));
+
+  // ── Code panel ──
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

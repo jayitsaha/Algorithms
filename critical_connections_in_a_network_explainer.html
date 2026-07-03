@@ -1,83 +1,816 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Critical Connections in a Network — LC #1192</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1192 · Critical Connections in a Network</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:920px;margin:0 auto;padding:2rem 1.5rem}
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+/* Graph Viz */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow:hidden}
+.graph-svg-wrapper{display:flex;justify-content:center;margin-bottom:1rem}
+svg.graph-svg{overflow:visible}
+.gnode circle{fill:var(--surface);stroke:var(--border2);stroke-width:2.5;transition:all 0.35s}
+.gnode text{font-size:14px;font-weight:700;fill:var(--text);text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:fill 0.35s;font-family:var(--sans)}
+.gnode.visiting circle{fill:var(--blue-bg);stroke:var(--blue-mid);stroke-width:3.5}
+.gnode.visiting text{fill:var(--blue-text)}
+.gnode.visited circle{fill:var(--bg2);stroke:var(--border);stroke-width:2}
+.gnode.visited text{fill:var(--text3)}
+.gnode.stack-top circle{fill:var(--purple-bg);stroke:var(--purple-mid);stroke-width:3.5}
+.gnode.stack-top text{fill:var(--purple-text)}
+.gedge{stroke:var(--border2);stroke-width:2;transition:all 0.35s}
+.gedge.tree-edge{stroke:var(--blue-mid);stroke-width:2.5}
+.gedge.back-edge{stroke:var(--amber-mid);stroke-width:2;stroke-dasharray:6,3}
+.gedge.bridge{stroke:var(--red-mid);stroke-width:4}
+.gedge-glow{stroke:var(--red-mid);stroke-width:9;opacity:0.2;display:none}
+.gedge-glow.show{display:block}
+/* Variable Tracker */
+.var-tracker{display:flex;gap:8px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:7px;background:var(--surface);border-radius:var(--radius);padding:7px 13px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+/* Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-visit{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-low{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-bridge{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-visiting{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-visited{background:var(--bg2);border-color:var(--border)}
+.sw-stack{background:var(--purple-bg);border-color:var(--purple-border)}
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+/* Bridge formula box */
+.formula-row{display:flex;align-items:center;justify-content:center;gap:16px;margin:1rem 0;flex-wrap:wrap}
+.formula-box{padding:12px 20px;border-radius:var(--radius);background:var(--surface);border:2px solid var(--border2);font-family:var(--mono);font-size:15px;text-align:center}
+.f-lo{color:var(--red-mid);font-weight:700}
+.f-di{color:var(--blue-mid);font-weight:700}
+.f-arrow{font-size:22px;color:var(--text3)}
+.formula-label{font-size:13px;color:var(--text2);text-align:center;padding:8px 16px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Critical Connections in a Network</h1>
-<div class="subtitle">LeetCode #1192 &mdash; Tarjan's Bridge Finding</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">Tarjan's Bridge Finding</span><span class="tag tag-cx">O(V+E) Time &middot; O(V+E) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1192</div>
+  <h1>Critical Connections in a Network</h1>
+  <p class="subtitle">Find all edges whose removal would increase the number of connected components — known as bridges in graph theory.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">Tarjan's Bridge Finding</span>
+    <span class="tag tag-complexity">Time: O(V+E)</span>
+    <span class="tag tag-complexity">Space: O(V+E)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem       -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:0.75rem">You are given <strong>n servers</strong> (0 to n−1) connected by <strong>undirected network cables</strong>. A <strong>critical connection</strong> is a cable that, if cut, would leave at least one server unable to communicate with the rest.</p>
+    <p style="margin-bottom:0.75rem">In graph theory these are called <em>bridges</em>: edges whose removal increases the number of connected components. Your task is to find all of them efficiently — not one by one by brute force, but in a single DFS pass.</p>
+
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">Not a Bridge</div>
+        <p style="font-size:13px;color:var(--red-mid)">Edge (0–1): even if removed, servers 0 and 1 can still communicate through server 2 via path 0–2–1. It's part of a cycle.</p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Bridge!</div>
+        <p style="font-size:13px;color:var(--green-mid)">Edge (1–3): server 3 is a leaf — its only connection is through node 1. Remove this cable and server 3 is isolated. No alternative path.</p>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p style="font-size:14px">An edge <strong>(u, v)</strong> is a bridge if and only if node <strong>v</strong>'s entire subtree (in the DFS tree) cannot "reach back" to node <strong>u</strong> or any of u's ancestors through a back-edge. Tarjan's algorithm detects this in one DFS pass using two timestamps per node: <strong>disc</strong> (discovery time) and <strong>low</strong> (lowest reachable ancestor).</p>
+    </div>
+
+    <p style="font-size:14px;color:var(--text2)"><strong>Example:</strong> n=4, connections=[[0,1],[1,2],[2,0],[1,3]]. Nodes 0,1,2 form a triangle (a cycle), so none of those three edges are bridges. Node 3 connects only through node 1, making (1,3) the single bridge. Answer: [[1,3]].</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Use DFS timestamps (disc) and low values. low[u] = minimum disc reachable from subtree of u. Edge (u,v) is a bridge if low[v] > disc[u] (v can't reach u's ancestors without (u,v)).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Tarjan's Bridge Algorithm</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Tarjan's Bridge Algorithm</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">disc[],low[],timer</span></div><div class="step"><span class="snum">2</span><span class="stxt">DFS: set disc=low=timer++; for each neighbor: if unvisited: DFS; low[u]=min(low[u],low[v]); if low[v]>disc[u]: bridge</span></div><div class="step"><span class="snum">3</span><span class="stxt">Skip parent edge</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(V+E)</strong> | Space: <strong>O(V+E)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def criticalConnections(n, connections):
-    adj=[[] for _ in range(n)]; result=[]
-    for u,v in connections: adj[u].append(v); adj[v].append(u)
-    disc=[-1]*n; low=[-1]*n; timer=[0]
-    def dfs(u,parent):
-        disc[u]=low[u]=timer[0]; timer[0]+=1
-        for v in adj[u]:
-            if disc[v]==-1: dfs(v,u); low[u]=min(low[u],low[v])
-            elif v!=parent: low[u]=min(low[u],disc[v])
-            if low[v]>disc[u]: result.append([u,v])
-    dfs(0,-1); return result</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">low[v]>disc[u]: v can't reach u without edge (u,v) → bridge</span></div><div class="step"><span class="snum">2</span><span class="stxt">Need to handle multiple edges between same nodes</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Tarjan's Bridge Algorithm</td><td>O(V+E)</td><td>O(V+E)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Find Bridges in Graph</span><span class="pd dh">Hard</span> — Same algorithm</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Tarjan's Bridge Finding</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Critical Connections in a Network"}, "title": "Tarjan's Bridge Algorithm", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                   -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Tarjan's Bridge Finding</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:0.75rem">Robert Tarjan (1974) devised a linear-time algorithm that detects bridges during a single DFS. Every node gets two values:</p>
+    <ul style="margin-left:1.25rem;margin-bottom:1rem;font-size:14px;color:var(--text2);line-height:2.1">
+      <li><strong>disc[v]</strong> — the <em>discovery time</em>: a global counter that increments each time we first visit a node. Think of it as a timestamp.</li>
+      <li><strong>low[v]</strong> — the <em>low-link value</em>: the minimum disc value reachable from node v or any descendant of v, possibly via one back-edge (an edge to an ancestor in the DFS tree).</li>
+    </ul>
+
+    <div class="formula-row">
+      <div class="formula-box">
+        <span class="f-lo">low[v]</span> <span style="color:var(--text3)"> &gt; </span> <span class="f-di">disc[u]</span>
+      </div>
+      <div class="f-arrow">⟹</div>
+      <div class="formula-label">Edge <strong>(u, v)</strong> is a bridge<br><em style="font-size:12px">v's subtree can't reach u or above without this edge</em></div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build adjacency list</strong> — store each undirected edge in both directions.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Initialize disc[] = low[] = −1</strong> (−1 means unvisited). Set global timer = 0.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>DFS from node 0.</strong> On first visit to node v: set disc[v] = low[v] = timer, then increment timer.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>For each neighbor w of v:</strong><br>
+          — If w is the parent: skip (avoid trivial back-tracking on undirected edge).<br>
+          — If w is unvisited: recurse dfs(w, v); after returning, update low[v] = min(low[v], low[w]).<br>
+          — If w is already visited (back-edge): update low[v] = min(low[v], disc[w]).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Bridge check:</strong> after returning from dfs(w, v), if low[w] &gt; disc[v], then edge (v, w) is a bridge. Collect it.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why disc vs low?</div>
+      <p style="font-size:14px">disc[v] is fixed at first visit. low[v] starts equal to disc[v] and can only decrease: it "pulls up" the minimum ancestor reachable from v's subtree. If the lowest reachable is still below v (low[v] &le; disc[parent]), then a cycle exists through the tree edge and it is safe to remove. If not, the edge is the only connection — a bridge.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant     -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p style="font-size:14px">After the DFS fully processes node v: <strong>low[v] = the minimum disc[x] for any node x reachable from v's subtree via at most one non-tree (back) edge.</strong></p>
+    </div>
+
+    <p style="margin-bottom:0.75rem;font-size:14px;color:var(--text2)"><strong>Why this guarantees bridge detection:</strong> Consider tree edge (u → v). Node v's subtree remains connected to the rest of the graph even if (u, v) is removed, <em>only if</em> some descendant of v has a back-edge to u or an ancestor of u. Such a back-edge would give low[v] &le; disc[u]. Contrapositive: if low[v] &gt; disc[u], no such back-edge exists, so removing (u, v) disconnects v's subtree.</p>
+
+    <p style="margin-bottom:0.75rem;font-size:14px;color:var(--text2)"><strong>Propagation:</strong> low values propagate bottom-up during DFS. When we return from dfs(w), we do low[v] = min(low[v], low[w]). This correctly "bubbles up" the earliest reachable ancestor from any node in v's subtree.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Parent-Edge Trap</div>
+      <p style="font-size:14px">In an undirected graph, each edge (u, v) is stored as both u→v and v→u. When visiting neighbors of v with parent u, we must skip u — otherwise the edge u→v (stored as v's neighbor) would be treated as a back-edge, giving low[v] = disc[u], making it look like v can always reach back to u. This would prevent any bridge from ever being detected.</p>
+    </div>
+
+    <p style="font-size:14px;color:var(--text2)"><strong>Edge cases:</strong> Isolated nodes — problem guarantees connectivity. Parallel edges — to handle multiple edges between the same pair correctly, track by edge index (not parent node): skip the edge we came from by its index, not all edges to parent. Single node — no edges, return empty list.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)            -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import defaultdict</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">def criticalConnections(n, connections):</span></div>
+<div class="ann-line"><span class="acode">    graph = defaultdict(list)             </span><span class="aann">adjacency list for undirected graph</span></div>
+<div class="ann-line"><span class="acode">    for u, v in connections:              </span><span class="aann">build bidirectional adjacency</span></div>
+<div class="ann-line"><span class="acode">        graph[u].append(v)                </span></div>
+<div class="ann-line"><span class="acode">        graph[v].append(u)                </span></div>
+<div class="ann-line"><span class="acode">    disc = [-1] * n                       </span><span class="aann">-1 = unvisited; set to timer at first visit</span></div>
+<div class="ann-line"><span class="acode">    low  = [-1] * n                       </span><span class="aann">lowest disc reachable from node's subtree</span></div>
+<div class="ann-line"><span class="acode">    timer = [0]                           </span><span class="aann">mutable int (list trick for closure capture)</span></div>
+<div class="ann-line"><span class="acode">    bridges = []                          </span><span class="aann">collect answers here</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def dfs(node, parent):                </span></div>
+<div class="ann-line"><span class="acode">        disc[node] = low[node] = timer[0] </span><span class="aann">stamp discovery time; low starts equal</span></div>
+<div class="ann-line"><span class="acode">        timer[0] += 1                     </span><span class="aann">advance global timer</span></div>
+<div class="ann-line"><span class="acode">        for nei in graph[node]:           </span><span class="aann">iterate all neighbors</span></div>
+<div class="ann-line"><span class="acode">            if nei == parent:             </span><span class="aann">skip the edge we came from (parent)</span></div>
+<div class="ann-line"><span class="acode">                continue                  </span></div>
+<div class="ann-line"><span class="acode">            if disc[nei] == -1:           </span><span class="aann">neighbor is unvisited → tree edge</span></div>
+<div class="ann-line"><span class="acode">                dfs(nei, node)            </span><span class="aann">recurse into neighbor</span></div>
+<div class="ann-line"><span class="acode">                low[node] = min(low[node], low[nei])   </span><span class="aann">pull up low from child subtree</span></div>
+<div class="ann-line"><span class="acode">                if low[nei] > disc[node]: </span><span class="aann">bridge condition: child can't reach back to us</span></div>
+<div class="ann-line"><span class="acode">                    bridges.append([node, nei])         </span><span class="aann">found a bridge!</span></div>
+<div class="ann-line"><span class="acode">            else:                         </span><span class="aann">already visited → back-edge</span></div>
+<div class="ann-line"><span class="acode">                low[node] = min(low[node], disc[nei])  </span><span class="aann">update with ancestor's disc time (not low!)</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    dfs(0, -1)                            </span><span class="aann">start DFS from node 0, no parent</span></div>
+<div class="ann-line"><span class="acode">    return bridges                        </span></div>
+    </div>
+
+    <div class="concept-box danger">
+      <div class="concept-box-title">🚫 Bug Alert: Use disc[nei], NOT low[nei] for back-edges</div>
+      <p style="font-size:14px">For back-edges (already-visited neighbor), always update: <code>low[node] = min(low[node], disc[nei])</code>. Do NOT use <code>low[nei]</code>. Using low[nei] could propagate incorrect low values across back-edges, causing non-bridges to be falsely reported as bridges. The disc value of an already-visited ancestor is the correct bound.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity</div>
+      <p style="font-size:14px"><strong>Time: O(V + E)</strong> — each node visited once, each edge traversed twice (both directions). <strong>Space: O(V + E)</strong> — adjacency list + disc/low arrays O(V) + recursion stack O(V) worst case (linear chain).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy              -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p style="font-size:13.5px;color:var(--text2)">Keywords: "critical edge", "single point of failure", "remove edge disconnects graph", "bridge". These signal a classic graph bridge-detection problem. The graph is undirected and connected (guaranteed), so one DFS from any node visits everything.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force</div>
+        <p style="font-size:13.5px;color:var(--text2)">For each edge, remove it, then run BFS/DFS to check if the graph remains connected. O(E × (V+E)). For n=100,000 this is way too slow. Show the interviewer you understand the problem before jumping to the optimal.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: The Core Observation</div>
+        <p style="font-size:13.5px;color:var(--text2)">An edge is a bridge if and only if it is NOT part of a cycle. So the question becomes: how do we know if a DFS tree edge is in a cycle? If some descendant has a back-edge to an ancestor at or above the parent, we have an alternative path — not a bridge. We need to track the "earliest reachable ancestor" from any subtree: that's low[v].</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Introduce Tarjan's Algorithm</div>
+        <p style="font-size:13.5px;color:var(--text2)">disc[v] = when first visited (monotonically increasing). low[v] = min disc reachable via subtree + at most one back-edge. Bridge condition: low[child] &gt; disc[parent]. One DFS, O(V+E). This is Tarjan's bridge-finding algorithm.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"First, brute force: remove each edge, BFS to check connectivity. O(E × (V+E)) — too slow."
+
+"Better insight: an edge is critical only if it's not in any cycle. If I can detect cycles during DFS, I'm done."
+
+"I'll use Tarjan's bridge-finding algorithm. Each node gets disc (discovery time) and low (earliest ancestor reachable from its subtree). After DFS on child v from parent u: if low[v] > disc[u], v's subtree has no back-edge to u or above — removing (u,v) disconnects it."
+
+"One DFS, O(V+E) time and space. One subtle point: skip the edge back to the parent node, otherwise the undirected graph would always show a back-edge that prevents bridge detection."
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📋 Common Follow-Ups</div>
+      <p style="font-size:14px"><strong>Articulation Points:</strong> Same DFS, different condition — a node u is an articulation point if low[child] &ge; disc[u] (for non-root; root is special). <strong>Parallel edges:</strong> Track by edge index not parent node to correctly handle multiple edges between same pair. <strong>Disconnected graph:</strong> Run DFS for each unvisited component (loop over all nodes).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough         -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:0.75rem">Tracing Tarjan's DFS on: <strong>n=4, connections=[[0,1],[1,2],[2,0],[1,3]]</strong>. Follow disc[] and low[] values as DFS unfolds.</p>
+
+    <div class="viz-area">
+      <div class="graph-svg-wrapper">
+        <svg class="graph-svg" id="graphSvg" viewBox="-20 -20 500 300" width="480" height="280">
+          <!-- Glow layers for bridge -->
+          <line id="glow01" class="gedge-glow" x1="120" y1="80" x2="260" y2="80"/>
+          <line id="glow12" class="gedge-glow" x1="260" y1="80" x2="380" y2="80"/>
+          <line id="glow20" class="gedge-glow" x1="120" y1="80" x2="380" y2="80"/>
+          <line id="glow13" class="gedge-glow" x1="260" y1="80" x2="260" y2="210"/>
+          <!-- Edges -->
+          <line id="edge01" class="gedge" x1="120" y1="80" x2="260" y2="80"/>
+          <line id="edge12" class="gedge" x1="260" y1="80" x2="380" y2="80"/>
+          <line id="edge20" class="gedge" x1="120" y1="80" x2="380" y2="80"/>
+          <line id="edge13" class="gedge" x1="260" y1="80" x2="260" y2="210"/>
+          <!-- Edge labels -->
+          <text x="190" y="68" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="system-ui">0—1</text>
+          <text x="320" y="68" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="system-ui">1—2</text>
+          <text x="250" y="42" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="system-ui">2—0</text>
+          <text x="276" y="150" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="system-ui">1—3</text>
+          <!-- Nodes -->
+          <g class="gnode" id="gn0"><circle cx="120" cy="80" r="28"/><text x="120" y="80">0</text></g>
+          <g class="gnode" id="gn1"><circle cx="260" cy="80" r="28"/><text x="260" y="80">1</text></g>
+          <g class="gnode" id="gn2"><circle cx="380" cy="80" r="28"/><text x="380" y="80">2</text></g>
+          <g class="gnode" id="gn3"><circle cx="260" cy="210" r="28"/><text x="260" y="210">3</text></g>
+          <!-- disc/low labels under each node -->
+          <text id="lbl0" x="120" y="120" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="monospace">d:? l:?</text>
+          <text id="lbl1" x="260" y="120" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="monospace">d:? l:?</text>
+          <text id="lbl2" x="380" y="120" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="monospace">d:? l:?</text>
+          <text id="lbl3" x="260" y="250" font-size="10" fill="#9c9a92" text-anchor="middle" font-family="monospace">d:? l:?</text>
+        </svg>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker" id="varTracker">
+        <div class="var-box" id="vb_timer"><span class="var-name">timer</span><span class="var-val" id="vv_timer">0</span></div>
+        <div class="var-box" id="vb_node"><span class="var-name">node</span><span class="var-val" id="vv_node">—</span></div>
+        <div class="var-box" id="vb_d0"><span class="var-name">disc[0]</span><span class="var-val" id="vv_d0">-1</span></div>
+        <div class="var-box" id="vb_d1"><span class="var-name">disc[1]</span><span class="var-val" id="vv_d1">-1</span></div>
+        <div class="var-box" id="vb_d2"><span class="var-name">disc[2]</span><span class="var-val" id="vv_d2">-1</span></div>
+        <div class="var-box" id="vb_d3"><span class="var-name">disc[3]</span><span class="var-val" id="vv_d3">-1</span></div>
+        <div class="var-box" id="vb_l0"><span class="var-name">low[0]</span><span class="var-val" id="vv_l0">-1</span></div>
+        <div class="var-box" id="vb_l1"><span class="var-name">low[1]</span><span class="var-val" id="vv_l1">-1</span></div>
+        <div class="var-box" id="vb_l2"><span class="var-name">low[2]</span><span class="var-val" id="vv_l2">-1</span></div>
+        <div class="var-box" id="vb_l3"><span class="var-name">low[3]</span><span class="var-val" id="vv_l3">-1</span></div>
+        <div class="var-box" id="vb_br"><span class="var-name">bridges</span><span class="var-val" id="vv_br">[]</span></div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel">
+<div class="code-line" id="cl0">def dfs(node, parent):</div>
+<div class="code-line" id="cl1">    disc[node] = low[node] = timer[0]  # stamp discovery</div>
+<div class="code-line" id="cl2">    timer[0] += 1</div>
+<div class="code-line" id="cl3">    for nei in graph[node]:</div>
+<div class="code-line" id="cl4">        if nei == parent: continue      # skip parent edge</div>
+<div class="code-line" id="cl5">        if disc[nei] == -1:             # tree edge</div>
+<div class="code-line" id="cl6">            dfs(nei, node)</div>
+<div class="code-line" id="cl7">            low[node] = min(low[node], low[nei])</div>
+<div class="code-line" id="cl8">            if low[nei] > disc[node]:   # bridge!</div>
+<div class="code-line" id="cl9">                bridges.append([node, nei])</div>
+<div class="code-line" id="cl10">        else:                           # back edge</div>
+<div class="code-line" id="cl11">            low[node] = min(low[node], disc[nei])</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+        <div class="step-counter" id="stepCounter">Step 1 / 14</div>
+        <div class="step-title" id="stepTitle">Start DFS from node 0</div>
+        <div class="step-body" id="stepBody">We call dfs(0, -1). The graph: nodes 0,1,2 form a triangle; node 3 is a leaf attached at node 1. We expect to find exactly one bridge: edge (1,3).</div>
+      </div>
+
+      <div class="progress-dots" id="progressDots"></div>
+
+      <div class="controls">
+        <button class="btn" id="btnPrev" onclick="go(-1)" disabled>&#8592; Prev</button>
+        <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next &#8594;</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use &#8592; &#8594; arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-visiting"></div> Currently visiting</div>
+        <div class="legend-item"><div class="legend-swatch sw-visited"></div> Already visited</div>
+        <div class="legend-item"><div class="legend-swatch sw-stack"></div> Current DFS frame</div>
+        <div class="legend-item"><div style="width:22px;height:3px;background:var(--blue-mid);border-radius:2px"></div> Tree edge</div>
+        <div class="legend-item"><div style="width:22px;height:3px;background:var(--amber-mid);border-radius:2px;border-top:2px dashed var(--amber-mid)"></div> Back edge</div>
+        <div class="legend-item"><div style="width:22px;height:3px;background:var(--red-mid);border-radius:2px"></div> Bridge</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways         -->
+<!-- ─────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A bridge is an edge that is NOT part of any cycle — Tarjan identifies these in one DFS.</div>
+      <div class="takeaway">disc[v] = discovery timestamp (set once, never changes). low[v] = lowest disc reachable from v's subtree (decreases as back-edges are found).</div>
+      <div class="takeaway">Bridge condition: low[child] &gt; disc[parent] — no back-edge from child's subtree can reach parent or above.</div>
+      <div class="takeaway">Always skip the parent edge when traversing neighbors in an undirected graph.</div>
+      <div class="takeaway">For back-edges use disc[nei] (not low[nei]) to update low values correctly.</div>
+      <div class="takeaway">Time O(V+E), Space O(V+E) — optimal. Brute force is O(E × (V+E)).</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (remove + BFS/DFS per edge)</td><td class="mark-bad">O(E &times; (V+E))</td><td>O(V+E)</td><td>TLE on large inputs</td></tr>
+        <tr><td>Tarjan's Bridge Finding (DFS + disc/low)</td><td class="mark-good">O(V+E)</td><td class="mark-good">O(V+E)</td><td><strong>Interview pick ✓</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1.1rem;font-size:14px;line-height:2.1;color:var(--text2)">
+        <li>Problem asks for "critical edges", "single points of failure", or "bridges" in a graph.</li>
+        <li>Removing an edge might disconnect the graph — need to find all such edges.</li>
+        <li>Related problem: Articulation Points (critical vertices, not edges) — same DFS, different condition.</li>
+        <li>Related problem: Strongly Connected Components in directed graphs (Tarjan's SCC algorithm uses a similar disc/low approach with a stack).</li>
+      </ul>
+    </div>
+
+    <div class="related-list" style="margin-top:1rem">
+      <div class="related-item"><strong>Articulation Points (Critical Nodes)</strong> <span class="related-diff diff-hard">Hard</span> — same Tarjan DFS; a node u is critical if low[child] &ge; disc[u] (non-root) or u is root with &ge;2 children.</div>
+      <div class="related-item"><strong>Number of Connected Components in Undirected Graph</strong> <span class="related-diff diff-med">Medium</span> — foundational DFS/Union-Find; knowing components helps reason about bridges.</div>
+      <div class="related-item"><strong>Course Schedule II</strong> <span class="related-diff diff-med">Medium</span> — DFS cycle detection in directed graphs; shares the "DFS with timestamp" mental model.</div>
+      <div class="related-item"><strong>Redundant Connection</strong> <span class="related-diff diff-med">Medium</span> — find an edge IN a cycle (opposite of bridge-finding: bridges are NOT in cycles).</div>
+      <div class="related-item"><strong>Graph Valid Tree</strong> <span class="related-diff diff-med">Medium</span> — verify no cycles; understanding cycles is prerequisite to bridge thinking.</div>
+      <div class="related-item"><strong>Minimum Number of Days to Disconnect Island</strong> <span class="related-diff diff-hard">Hard</span> — variant: bridge detection on grid graphs to find minimum cuts.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ──────────────────────────────────────────────────────────────
+// Tarjan's DFS on n=4, connections=[[0,1],[1,2],[2,0],[1,3]]
+// Adjacency: 0:{1,2}, 1:{0,2,3}, 2:{1,0}, 3:{1}
+// DFS call order: dfs(0,-1) → dfs(1,0) → dfs(2,1) → back(2→0) → ret to 1 → dfs(3,1) → ret to 1 → ret to 0
+// Expected bridge: [1,3]
+// ──────────────────────────────────────────────────────────────
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:0,
+    title:'Setup: call dfs(0, -1)',
+    body:'All disc[] = low[] = -1 (unvisited). Timer starts at 0. We call dfs(0, -1) — starting from node 0 with no parent. The graph: nodes 0,1,2 form triangle 0–1–2–0; node 3 is a leaf hanging off node 1.',
+    nodes:{0:'visiting',1:'normal',2:'normal',3:'normal'},
+    edges:{e01:'normal',e12:'normal',e20:'normal',e13:'normal'},
+    vars:{timer:0,node:0,d0:-1,d1:-1,d2:-1,d3:-1,l0:-1,l1:-1,l2:-1,l3:-1,br:'[]'},
+    changed:[],
+    lbls:{0:'?/?',1:'?/?',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:1,
+    title:'Visit node 0: disc[0]=0, low[0]=0',
+    body:'disc[0] = low[0] = timer = 0. Timer advances to 1. low[0] starts equal to disc[0] — it will decrease only if we discover a back-edge to an earlier ancestor.',
+    nodes:{0:'stack-top',1:'normal',2:'normal',3:'normal'},
+    edges:{e01:'normal',e12:'normal',e20:'normal',e13:'normal'},
+    vars:{timer:1,node:0,d0:0,d1:-1,d2:-1,d3:-1,l0:0,l1:-1,l2:-1,l3:-1,br:'[]'},
+    changed:['timer','d0','l0'],
+    lbls:{0:'0/0',1:'?/?',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:5,
+    title:'dfs(0): neighbor 1 is unvisited — tree edge, recurse dfs(1,0)',
+    body:'Node 0 iterates neighbors {1, 2}. First neighbor: 1. disc[1]=-1 so it is unvisited. Not the parent. We recurse dfs(1, 0). Edge 0→1 becomes a DFS tree edge.',
+    nodes:{0:'visited',1:'visiting',2:'normal',3:'normal'},
+    edges:{e01:'tree-edge',e12:'normal',e20:'normal',e13:'normal'},
+    vars:{timer:1,node:1,d0:0,d1:-1,d2:-1,d3:-1,l0:0,l1:-1,l2:-1,l3:-1,br:'[]'},
+    changed:['node'],
+    lbls:{0:'0/0',1:'?/?',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:1,
+    title:'Visit node 1: disc[1]=1, low[1]=1',
+    body:'Inside dfs(1, 0): disc[1] = low[1] = timer = 1. Timer advances to 2. Node 1 is now stamped.',
+    nodes:{0:'visited',1:'stack-top',2:'normal',3:'normal'},
+    edges:{e01:'tree-edge',e12:'normal',e20:'normal',e13:'normal'},
+    vars:{timer:2,node:1,d0:0,d1:1,d2:-1,d3:-1,l0:0,l1:1,l2:-1,l3:-1,br:'[]'},
+    changed:['timer','d1','l1'],
+    lbls:{0:'0/0',1:'1/1',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:4,
+    title:'dfs(1): neighbor 0 is parent — skip',
+    body:'Node 1 iterates neighbors {0, 2, 3}. First neighbor: 0. But nei=0 equals parent=0, so we skip this edge. Without this guard, the undirected edge 1→0 would look like a back-edge, incorrectly lowering low[1] and masking the bridge.',
+    nodes:{0:'visited',1:'stack-top',2:'normal',3:'normal'},
+    edges:{e01:'tree-edge',e12:'normal',e20:'normal',e13:'normal'},
+    vars:{timer:2,node:1,d0:0,d1:1,d2:-1,d3:-1,l0:0,l1:1,l2:-1,l3:-1,br:'[]'},
+    changed:[],
+    lbls:{0:'0/0',1:'1/1',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:5,
+    title:'dfs(1): neighbor 2 is unvisited — tree edge, recurse dfs(2,1)',
+    body:'Next neighbor of 1: node 2. disc[2]=-1 so unvisited. Recurse dfs(2, 1). Edge 1→2 is a tree edge.',
+    nodes:{0:'visited',1:'visited',2:'visiting',3:'normal'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'normal',e13:'normal'},
+    vars:{timer:2,node:2,d0:0,d1:1,d2:-1,d3:-1,l0:0,l1:1,l2:-1,l3:-1,br:'[]'},
+    changed:['node'],
+    lbls:{0:'0/0',1:'1/1',2:'?/?',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:1,
+    title:'Visit node 2: disc[2]=2, low[2]=2',
+    body:'Inside dfs(2, 1): disc[2] = low[2] = timer = 2. Timer advances to 3.',
+    nodes:{0:'visited',1:'visited',2:'stack-top',3:'normal'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'normal',e13:'normal'},
+    vars:{timer:3,node:2,d0:0,d1:1,d2:2,d3:-1,l0:0,l1:1,l2:2,l3:-1,br:'[]'},
+    changed:['timer','d2','l2'],
+    lbls:{0:'0/0',1:'1/1',2:'2/2',3:'?/?'}
+  },
+  {
+    phase:'low', phaseClass:'phase-low', activeLine:11,
+    title:'dfs(2): back-edge to node 0! low[2] = min(2, disc[0]) = 0',
+    body:'Node 2 checks neighbor 1 (parent — skip) then neighbor 0. disc[0]=0 ≠ -1, and 0 is NOT node 2\'s parent (parent=1). Back-edge detected! We update: low[2] = min(low[2], disc[0]) = min(2, 0) = 0. Node 2 can reach all the way back to disc time 0.',
+    nodes:{0:'visited',1:'visited',2:'stack-top',3:'normal'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'normal'},
+    vars:{timer:3,node:2,d0:0,d1:1,d2:2,d3:-1,l0:0,l1:1,l2:0,l3:-1,br:'[]'},
+    changed:['l2'],
+    lbls:{0:'0/0',1:'1/1',2:'2/0',3:'?/?'}
+  },
+  {
+    phase:'low', phaseClass:'phase-low', activeLine:7,
+    title:'Return from dfs(2) to dfs(1): low[1] = min(1, low[2]) = 0',
+    body:'Back in dfs(1) after dfs(2) returns. We propagate: low[1] = min(low[1], low[2]) = min(1, 0) = 0. Node 1\'s subtree (including node 2) can reach ancestor with disc time 0.',
+    nodes:{0:'visited',1:'stack-top',2:'visited',3:'normal'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'normal'},
+    vars:{timer:3,node:1,d0:0,d1:1,d2:2,d3:-1,l0:0,l1:0,l2:0,l3:-1,br:'[]'},
+    changed:['node','l1'],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'?/?'}
+  },
+  {
+    phase:'low', phaseClass:'phase-low', activeLine:8,
+    title:'Bridge check for edge (1,2): low[2]=0 > disc[1]=1? NO — not a bridge',
+    body:'low[2]=0 > disc[1]=1? No. 0 is not greater than 1. Edge (1,2) is safe — it\'s part of the cycle 0–1–2–0. Removing it keeps 0,1,2 connected via the other paths.',
+    nodes:{0:'visited',1:'stack-top',2:'visited',3:'normal'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'normal'},
+    vars:{timer:3,node:1,d0:0,d1:1,d2:2,d3:-1,l0:0,l1:0,l2:0,l3:-1,br:'[]'},
+    changed:[],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:5,
+    title:'dfs(1): neighbor 3 is unvisited — tree edge, recurse dfs(3,1)',
+    body:'Next neighbor of node 1: node 3. disc[3]=-1, unvisited. Recurse dfs(3, 1). Edge 1→3 is a tree edge. Notice node 3 is a leaf — it will have no further unvisited neighbors to explore.',
+    nodes:{0:'visited',1:'visited',2:'visited',3:'visiting'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'tree-edge'},
+    vars:{timer:3,node:3,d0:0,d1:1,d2:2,d3:-1,l0:0,l1:0,l2:0,l3:-1,br:'[]'},
+    changed:['node'],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'?/?'}
+  },
+  {
+    phase:'visit', phaseClass:'phase-visit', activeLine:1,
+    title:'Visit node 3: disc[3]=3, low[3]=3',
+    body:'Inside dfs(3, 1): disc[3] = low[3] = timer = 3. Timer advances to 4. Node 3\'s only neighbor is 1 (its parent). After skipping the parent edge, there are no more neighbors. low[3] stays at 3 — no back-edges possible.',
+    nodes:{0:'visited',1:'visited',2:'visited',3:'stack-top'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'tree-edge'},
+    vars:{timer:4,node:3,d0:0,d1:1,d2:2,d3:3,l0:0,l1:0,l2:0,l3:3,br:'[]'},
+    changed:['timer','d3','l3'],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'3/3'}
+  },
+  {
+    phase:'bridge', phaseClass:'phase-bridge', activeLine:8,
+    title:'BRIDGE FOUND! low[3]=3 > disc[1]=1 → edge (1,3) is a bridge!',
+    body:'Back in dfs(1) after dfs(3) returns. Bridge check: low[3]=3 > disc[1]=1? YES! Node 3\'s subtree cannot reach back to node 1 or any ancestor. Removing edge (1,3) isolates node 3 completely. We add [1,3] to bridges.',
+    nodes:{0:'visited',1:'stack-top',2:'visited',3:'visited'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'bridge'},
+    vars:{timer:4,node:1,d0:0,d1:1,d2:2,d3:3,l0:0,l1:0,l2:0,l3:3,br:'[[1,3]]'},
+    changed:['node','br'],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'3/3'}
+  },
+  {
+    phase:'result', phaseClass:'phase-result', activeLine:-1,
+    title:'DFS Complete — Result: [[1,3]]',
+    body:'After dfs(3) returns, dfs(1) finishes and returns to dfs(0). We update low[0] = min(low[0], low[1]) = min(0,0) = 0. Bridge check for (0,1): low[1]=0 > disc[0]=0? No (equal, not greater). Not a bridge. All nodes visited. Final answer: [[1,3]].',
+    nodes:{0:'visited',1:'visited',2:'visited',3:'visited'},
+    edges:{e01:'tree-edge',e12:'tree-edge',e20:'back-edge',e13:'bridge'},
+    vars:{timer:4,node:'done',d0:0,d1:1,d2:2,d3:3,l0:0,l1:0,l2:0,l3:3,br:'[[1,3]]'},
+    changed:['br'],
+    lbls:{0:'0/0',1:'1/0',2:'2/0',3:'3/3'}
+  }
+];
+
+let cur = 0;
+
+const edgeClassMap = {
+  'normal':    'gedge',
+  'tree-edge': 'gedge tree-edge',
+  'back-edge': 'gedge back-edge',
+  'bridge':    'gedge bridge'
+};
+const glowIds = {e01:'glow01',e12:'glow12',e20:'glow20',e13:'glow13'};
+
+function render(idx) {
+  const s = steps[idx];
+
+  // Info card
+  const badge = document.getElementById('phaseBadge');
+  badge.textContent = s.phase.toUpperCase();
+  badge.className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('stepCounter').textContent = `Step ${idx+1} / ${steps.length}`;
+  document.getElementById('stepTitle').textContent = s.title;
+  document.getElementById('stepBody').textContent = s.body;
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach((el,i) => el.classList.toggle('active', i === s.activeLine));
+
+  // Variables
+  const vmap = {
+    timer:'timer',node:'node',
+    d0:'d0',d1:'d1',d2:'d2',d3:'d3',
+    l0:'l0',l1:'l1',l2:'l2',l3:'l3',br:'br'
+  };
+  Object.keys(vmap).forEach(k => {
+    const el = document.getElementById('vv_'+k);
+    const box = document.getElementById('vb_'+k);
+    if(el) el.textContent = String(s.vars[k]);
+    if(box) box.classList.toggle('changed', s.changed.includes(k));
+  });
+
+  // Node states
+  ['0','1','2','3'].forEach(n => {
+    document.getElementById('gn'+n).className = 'gnode ' + (s.nodes[n] || 'normal');
+  });
+
+  // Node labels (disc/low)
+  [0,1,2,3].forEach(n => {
+    const el = document.getElementById('lbl'+n);
+    if(el && s.lbls[n]) {
+      const p = s.lbls[n].split('/');
+      el.textContent = `d:${p[0]} l:${p[1]}`;
+    }
+  });
+
+  // Edge states
+  ['e01','e12','e20','e13'].forEach(eid => {
+    const el = document.getElementById('edge'+eid.substring(1));
+    if(el) el.className = edgeClassMap[s.edges[eid]] || 'gedge';
+    const gl = document.getElementById(glowIds[eid]);
+    if(gl) gl.classList.toggle('show', s.edges[eid] === 'bridge');
+  });
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.classList.toggle('active', i === idx);
+    d.classList.toggle('visited', i < idx);
+  });
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').disabled = idx === steps.length - 1;
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function go(dir) {
+  const next = cur + dir;
+  if(next < 0 || next >= steps.length) return;
+  cur = next;
+  render(cur);
+}
+
+function reset() { cur = 0; render(0); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// Build progress dots
+(function(){
+  const pd = document.getElementById('progressDots');
+  steps.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.onclick = () => { cur = i; render(i); };
+    pd.appendChild(d);
+  });
+})();
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+  if(e.key === 'r' || e.key === 'R') reset();
+});
+
+render(0);
 </script>
-</body></html>
+</body>
+</html>

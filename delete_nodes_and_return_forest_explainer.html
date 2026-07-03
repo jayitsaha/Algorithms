@@ -1,236 +1,916 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delete Nodes And Return Forest – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1110 · Delete Nodes And Return Forest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.tree-svg-container{display:flex;justify-content:center;margin:1rem 0}
+
+/* Tree node styles */
+.tree-node-circle{transition:fill 0.35s,stroke 0.35s;cursor:default}
+.tree-edge{transition:stroke 0.35s,stroke-dasharray 0.35s}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-traverse{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-delete{background:var(--red-bg);color:var(--red-mid)}
+.phase-newroot{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-processing{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-delete{background:var(--red-bg);border-color:var(--red-border)}
+.sw-root{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-newroot{background:var(--green-bg);border-color:var(--green-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Call Stack Display ── */
+.call-stack{display:flex;flex-direction:column;gap:4px;margin:0.75rem 0}
+.call-stack-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px}
+.call-frame{padding:6px 12px;border-radius:6px;font-family:var(--mono);font-size:12px;background:var(--bg2);border-left:3px solid var(--border2);transition:background 0.3s,border-color 0.3s}
+.call-frame.active-frame{background:var(--purple-bg);border-left-color:var(--purple-mid);font-weight:600;color:var(--purple-text)}
+
+/* ── Forest Area ── */
+.forest-area{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;padding:1rem;background:var(--surface);border-radius:var(--radius);border:1px dashed var(--border2);min-height:60px;margin-top:0.75rem}
+.forest-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:0.5rem;text-align:center}
+.forest-tree{display:flex;flex-direction:column;align-items:center;padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);border:1px solid var(--green-border);font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green-text)}
+.forest-empty{color:var(--text3);font-style:italic;font-size:13px}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Delete Nodes And Return Forest</h1>
-    <p class="subtitle">LeetCode #1110 — Tree Traversal - Post-Order · Post-order, Check Parent</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Trees</span>
-      <span class="tag tag-complexity">O(n) Time</span>
-      <span class="tag tag-complexity">O(h) where h=height Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Tree Traversal - Post-Order</strong> using the <strong>Post-order, Check Parent</strong> technique.</p>
-      <p>Pattern category: <strong>Trees</strong>. Apply when: <em>Most tree problems: think recursively. Define what your function returns. Handle None base case.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>DFS: preorder=process root first; inorder=BST sorted order; postorder=process children first. BFS=level by level.</p>
-      </div>
-    </div>
+<header>
+  <div class="problem-number">LeetCode #1110</div>
+  <h1>Delete Nodes And Return Forest</h1>
+  <p class="subtitle">Given a binary tree and a set of node values to delete, remove those nodes and return the roots of all remaining trees in the resulting forest.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Trees</span>
+    <span class="tag tag-pattern">Post-order DFS</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
   </div>
+</header>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Post-order, Check Parent</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Base case: if not root, return base value</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">Recurse on left subtree</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">Recurse on right subtree (or both for pre/post)</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Combine left, root, right results</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">Return combined result</span></div>
-      </div>
-    </div>
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>You have a binary tree and a list of node values to delete. When you delete a node, its children become <strong>orphaned</strong> — they may become new roots of their own independent trees. Your task: return all root nodes of the surviving trees after all deletions.</p>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A node becomes a <strong>new forest root</strong> if and only if it is NOT deleted AND its parent WAS deleted (or it was already the original root with no parent). This parent-deleted signal must flow <em>downward</em> through the recursion — the natural fit is passing an <code>is_root</code> flag alongside each recursive call.</p>
     </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>For BST: all left descendants < root < all right descendants. Height-balanced: |left_h - right_h| ≤ 1.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Input Tree (delete = {3, 5})</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2.2">
+          &nbsp;&nbsp;&nbsp;&nbsp;1<br>
+          &nbsp;&nbsp;&nbsp;/ \<br>
+          &nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;[3]<br>
+          &nbsp;/ \&nbsp;&nbsp;&nbsp;\<br>
+          4&nbsp;&nbsp;[5]&nbsp;&nbsp;6
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Result Forest (3 trees)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2.2">
+          Tree A: root=1<br>
+          &nbsp;&nbsp;(subtree: 1-2-4)<br>
+          Tree B: root=6<br>
+          &nbsp;&nbsp;(was child of 3)<br>
+          Note: nodes 3,5 gone
+        </p>
       </div>
     </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong></p>
+    <ul style="margin-left:1.25rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+      <li>The original root is in the delete list — its surviving children become new roots.</li>
+      <li>A leaf node is deleted — no new roots are created (it simply disappears).</li>
+      <li>All nodes deleted — return empty list.</li>
+      <li>No nodes deleted — return a forest with just the original root.</li>
+      <li>A deleted node's parent is also deleted — the child is still a new root (the link to its grandparent is already severed).</li>
+    </ul>
   </div>
+</div>
 
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">def maxDepth(root):</div><div class="code-line">    if not root: return 0</div><div class="code-line">    return 1 + max(maxDepth(root.left), maxDepth(root.right))</div><div class="code-line"></div><div class="code-line">def levelOrder(root):</div><div class="code-line">    if not root: return []</div><div class="code-line">    from collections import deque</div><div class="code-line">    result, queue = [], deque([root])</div><div class="code-line">    while queue:</div><div class="code-line">        level = []</div><div class="code-line">        for _ in range(len(queue)):</div><div class="code-line">            node = queue.popleft()</div><div class="code-line">            level.append(node.val)</div><div class="code-line">            if node.left:  queue.append(node.left)</div><div class="code-line">            if node.right: queue.append(node.right)</div><div class="code-line">        result.append(level)</div><div class="code-line">    return result</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n) &nbsp;|&nbsp; Space: O(h) where h=height</p>
-    </div>
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Post-order DFS with is_root Flag</span>
+    <span class="collapse-icon">▾</span>
   </div>
+  <div class="section-content">
+    <p>We perform a single <strong>post-order DFS</strong> — visiting left child, right child, then the node itself. This bottom-up order ensures we process children before parents, so we can sever links cleanly as we return up the call stack.</p>
 
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Most tree problems: think recursively. Define what your function returns. Handle None base case.</p>
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Convert delete list to a set</strong> — Enables O(1) membership checks. We'll do this check at every node, so it must be fast.</span>
       </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Trees problem using Post-order, Check Parent. I'll base case: if not root, return base value then recurse on left subtree. Time: O(n), Space: O(h) where h=height."</div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>DFS with is_root parameter</strong> — Each call carries a boolean: "Is this node currently a potential forest root?" The original tree root starts with <code>is_root=True</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Add to forest if (is_root AND not deleted)</strong> — A surviving orphan becomes a new forest root. We add it at the top of the call before recursing.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Recurse on children with correct is_root</strong> — Pass <code>is_root=deleted</code> to each child. If we're deleting the current node (<code>deleted=True</code>), the children become orphans (<code>is_root=True</code>). If we keep the node, children remain normal children (<code>is_root=False</code>).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return None if deleted, else return node</strong> — Returning <code>None</code> severs the link at the parent level. The parent captures this: <code>node.left = dfs(node.left, deleted)</code> sets <code>node.left = None</code> when the left child is deleted.</span>
       </div>
     </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Post-order Is Essential</div>
+      <p>Pre-order visits the parent before children — but at that point, we don't yet know if a child needs to be severed. Post-order visits children first, so by the time we handle a parent's deletion, its children have already been visited, captured as roots if needed, and their return values (<code>None</code> or themselves) are ready to assign.</p>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>DFS Order</th><th>Children processed first?</th><th>Suitable here?</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-order (root first)</td><td class="mark-bad">No — parent handled before children</td><td class="mark-bad">Requires extra passes</td></tr>
+        <tr><td>In-order (left, root, right)</td><td class="mark-bad">Partial — right child after parent</td><td class="mark-bad">Not naturally suited</td></tr>
+        <tr><td><strong>Post-order (left, right, root)</strong></td><td class="mark-good">Yes — both children before parent</td><td class="mark-good">Perfect fit</td></tr>
+      </tbody>
+    </table>
   </div>
+</div>
 
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
-          </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
-        </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
-        </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
-      </div>
-    </div>
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
   </div>
-
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>When <code>dfs(node, is_root)</code> is called, the value of <code>is_root</code> is <em>always exactly correct</em>: it is <code>True</code> if and only if the node's parent has been deleted (or the node is the original root). This correctness is maintained because the parent's deletion status is determined before the recursive call is made.</p>
     </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Trees — Post-order, Check Parent</div>
-        <div class="takeaway">✓ DFS: preorder=process root first; inorder=BST sorted order; postorder=process children first</div>
-        <div class="takeaway">✓ Time: O(n) | Space: O(h) where h=height</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Most tree problems: think recursively. Define what your function returns. Handle None base case.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Binary Tree Postorder Traversal</strong> (Easy) — Stack with Reverse</li>
-<li><strong>Invert Binary Tree</strong> (Easy) — Swap Children</li>
-<li><strong>Balanced Binary Tree</strong> (Easy) — Check Height Difference</li>
-<li><strong>Diameter of Binary Tree</strong> (Easy) — Max Left + Right Depth</li>
-<li><strong>Count Good Nodes in Binary Tree</strong> (Medium) — Track Max on Path</li>
-<li><strong>Sum Root to Leaf Numbers</strong> (Medium) — Pass Current Number Down</li></ul>
-      </div>
+
+    <p><strong>Why returning None severs the link:</strong> Python assignment <code>node.left = dfs(node.left, ...)</code> sets <code>node.left</code> to whatever <code>dfs</code> returns. If the left child is deleted, <code>dfs</code> returns <code>None</code>, so <code>node.left = None</code> — the link is severed automatically. No need for parent pointers or separate deletion passes.</p>
+
+    <p style="margin-top:0.75rem"><strong>Proof of new-root correctness:</strong> Suppose node <code>C</code> is a child of node <code>P</code> which is being deleted. When we process <code>P</code> (the parent's frame), we detect <code>deleted=True</code> and call <code>dfs(C, is_root=True)</code>. Inside that call, if <code>C</code> is not in the delete set, the first conditional fires: <code>forest.append(C)</code>. This happens before we recurse into C's subtree — so C is captured as a root before any of its descendants are processed. This ordering ensures no root is missed and no root is double-counted.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting the Original Root</div>
+      <p>The initial call must pass <code>is_root=True</code> for the tree's original root. If the root is NOT deleted, it must appear in the forest. Many incorrect solutions start with <code>is_root=False</code> and forget to handle the root as a special case — then the root node is never added to the forest, producing a wrong answer.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>When the root itself is deleted:</strong> The call <code>dfs(root, is_root=True)</code> detects <code>deleted=True</code>. Even though <code>is_root=True</code>, the <code>not deleted</code> condition prevents adding root to the forest. We then call <code>dfs(root.left, is_root=True)</code> and <code>dfs(root.right, is_root=True)</code> — both surviving children become new roots. The function returns <code>None</code> for the deleted root.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Post-order DFS with is_root flag (Optimal / Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def delNodes(root, to_delete):                    </span></div>
+<div class="ann-line"><span class="acode">    to_delete_set = set(to_delete)                </span><span class="aann">← O(1) lookup; avoid O(k) list scan per node</span></div>
+<div class="ann-line"><span class="acode">    forest = []                                   </span><span class="aann">← Accumulate surviving tree roots here</span></div>
+<div class="ann-line"><span class="acode">                                                  </span></div>
+<div class="ann-line"><span class="acode">    def dfs(node, is_root):                       </span><span class="aann">← is_root: True if this node may be a new forest root</span></div>
+<div class="ann-line"><span class="acode">        if not node: return None                  </span><span class="aann">← Base case: null child, nothing to do</span></div>
+<div class="ann-line"><span class="acode">        deleted = node.val in to_delete_set       </span><span class="aann">← Is this node scheduled for deletion? O(1)</span></div>
+<div class="ann-line"><span class="acode">        if is_root and not deleted:               </span><span class="aann">← Surviving orphan = new forest root!</span></div>
+<div class="ann-line"><span class="acode">            forest.append(node)                  </span><span class="aann">← Capture root BEFORE modifying children</span></div>
+<div class="ann-line"><span class="acode">        node.left  = dfs(node.left,  deleted)     </span><span class="aann">← deleted becomes child's is_root signal</span></div>
+<div class="ann-line"><span class="acode">        node.right = dfs(node.right, deleted)     </span><span class="aann">← Same for right; None return severs the link</span></div>
+<div class="ann-line"><span class="acode">        return None if deleted else node          </span><span class="aann">← None tells parent to sever this edge</span></div>
+<div class="ann-line"><span class="acode">                                                  </span></div>
+<div class="ann-line"><span class="acode">    dfs(root, is_root=True)                       </span><span class="aann">← Root is always a candidate root initially</span></div>
+<div class="ann-line"><span class="acode">    return forest                                 </span><span class="aann">← All surviving tree roots collected</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why must we assign node.left = dfs(node.left, ...) instead of just calling dfs?</div>
+      <p>The return value of <code>dfs</code> is either the node itself (if kept) or <code>None</code> (if deleted). We <em>must</em> write this return value back to <code>node.left</code>. Without the assignment, calling <code>dfs(node.left, ...)</code> only traverses the subtree — it never updates <code>node.left</code>, so deleted children would still be reachable from their parent.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — BFS with parent tracking (Iterative Alternative)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import deque                     </span></div>
+<div class="ann-line"><span class="acode">def delNodes(root, to_delete):                    </span></div>
+<div class="ann-line"><span class="acode">    to_delete_set = set(to_delete)                </span></div>
+<div class="ann-line"><span class="acode">    forest = []                                   </span></div>
+<div class="ann-line"><span class="acode">    # Queue holds (node, parent, side) tuples     </span><span class="aann">← Track where each node hangs</span></div>
+<div class="ann-line"><span class="acode">    queue = deque([(root, None, None)])           </span><span class="aann">← Root has no parent</span></div>
+<div class="ann-line"><span class="acode">    while queue:                                  </span></div>
+<div class="ann-line"><span class="acode">        node, parent, side = queue.popleft()      </span></div>
+<div class="ann-line"><span class="acode">        if node.val in to_delete_set:             </span><span class="aann">← Delete this node</span></div>
+<div class="ann-line"><span class="acode">            if parent:                            </span><span class="aann">← Sever parent's pointer to this node</span></div>
+<div class="ann-line"><span class="acode">                setattr(parent, side, None)       </span></div>
+<div class="ann-line"><span class="acode">            for child, s in [(node.left,'left'),(node.right,'right')]:  </span></div>
+<div class="ann-line"><span class="acode">                if child:                         </span><span class="aann">← Orphaned children become new roots</span></div>
+<div class="ann-line"><span class="acode">                    forest.append(child)          </span></div>
+<div class="ann-line"><span class="acode">                    queue.append((child,None,None))</span><span class="aann">← No parent now (orphan)</span></div>
+<div class="ann-line"><span class="acode">        else:                                     </span></div>
+<div class="ann-line"><span class="acode">            if parent is None: forest.append(node)</span><span class="aann">← Root of original tree (if undeleted)</span></div>
+<div class="ann-line"><span class="acode">            if node.left:  queue.append((node.left, node,'left'))   </span></div>
+<div class="ann-line"><span class="acode">            if node.right: queue.append((node.right,node,'right'))  </span></div>
+<div class="ann-line"><span class="acode">    return forest                                 </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>DFS (Optimal):</strong> Time O(n) — every node visited exactly once. Space O(h) recursion stack (h = tree height; O(n) worst case skewed tree) + O(k) delete set + O(n) result.<br>
+        <strong>BFS:</strong> Time O(n), Space O(n) queue. Avoids recursion stack but is more complex to implement correctly.<br>
+        <strong>Prefer DFS in interviews</strong> — it's shorter, cleaner, and demonstrates elegant use of return values.
+      </p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {active:"root",vals:{},msg:"Start at root",phase:"INIT"},
-  {active:"left",vals:{left_depth:0},msg:"Recurse left subtree",phase:"DFS"},
-  {active:"left_left",vals:{},msg:"Recurse deeper left",phase:"DFS"},
-  {active:"left_left",vals:{ret:1},msg:"Leaf: return 1",phase:"RETURN"},
-  {active:"left",vals:{ret:2},msg:"Return max(1,0)+1=2",phase:"RETURN"},
-  {active:"right",vals:{ret:1},msg:"Right leaf: return 1",phase:"RETURN"},
-  {active:"root",vals:{ret:3},msg:"Return max(2,1)+1=3",phase:"DONE"},
-];
-let cur = 0;
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Reframe the Problem</div>
+        <p style="font-size:14px;color:var(--text)">"What makes a node become a new forest root?" — This is the central question. Answer: A node becomes a new root when its parent is deleted. So we need to detect, for each node, whether its parent just got deleted. That's a signal that travels <em>downward</em> through the tree.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the Need for Post-order</div>
+        <p style="font-size:14px;color:var(--text)">We need to modify parent-child links. When we delete a node, we want its parent to immediately lose its reference to it. The cleanest way: have the deleted node's recursive call <em>return None</em>, and have the parent assign that return value back. This requires processing children before parents — post-order.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Design the API</div>
+        <p style="font-size:14px;color:var(--text)"><code>dfs(node, is_root)</code> — the function passes down "are you an orphan?" and passes up "should your parent sever its reference to you?" The is_root flag flows top-down; the return value (None vs. node) flows bottom-up. This two-way information flow through a single DFS is the elegant core of the solution.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Original Root</div>
+        <p style="font-size:14px;color:var(--text)">The initial call is <code>dfs(root, is_root=True)</code>. If the root isn't deleted, it gets added to forest immediately. This avoids any special-casing — the same logic handles all nodes uniformly.</p>
+      </div>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use post-order DFS — children before parents — so I can sever links as I return up the stack.<br>
+Each call carries an is_root flag. A node becomes a new forest root if is_root=True and it's not deleted.<br>
+is_root for children equals whether the current node is being deleted.<br>
+Deleted nodes return None, which severs the parent's reference automatically via assignment.<br>
+Original root starts with is_root=True. Complexity: O(n) time, O(h) space for the call stack."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you do it without recursion?"</strong> → BFS with parent+side tracking (Solution 2 above)</li>
+        <li><strong>"What if node values aren't unique?"</strong> → Use a set of node <em>references</em> (by id), not values</li>
+        <li><strong>"What if it's an N-ary tree?"</strong> → Same approach; filter out deleted children from node.children list</li>
+        <li><strong>"What's the space complexity for a balanced vs. skewed tree?"</strong> → O(log n) balanced, O(n) skewed (recursion stack)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:0.75rem">Tree: 1 is root; 1→{2,3}, 2→{4,5}, 3→{null,6}. Delete = {3, 5}. Walk through post-order DFS step by step.</p>
+
+    <div class="viz-area">
+      <!-- SVG Tree -->
+      <div class="tree-svg-container">
+        <svg id="treeSvg" width="480" height="220" viewBox="0 0 480 220">
+          <!-- Edges -->
+          <line id="e-1-2" x1="240" y1="48" x2="145" y2="108" stroke="var(--border2)" stroke-width="2"/>
+          <line id="e-1-3" x1="240" y1="48" x2="335" y2="108" stroke="var(--border2)" stroke-width="2"/>
+          <line id="e-2-4" x1="145" y1="108" x2="90" y2="168" stroke="var(--border2)" stroke-width="2"/>
+          <line id="e-2-5" x1="145" y1="108" x2="200" y2="168" stroke="var(--border2)" stroke-width="2"/>
+          <line id="e-3-6" x1="335" y1="108" x2="390" y2="168" stroke="var(--border2)" stroke-width="2"/>
+
+          <!-- Node 1 -->
+          <circle id="c-1" cx="240" cy="40" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="240" y="45" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-1">1</text>
+
+          <!-- Node 2 -->
+          <circle id="c-2" cx="145" cy="100" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="145" y="105" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-2">2</text>
+
+          <!-- Node 3 -->
+          <circle id="c-3" cx="335" cy="100" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="335" y="105" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-3">3</text>
+
+          <!-- Node 4 -->
+          <circle id="c-4" cx="90" cy="160" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="90" y="165" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-4">4</text>
+
+          <!-- Node 5 -->
+          <circle id="c-5" cx="200" cy="160" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="200" y="165" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-5">5</text>
+
+          <!-- Node 6 -->
+          <circle id="c-6" cx="390" cy="160" r="22" fill="var(--surface)" stroke="var(--border2)" stroke-width="2.5" class="tree-node-circle"/>
+          <text x="390" y="165" text-anchor="middle" dominant-baseline="middle" font-family="var(--mono)" font-size="15" font-weight="700" fill="var(--text)" id="t-6">6</text>
+        </svg>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-current">
+          <span class="var-name">Node</span>
+          <span class="var-val" id="vv-current">—</span>
+        </div>
+        <div class="var-box" id="vb-isroot">
+          <span class="var-name">is_root</span>
+          <span class="var-val" id="vv-isroot">—</span>
+        </div>
+        <div class="var-box" id="vb-deleted">
+          <span class="var-name">deleted</span>
+          <span class="var-val" id="vv-deleted">—</span>
+        </div>
+        <div class="var-box" id="vb-fsize">
+          <span class="var-name">forest</span>
+          <span class="var-val" id="vv-fsize">[ ]</span>
+        </div>
+      </div>
+
+      <!-- Call Stack -->
+      <div style="margin:0.75rem 0">
+        <div class="call-stack-label">Call Stack (bottom → top)</div>
+        <div id="callStack" style="display:flex;flex-direction:column;gap:4px;margin:0.5rem 0">
+          <div style="font-size:12px;color:var(--text3);font-style:italic;padding:4px 8px">Stack empty</div>
+        </div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel">
+        <div class="code-line" data-line="0">def delNodes(root, to_delete):</div>
+        <div class="code-line" data-line="1">    to_delete_set = set(to_delete)</div>
+        <div class="code-line" data-line="2">    forest = []</div>
+        <div class="code-line" data-line="3">    def dfs(node, is_root):</div>
+        <div class="code-line" data-line="4">        if not node: return None</div>
+        <div class="code-line" data-line="5">        deleted = node.val in to_delete_set</div>
+        <div class="code-line" data-line="6">        if is_root and not deleted:</div>
+        <div class="code-line" data-line="7">            forest.append(node)</div>
+        <div class="code-line" data-line="8">        node.left  = dfs(node.left,  deleted)</div>
+        <div class="code-line" data-line="9">        node.right = dfs(node.right, deleted)</div>
+        <div class="code-line" data-line="10">        return None if deleted else node</div>
+        <div class="code-line" data-line="11">    dfs(root, is_root=True)</div>
+        <div class="code-line" data-line="12">    return forest</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+        <div class="step-counter" id="stepCounter">Step 0 of 13</div>
+        <div class="step-title" id="stepTitle">Setup: Convert to_delete to a set</div>
+        <div class="step-body" id="stepBody">We convert to_delete=[3,5] into to_delete_set={3,5} for O(1) lookups. Initialize forest=[]. Post-order DFS will visit nodes in order: 4 → 5 → 2 → 6 → 3 → 1. Children are always processed before their parents.</div>
+      </div>
+    </div>
+
+    <!-- Forest Result -->
+    <div style="margin-top:1rem">
+      <div class="forest-label">Result Forest (roots collected so far)</div>
+      <div class="forest-area" id="forestArea">
+        <span class="forest-empty" id="forestEmpty">No roots yet</span>
+      </div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progressDots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-root"></div> Potential root (is_root=True)</div>
+      <div class="legend-item"><div class="legend-swatch sw-processing"></div> Currently processing</div>
+      <div class="legend-item"><div class="legend-swatch sw-delete"></div> Marked for deletion</div>
+      <div class="legend-item"><div class="legend-swatch sw-newroot"></div> Confirmed forest root</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed / removed</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary & Key Takeaways -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Post-order DFS (children before parents) is the natural traversal for bottom-up tree modifications.</div>
+      <div class="takeaway">Passing <code>is_root</code> downward elegantly propagates "your parent was just deleted" without tracking parent pointers.</div>
+      <div class="takeaway">Returning <code>None</code> from a deleted node automatically severs the parent-child link via the assignment <code>node.left = dfs(...)</code>.</div>
+      <div class="takeaway">Convert <code>to_delete</code> to a set upfront — never do O(k) list membership tests inside a loop.</div>
+      <div class="takeaway">The original root must also start with <code>is_root=True</code> — it's a potential forest root too!</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Delete nodes from a tree" — almost always signals post-order DFS with return-value severance.</li>
+        <li>Problems where a node's fate depends on its parent's fate — pass signals downward as parameters.</li>
+        <li>Collecting subtree roots after structural modifications — capture before recursing.</li>
+        <li>Any problem needing bidirectional information flow in a tree — pass flags down; return results up.</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Complexity:</strong> Time O(n) — each node visited exactly once. Space O(n) — O(h) recursion stack where h is tree height; O(n) worst case for a skewed tree.</p>
+
+    <div class="related-list" style="margin-top:1.25rem">
+      <p style="font-size:14px;font-weight:600;margin-bottom:0.5rem">Related Problems (same post-order tree modification technique):</p>
+      <div class="related-item"><strong>Binary Tree Pruning</strong><span class="related-diff diff-med">Medium</span> — Return null for subtrees containing no 1s; identical return-value severance pattern</div>
+      <div class="related-item"><strong>Delete Node in a BST</strong><span class="related-diff diff-med">Medium</span> — Post-order DFS, find target and splice via return value</div>
+      <div class="related-item"><strong>Lowest Common Ancestor of Binary Tree</strong><span class="related-diff diff-med">Medium</span> — Post-order: children report findings up the stack to parent</div>
+      <div class="related-item"><strong>Flatten Binary Tree to Linked List</strong><span class="related-diff diff-med">Medium</span> — Post-order restructuring, rewiring left/right pointers on return</div>
+      <div class="related-item"><strong>House Robber III</strong><span class="related-diff diff-med">Medium</span> — Post-order DP on tree: children solve their subproblems before parent decides</div>
+      <div class="related-item"><strong>Count Nodes Equal to Average of Subtree</strong><span class="related-diff diff-med">Medium</span> — Post-order: aggregate subtree sum/count from children, decide at parent</div>
+      <div class="related-item"><strong>Construct Binary Tree from Preorder and Inorder</strong><span class="related-diff diff-med">Medium</span> — DFS with return-value assignment rebuilds tree structure</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ── Step definitions ──
+// Node color classes: 'normal','processing','delete','root','newroot','done'
+const NODE_COLORS = {
+  normal:    { fill:'var(--surface)',    stroke:'var(--border2)',    sw:'2' },
+  processing:{ fill:'var(--purple-bg)', stroke:'var(--purple-border)', sw:'2.5' },
+  delete:    { fill:'var(--red-bg)',    stroke:'var(--red-border)', sw:'2.5' },
+  root:      { fill:'var(--blue-bg)',   stroke:'var(--blue-border)', sw:'2.5' },
+  newroot:   { fill:'var(--green-bg)',  stroke:'var(--green-border)', sw:'2.5' },
+  done:      { fill:'var(--bg2)',       stroke:'var(--border)',     sw:'1.5' },
+};
+
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', line:1,
+    node:'—', isroot:'—', deleted:'—',
+    nodeStates:{1:'normal',2:'normal',3:'normal',4:'normal',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:[],
+    forest:[],
+    title:'Setup: Convert to_delete to a set',
+    body:'We convert to_delete=[3,5] into to_delete_set={3,5} for O(1) lookups. Initialize forest=[]. Post-order DFS will visit nodes in order: 4 → 5 → 2 → 6 → 3 → 1. Children are always processed before their parents.'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:11,
+    node:'1', isroot:'True', deleted:'False',
+    nodeStates:{1:'root',2:'normal',3:'normal',4:'normal',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:['dfs(node=1, is_root=True)'],
+    forest:[],
+    title:'dfs(1, is_root=True) — Entry point',
+    body:'We begin DFS at the original root, node 1, with is_root=True. First check: is 1 in {3,5}? No → deleted=False. is_root=True and not deleted → add node 1 to forest. Forest = [node_1]. Now recurse left: dfs(node_2, is_root=False) since node 1 is not deleted.'
+  },
+  {
+    phase:'newroot', phaseClass:'phase-newroot', line:7,
+    node:'1', isroot:'True', deleted:'False',
+    nodeStates:{1:'newroot',2:'normal',3:'normal',4:'normal',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:['dfs(node=1, is_root=True)'],
+    forest:['node 1'],
+    title:'Node 1 captured as forest root',
+    body:'forest.append(node_1). Forest = [node_1]. Now we recurse: node.left = dfs(node_2, deleted=False). Because node 1 is NOT deleted, node 2\'s is_root flag is False — node 2 is a normal child, not an orphan.'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:8,
+    node:'2', isroot:'False', deleted:'False',
+    nodeStates:{1:'newroot',2:'processing',3:'normal',4:'normal',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=2, is_root=False)'],
+    forest:['node 1'],
+    title:'dfs(2, is_root=False) — Normal child',
+    body:'Node 2: is 2 in {3,5}? No → deleted=False. is_root=False → don\'t add to forest (it has a living parent). Now recurse left: dfs(node_4, is_root=False). Node 2 is not deleted so its children are not orphans.'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:8,
+    node:'4', isroot:'False', deleted:'False',
+    nodeStates:{1:'newroot',2:'processing',3:'normal',4:'processing',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=2, is_root=False)', 'dfs(node=4, is_root=False)'],
+    forest:['node 1'],
+    title:'dfs(4, is_root=False) — Leaf node',
+    body:'Node 4 is a leaf. Is 4 in {3,5}? No → deleted=False. is_root=False → not added to forest. dfs(None, ...) for both children returns None immediately (base case). Node 4 is not deleted → return node_4. Parent (node 2) will receive node_4 and keep the link.'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:10,
+    node:'4', isroot:'False', deleted:'False',
+    nodeStates:{1:'newroot',2:'processing',3:'normal',4:'done',5:'normal',6:'normal'},
+    edgeDeleted:[],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=2, is_root=False)'],
+    forest:['node 1'],
+    title:'Return node_4 (kept) → node_2.left = node_4',
+    body:'dfs(4) returns node_4. So node_2.left = node_4 — link is kept. Now node 2 recurses right: dfs(node_5, is_root=False). Node 2 is not deleted, so node 5 gets is_root=False. But node 5 IS in the delete set!'
+  },
+  {
+    phase:'delete', phaseClass:'phase-delete', line:5,
+    node:'5', isroot:'False', deleted:'True',
+    nodeStates:{1:'newroot',2:'processing',3:'normal',4:'done',5:'delete',6:'normal'},
+    edgeDeleted:['e-2-5'],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=2, is_root=False)', 'dfs(node=5, is_root=False)'],
+    forest:['node 1'],
+    title:'dfs(5, is_root=False) — Node 5 IS in delete set!',
+    body:'Is 5 in {3,5}? YES → deleted=True. is_root=False → even if it wasn\'t deleted, we wouldn\'t add it. Node 5 is a leaf, so both child calls return None immediately. Now: return None (because deleted=True). This None will sever the edge from node 2 to node 5.'
+  },
+  {
+    phase:'delete', phaseClass:'phase-delete', line:10,
+    node:'5', isroot:'False', deleted:'True',
+    nodeStates:{1:'newroot',2:'processing',3:'normal',4:'done',5:'done',6:'normal'},
+    edgeDeleted:['e-2-5'],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=2, is_root=False)'],
+    forest:['node 1'],
+    title:'Return None → node_2.right = None (edge severed!)',
+    body:'dfs(5) returns None. Parent assignment: node_2.right = None. Edge 2→5 is severed. Node 5 is deleted with no orphaned children. Back in dfs(2): both children processed. Node 2 is not deleted → return node_2 to parent.'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:10,
+    node:'2', isroot:'False', deleted:'False',
+    nodeStates:{1:'newroot',2:'done',3:'normal',4:'done',5:'done',6:'normal'},
+    edgeDeleted:['e-2-5'],
+    stack:['dfs(node=1, is_root=True)'],
+    forest:['node 1'],
+    title:'Return node_2 (kept) → node_1.left = node_2',
+    body:'dfs(2) returns node_2. Parent assignment: node_1.left = node_2 — link is kept. Left subtree fully processed (post-order: 4→5→2). Now node 1 recurses right: dfs(node_3, is_root=False). Node 1 is not deleted, so node 3 gets is_root=False. But node 3 IS in the delete set!'
+  },
+  {
+    phase:'delete', phaseClass:'phase-delete', line:5,
+    node:'3', isroot:'False', deleted:'True',
+    nodeStates:{1:'newroot',2:'done',3:'delete',4:'done',5:'done',6:'normal'},
+    edgeDeleted:['e-2-5','e-1-3'],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=3, is_root=False)'],
+    forest:['node 1'],
+    title:'dfs(3, is_root=False) — Node 3 IS in delete set!',
+    body:'Is 3 in {3,5}? YES → deleted=True. is_root=False → skip (and deleted anyway). Node 3 HAS a right child (node 6). Since deleted=True, we call dfs(None, is_root=True) for left (no-op) and dfs(node_6, is_root=True) for right. Node 6 will be an orphan!'
+  },
+  {
+    phase:'newroot', phaseClass:'phase-newroot', line:7,
+    node:'6', isroot:'True', deleted:'False',
+    nodeStates:{1:'newroot',2:'done',3:'delete',4:'done',5:'done',6:'newroot'},
+    edgeDeleted:['e-2-5','e-1-3','e-3-6'],
+    stack:['dfs(node=1, is_root=True)', 'dfs(node=3, is_root=False)', 'dfs(node=6, is_root=True)'],
+    forest:['node 1', 'node 6'],
+    title:'dfs(6, is_root=True) — Node 6 becomes new forest root!',
+    body:'Node 3 is deleted so it calls dfs(node_6, is_root=True). Is 6 in {3,5}? No → deleted=False. is_root=True and not deleted → forest.append(node_6)! Forest = [node_1, node_6]. Node 6 is a leaf: both child calls return None immediately. Return node_6 (not deleted).'
+  },
+  {
+    phase:'delete', phaseClass:'phase-delete', line:10,
+    node:'3', isroot:'False', deleted:'True',
+    nodeStates:{1:'newroot',2:'done',3:'done',4:'done',5:'done',6:'newroot'},
+    edgeDeleted:['e-2-5','e-1-3','e-3-6'],
+    stack:['dfs(node=1, is_root=True)'],
+    forest:['node 1', 'node 6'],
+    title:'Return None → node_1.right = None (edge severed!)',
+    body:'dfs(3) returns None (deleted=True, even though it returned node_6 to node_3.right internally). Parent assignment: node_1.right = None. Edge 1→3 severed. The entire subtree containing node 3 is disconnected — but node 6 was already captured as a forest root. Back in dfs(1)!'
+  },
+  {
+    phase:'traverse', phaseClass:'phase-traverse', line:10,
+    node:'1', isroot:'True', deleted:'False',
+    nodeStates:{1:'newroot',2:'done',3:'done',4:'done',5:'done',6:'newroot'},
+    edgeDeleted:['e-2-5','e-1-3','e-3-6'],
+    stack:[],
+    forest:['node 1', 'node 6'],
+    title:'Return node_1 — DFS complete!',
+    body:'dfs(1): both subtrees processed. Node 1 is not deleted → return node_1. The initial call finishes. All 6 nodes visited exactly once in post-order: 4 → 5 → 2 → 6 → 3 → 1. Now return forest.'
+  },
+  {
+    phase:'result', phaseClass:'phase-result', line:12,
+    node:'—', isroot:'—', deleted:'—',
+    nodeStates:{1:'newroot',2:'done',3:'done',4:'done',5:'done',6:'newroot'},
+    edgeDeleted:['e-2-5','e-1-3','e-3-6'],
+    stack:[],
+    forest:['Tree A: root=1 (subtree 1→2→4)', 'Tree B: root=6 (standalone)'],
+    title:'Result: Forest = [node_1, node_6] — 2 trees!',
+    body:'Final answer: 2 trees in the forest. Tree A: rooted at node 1, contains nodes 1, 2, and 4 (node 5 was deleted). Tree B: just node 6 (its parent node 3 was deleted, so node 6 became an independent root). Nodes 3 and 5 are completely removed.'
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let cur = 0;
+const total = steps.length;
+
+function buildDots() {
+  const pd = document.getElementById('progressDots');
+  pd.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.title = 'Step ' + i;
+    d.onclick = (function(idx){ return function(){ cur=idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function applyNodeState(nodeId, state) {
+  const c = document.getElementById('c-' + nodeId);
+  const t = document.getElementById('t-' + nodeId);
+  if (!c) return;
+  const cfg = NODE_COLORS[state] || NODE_COLORS.normal;
+  c.setAttribute('fill', cfg.fill);
+  c.setAttribute('stroke', cfg.stroke);
+  c.setAttribute('stroke-width', cfg.sw);
+  if (t) {
+    // Keep text readable
+    t.setAttribute('fill', 'var(--text)');
+  }
+}
+
+function render() {
+  const s = steps[cur];
+  const prev = cur > 0 ? steps[cur-1] : {};
+
+  // Badge, counter, title, body
+  const badge = document.getElementById('phaseBadge');
+  badge.className = 'phase-badge ' + s.phaseClass;
+  badge.textContent = s.phase.toUpperCase();
+  document.getElementById('stepCounter').textContent = 'Step ' + cur + ' of ' + (total-1);
+  document.getElementById('stepTitle').textContent = s.title;
+  document.getElementById('stepBody').textContent = s.body;
+
+  // Variables
+  function setVar(id, val, prevVal) {
+    const box = document.getElementById('vb-' + id);
+    const el  = document.getElementById('vv-' + id);
+    if (box) box.classList.toggle('changed', String(val) !== String(prevVal || ''));
+    if (el)  el.textContent = String(val);
+  }
+  setVar('current', s.node,    prev.node    || '—');
+  setVar('isroot',  s.isroot,  prev.isroot  || '—');
+  setVar('deleted', s.deleted, prev.deleted || '—');
+  const fLabel = s.forest.length === 0 ? '[ ]' : '[' + s.forest.length + ']';
+  setVar('fsize', fLabel, prev.forest ? (prev.forest.length===0?'[ ]':'['+prev.forest.length+']') : '[ ]');
+
+  // Node states
+  Object.entries(s.nodeStates).forEach(([id, st]) => applyNodeState(id, st));
+
+  // Edge states
+  const allEdges = ['e-1-2','e-1-3','e-2-4','e-2-5','e-3-6'];
+  allEdges.forEach(eid => {
+    const el = document.getElementById(eid);
+    if (!el) return;
+    if (s.edgeDeleted.includes(eid)) {
+      el.setAttribute('stroke', 'var(--red-border)');
+      el.setAttribute('stroke-dasharray', '6,4');
+      el.setAttribute('stroke-width', '2');
+    } else {
+      el.setAttribute('stroke', 'var(--border2)');
+      el.setAttribute('stroke-dasharray', '');
+      el.setAttribute('stroke-width', '2');
+    }
+  });
+
+  // Call stack
+  const cs = document.getElementById('callStack');
+  if (s.stack && s.stack.length > 0) {
+    cs.innerHTML = s.stack.map((frame, i) => {
+      const isTop = i === s.stack.length - 1;
+      return '<div class="call-frame' + (isTop?' active-frame':'') + '">' + frame + '</div>';
+    }).join('');
+  } else {
+    cs.innerHTML = '<div style="font-size:12px;color:var(--text3);font-style:italic;padding:4px 8px">Stack empty</div>';
+  }
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const al = document.querySelector('.code-line[data-line="' + s.line + '"]');
+  if (al) al.classList.add('active');
+
+  // Forest display
+  const fa = document.getElementById('forestArea');
+  const fe = document.getElementById('forestEmpty');
+  const existing = fa.querySelectorAll('.forest-tree');
+  existing.forEach(e => e.remove());
+  if (s.forest && s.forest.length > 0) {
+    if (fe) fe.style.display = 'none';
+    s.forest.forEach(label => {
+      const ft = document.createElement('div');
+      ft.className = 'forest-tree';
+      ft.textContent = label;
+      fa.appendChild(ft);
+    });
+  } else {
+    if (fe) fe.style.display = '';
+  }
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === cur);
+    d.classList.toggle('visited', i < cur);
+  });
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === total - 1;
+}
+
+function go(dir) {
+  const n = cur + dir;
+  if (n >= 0 && n < total) { cur = n; render(); }
+}
+
+function reset() { cur = 0; render(); }
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+function toggle(header) {
+  const content = header.parentElement.querySelector('.section-content');
+  const icon = header.querySelector('.collapse-icon');
+  if (!content) return;
+  content.classList.toggle('collapsed');
+  if (icon) icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+buildDots();
 render();
 </script>
 </body>

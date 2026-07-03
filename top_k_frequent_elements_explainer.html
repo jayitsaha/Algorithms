@@ -1,232 +1,961 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Top K Frequent Elements – Visual Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f9f8f5;--bg2:#f0efe9;--surface:#fff;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--text:#1a1a18;--text2:#6b6b65;--text3:#9c9a92;--mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--blue-bg:#E6F1FB;--blue-border:#85B7EB;--blue-text:#042C53;--blue-mid:#185FA5;--green-bg:#EAF3DE;--green-border:#97C459;--green-text:#173404;--green-mid:#3B6D11;--amber-bg:#FAEEDA;--amber-border:#EF9F27;--amber-text:#412402;--amber-mid:#854F0B;--red-bg:#FCEBEB;--red-border:#F09595;--red-text:#501313;--red-mid:#A32D2D;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;--purple-text:#26215C;--purple-mid:#534AB7;--cyan-bg:#E0F7FA;--cyan-border:#4DD0E1;--cyan-text:#006064;--cyan-mid:#00ACC1;--radius:10px;--radius-lg:14px;}
-    @media(prefers-color-scheme:dark){:root{--bg:#18181a;--bg2:#222224;--surface:#2a2a2d;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--text:#e8e6de;--text2:#9c9a92;--text3:#666460;--blue-bg:#0c2a45;--blue-mid:#85B7EB;--green-bg:#172a0a;--green-mid:#97C459;--amber-bg:#2e1c05;--amber-mid:#EF9F27;--purple-bg:#1e1a45;--purple-mid:#AFA9EC;--cyan-bg:#004D54;--cyan-mid:#4DD0E1;--green-text:#C0DD97;--blue-text:#B5D4F4;--amber-text:#FAC775;--green-border:#639922;--blue-border:#378ADD;--amber-border:#BA7517;--purple-border:#7F77DD;}}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;padding:2rem 1rem;}.container{max-width:900px;margin:0 auto;}
-    header{text-align:center;margin-bottom:2rem;}h1{font-size:1.75rem;font-weight:700;margin-bottom:.25rem;}.subtitle{color:var(--text2);font-size:.95rem;}.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;}.tag-easy{background:var(--green-bg);color:var(--green-mid);}.tag-medium{background:var(--amber-bg);color:var(--amber-mid);}.tag-hard{background:var(--red-bg);color:var(--red-mid);}.tag-pattern{background:var(--blue-bg);color:var(--blue-mid);}.tag-complexity{background:var(--purple-bg);color:var(--purple-mid);}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem;}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none;}.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1;}.collapse-icon{font-size:14px;color:var(--text3);transition:transform .3s;}.card.collapsed .collapse-icon{transform:rotate(-90deg);}.card.collapsed .section-content{display:none;}.section-content p{margin-bottom:.75rem;color:var(--text2);}
-    .concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0;}.concept-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border);}.concept-box.insight .concept-box-title{color:var(--green-mid);}.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border);}.concept-box.warning .concept-box-title{color:var(--amber-mid);}.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border);}.concept-box.key-concept .concept-box-title{color:var(--blue-mid);}.concept-box p{color:var(--text);margin:0;}.concept-box ul{margin:.5rem 0 0 1.25rem;color:var(--text);}
-    .algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0;}.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);}.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}.step-text{color:var(--text);line-height:1.5;}
-    .code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto;}.code-line{padding:1px 6px;border-radius:4px;transition:background .25s;white-space:pre;color:var(--text2);}.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:500;}
-    .strategy-step{padding:16px;background:linear-gradient(135deg,var(--purple-bg),var(--blue-bg));border-radius:var(--radius);border:1px solid var(--purple-border);margin-bottom:12px;}.step-label{font-weight:700;font-size:14px;color:var(--purple-mid);margin-bottom:8px;}.interview-script{margin-top:1rem;padding:16px;background:var(--bg2);border-radius:var(--radius);}.script-content{font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid);}
-    .viz-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;}
-    .arr-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;}.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);font-family:var(--mono);font-size:15px;font-weight:600;border:2px solid var(--border2);background:var(--surface);transition:all .3s;}.cell.lo{border-color:var(--blue-mid);background:var(--blue-bg);color:var(--blue-text);}.cell.hi{border-color:var(--purple-mid);background:var(--purple-bg);color:var(--purple-text);}.cell.mid{border-color:var(--amber-mid);background:var(--amber-bg);color:var(--amber-text);}.cell.found{border-color:var(--green-mid);background:var(--green-bg);color:var(--green-text);}.cell.window{opacity:.55;}
-    .info-card{background:var(--bg2);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;}.info-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;}.phase-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:10px;background:var(--cyan-bg);color:var(--cyan-mid);}.step-counter{font-size:12px;color:var(--text3);margin-left:auto;}.info-title{font-weight:600;color:var(--text);margin-bottom:.25rem;}.info-text{font-size:14px;color:var(--text2);line-height:1.6;}
-    .progress-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem;flex-wrap:wrap;}.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;cursor:pointer;}.dot.active{background:var(--blue-mid);transform:scale(1.3);}.dot.visited{background:var(--green-mid);}
-    .controls{display:flex;justify-content:center;gap:12px;margin-top:1.5rem;}.btn{padding:10px 24px;border-radius:var(--radius);border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}.btn-primary{background:var(--blue-mid);color:white;}.btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border);}.btn:disabled{opacity:.5;cursor:not-allowed;}.kbd-hint{text-align:center;margin-top:.75rem;font-size:12px;color:var(--text3);}
-    .takeaways{display:flex;flex-direction:column;gap:8px;margin:1rem 0;}.takeaway{padding:10px 14px;background:var(--green-bg);border-radius:var(--radius);color:var(--green-text);font-weight:500;}
-    .related-problems h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.5rem;margin-top:1rem;}.related-problems ul{margin-left:1.25rem;color:var(--text2);}.related-problems li{margin-bottom:.25rem;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#347 · Top K Frequent Elements</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Input Array Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.cells-row{display:flex;gap:4px}
+.cell{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:600;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:background 0.3s,border-color 0.3s,color 0.3s;flex-shrink:0}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.result-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.idx-row{display:flex;gap:4px;margin-top:4px}
+.idx-slot{width:44px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Freq Map ── */
+.freq-section{display:flex;flex-direction:column;align-items:center;margin:1.25rem 0}
+.freq-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+.freq-map{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.freq-cell{display:flex;flex-direction:column;align-items:center;width:56px;padding:8px 4px;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.freq-char{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text3);margin-bottom:4px}
+.freq-count{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text3);line-height:1;min-height:26px;display:flex;align-items:center}
+.freq-cell.unseen{opacity:0.3}
+.freq-cell.positive{background:var(--blue-bg);border-color:var(--blue-border)}
+.freq-cell.positive .freq-char{color:var(--blue-mid)}
+.freq-cell.positive .freq-count{color:var(--blue-text)}
+.freq-cell.changed{background:var(--amber-bg);border-color:var(--amber-border)}
+.freq-cell.changed .freq-char{color:var(--amber-mid)}
+.freq-cell.changed .freq-count{color:var(--amber-text)}
+.freq-cell.result-freq{background:var(--green-bg);border-color:var(--green-border)}
+.freq-cell.result-freq .freq-char{color:var(--green-mid)}
+.freq-cell.result-freq .freq-count{color:var(--green-text)}
+
+/* ── Bucket Viz ── */
+.bucket-section{margin-top:1.25rem}
+.bucket-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.bucket-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+.bucket-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;min-width:58px}
+.bucket-freq-label{font-size:10px;color:var(--text3);font-family:var(--mono);font-weight:600}
+.bucket-container{border:2px dashed var(--border2);border-radius:8px;min-height:36px;width:52px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px;gap:3px;transition:background 0.3s,border-color 0.3s;background:var(--surface)}
+.bucket-container.active-bucket{border-color:var(--amber-border);background:var(--amber-bg);border-style:solid}
+.bucket-container.result-bucket{border-color:var(--green-border);background:var(--green-bg);border-style:solid}
+.bucket-item{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 6px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);text-align:center;width:100%;transition:background 0.3s,border-color 0.3s}
+.bucket-item.item-active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.bucket-item.item-result{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.bucket-idx-label{font-size:9px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Static Diagram ── */
+.diagram-area{background:var(--bg2);border-radius:var(--radius);padding:1.25rem;margin:1rem 0;overflow-x:auto}
+.diagram-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:nowrap}
+.diag-col{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:58px}
+.diag-freq-lbl{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.diag-bucket{border:2px dashed var(--border2);border-radius:8px;width:52px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:3px;background:var(--surface)}
+.diag-item{font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--blue-bg);color:var(--blue-mid);border:1px solid var(--blue-border);width:100%;text-align:center}
+.diag-item.hl{background:var(--green-bg);color:var(--green-mid);border-color:var(--green-border)}
+.diag-idx{font-size:9px;color:var(--text3)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-count{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-bucket{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-collect{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-count{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-result{background:var(--green-bg);border-color:var(--green-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Top K Frequent Elements</h1>
-    <p class="subtitle">LeetCode #347 — Top K Elements · Heap or Bucket Sort</p>
-    <div class="tags">
-      <span class="tag tag-medium">Medium</span>
-      <span class="tag tag-pattern">Heaps</span>
-      <span class="tag tag-complexity">O(n log k) Time</span>
-      <span class="tag tag-complexity">O(k) Space</span>
-    </div>
-  </header>
+<div class="page-wrapper">
 
-  <!-- Section 1: Understanding -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">1</span>
-      <span class="section-title">Understanding the Problem</span>
-      <span class="collapse-icon">▼</span>
+<header>
+  <div class="problem-number">LeetCode #347</div>
+  <h1>Top K Frequent Elements</h1>
+  <p class="subtitle">Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Heaps</span>
+    <span class="tag tag-pattern">Bucket Sort</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an array of integers. Some numbers appear once, some appear many times. Your task: <strong>find the k numbers that appear most frequently</strong>. The order of your answer doesn't matter — just name the right k elements.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is a <strong>ranking by frequency</strong> problem. First count how often each element appears — that takes one hash-map pass. Then select the top k by count. The elegant O(n) trick is to use the array index itself as a frequency level — known as <strong>bucket sort</strong> — which avoids sorting entirely.</p>
     </div>
-    <div class="section-content">
-      <p>This problem falls under <strong>Top K Elements</strong> using the <strong>Heap or Bucket Sort</strong> technique.</p>
-      <p>Pattern category: <strong>Heaps</strong>. Apply when: <em>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</em></p>
-      <div class="concept-box insight">
-        <div class="concept-box-title">💡 Key Insight</div>
-        <p>Heap gives O(log n) insert/delete and O(1) min/max access. Use for top-K, median tracking, scheduling.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: nums=[1,1,1,2,2,3], k=2</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          1 appears 3 times<br>
+          2 appears 2 times<br>
+          3 appears 1 time<br>
+          Top 2 by frequency → <strong>[1, 2]</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Wrong: returning [1, 3] or [3]</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.9">
+          3 only appears 1× — least frequent<br>
+          1 and 3 is not top-2 by count<br>
+          Must rank by <strong>frequency count</strong>
+        </p>
       </div>
     </div>
-  </div>
 
-  <!-- Section 2: Algorithm -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">2</span>
-      <span class="section-title">The Algorithm: Heap or Bucket Sort</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="algorithm-steps">
-<div class="algo-step"><span class="step-num">1</span><span class="step-text">Build heap from initial elements</span></div>
-<div class="algo-step"><span class="step-num">2</span><span class="step-text">For each new element: push to heap</span></div>
-<div class="algo-step"><span class="step-num">3</span><span class="step-text">If heap exceeds size limit: pop smallest/largest</span></div>
-<div class="algo-step"><span class="step-num">4</span><span class="step-text">Top of heap = current kth element</span></div>
-<div class="algo-step"><span class="step-num">5</span><span class="step-text">For two heaps: balance sizes, rebalance on every push</span></div>
+    <p style="margin-top:1rem"><strong>Edge cases to consider:</strong> all elements distinct (each frequency = 1), all elements identical (one element with freq = n), negative integers, k = 1 (single most frequent), k = number of distinct elements (return everything). The problem guarantees no tie at position k — the answer is always unique.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Bucket Sort (O(n) Optimal)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The pivotal observation: <strong>element frequency is a bounded integer from 1 to n</strong>. Bounded integer keys let us skip comparison-based sorting and use <em>bucket sort</em> — placing elements into buckets indexed by their frequency, then reading the top k from the highest-index buckets.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Count frequencies:</strong> One linear pass through nums builds a hash map: element → count. Cost: O(n).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Build frequency buckets:</strong> Create an array of n+1 empty lists. <code>buckets[f]</code> will hold all elements with exactly frequency f. Since no element can appear more than n times, n+1 slots covers the full range. Cost: O(n).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Fill buckets:</strong> For each (element, count) pair in the frequency map, append the element into <code>buckets[count]</code>. Cost: O(n) for at most n distinct elements.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Collect top k from the back:</strong> Scan the bucket array from index n down to 1. For each bucket, append its elements into the result. Stop as soon as the result has k elements. Cost: O(n) worst-case scan.</span>
       </div>
     </div>
-  </div>
 
-  <!-- Section 3: Why It Works -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">3</span>
-      <span class="section-title">Why It Works: The Invariant</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="concept-box key-concept">
-        <div class="concept-box-title">🔐 The Invariant</div>
-        <p>Min-heap: parent ≤ children. Max-heap: parent ≥ children. Heap property maintained after every op.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 4: Code -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">4</span>
-      <span class="section-title">The Code (Annotated)</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="code-panel"><div class="code-line">import heapq</div><div class="code-line">def topKFrequent(nums, k):</div><div class="code-line">    freq = {}</div><div class="code-line">    for n in nums: freq[n] = freq.get(n, 0) + 1</div><div class="code-line">    heap = []</div><div class="code-line">    for num, cnt in freq.items():</div><div class="code-line">        heapq.heappush(heap, (cnt, num))</div><div class="code-line">        if len(heap) > k: heapq.heappop(heap)</div><div class="code-line">    return [h[1] for h in heap]</div></div>
-      <p style="margin-top:.75rem;color:var(--text2);">Time: O(n log k) &nbsp;|&nbsp; Space: O(k)</p>
-    </div>
-  </div>
-
-  <!-- Section 5: Interview Strategy -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">5</span>
-      <span class="section-title">🎤 Interview Strategy</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="strategy-step">
-        <div class="step-label">Pattern Recognition</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="interview-script">
-        <h4>🗣️ What to Say</h4>
-        <div class="script-content">"This is a Heaps problem using Heap or Bucket Sort. I'll build heap from initial elements then for each new element: push to heap. Time: O(n log k), Space: O(k)."</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 6: Interactive Walkthrough -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">6</span>
-      <span class="section-title">Interactive Walkthrough</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="viz-container">
-        <div id="viz"></div>
-        <div class="code-panel" id="codePanel"></div>
-        <div class="info-card">
-          <div class="info-header">
-            <span class="phase-badge" id="phaseBadge">INIT</span>
-            <span class="step-counter" id="stepCtr">0/0</span>
+    <p style="margin-top:1rem"><strong>Bucket layout for nums=[1,1,1,2,2,3,3], k=2:</strong></p>
+    <div class="diagram-area">
+      <p style="font-size:11px;color:var(--text3);margin-bottom:10px">bucket[freq] → elements · scan right-to-left to collect top k</p>
+      <div class="diagram-row">
+        <div class="diag-col">
+          <div class="diag-freq-lbl">freq=0</div>
+          <div class="diag-bucket" style="border-style:solid;opacity:0.35">
+            <span style="font-size:10px;color:var(--text3)">∅</span>
           </div>
-          <div class="info-title" id="infoTitle">Ready</div>
-          <div class="info-text" id="infoText">Click Next to step through the algorithm.</div>
+          <div class="diag-idx">idx 0</div>
         </div>
-        <div class="progress-dots" id="dots"></div>
-        <div class="controls">
-          <button class="btn btn-secondary" id="prevBtn" onclick="go(-1)">← Prev</button>
-          <button class="btn btn-secondary" onclick="reset()">Reset</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="go(1)">Next →</button>
+        <div class="diag-col">
+          <div class="diag-freq-lbl">freq=1</div>
+          <div class="diag-bucket">
+            <div class="diag-item">3</div>
+          </div>
+          <div class="diag-idx">idx 1</div>
         </div>
-        <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+        <div class="diag-col">
+          <div class="diag-freq-lbl">freq=2</div>
+          <div class="diag-bucket">
+            <div class="diag-item hl">2</div>
+          </div>
+          <div class="diag-idx">idx 2</div>
+        </div>
+        <div class="diag-col">
+          <div class="diag-freq-lbl">freq=3</div>
+          <div class="diag-bucket">
+            <div class="diag-item hl">1</div>
+          </div>
+          <div class="diag-idx">idx 3</div>
+        </div>
+        <div class="diag-col" style="margin-left:16px;justify-content:flex-end;padding-bottom:4px">
+          <div style="font-size:11px;color:var(--green-mid);font-weight:700;">← scan</div>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--green-mid);font-weight:700;margin-top:4px">res=[1,2]</div>
+          <div style="font-size:10px;color:var(--text3)">k=2 done</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Section 7: Summary -->
-  <div class="card">
-    <div class="section-header" onclick="toggleSection(this)">
-      <span class="section-number">7</span>
-      <span class="section-title">Summary & Key Takeaways</span>
-      <span class="collapse-icon">▼</span>
-    </div>
-    <div class="section-content">
-      <div class="takeaways">
-        <div class="takeaway">✓ Pattern: Heaps — Heap or Bucket Sort</div>
-        <div class="takeaway">✓ Heap gives O(log n) insert/delete and O(1) min/max access</div>
-        <div class="takeaway">✓ Time: O(n log k) | Space: O(k)</div>
-      </div>
-      <div class="concept-box insight">
-        <div class="concept-box-title">🎯 When to Use This Pattern</div>
-        <p>Python heapq is min-heap. For max-heap: negate values. Two heaps for median: max-heap left + min-heap right.</p>
-      </div>
-      <div class="related-problems">
-        <h4>Related Problems (same section)</h4>
-        <ul><li><strong>Kth Largest Element in a Stream</strong> (Easy) — Min Heap of Size K</li>
-<li><strong>K Closest Points to Origin</strong> (Medium) — Max Heap of Size K</li></ul>
-      </div>
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Not Just Use a Heap? (O(n log k) alternative)</div>
+      <p>A min-heap of size k is the canonical interview answer. Iterate the frequency map; push (freq, element) pairs; whenever heap size exceeds k, pop the minimum. The k elements remaining in the heap are the top k. Time: O(n log k), Space: O(n). This is simpler to explain and works even when the frequency range is unbounded. In an interview, propose the heap first, then offer bucket sort as the O(n) bonus optimization.</p>
     </div>
   </div>
 </div>
 
-<script>
-const STEPS = [
-  {heap:[],msg:"Empty min-heap",phase:"INIT"},
-  {heap:[3],msg:"Push 3",phase:"PUSH"},
-  {heap:[1,3],msg:"Push 1 → heapify up",phase:"PUSH"},
-  {heap:[1,3,5],msg:"Push 5",phase:"PUSH"},
-  {heap:[1,3,5,7],msg:"Push 7",phase:"PUSH"},
-  {heap:[3,7,5],top:1,msg:"Pop 1 (min) → heapify down",phase:"POP"},
-  {heap:[3,7,5],msg:"Top=3 (second smallest)",phase:"DONE"},
-];
-let cur = 0;
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After filling the buckets, <code>buckets[f]</code> contains exactly the set of elements whose frequency in nums is <em>exactly f</em>. Because bucket indices are the frequency values themselves, scanning from index n downward visits element groups in strictly non-increasing frequency order. The first k elements encountered are therefore guaranteed to be the k most frequent.</p>
+    </div>
 
-function render() {
-  const s = STEPS[cur];
-  // Render array visualization
-  if (s.arr) {
-    const cells = s.arr.map((v,i) => {
-      let cls = 'cell';
-      if (i === s.lo) cls += ' lo';
-      else if (i === s.hi) cls += ' hi';
-      else if (i === s.mid) cls += ' mid';
-      else if (s.found_idx === i) cls += ' found';
-      return `<div class="${cls}">${v}</div>`;
-    }).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else if (s.stack !== undefined) {
-    const items = s.stack.map(v=>`<div class="cell lo">${v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${items || '<span style="color:var(--text3)">Empty stack</span>'}</div>`;
-  } else if (s.dp) {
-    const cells = s.dp.map((v,i)=>`<div class="cell${i===s.cur?' found':v>0&&v<1e9?' lo':''}">${v===1e9?'∞':v}</div>`).join('');
-    document.getElementById('viz').innerHTML = `<div class="arr-row">${cells}</div>`;
-  } else {
-    document.getElementById('viz').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2)">${s.msg}</div>`;
+    <p><strong>Why the back-scan is safe without explicit sorting:</strong> Bucket index <em>is</em> the frequency. Index 5 holds elements with higher frequency than index 4. By reading right-to-left we automatically get descending frequency order — without comparing any two elements. This works only because frequencies are bounded integers: the bucket array converts frequency into an array position, giving O(1) access to each frequency tier.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why n+1 buckets is always sufficient:</strong> An element can appear at most n times (if every element in the array is the same). So the maximum possible frequency is n, and we need indices 0 through n — exactly n+1 slots. Index 0 is always empty (an element must appear at least once to be counted).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Multiple elements in the same bucket</div>
+      <p>If two distinct elements have the same frequency they share a bucket (e.g., both 2 and 5 appear 3 times → both go into bucket[3]). The back-scan will encounter both and add them equally. Since the problem guarantees uniqueness at position k, we won't straddle a tie at the kth slot. If ties did occur at position k (a variant), any element from that bucket would be a valid answer — you can stop mid-bucket.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Bucket Sort (Optimal, O(n) time)</strong> — Interview Pick</p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def topKFrequent(nums, k):                        </span></div>
+<div class="ann-line"><span class="acode">    count = {}                                    </span><span class="aann">← freq map: element → how many times it appears</span></div>
+<div class="ann-line"><span class="acode">    for n in nums:                                </span><span class="aann">← Pass 1: count every element</span></div>
+<div class="ann-line"><span class="acode">        count[n] = count.get(n, 0) + 1           </span><span class="aann">← get(n,0) safely handles first occurrence</span></div>
+<div class="ann-line"><span class="acode">    freq = [[] for _ in range(len(nums) + 1)]    </span><span class="aann">← n+1 buckets; freq[f] = elements with that freq</span></div>
+<div class="ann-line"><span class="acode">    for n, c in count.items():                   </span><span class="aann">← Pass 2: place each element into its bucket</span></div>
+<div class="ann-line"><span class="acode">        freq[c].append(n)                        </span><span class="aann">← element n goes in bucket at index c (its count)</span></div>
+<div class="ann-line"><span class="acode">    res = []                                     </span><span class="aann">← accumulate our k results here</span></div>
+<div class="ann-line"><span class="acode">    for i in range(len(freq) - 1, 0, -1):       </span><span class="aann">← scan from index n downward (highest freq first)</span></div>
+<div class="ann-line"><span class="acode">        for n in freq[i]:                        </span><span class="aann">← for each element in this frequency bucket</span></div>
+<div class="ann-line"><span class="acode">            res.append(n)                        </span><span class="aann">← add to results</span></div>
+<div class="ann-line"><span class="acode">            if len(res) == k:                    </span><span class="aann">← stop as soon as we have k elements</span></div>
+<div class="ann-line"><span class="acode">                return res                       </span><span class="aann">← early exit — no need to continue scanning</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why stop at index 1, not 0?</div>
+      <p>The range <code>range(len(freq)-1, 0, -1)</code> stops at index 1, excluding index 0. Index 0 represents "appeared 0 times" — which is always empty (an element must appear at least once). Stopping at 0 would also be correct (visiting an empty list is harmless) but visiting index 1 is the smallest meaningful bucket.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Min-Heap of size k (O(n log k), classic interview approach)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">import heapq                                      </span></div>
+<div class="ann-line"><span class="acode">def topKFrequent(nums, k):                        </span></div>
+<div class="ann-line"><span class="acode">    count = {}                                    </span></div>
+<div class="ann-line"><span class="acode">    for n in nums:                                </span></div>
+<div class="ann-line"><span class="acode">        count[n] = count.get(n, 0) + 1           </span></div>
+<div class="ann-line"><span class="acode">    return heapq.nlargest(k, count.keys(),        </span><span class="aann">← find k keys with the largest values</span></div>
+<div class="ann-line"><span class="acode">                          key=count.get)          </span><span class="aann">← key function looks up each element's frequency</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — Sort by frequency (O(n log n), simplest code)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import Counter                   </span></div>
+<div class="ann-line"><span class="acode">def topKFrequent(nums, k):                        </span></div>
+<div class="ann-line"><span class="acode">    return [x for x, _ in Counter(nums)          </span><span class="aann">← Counter builds freq map; most_common returns sorted</span></div>
+<div class="ann-line"><span class="acode">            .most_common(k)]                      </span><span class="aann">← take only the first k (element, count) pairs</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Bucket Sort:</strong> Time O(n), Space O(n) — theoretically optimal; reading input is already O(n)<br>
+        <strong>Min-Heap (nlargest):</strong> Time O(n log k), Space O(n) — standard interview answer<br>
+        <strong>Sort + slice:</strong> Time O(n log n), Space O(n) — simplest to write; fine for small n
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Clarify the Problem</div>
+        <p style="font-size:14px;color:var(--text)">Ask: "Can elements be negative? Is k always valid? Are ties at position k possible?" The problem guarantees k is valid and the answer is unique — no tiebreaking needed. If those guarantees weren't given, you'd need extra logic.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose the Naive Approach</div>
+        <p style="font-size:14px;color:var(--text)">"I'll count frequencies with a hash map, then sort by frequency descending, return the first k. That's O(n log n) — correct and simple. Can I optimize?" Always start here; it shows you understand the problem before jumping to tricks.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Optimize to O(n log k) with a Heap</div>
+        <p style="font-size:14px;color:var(--text)">"Instead of sorting all n items, I keep only k items in a min-heap. For each element in the freq map, I push (freq, element). If the heap exceeds k, pop the minimum. At the end, the heap contains exactly the top-k by frequency." This is the most-expected good answer in interviews.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Blow Their Minds — O(n) with Bucket Sort</div>
+        <p style="font-size:14px;color:var(--text)">"There's a key observation: frequencies are bounded integers from 1 to n. I can create n+1 buckets indexed by frequency. No element can appear more than n times, so the buckets cover the full range. Place each element into its frequency's bucket. Then scan from the right, collecting elements until I have k. No sorting, no heap — pure O(n)."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"First I build a frequency map in O(n) — one pass through nums.<br>
+Key observation: frequencies are bounded integers in [1, n].<br>
+So I create a bucket array of size n+1, where index i holds all elements with frequency i.<br>
+I fill the buckets in O(n), then scan from right to left collecting until I have k elements.<br>
+Total: O(n) time, O(n) space. This beats even the heap approach."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if the answer is not unique (ties at position k)?"</strong> → Collect all elements from the tie bucket; any subset of size k is valid.</li>
+        <li><strong>"Top k frequent words?"</strong> → Same pattern but break ties alphabetically (#692) — heap with (−count, word) tuples handles it neatly.</li>
+        <li><strong>"What is the kth most frequent element?"</strong> → Same bucket scan but stop after collecting the kth individual element, not k elements.</li>
+        <li><strong>"Can you do this in O(1) space?"</strong> → Not without O(n log n) sorting. You need at least a freq map to know frequencies.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: nums=[1,1,1,2,2,3], k=2</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Input array -->
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">Input nums</div>
+        <div class="cells-row" id="arr-cells"></div>
+        <div class="idx-row" id="arr-idx"></div>
+      </div>
+
+      <!-- Frequency map -->
+      <div class="freq-section">
+        <div class="freq-section-title">count map · element → frequency</div>
+        <div class="freq-map" id="freq-map"></div>
+      </div>
+
+      <!-- Buckets -->
+      <div class="bucket-section">
+        <div class="bucket-section-title">frequency buckets · bucket[freq] = [elements with that freq]</div>
+        <div class="bucket-row" id="bucket-row"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-phase">
+          <span class="var-name">phase</span>
+          <span class="var-val" id="vv-phase">—</span>
+        </div>
+        <div class="var-box" id="vb-cur">
+          <span class="var-name">element</span>
+          <span class="var-val" id="vv-cur">—</span>
+        </div>
+        <div class="var-box" id="vb-freq">
+          <span class="var-name">freq</span>
+          <span class="var-val" id="vv-freq">—</span>
+        </div>
+        <div class="var-box" id="vb-res">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-res" style="font-size:13px">[]</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def topKFrequent(nums, k):</div>
+      <div class="code-line" id="cl-1">    count = {}</div>
+      <div class="code-line" id="cl-2">    for n in nums:</div>
+      <div class="code-line" id="cl-3">        count[n] = count.get(n, 0) + 1</div>
+      <div class="code-line" id="cl-4">    freq = [[] for _ in range(len(nums) + 1)]</div>
+      <div class="code-line" id="cl-5">    for n, c in count.items():</div>
+      <div class="code-line" id="cl-6">        freq[c].append(n)</div>
+      <div class="code-line" id="cl-7">    res = []</div>
+      <div class="code-line" id="cl-8">    for i in range(len(freq) - 1, 0, -1):</div>
+      <div class="code-line" id="cl-9">        for n in freq[i]:</div>
+      <div class="code-line" id="cl-10">            res.append(n)</div>
+      <div class="code-line" id="cl-11">            if len(res) == k:</div>
+      <div class="code-line" id="cl-12">                return res</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 15</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the bucket-sort algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-count"></div> Currently counting (blue)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Being placed / scanned (amber)</div>
+      <div class="legend-item"><div class="legend-swatch sw-result"></div> In result (green)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Always start with a frequency hash map — it's the foundation of every "top k by frequency" problem</div>
+      <div class="takeaway">Bucket sort achieves O(n) by treating frequencies as array indices — only valid when keys are bounded integers</div>
+      <div class="takeaway">Min-heap of size k is O(n log k) and easier to explain — propose it first in interviews, then offer bucket sort</div>
+      <div class="takeaway">The early exit in the back-scan (return as soon as k elements collected) keeps the constant factor small</div>
+      <div class="takeaway">Python's heapq.nlargest(k, count, key=count.get) is the idiomatic one-liner; bucket sort shows algorithmic depth</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sort by frequency</td>
+          <td class="mark-bad">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Counter.most_common; simplest code</td>
+        </tr>
+        <tr>
+          <td>Min-Heap size k</td>
+          <td>O(n log k)</td>
+          <td>O(n)</td>
+          <td>heapq.nlargest; preferred interview pick</td>
+        </tr>
+        <tr>
+          <td><strong>Bucket Sort ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td>O(n)</td>
+          <td>Optimal; shows deep understanding</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize This Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Find the k most/least frequent elements" → freq map + heap (or bucket sort for O(n))</li>
+        <li>"Rank items by a bounded integer score" → bucket sort to avoid O(n log n) comparison sort</li>
+        <li>"Sort characters by frequency, then rebuild string" → same freq+bucket pattern (#451)</li>
+        <li>"Kth largest in a stream" → maintain heap of size k; root is always the kth largest (#703)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Heaps → Top K sub-pattern)</div>
+      <div class="related-item"><strong>Kth Largest Element in an Array</strong><span class="related-diff diff-med">Medium</span> — Quickselect or min-heap to find the kth order statistic without full sort (#215)</div>
+      <div class="related-item"><strong>Sort Characters By Frequency</strong><span class="related-diff diff-med">Medium</span> — Same freq map + bucket sort; rebuild sorted string (#451)</div>
+      <div class="related-item"><strong>Top K Frequent Words</strong><span class="related-diff diff-med">Medium</span> — Same pattern but ties broken alphabetically; heap with (−count, word) tuples (#692)</div>
+      <div class="related-item"><strong>Kth Largest Element in a Stream</strong><span class="related-diff diff-easy">Easy</span> — Maintain a min-heap of size k; root is the kth largest at any time (#703)</div>
+      <div class="related-item"><strong>K Closest Points to Origin</strong><span class="related-diff diff-med">Medium</span> — Min-heap by Euclidean distance, same nlargest pattern (#973)</div>
+      <div class="related-item"><strong>Find Median from Data Stream</strong><span class="related-diff diff-hard">Hard</span> — Two heaps: max-heap for lower half, min-heap for upper half (#295)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Heaps section (Top K sub-pattern)<br>
+      Sub-Pattern: <strong>Top K</strong> · Technique: <strong>Bucket Sort</strong> (for O(n) variant)<br>
+      Source: Guide + Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Data ──
+const NUMS = [1, 1, 1, 2, 2, 3];
+const K = 2;
+const FREQ_KEYS = [1, 2, 3];
+const NUM_BUCKETS = NUMS.length + 1; // indices 0..6
+
+// Each step encodes the full visual state
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    arrIdx:-1, count:{}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'—', curFreq:'—', res:'[]', activeLine:1,
+    changedKey:null, activeBucket:-1, resultBuckets:[],
+    title:'Initialize',
+    text:'nums = [1,1,1,2,2,3], k = 2. Goal: find the 2 most frequent elements. Step 1: initialize an empty count map. We will count how often each element appears with one linear pass.'
+  },
+  {
+    id:1, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:0, count:{1:1}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'1', curFreq:'1', res:'[]', activeLine:3,
+    changedKey:1, activeBucket:-1, resultBuckets:[],
+    title:"nums[0]=1  →  count[1]=1",
+    text:"Scanning nums. Index 0: element 1. count.get(1,0)+1 = 0+1 = 1. First time we see 1 — its frequency is now 1."
+  },
+  {
+    id:2, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:1, count:{1:2}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'1', curFreq:'2', res:'[]', activeLine:3,
+    changedKey:1, activeBucket:-1, resultBuckets:[],
+    title:"nums[1]=1  →  count[1]=2",
+    text:"Index 1: element 1 again. count[1] was 1, now becomes 2. Second occurrence counted."
+  },
+  {
+    id:3, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:2, count:{1:3}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'1', curFreq:'3', res:'[]', activeLine:3,
+    changedKey:1, activeBucket:-1, resultBuckets:[],
+    title:"nums[2]=1  →  count[1]=3",
+    text:"Index 2: element 1 for the third time. count[1] = 3. Element 1 is the most frequent so far."
+  },
+  {
+    id:4, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:3, count:{1:3,2:1}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'2', curFreq:'1', res:'[]', activeLine:3,
+    changedKey:2, activeBucket:-1, resultBuckets:[],
+    title:"nums[3]=2  →  count[2]=1",
+    text:"Index 3: new element 2. count.get(2,0)+1 = 0+1 = 1. First occurrence of 2. count = {1:3, 2:1}."
+  },
+  {
+    id:5, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:4, count:{1:3,2:2}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'2', curFreq:'2', res:'[]', activeLine:3,
+    changedKey:2, activeBucket:-1, resultBuckets:[],
+    title:"nums[4]=2  →  count[2]=2",
+    text:"Index 4: element 2 again. count[2] = 2. count = {1:3, 2:2}."
+  },
+  {
+    id:6, phase:'count', phaseLabel:'COUNT', phaseClass:'phase-count',
+    arrIdx:5, count:{1:3,2:2,3:1}, buckets:[[],[],[],[],[],[],[]],
+    curEl:'3', curFreq:'1', res:'[]', activeLine:3,
+    changedKey:3, activeBucket:-1, resultBuckets:[],
+    title:"nums[5]=3  →  count[3]=1",
+    text:"Index 5: new element 3. count[3] = 1. Pass 1 complete. Final count = {1:3, 2:2, 3:1}. Element 1 appeared most (3×), element 2 second (2×), element 3 least (1×)."
+  },
+  {
+    id:7, phase:'bucket', phaseLabel:'FILL BUCKETS', phaseClass:'phase-bucket',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[],[],[],[],[]],
+    curEl:'3', curFreq:'1', res:'[]', activeLine:6,
+    changedKey:null, activeBucket:1, resultBuckets:[],
+    title:"Place element 3 → bucket[1]",
+    text:"Now filling the bucket array. Element 3 has frequency 1, so freq[1].append(3). Bucket at index 1 now holds [3]. The bucket index IS the frequency — that is the core insight."
+  },
+  {
+    id:8, phase:'bucket', phaseLabel:'FILL BUCKETS', phaseClass:'phase-bucket',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[],[],[],[]],
+    curEl:'2', curFreq:'2', res:'[]', activeLine:6,
+    changedKey:null, activeBucket:2, resultBuckets:[],
+    title:"Place element 2 → bucket[2]",
+    text:"Element 2 has frequency 2, so freq[2].append(2). Bucket at index 2 now holds [2]. Buckets so far: bucket[1]=[3], bucket[2]=[2]."
+  },
+  {
+    id:9, phase:'bucket', phaseLabel:'FILL BUCKETS', phaseClass:'phase-bucket',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[1],[],[],[]],
+    curEl:'1', curFreq:'3', res:'[]', activeLine:6,
+    changedKey:null, activeBucket:3, resultBuckets:[],
+    title:"Place element 1 → bucket[3]",
+    text:"Element 1 has frequency 3, so freq[3].append(1). Bucket at index 3 now holds [1]. All buckets filled: bucket[1]=[3], bucket[2]=[2], bucket[3]=[1]. Buckets 4, 5, 6 remain empty."
+  },
+  {
+    id:10, phase:'collect', phaseLabel:'COLLECT', phaseClass:'phase-collect',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[1],[],[],[]],
+    curEl:'—', curFreq:'6→4', res:'[]', activeLine:8,
+    changedKey:null, activeBucket:-1, resultBuckets:[],
+    title:"Scan from index 6 downward — buckets 6,5,4 are empty",
+    text:"Starting back-scan from index 6 (highest possible frequency). Buckets at indices 6, 5, and 4 are all empty — no element appeared that many times. Continue scanning downward toward index 3."
+  },
+  {
+    id:11, phase:'collect', phaseLabel:'COLLECT', phaseClass:'phase-collect',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[1],[],[],[]],
+    curEl:'1', curFreq:'3', res:'[1]', activeLine:10,
+    changedKey:null, activeBucket:-1, resultBuckets:[3],
+    title:"bucket[3]=[1]  →  res.append(1)  →  res=[1]",
+    text:"Index 3: bucket[3] = [1]. Element 1 appeared 3 times — highest frequency. res.append(1). res = [1]. len(res) = 1, which is less than k=2. Keep scanning."
+  },
+  {
+    id:12, phase:'collect', phaseLabel:'COLLECT', phaseClass:'phase-collect',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[1],[],[],[]],
+    curEl:'2', curFreq:'2', res:'[1, 2]', activeLine:10,
+    changedKey:null, activeBucket:-1, resultBuckets:[3,2],
+    title:"bucket[2]=[2]  →  res.append(2)  →  res=[1,2]",
+    text:"Index 2: bucket[2] = [2]. Element 2 appeared 2 times — second highest. res.append(2). res = [1, 2]. Now len(res) = 2 = k. Return immediately!"
+  },
+  {
+    id:13, phase:'result', phaseLabel:'RETURN', phaseClass:'phase-result',
+    arrIdx:-1, count:{1:3,2:2,3:1}, buckets:[[],[3],[2],[1],[],[],[]],
+    curEl:'—', curFreq:'—', res:'[1, 2]', activeLine:12,
+    changedKey:null, activeBucket:-1, resultBuckets:[3,2],
+    title:"Return [1, 2] ✓",
+    text:"len(res) == k (2 == 2). Return [1, 2]. Correctness: 1 appeared 3 times (most), 2 appeared 2 times (second most). Element 3 appeared only 1 time and is excluded. Total: O(n) time, O(n) space — no sorting involved."
   }
-  document.getElementById('phaseBadge').textContent = s.phase || 'STEP';
-  document.getElementById('stepCtr').textContent = `Step ${cur}/${STEPS.length-1}`;
-  document.getElementById('infoTitle').textContent = s.op || s.phase || 'Processing';
-  document.getElementById('infoText').textContent  = s.msg || '';
-  document.getElementById('dots').innerHTML = STEPS.map((_,i) =>
-    `<div class="dot${i===cur?' active':i<cur?' visited':''}" onclick="goTo(${i})"></div>`).join('');
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===STEPS.length-1;
+];
+
+let current = 0;
+
+function buildDom() {
+  // Input array
+  const arrCells = document.getElementById('arr-cells');
+  const arrIdxRow = document.getElementById('arr-idx');
+  NUMS.forEach((n, i) => {
+    const c = document.createElement('div');
+    c.className = 'cell normal'; c.id = 'ac-' + i;
+    c.textContent = n;
+    arrCells.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot'; ix.textContent = i;
+    arrIdxRow.appendChild(ix);
+  });
+
+  // Freq map cells
+  const fm = document.getElementById('freq-map');
+  FREQ_KEYS.forEach(key => {
+    const fc = document.createElement('div');
+    fc.className = 'freq-cell unseen'; fc.id = 'fc-' + key;
+    fc.innerHTML = '<div class="freq-char">' + key + '</div><div class="freq-count" id="fv-' + key + '">—</div>';
+    fm.appendChild(fc);
+  });
+
+  // Bucket columns (indices 0 through n=6)
+  const br = document.getElementById('bucket-row');
+  for (let i = 0; i < NUM_BUCKETS; i++) {
+    const col = document.createElement('div');
+    col.className = 'bucket-col';
+    col.innerHTML =
+      '<div class="bucket-freq-label">freq=' + i + '</div>' +
+      '<div class="bucket-container" id="bc-' + i + '"></div>' +
+      '<div class="bucket-idx-label">[' + i + ']</div>';
+    br.appendChild(col);
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
 }
 
-function go(d) { if(cur+d>=0 && cur+d<STEPS.length){ cur+=d; render(); } }
-function goTo(i) { cur=i; render(); }
-function reset() { cur=0; render(); }
-function toggleSection(h) { h.closest('.card').classList.toggle('collapsed'); }
+function render() {
+  const step = steps[current];
+
+  // ── Input array cells ──
+  NUMS.forEach((n, i) => {
+    const cell = document.getElementById('ac-' + i);
+    cell.className = 'cell';
+    if (step.phase === 'result') {
+      cell.classList.add('result-cell');
+    } else if (step.phase === 'count' && i === step.arrIdx) {
+      cell.classList.add('active');
+    } else if (step.phase === 'count' && i < step.arrIdx) {
+      cell.classList.add('done');
+    } else if (step.phase === 'bucket' || step.phase === 'collect') {
+      cell.classList.add('done');
+    } else {
+      cell.classList.add('normal');
+    }
+  });
+
+  // ── Freq map ──
+  FREQ_KEYS.forEach(key => {
+    const fcEl = document.getElementById('fc-' + key);
+    const fvEl = document.getElementById('fv-' + key);
+    const cnt = step.count[key];
+    if (cnt === undefined) {
+      fcEl.className = 'freq-cell unseen';
+      fvEl.textContent = '—';
+    } else if (step.phase === 'result') {
+      fcEl.className = 'freq-cell result-freq';
+      fvEl.textContent = cnt;
+    } else if (key === step.changedKey) {
+      fcEl.className = 'freq-cell changed';
+      fvEl.textContent = cnt;
+    } else {
+      fcEl.className = 'freq-cell positive';
+      fvEl.textContent = cnt;
+    }
+  });
+
+  // ── Buckets ──
+  for (let i = 0; i < NUM_BUCKETS; i++) {
+    const bc = document.getElementById('bc-' + i);
+    bc.innerHTML = '';
+    const items = step.buckets[i] || [];
+    const isActiveBucket = i === step.activeBucket;
+    const isResultBucket = step.resultBuckets && step.resultBuckets.includes(i);
+    bc.className = 'bucket-container';
+    if (isResultBucket) bc.classList.add('result-bucket');
+    else if (isActiveBucket) bc.classList.add('active-bucket');
+
+    items.forEach(el => {
+      const div = document.createElement('div');
+      div.className = 'bucket-item';
+      if (isResultBucket) div.classList.add('item-result');
+      else if (isActiveBucket) div.classList.add('item-active');
+      div.textContent = el;
+      bc.appendChild(div);
+    });
+  }
+
+  // ── Code panel ──
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  document.getElementById('vv-phase').textContent = step.phase;
+  document.getElementById('vv-cur').textContent = step.curEl;
+  document.getElementById('vv-freq').textContent = step.curFreq;
+  document.getElementById('vv-res').textContent = step.res;
+
+  const prev = current > 0 ? steps[current - 1] : null;
+  document.getElementById('vb-phase').classList.toggle('changed', prev && prev.phase !== step.phase);
+  document.getElementById('vb-cur').classList.toggle('changed', prev && prev.curEl !== step.curEl && step.curEl !== '—');
+  document.getElementById('vb-freq').classList.toggle('changed', prev && prev.curFreq !== step.curFreq && step.curFreq !== '—');
+  document.getElementById('vb-res').classList.toggle('changed', prev && prev.res !== step.res);
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key==='ArrowRight') go(1);
-  if(e.key==='ArrowLeft')  go(-1);
-  if(e.key==='r'||e.key==='R') reset();
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
 });
+
+buildDom();
 render();
 </script>
 </body>

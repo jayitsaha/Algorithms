@@ -1,87 +1,930 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Making A Large Island — LC #827</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#827 · Making A Large Island</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Phase Diagram ── */
+.phase-diagram{display:flex;align-items:center;justify-content:center;gap:0;margin:1rem 0;flex-wrap:wrap}
+.phase-node{padding:10px 16px;border-radius:var(--radius);font-size:12px;font-weight:700;text-align:center;min-width:110px;line-height:1.4}
+.ph-init{background:var(--purple-bg);color:var(--purple-mid);border:2px solid var(--purple-border)}
+.ph-dfs{background:var(--blue-bg);color:var(--blue-mid);border:2px solid var(--blue-border)}
+.ph-flip{background:var(--amber-bg);color:var(--amber-mid);border:2px solid var(--amber-border)}
+.ph-result{background:var(--green-bg);color:var(--green-mid);border:2px solid var(--green-border)}
+.phase-arrow{color:var(--text3);font-size:20px;padding:0 4px}
+
+/* ── Grid Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.grid-wrapper{display:flex;justify-content:center;margin-bottom:1rem}
+.grid-container{display:flex;flex-direction:column;gap:5px}
+.grid-row{display:flex;gap:5px}
+.gcell{
+  width:58px;height:58px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s,box-shadow 0.25s;
+  flex-shrink:0;position:relative;
+}
+.gcell.sea{background:var(--surface);border-color:var(--border2);color:var(--text3)}
+.gcell.land{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.gcell.isle-a{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.gcell.isle-b{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.gcell.isle-c{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.gcell.candidate{box-shadow:0 0 0 3px var(--amber-mid)}
+.gcell.merged{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.gcell.active-dfs{box-shadow:0 0 0 3px var(--blue-mid)}
+.coord-label{position:absolute;bottom:2px;right:4px;font-size:9px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-dfs{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-flip{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-done{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){opacity:0.88}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-sea{background:var(--surface);border-color:var(--border2)}
+.sw-land{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-a{background:var(--green-bg);border-color:var(--green-border)}
+.sw-b{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-c{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-cand{border:2px solid var(--amber-mid);background:transparent}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Making A Large Island</h1>
-<div class="subtitle">LeetCode #827 &mdash; Label Islands + Try Flip</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">Label Islands + Try Flip</span><span class="tag tag-cx">O(m*n) Time &middot; O(m*n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #827</div>
+  <h1>Making A Large Island</h1>
+  <p class="subtitle">You are given an n×n binary grid. You are allowed to change at most one 0 to 1. Return the size of the largest island after applying this operation.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Graph</span>
+    <span class="tag tag-pattern">DFS</span>
+    <span class="tag tag-pattern">Label Islands + Try Flip</span>
+    <span class="tag tag-complexity">Time: O(n²)</span>
+    <span class="tag tag-complexity">Space: O(n²)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an <strong>n×n binary grid</strong> of 0s (sea) and 1s (land). Cells connected in 4 directions (up/down/left/right) form <strong>islands</strong>. You may flip <strong>exactly one</strong> 0 to a 1 — or flip none if the grid is already all 1s. Return the size of the largest island you can create.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Flipping a 0 to 1 doesn't add just one cell — it acts as a <strong>bridge</strong> that can merge several nearby islands into one. If a sea cell at (r, c) has neighbors from three distinct islands of sizes 5, 3, and 2, flipping it yields an island of size 5+3+2+1=11. The challenge is computing this quickly for every candidate 0-cell.</p>
+    </div>
+
+    <p style="margin-top:0.75rem">Walk through the example grid <code>[[1,0],[0,1]]</code> by hand:</p>
+    <div class="two-col">
+      <div class="panel-box before">
+        <div class="panel-title">Before flip — 2 islands of size 1</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          1  0<br>
+          0  1<br>
+          Max island = 1
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">After flipping (0,1) — island of size 3</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          1  <strong>1</strong><br>
+          0  1<br>
+          island A + flip + island B = 3
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases to consider:</strong></p>
+    <ul style="margin-left:1.25rem;margin-top:0.5rem;line-height:2">
+      <li>Grid is all 1s — answer is n² (the entire grid is one island; no flip needed)</li>
+      <li>Grid is all 0s — answer is 1 (flip any single cell)</li>
+      <li>A 0-cell whose multiple neighbors belong to the <em>same</em> island — must not double-count</li>
+      <li>1×1 grid with a single 1 — answer is 1</li>
+    </ul>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>Pass 1: DFS to label each island with a unique ID and record its size. Pass 2: for each 0-cell, look at its 4 neighbors' island IDs (deduplicated), sum their sizes + 1.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Two-Pass DFS</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Two-Pass DFS</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">DFS to label islands and compute sizes</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each '0': sum sizes of distinct adjacent island IDs + 1</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n)</strong> | Space: <strong>O(m*n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def largestIsland(grid):
-    m,n=len(grid),len(grid[0]); island_id=2; sizes={}
-    def dfs(r,c,iid):
-        if r<0 or r>=m or c<0 or c>=n or grid[r][c]!=1: return 0
-        grid[r][c]=iid; return 1+dfs(r+1,c,iid)+dfs(r-1,c,iid)+dfs(r,c+1,iid)+dfs(r,c-1,iid)
-    for r in range(m):
-        for c in range(n):
-            if grid[r][c]==1: sizes[island_id]=dfs(r,c,island_id); island_id+=1
-    result=max(sizes.values()) if sizes else 0
-    for r in range(m):
-        for c in range(n):
-            if grid[r][c]==0:
-                adj={grid[r+dr][c+dc] for dr,dc in[(0,1),(0,-1),(1,0),(-1,0)] if 0<=r+dr<m and 0<=c+dc<n and grid[r+dr][c+dc]>1}
-                result=max(result,1+sum(sizes.get(iid,0) for iid in adj))
-    return result</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Label islands with IDs 2,3,... to distinguish from 0s and 1s</span></div><div class="step"><span class="snum">2</span><span class="stxt">Deduplicate adjacent island IDs to avoid double-counting</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Two-Pass DFS</td><td>O(m*n)</td><td>O(m*n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Number of Islands</span><span class="pd dm">Medium</span> — Basic island DFS</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Label Islands + Try Flip</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Making A Large Island"}, "title": "Two-Pass DFS", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Label Islands + Try Flip</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Think of this like a land surveyor. First, they <em>stamp every connected parcel with a lot number</em> and record its total area. Then, they stand on each empty field and ask: "If I develop this plot, which adjacent lots do I connect, and what's the combined acreage?" The key is doing the surveying once and looking up results O(1) per query.</p>
+
+    <div class="phase-diagram">
+      <div class="phase-node ph-init">Init<br><small>label=2</small></div>
+      <div class="phase-arrow">→</div>
+      <div class="phase-node ph-dfs">Phase 1<br><small>DFS label islands</small></div>
+      <div class="phase-arrow">→</div>
+      <div class="phase-node ph-flip">Phase 2<br><small>Try each 0</small></div>
+      <div class="phase-arrow">→</div>
+      <div class="phase-node ph-result">Return<br><small>max result</small></div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Start label counter at 2.</strong> Grid values are 0 or 1 — using labels 2, 3, 4, … avoids any ambiguity. <code>island_size = {}</code> will map label → cell count.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Phase 1 — label every island via DFS:</strong> For each cell with value 1 (unlabeled land), flood-fill with the current label (overwriting grid cells in-place), count cells, store in <code>island_size[label]</code>, increment label.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Initialize result = max(island_size.values(), default=0).</strong> This handles the all-ones case: if no 0 exists, Phase 2 never updates <code>result</code>, so we need the correct baseline.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Phase 2 — try each 0-cell (r, c):</strong> Collect a <code>set</code> of unique island labels from its ≤ 4 neighbors. Sum their sizes + 1 (for the flipped cell). Update <code>result</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return result.</strong> This is the maximum island size achievable with at most one flip.</span>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Critical: Use a Set for Neighbor Labels</div>
+      <p>An island can wrap around the corner of a 0-cell, making two of its four neighbors carry the same label. If you just sum neighbor values without deduplication, you count that island's area twice. Always collect neighbor labels into a <code>set</code> first, then sum <code>island_size[l] for l in seen</code>.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Core Invariant</div>
+      <p>After Phase 1: every land cell holds a label ≥ 2, and <code>island_size[label]</code> equals the exact number of cells in that island. This is a static, correct snapshot — it never changes during Phase 2.</p>
+    </div>
+
+    <p><strong>Why the size sum is always correct when we flip (r, c):</strong></p>
+    <p style="margin-top:0.5rem">Flipping grid[r][c] from 0 to 1 creates a new island consisting of: the single flipped cell + every island reachable from it via a 4-directional step. Because islands are disjoint by definition (DFS labeling ensures each cell belongs to at most one island), their sizes add without overlap. The set-of-labels deduplication is the only subtlety: two neighbors pointing to the same label is <em>not</em> two separate contributions — it's the same island approached from two sides.</p>
+
+    <p style="margin-top:1rem"><strong>Why Phase 1 overwrites the grid with labels:</strong></p>
+    <p style="margin-top:0.5rem">We need a way to ask "which island does neighbor (nr, nc) belong to?" in O(1). Storing the answer directly in the grid cell — overwriting 1 with its island's label — is the most space-efficient approach. After labeling, a cell value of 0 still means sea; any value ≥ 2 means "island with this label." No additional data structure is needed.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Starting Labels at 2 Matters</div>
+      <p>If we used label=1 for the first island, we'd be writing 1 into cells that already contained 1. The outer scan in Phase 1 checks <code>if grid[r][c] == 1</code> to find unlabeled land. If the first island gets label=1, its cells look identical to unlabeled cells — the scan might re-enter them. Starting at 2 (or any value &gt; 1) keeps the three states distinct: 0=sea, 1=unlabeled-land, ≥2=labeled-island.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Handling the all-ones edge case:</strong> When every cell is 1, the outer loop in Phase 2 (<code>if grid[r][c] == 0</code>) finds nothing, so it never updates <code>result</code>. Without the initialization <code>result = max(island_size.values())</code>, we'd return 0. The initialization captures the pre-existing largest island, giving the correct answer without any flip.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def largestIsland(grid):                                 </span><span class="aann">n×n binary grid, modified in-place</span></div>
+      <div class="ann-line"><span class="acode">    n = len(grid)                                        </span><span class="aann">grid is always square (n×n)</span></div>
+      <div class="ann-line"><span class="acode">    island_size = {}                                     </span><span class="aann">label (int ≥ 2) → cell count</span></div>
+      <div class="ann-line"><span class="acode">    label = 2  # labels start above 0 and 1             </span><span class="aann">avoids collision with grid values</span></div>
+      <div class="ann-line"><span class="acode">                                                         </span></div>
+      <div class="ann-line"><span class="acode">    def dfs(r, c, lbl):                                  </span><span class="aann">flood-fill from (r,c), marking cells lbl</span></div>
+      <div class="ann-line"><span class="acode">        if r &lt; 0 or r &gt;= n or c &lt; 0 or c &gt;= n:         </span><span class="aann">bounds guard</span></div>
+      <div class="ann-line"><span class="acode">            return 0                                     </span></div>
+      <div class="ann-line"><span class="acode">        if grid[r][c] != 1: return 0                     </span><span class="aann">0=sea or ≥2=already labeled → skip</span></div>
+      <div class="ann-line"><span class="acode">        grid[r][c] = lbl                                 </span><span class="aann">mark visited + store island id in cell</span></div>
+      <div class="ann-line"><span class="acode">        return (1 + dfs(r+1,c,lbl) + dfs(r-1,c,lbl)    </span><span class="aann">count this cell + recurse all 4 dirs</span></div>
+      <div class="ann-line"><span class="acode">                  + dfs(r,c+1,lbl) + dfs(r,c-1,lbl))   </span></div>
+      <div class="ann-line"><span class="acode">                                                         </span></div>
+      <div class="ann-line"><span class="acode">    # ── Phase 1: label every connected island ──        </span></div>
+      <div class="ann-line"><span class="acode">    for r in range(n):                                   </span></div>
+      <div class="ann-line"><span class="acode">        for c in range(n):                               </span></div>
+      <div class="ann-line"><span class="acode">            if grid[r][c] == 1:                          </span><span class="aann">found unlabeled land</span></div>
+      <div class="ann-line"><span class="acode">                island_size[label] = dfs(r, c, label)   </span><span class="aann">DFS floods island, returns size</span></div>
+      <div class="ann-line"><span class="acode">                label += 1                               </span><span class="aann">next island gets next integer label</span></div>
+      <div class="ann-line"><span class="acode">                                                         </span></div>
+      <div class="ann-line"><span class="acode">    # ── Phase 2: try flipping each sea cell ──          </span></div>
+      <div class="ann-line"><span class="acode">    result = max(island_size.values(), default=0)        </span><span class="aann">baseline: best existing island (all-1s case)</span></div>
+      <div class="ann-line"><span class="acode">    for r in range(n):                                   </span></div>
+      <div class="ann-line"><span class="acode">        for c in range(n):                               </span></div>
+      <div class="ann-line"><span class="acode">            if grid[r][c] == 0:                          </span><span class="aann">candidate flip cell</span></div>
+      <div class="ann-line"><span class="acode">                seen = set()                             </span><span class="aann">unique island labels among neighbors</span></div>
+      <div class="ann-line"><span class="acode">                for nr,nc in [(r+1,c),(r-1,c),          </span><span class="aann">check all 4 neighbors</span></div>
+      <div class="ann-line"><span class="acode">                              (r,c+1),(r,c-1)]:          </span></div>
+      <div class="ann-line"><span class="acode">                    if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n:     </span><span class="aann">bounds check</span></div>
+      <div class="ann-line"><span class="acode">                        if grid[nr][nc] &gt; 1:             </span><span class="aann">neighbor is labeled land</span></div>
+      <div class="ann-line"><span class="acode">                            seen.add(grid[nr][nc])       </span><span class="aann">set deduplicates same-island neighbors</span></div>
+      <div class="ann-line"><span class="acode">                sz = 1 + sum(island_size[l] for l in seen)</span><span class="aann">+1 for the flipped cell</span></div>
+      <div class="ann-line"><span class="acode">                result = max(result, sz)                 </span><span class="aann">update global maximum</span></div>
+      <div class="ann-line"><span class="acode">    return result                                        </span><span class="aann">largest achievable island</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Bug: Forgetting the Set</div>
+      <p>The most frequent mistake is writing <code>sum(island_size[grid[nr][nc]] for ...)</code> without deduplication. Consider a U-shaped island: its two ends are both neighbors of the cell at the bottom of the U. You'd add that island's size twice, inflating the answer. The fix is one line: <code>seen = set()</code>.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔎 Complexity Analysis</div>
+      <p><strong>Time O(n²):</strong> Phase 1 — each cell visited at most once by DFS (marking prevents re-visits). Phase 2 — each cell visited once, 4-neighbor check is O(1). Both phases linear in grid size.<br><br><strong>Space O(n²):</strong> <code>island_size</code> has at most O(n²) entries (trivially, since there are n² cells). Recursion stack depth up to O(n²) in worst case (all-1 grid = one giant snake-island). Grid is modified in-place so no extra n×n array.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Start with Brute Force and Name the Problem</div>
+        <p style="font-size:14px">The naive approach: for each 0-cell, flip it, run BFS/DFS to find the resulting island size, track max, undo the flip. Time: O(n²) cells × O(n²) BFS each = O(n⁴). For n=500 that's 62.5 billion operations — clearly TLE. State this immediately to show you think about complexity first.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Name the Repeated Work</div>
+        <p style="font-size:14px">Why is brute force slow? Because every flip re-explores the same islands that don't change between flips. This is the key insight: <em>island sizes are static</em>. If we precompute them, we pay the DFS cost once instead of O(n²) times.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Design the Labeling Scheme</div>
+        <p style="font-size:14px">To look up "which island does this neighbor belong to?", we need a cell → island-ID mapping. The elegant trick: overwrite grid values with integer labels ≥ 2 during DFS. The grid itself becomes our lookup table. No extra array needed.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Anticipate the Deduplication Edge Case</div>
+        <p style="font-size:14px">Before the interviewer has to point it out, bring up: "When trying a 0-cell, I'll collect neighbor labels into a <em>set</em> — because the same island can appear as multiple neighbors if it wraps around the 0-cell. A set prevents double-counting."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Mention the All-Ones Edge Case</div>
+        <p style="font-size:14px">Initialize <code>result</code> to the max value in <code>island_size</code> before Phase 2. This gracefully handles grids with no 0s — Phase 2 never triggers, and you return the largest pre-existing island.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Let me start with brute force: for every 0, flip it, BFS for island size, track max.
+That's O(n^4) — too slow for n=500.
+
+The bottleneck is re-running BFS for every candidate flip. But island sizes
+don't change between flips, so I can precompute them once.
+
+Here's my plan:
+  Phase 1 — DFS over the grid. Each time I find an unlabeled 1-cell,
+  I flood-fill it with a unique label (starting at 2, above grid values),
+  count cells, store in island_size[label]. Overwrites the grid in-place.
+
+  Phase 2 — For each 0-cell, check its 4 neighbors. Collect unique island
+  labels in a set (to avoid double-counting a wrapping island), sum their
+  sizes plus 1, update result.
+
+Edge case: no 0s — initialize result to max(island_size.values()).
+
+Time: O(n^2). Space: O(n^2) for the dict and recursion stack."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Follow-Up Questions to Expect</div>
+      <ul style="margin-top:0.5rem;line-height:2">
+        <li><strong>What if we can flip k zeros?</strong> — BFS/Union-Find becomes necessary; label trick still useful for Phase 1.</li>
+        <li><strong>Can you avoid mutating the grid?</strong> — Yes: use a separate <code>label_grid[n][n]</code> array for labels.</li>
+        <li><strong>What if 8-directional adjacency?</strong> — Expand neighbor list to 8 directions; algorithm is identical.</li>
+        <li><strong>Stack overflow concern for large grids?</strong> — Convert DFS to iterative BFS (use a deque). Same O(n²) complexity.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:14px;color:var(--text2);margin-bottom:0.75rem">
+      Grid: <code>[[1,1,0],[1,0,0],[0,0,1]]</code> (3×3). Three islands — let's find the best flip.
+    </p>
+
+    <div class="viz-area">
+      <div class="grid-wrapper">
+        <div class="grid-container" id="grid-viz"></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-ph">
+          <span class="var-name">Phase</span>
+          <span class="var-val" id="vv-ph">—</span>
+        </div>
+        <div class="var-box" id="vb-lbl">
+          <span class="var-name">label</span>
+          <span class="var-val" id="vv-lbl">2</span>
+        </div>
+        <div class="var-box" id="vb-sz">
+          <span class="var-name">island_size</span>
+          <span class="var-val" id="vv-sz">{}</span>
+        </div>
+        <div class="var-box" id="vb-seen">
+          <span class="var-name">seen</span>
+          <span class="var-val" id="vv-seen">—</span>
+        </div>
+        <div class="var-box" id="vb-res">
+          <span class="var-name">result</span>
+          <span class="var-val" id="vv-res">0</span>
+        </div>
+      </div>
+
+      <!-- Code panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" id="cl0">def largestIsland(grid):</div>
+        <div class="code-line" id="cl1">    island_size = {};  label = 2</div>
+        <div class="code-line" id="cl2">    def dfs(r, c, lbl):  # flood-fill</div>
+        <div class="code-line" id="cl3">        grid[r][c] = lbl;  return 1 + dfs(4 dirs)</div>
+        <div class="code-line" id="cl4">    # Phase 1: label every island</div>
+        <div class="code-line" id="cl5">    for r,c: if grid[r][c]==1:</div>
+        <div class="code-line" id="cl6">        island_size[label] = dfs(r,c,label); label+=1</div>
+        <div class="code-line" id="cl7">    # Phase 2: try each sea cell</div>
+        <div class="code-line" id="cl8">    result = max(island_size.values(), default=0)</div>
+        <div class="code-line" id="cl9">    for r,c: if grid[r][c]==0:</div>
+        <div class="code-line" id="cl10">        seen = {label of each labeled neighbor}</div>
+        <div class="code-line" id="cl11">        sz = 1 + sum(island_size[l] for l in seen)</div>
+        <div class="code-line" id="cl12">        result = max(result, sz)</div>
+        <div class="code-line" id="cl13">    return result</div>
+      </div>
+
+      <!-- Info card -->
+      <div class="info-card">
+        <div id="phase-badge" class="phase-badge phase-init">Init</div>
+        <div id="step-counter" class="step-counter">Step 1 of 14</div>
+        <div id="step-title" class="step-title">Starting</div>
+        <div id="step-body" class="step-body">3×3 grid with islands at (0,0)-(0,1)-(1,0), a lone 1 at (2,2), and sea cells elsewhere. We'll label islands and find the best flip.</div>
+      </div>
+
+      <!-- Progress dots -->
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+        <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-sea"></div>Sea (0)</div>
+        <div class="legend-item"><div class="legend-swatch sw-land"></div>Unlabeled land (1)</div>
+        <div class="legend-item"><div class="legend-swatch sw-a"></div>Island A (label 2)</div>
+        <div class="legend-item"><div class="legend-swatch sw-b"></div>Island B (label 3)</div>
+        <div class="legend-item"><div class="legend-swatch sw-cand"></div>Candidate flip (amber ring)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="takeaways">
+      <div class="takeaway">Two-phase approach: label once with DFS (O(n²)), then query each 0-cell in O(1) per neighbor — total O(n²).</div>
+      <div class="takeaway">Labels start at 2 to distinguish from grid values 0 and 1 — the grid itself becomes the O(1) island-lookup table.</div>
+      <div class="takeaway">Set of neighbor labels prevents double-counting when one island borders the same 0-cell from multiple directions.</div>
+      <div class="takeaway">Initialize result = max existing island size to handle all-ones grids where no flip is needed.</div>
+      <div class="takeaway">Can adapt to iterative BFS for DFS to avoid recursion stack overflow on very large all-land grids.</div>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (flip + BFS each 0)</td><td class="mark-bad">O(n⁴)</td><td>O(n²)</td><td>TLE for n &gt; ~100</td></tr>
+        <tr><td><strong>Label Islands + Try Flip (optimal)</strong></td><td class="mark-good">O(n²)</td><td class="mark-good">O(n²)</td><td>Interview pick</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use This Pattern</div>
+      <ul style="margin-top:0.5rem;line-height:2">
+        <li>Problem asks: "make one edit to a grid and maximize connected component size"</li>
+        <li>Repeated DFS/BFS would re-traverse unchanged components — precompute + store</li>
+        <li>Need to combine sizes of distinct groups meeting at a single boundary cell</li>
+        <li>Any "what's the best single connection between components?" grid problem</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Number of Islands</strong><span class="related-diff diff-med">Medium</span> — Foundation: DFS to count connected components of 1s; the building block for this problem</div>
+      <div class="related-item"><strong>Max Area of Island</strong><span class="related-diff diff-med">Medium</span> — DFS to find the single largest island; same structure as Phase 1 without Phase 2</div>
+      <div class="related-item"><strong>Number of Islands II</strong><span class="related-diff diff-hard">Hard</span> — Online Union-Find: each added 1-cell merges islands dynamically; inverse of this problem</div>
+      <div class="related-item"><strong>Surrounded Regions</strong><span class="related-diff diff-med">Medium</span> — DFS from borders to label safe cells; similar label-then-query structure</div>
+      <div class="related-item"><strong>Pacific Atlantic Water Flow</strong><span class="related-diff diff-med">Medium</span> — Two-phase DFS (one per ocean); same "label first, query second" intuition</div>
+      <div class="related-item"><strong>Number of Distinct Islands</strong><span class="related-diff diff-med">Medium</span> — DFS + shape encoding; extends island labeling with signature hashing</div>
+      <div class="related-item"><strong>Flood Fill</strong><span class="related-diff diff-easy">Easy</span> — Pure DFS flood-fill from a starting cell; simplest form of the island-marking pattern</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ─────────────────────────────────────────────────────────
+// Grid: [[1,1,0],[1,0,0],[0,0,1]]
+//
+// Phase 1:
+//  DFS from (0,0) with label=2 → floods (0,0),(0,1),(1,0) → size=3
+//  island_size = {2:3}
+//  DFS from (2,2) with label=3 → floods (2,2) → size=1
+//  island_size = {2:3, 3:1}
+//
+// Phase 2: result = max(3,1) = 3 initially
+//  Try (0,2): neighbors → (0,1)=2 (A), (1,2)=0 → seen={2} → sz=1+3=4 → result=4
+//  Try (1,1): neighbors → (0,1)=2 (A), (1,0)=2 (A), (2,1)=0, (1,2)=0 → seen={2} → sz=1+3=4
+//  Try (1,2): neighbors → (0,2)=0, (2,2)=3 (B), (1,1)=0 → seen={3} → sz=1+1=2
+//  Try (2,0): neighbors → (1,0)=2 (A) → seen={2} → sz=1+3=4
+//  Try (2,1): neighbors → (2,2)=3 (B), (1,1)=0, (2,0)=0 → seen={3} → sz=1+1=2
+// Best: 4 (many cells achieve this)
+// ─────────────────────────────────────────────────────────
+
+const N = 3;
+const STEPS = [
+  // Step 0: init
+  {
+    gridVals: [[1,1,0],[1,0,0],[0,0,1]],
+    curCell: null,
+    ph:'Init', phClass:'phase-init',
+    lbl:2, sz:'{}', seen:'—', res:0,
+    al:1,
+    title:'Initialize',
+    body:'Grid: [[1,1,0],[1,0,0],[0,0,1]]. Blue cells are unvisited land (1). Sea is white. We set label=2 and island_size={}. We will label each island with a unique integer ≥ 2.'
+  },
+  // Step 1: DFS from (0,0)
+  {
+    gridVals: [[1,1,0],[1,0,0],[0,0,1]],
+    curCell: [0,0],
+    ph:'Phase 1', phClass:'phase-dfs',
+    lbl:2, sz:'{}', seen:'—', res:0,
+    al:5,
+    title:'Phase 1: Found unlabeled land at (0,0)',
+    body:'The outer scan finds grid[0][0]=1. Launch DFS with label=2. The DFS will flood-fill all connected 1-cells, overwriting them with the label 2.'
+  },
+  // Step 2: after DFS island A (0,0),(0,1),(1,0) labeled 2
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,1]],
+    curCell: [0,0],
+    ph:'Phase 1', phClass:'phase-dfs',
+    lbl:2, sz:'{2:3}', seen:'—', res:0,
+    al:6,
+    title:'Island A labeled (label=2, size=3)',
+    body:'DFS visits (0,0)→(0,1)→(1,0) — all connected 1-cells. Each is overwritten with 2. DFS returns size=3. island_size[2]=3. Label increments to 3.'
+  },
+  // Step 3: scan finds (2,2)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,1]],
+    curCell: [2,2],
+    ph:'Phase 1', phClass:'phase-dfs',
+    lbl:3, sz:'{2:3}', seen:'—', res:0,
+    al:5,
+    title:'Phase 1: Found unlabeled land at (2,2)',
+    body:'Scan continues. (2,2) still has value 1 — unlabeled land. Launch DFS with label=3. (2,2) has no 1-neighbors, so DFS returns immediately with size=1.'
+  },
+  // Step 4: island B labeled
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [2,2],
+    ph:'Phase 1', phClass:'phase-dfs',
+    lbl:3, sz:'{2:3, 3:1}', seen:'—', res:0,
+    al:6,
+    title:'Island B labeled (label=3, size=1)',
+    body:'grid[2][2] = 3. DFS returns 1. island_size[3]=1. Label increments to 4. Phase 1 is complete — all land cells now carry a label ≥ 2.'
+  },
+  // Step 5: init result
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: null,
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'—', res:3,
+    al:8,
+    title:'Phase 2: Initialize result = max(3, 1) = 3',
+    body:'Before trying any flip, set result = max(island_size.values()) = 3. This handles the all-1s edge case. Now we scan for 0-cells to evaluate as flip candidates.'
+  },
+  // Step 6: try (0,2)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [0,2],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{2}', res:3,
+    al:10,
+    title:'Try flipping (0,2)',
+    body:'grid[0][2]=0, candidate. Check neighbors: up=(−1,2) OOB, down=(1,2)=0 skip, left=(0,1)=2 → add label 2 to seen, right=(0,3) OOB. seen={2}.'
+  },
+  // Step 7: size for (0,2)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [0,2],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{2}', res:4,
+    al:12,
+    title:'(0,2): sz = 1 + island_size[2] = 1 + 3 = 4 → result=4',
+    body:'sz = 1 (flipped cell) + island_size[2]=3 = 4. result = max(3, 4) = 4. Flipping (0,2) would connect it to Island A, forming a 4-cell island.'
+  },
+  // Step 8: try (1,1)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [1,1],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{2}', res:4,
+    al:10,
+    title:'Try flipping (1,1)',
+    body:'grid[1][1]=0. Neighbors: up=(0,1)=2 (A), down=(2,1)=0 skip, left=(1,0)=2 (A again!), right=(1,2)=0 skip. seen = {2} — the set deduplicates label 2 from two different neighbors.'
+  },
+  // Step 9: size for (1,1)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [1,1],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{2}', res:4,
+    al:12,
+    title:'(1,1): sz = 1 + 3 = 4 → result stays 4',
+    body:'seen = {2} (deduplicated — island A appeared twice!). sz = 1+3 = 4. result = max(4, 4) = 4. The set correctly prevented double-counting Island A.'
+  },
+  // Step 10: try (2,0)
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [2,0],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{2}', res:4,
+    al:10,
+    title:'Try flipping (2,0)',
+    body:'grid[2][0]=0. Neighbors: up=(1,0)=2 (A), down=(3,0) OOB, left=(2,−1) OOB, right=(2,1)=0 skip. seen={2}. sz=1+3=4. result stays 4.'
+  },
+  // Step 11: try (2,1) — connects to B only
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [2,1],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{3}', res:4,
+    al:10,
+    title:'Try flipping (2,1)',
+    body:'grid[2][1]=0. Neighbors: up=(1,1)=0, down=(3,1) OOB, left=(2,0)=0, right=(2,2)=3 (B). seen={3}. sz=1+1=2. result stays 4. Only connects to small Island B.'
+  },
+  // Step 12: try (1,2) — connects to B only
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: [1,2],
+    ph:'Phase 2', phClass:'phase-flip',
+    lbl:4, sz:'{2:3, 3:1}', seen:'{3}', res:4,
+    al:10,
+    title:'Try flipping (1,2)',
+    body:'grid[1][2]=0. Neighbors: up=(0,2)=0, down=(2,2)=3 (B), left=(1,1)=0, right=(1,3) OOB. seen={3}. sz=1+1=2. result stays 4.'
+  },
+  // Step 13: done
+  {
+    gridVals: [[2,2,0],[2,0,0],[0,0,3]],
+    curCell: null,
+    ph:'Done', phClass:'phase-done',
+    lbl:4, sz:'{2:3, 3:1}', seen:'—', res:4,
+    al:13,
+    title:'🎉 Answer: 4',
+    body:'After evaluating all 5 sea cells, result=4. The best flips are (0,2), (1,1), or (2,0) — each bridges Island A (size 3) with the flipped cell to yield size 4. Note how (1,1) tested the deduplication: island A was its left AND its up neighbor, but the set correctly counted it only once.'
+  }
+];
+
+let cur = 0;
+
+function cellClass(val) {
+  if (val === 0) return 'sea';
+  if (val === 1) return 'land';
+  if (val === 2) return 'isle-a';
+  if (val === 3) return 'isle-b';
+  if (val === 4) return 'isle-c';
+  return '';
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function cellLabel(val) {
+  if (val === 0) return '0';
+  if (val === 1) return '1';
+  if (val === 2) return 'A';
+  if (val === 3) return 'B';
+  if (val === 4) return 'C';
+  return String(val);
+}
+
+function buildGrid() {
+  const d = document.getElementById('grid-viz');
+  d.innerHTML = '';
+  for (let r = 0; r < N; r++) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'gcell';
+      cell.id = `g-${r}-${c}`;
+      const lbl = document.createElement('span');
+      lbl.className = 'coord-label';
+      lbl.textContent = `${r},${c}`;
+      cell.appendChild(lbl);
+      row.appendChild(cell);
+    }
+    d.appendChild(row);
+  }
+}
+
+function render(idx) {
+  const s = STEPS[idx];
+  const prev = idx > 0 ? STEPS[idx-1] : null;
+
+  // Grid
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const el = document.getElementById(`g-${r}-${c}`);
+      const val = s.gridVals[r][c];
+      el.className = 'gcell ' + cellClass(val);
+      // keep coordinate label
+      if (!el.querySelector('.coord-label')) {
+        const lbl = document.createElement('span');
+        lbl.className = 'coord-label';
+        lbl.textContent = `${r},${c}`;
+        el.appendChild(lbl);
+      }
+      // text content (before label child)
+      el.childNodes[0].nodeType === 3
+        ? el.childNodes[0].textContent = cellLabel(val)
+        : el.insertBefore(document.createTextNode(cellLabel(val)), el.firstChild);
+      // candidate ring
+      if (s.curCell && s.curCell[0]===r && s.curCell[1]===c) {
+        el.classList.add('candidate');
+      }
+    }
+  }
+
+  // var tracker
+  function setVar(boxId, valId, newVal, oldVal) {
+    const box = document.getElementById(boxId);
+    const valEl = document.getElementById(valId);
+    valEl.textContent = String(newVal);
+    box.classList.toggle('changed', prev !== null && String(newVal) !== String(oldVal));
+  }
+  setVar('vb-ph','vv-ph', s.ph, prev ? prev.ph : null);
+  setVar('vb-lbl','vv-lbl', s.lbl, prev ? prev.lbl : null);
+  setVar('vb-sz','vv-sz', s.sz, prev ? prev.sz : null);
+  setVar('vb-seen','vv-seen', s.seen, prev ? prev.seen : null);
+  setVar('vb-res','vv-res', s.res, prev ? prev.res : null);
+
+  // code panel
+  for (let i = 0; i <= 13; i++) {
+    const el = document.getElementById('cl'+i);
+    if (el) el.classList.toggle('active', i === s.al);
+  }
+
+  // info card
+  document.getElementById('phase-badge').className = 'phase-badge ' + s.phClass;
+  document.getElementById('phase-badge').textContent = s.ph;
+  document.getElementById('step-counter').textContent = `Step ${idx+1} of ${STEPS.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // progress dots
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.classList.toggle('active', i === idx);
+    d.classList.toggle('visited', i < idx);
+  });
+
+  // buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === STEPS.length - 1;
+}
+
+function go(dir) {
+  const n = cur + dir;
+  if (n < 0 || n >= STEPS.length) return;
+  cur = n;
+  render(cur);
+}
+
+function reset() { cur = 0; render(0); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// Build progress dots
+function buildDots() {
+  const d = document.getElementById('progress-dots');
+  STEPS.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.onclick = () => { cur = i; render(i); };
+    d.appendChild(dot);
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildGrid();
+buildDots();
+render(0);
 </script>
-</body></html>
+</body>
+</html>
