@@ -300,8 +300,8 @@ blocks += [
 # ── Pattern Classification ──
 blocks += [
     N.h2("🏷️ Pattern Classification"),
-    N.para(N.rich([("Main Pattern: ", {"bold": True}), ("String Processing", {})])),
-    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), ("KMP on s + '#' + reverse(s)", {})])),
+    N.para(N.rich([("Main Pattern: ", {"bold": True}), "String Processing"])),
+    N.para(N.rich([("Sub-Pattern(s): ", {"bold": True}), "KMP on s + '#' + reverse(s)"])),
     N.callout(
         "When to recognize this pattern:\n"
         "• 'Shortest/longest palindrome by adding characters to one end'\n"
@@ -324,13 +324,13 @@ blocks += [
 blocks += [
     N.h2("🔗 Related Problems"),
     N.para("Problems using the same technique (KMP / prefix-suffix matching):"),
-    N.bullet(N.rich([("Implement strStr (Needle in Haystack)", {"bold": True}), (" (Easy) — Classic KMP pattern search, same failure function. LeetCode #28.", {})])),
-    N.bullet(N.rich([("Repeated Substring Pattern", {"bold": True}), (" (Easy) — KMP LPS detects if s can be formed by repeating a substring. LeetCode #459.", {})])),
-    N.bullet(N.rich([("Longest Happy Prefix", {"bold": True}), (" (Hard) — Directly return the KMP failure function's longest prefix-suffix. LeetCode #1392.", {})])),
-    N.bullet(N.rich([("Palindrome Pairs", {"bold": True}), (" (Hard) — Find all word pairs whose concatenation is a palindrome; uses reverse matching. LeetCode #336.", {})])),
-    N.bullet(N.rich([("Shortest Palindrome (this problem)", {"bold": True}), (" (Hard) — Template: t = s + '#' + rev(s), run KMP, use lps[-1]. LeetCode #214.", {})])),
-    N.bullet(N.rich([("Longest Palindromic Substring", {"bold": True}), (" (Medium) — Manacher's algorithm for O(n) palindrome detection in full string. LeetCode #5.", {})])),
-    N.bullet(N.rich([("Find All Anagrams in a String", {"bold": True}), (" (Medium) — Sliding window + frequency count; different sub-pattern but same String Processing main pattern. LeetCode #438.", {})])),
+    N.bullet(N.rich([("Implement strStr (Needle in Haystack)", {"bold": True}), " (Easy) — Classic KMP pattern search, same failure function. LeetCode #28."])),
+    N.bullet(N.rich([("Repeated Substring Pattern", {"bold": True}), " (Easy) — KMP LPS detects if s can be formed by repeating a substring. LeetCode #459."])),
+    N.bullet(N.rich([("Longest Happy Prefix", {"bold": True}), " (Hard) — Directly return the KMP failure function's longest prefix-suffix. LeetCode #1392."])),
+    N.bullet(N.rich([("Palindrome Pairs", {"bold": True}), " (Hard) — Find all word pairs whose concatenation is a palindrome; uses reverse matching. LeetCode #336."])),
+    N.bullet(N.rich([("Shortest Palindrome (this problem)", {"bold": True}), " (Hard) — Template: t = s + '#' + rev(s), run KMP, use lps[-1]. LeetCode #214."])),
+    N.bullet(N.rich([("Longest Palindromic Substring", {"bold": True}), " (Medium) — Manacher's algorithm for O(n) palindrome detection in full string. LeetCode #5."])),
+    N.bullet(N.rich([("Find All Anagrams in a String", {"bold": True}), " (Medium) — Sliding window + frequency count; different sub-pattern but same String Processing main pattern. LeetCode #438."])),
     N.para("These problems share the core technique: using KMP's self-similarity table to answer prefix-suffix questions in linear time."),
     N.callout("📚 Reference: DSA_Patterns_and_SubPatterns_Guide.md — Section 2 (String Processing) → KMP / Z-Algorithm sub-pattern.", "📚", "gray_background"),
     N.divider(),
