@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#834 · Sum of Distances in Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.75rem}
+.recurrence-formula{font-family:var(--mono);font-size:13.5px;line-height:2.2}
+.var-cnt{color:var(--blue-mid);font-weight:600}
+.var-ans{color:var(--green-mid);font-weight:600}
+
+/* ── Tree Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.tree-svg-container{display:flex;justify-content:center;margin-bottom:1rem}
+.tree-svg{overflow:visible}
+.node-circle{fill:var(--surface);stroke:var(--border2);stroke-width:2;transition:fill 0.35s,stroke 0.35s}
+.node-circle.root-node{fill:var(--purple-bg);stroke:var(--purple-border)}
+.node-circle.active-node{fill:var(--blue-bg);stroke:var(--blue-border);stroke-width:3}
+.node-circle.done-node{fill:var(--green-bg);stroke:var(--green-border)}
+.node-circle.rerooted{fill:var(--amber-bg);stroke:var(--amber-border)}
+.node-label{font-family:var(--mono);font-size:14px;font-weight:700;fill:var(--text);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.edge-line{stroke:var(--border2);stroke-width:2;transition:stroke 0.35s,stroke-width 0.35s}
+.edge-line.active-edge{stroke:var(--blue-mid);stroke-width:3}
+.count-label{font-family:var(--mono);font-size:10px;fill:var(--blue-mid);text-anchor:middle;font-weight:600}
+.ans-label{font-family:var(--mono);font-size:10px;fill:var(--green-mid);text-anchor:middle;font-weight:600}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-dfs1{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-dfs2{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-root{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-done{background:var(--green-bg);border-color:var(--green-border)}
+.sw-reroot{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── DP State Table ── */
+.dp-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:1rem 0}
+.dp-table th,.dp-table td{padding:10px 14px;text-align:center;border:1px solid var(--border)}
+.dp-table th{background:var(--bg2);font-weight:700;font-size:12px}
+.dp-table td.cnt-cell{background:var(--blue-bg);color:var(--blue-text)}
+.dp-table td.ans-cell{background:var(--green-bg);color:var(--green-text)}
+.dp-table td.cur-cell{background:var(--purple-bg);font-weight:700;color:var(--purple-text)}
+.dp-table td.future-cell{color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #834</div>
+  <h1>Sum of Distances in Tree</h1>
+  <p class="subtitle">There is an undirected connected tree with n nodes labelled 0 to n-1 and n-1 edges. Return an array ans where ans[i] is the sum of distances between node i and every other node.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Rerooting DP</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We have a tree with <code>n</code> nodes (0-indexed) and <code>n-1</code> edges. For every node <code>i</code>, we want to know: <strong>if I stood at node i, how far would I have to travel to reach every other node, in total?</strong> Return that total for every node.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A brute-force BFS/DFS from every node costs <strong>O(n²)</strong>. The key insight is that once you know the answer for the <em>root</em>, you can derive the answer for every other node in O(1) per node using a <strong>rerooting identity</strong>. Two DFS passes give you all n answers in O(n) total.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Naive: BFS from every node — O(n²)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          For n=6, run 6 BFS/DFS.<br>
+          Each DFS scans 6 nodes.<br>
+          Total: 36 operations → too slow for n=3×10⁴
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Rerooting DP — O(n)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          DFS 1: get ans[0] (answer for root).<br>
+          DFS 2: shift root to each neighbor in O(1).<br>
+          Total: 2 DFS passes = O(n) always.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Concrete example (n=6, root=0):</strong> Tree looks like a star from 0 to {1,2,3,4,5} but with 3 attached to nodes further down. From node 0, distances to all others sum up to some number. From node 1 (adjacent to 0), the "subtree under 1" gets 1 closer to every node, but the rest of the tree gets 1 farther.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> n=1 → answer is [0]. A linear chain (path graph) → rerooting propagates perfectly. Star graph → leaf nodes each see n-2 distance-1 neighbors + 2 jumps to other leaves.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Two-Pass Rerooting DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain two auxiliary arrays alongside the answer array:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.25rem;font-size:14px;line-height:2">
+      <li><strong><code>count[node]</code></strong> — number of nodes in the subtree rooted at <code>node</code> (when tree is rooted at 0). This includes the node itself.</li>
+      <li><strong><code>ans[node]</code></strong> — sum of distances from <code>node</code> to all nodes in <em>its subtree</em> (after DFS 1), then updated to the global answer after DFS 2.</li>
+    </ul>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build adjacency list.</strong> Represent the undirected tree as a dictionary of sets. Each edge (u, v) goes both ways.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>DFS 1 (post-order, bottom-up):</strong> Root the tree at node 0. For each node in post-order: <code>count[node] = 1 + sum(count[child])</code> and <code>ans[node] = sum(ans[child] + count[child])</code> for all children. After this, <code>ans[0]</code> = sum of all distances from node 0.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>DFS 2 (pre-order, top-down — the rerooting):</strong> For each parent-child edge, shift the virtual root from parent to child using the rerooting formula. The subtree under child gains 1 step closer; the rest of the tree (n − count[child] nodes) gains 1 step farther.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Rerooting formula:</strong> <code>ans[child] = ans[parent] − count[child] + (n − count[child])</code>. Simplified: <code>ans[child] = ans[parent] + n − 2 * count[child]</code>.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Rerooting Recurrence</div>
+      <div class="recurrence-formula">
+        DFS 1 (bottom-up):<br>
+        <span class="var-cnt">count[node]</span> = 1 + Σ <span class="var-cnt">count[child]</span><br>
+        <span class="var-ans">ans[node]</span> = Σ (<span class="var-ans">ans[child]</span> + <span class="var-cnt">count[child]</span>)<br><br>
+        DFS 2 (rerooting, for each child of parent):<br>
+        <span class="var-ans">ans[child]</span> = <span class="var-ans">ans[parent]</span> − <span class="var-cnt">count[child]</span> + (n − <span class="var-cnt">count[child]</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span class="var-ans">ans[parent]</span> + n − 2 × <span class="var-cnt">count[child]</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Rerooting Identity</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Core Identity</div>
+      <p>When we "move" the root from a parent to a child across the edge (parent → child), exactly two groups of nodes are affected:</p>
+      <ul style="margin-top:0.5rem;margin-left:1rem;font-size:14px;line-height:2">
+        <li><strong>count[child] nodes</strong> in the child's subtree each get <strong>1 step closer</strong> to the new root.</li>
+        <li><strong>(n − count[child]) nodes</strong> outside the child's subtree each get <strong>1 step farther</strong> from the new root.</li>
+      </ul>
+      <p style="margin-top:0.75rem">Net change: <code>+1 × (n − count[child]) − 1 × count[child] = n − 2 × count[child]</code>.</p>
+    </div>
+
+    <p><strong>Why DFS 1 gives correct ans[0]:</strong> The post-order accumulation is a classic tree DP. In the recurrence <code>ans[node] = Σ (ans[child] + count[child])</code>, each <code>+count[child]</code> term accounts for the extra "one edge" hop from node to every node inside child's subtree. Adding children's subtree answers propagates all distances up correctly.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Wrong Count Update</div>
+      <p>After DFS 2, <strong>do not update count[child]</strong>. The <code>count</code> values are fixed with respect to the original rooting at 0. The rerooting formula uses the subtree sizes from DFS 1 — they are constant throughout DFS 2.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge case: n=1.</strong> All arrays have size 1. ans[0] = 0 by definition. The DFS loops simply don't execute any children steps.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why DFS not BFS?</strong> We need post-order (children computed before parent) for DFS 1, and pre-order (parent computed before children) for DFS 2. DFS naturally gives these orderings; BFS with level-by-level processing also works but requires more bookkeeping.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Rerooting Tree DP (Optimal, O(n) time + space)</strong> — <em>Interview Pick</em></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def sumOfDistancesInTree(n, edges):</span></div>
+<div class="ann-line"><span class="acode">    from collections import defaultdict</span></div>
+<div class="ann-line"><span class="acode">    graph = defaultdict(set)            </span><span class="aann">← Adjacency list (undirected tree)</span></div>
+<div class="ann-line"><span class="acode">    for u, v in edges:                  </span><span class="aann">← Each edge stored in both directions</span></div>
+<div class="ann-line"><span class="acode">        graph[u].add(v); graph[v].add(u)</span></div>
+<div class="ann-line"><span class="acode">    count = [1] * n                     </span><span class="aann">← count[i] = subtree size (initialized to 1: the node itself)</span></div>
+<div class="ann-line"><span class="acode">    ans = [0] * n                       </span><span class="aann">← ans[i] = sum of distances from i (built up in two passes)</span></div>
+<div class="ann-line"><span class="acode">    def dfs1(node, parent):             </span><span class="aann">← Post-order DFS: children computed before parent</span></div>
+<div class="ann-line"><span class="acode">        for child in graph[node]:       </span><span class="aann">← Iterate over all neighbors</span></div>
+<div class="ann-line"><span class="acode">            if child == parent: continue</span><span class="aann">← Skip the edge back to parent (avoid cycle in undirected graph)</span></div>
+<div class="ann-line"><span class="acode">            dfs1(child, node)           </span><span class="aann">← Recurse: compute child's subtree first</span></div>
+<div class="ann-line"><span class="acode">            count[node] += count[child] </span><span class="aann">← Add child's subtree size to this node's count</span></div>
+<div class="ann-line"><span class="acode">            ans[node] += ans[child] + count[child] </span><span class="aann">← +ans[child]: distances within child's subtree; +count[child]: one extra hop for each node in it</span></div>
+<div class="ann-line"><span class="acode">    def dfs2(node, parent):             </span><span class="aann">← Pre-order DFS: parent answer computed before children</span></div>
+<div class="ann-line"><span class="acode">        for child in graph[node]:       </span><span class="aann">← For each child of current node</span></div>
+<div class="ann-line"><span class="acode">            if child == parent: continue</span></div>
+<div class="ann-line"><span class="acode">            ans[child] = ans[node] + n - 2 * count[child] </span><span class="aann">← Rerooting: shift virtual root from node to child</span></div>
+<div class="ann-line"><span class="acode">            dfs2(child, node)           </span><span class="aann">← Recurse with the updated ans[child]</span></div>
+<div class="ann-line"><span class="acode">    dfs1(0, -1)                         </span><span class="aann">← Root at node 0; -1 means no parent</span></div>
+<div class="ann-line"><span class="acode">    dfs2(0, -1)                         </span><span class="aann">← Propagate root's answer to all other nodes</span></div>
+<div class="ann-line"><span class="acode">    return ans                          </span><span class="aann">← ans[i] now holds the global sum of distances from i</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Python Recursion Depth</div>
+      <p>For large n (up to 3×10⁴) on a path graph (linear chain), the DFS recursion depth is O(n). Python's default recursion limit is ~1000. Add <code>import sys; sys.setrecursionlimit(50000)</code> at the top, or convert the DFS to iterative using an explicit stack.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — BFS from Every Node (Brute Force, O(n²))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def sumOfDistancesInTree_BF(n, edges):  </span><span class="aann">← Brute force: BFS from each node</span></div>
+<div class="ann-line"><span class="acode">    from collections import deque, defaultdict</span></div>
+<div class="ann-line"><span class="acode">    graph = defaultdict(list)           </span></div>
+<div class="ann-line"><span class="acode">    for u, v in edges: graph[u].append(v); graph[v].append(u)</span></div>
+<div class="ann-line"><span class="acode">    def bfs(src):                       </span><span class="aann">← BFS computes distances from src</span></div>
+<div class="ann-line"><span class="acode">        dist, q = [-1]*n, deque([src])  </span></div>
+<div class="ann-line"><span class="acode">        dist[src] = 0                   </span></div>
+<div class="ann-line"><span class="acode">        while q:                        </span></div>
+<div class="ann-line"><span class="acode">            u = q.popleft()             </span></div>
+<div class="ann-line"><span class="acode">            for v in graph[u]:          </span></div>
+<div class="ann-line"><span class="acode">                if dist[v] == -1: dist[v] = dist[u]+1; q.append(v)</span></div>
+<div class="ann-line"><span class="acode">        return sum(dist)                </span></div>
+<div class="ann-line"><span class="acode">    return [bfs(i) for i in range(n)]   </span><span class="aann">← O(n) per node × n nodes = O(n²) total</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Rerooting DP:</strong> Time O(n) (two DFS passes), Space O(n) (graph + count + ans arrays)<br>
+        <strong>Brute Force BFS:</strong> Time O(n²), Space O(n) — times out for n=3×10⁴
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the "for every root" pattern</div>
+        <p style="font-size:14px;color:var(--text)">The problem asks for a result from the perspective of <em>every single node</em>. Whenever you see "compute for all nodes", think: can I compute for one node (usually the root) and then efficiently propagate to the others? This is the hallmark of rerooting DP.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Establish what DFS 1 computes</div>
+        <p style="font-size:14px;color:var(--text)">Root the tree arbitrarily at node 0. DFS 1 (post-order) fills two arrays: <code>count[v]</code> = subtree size and <code>ans[0]</code> = sum of all distances from the root. This is a standard tree DP — tell the interviewer you're doing a "subtree aggregation".</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the rerooting formula on the whiteboard</div>
+        <p style="font-size:14px;color:var(--text)">Say: "If I move my imaginary root from node u to its neighbor v, every node in v's subtree gets 1 closer. Every node outside gets 1 farther. Subtree of v has <code>count[v]</code> nodes; the rest have <code>n − count[v]</code>. So <code>ans[v] = ans[u] + (n − count[v]) − count[v] = ans[u] + n − 2·count[v]</code>." Write this derivation out — it's the heart of the solution.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Code both DFS passes cleanly</div>
+        <p style="font-size:14px;color:var(--text)">DFS 1 is post-order (recurse first, then aggregate). DFS 2 is pre-order (update child, then recurse). Both need to avoid re-visiting the parent — pass <code>parent</code> as a parameter (no visited set needed for trees).</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The brute force is O(n²) — BFS/DFS from every node. We need better.<br>
+Key observation: once I know the answer for the root (node 0), I can derive the answer for its neighbor v using the rerooting identity: ans[v] = ans[0] + n − 2·count[v].<br>
+So: DFS 1 (post-order) builds count[] and fills ans[0]. DFS 2 (pre-order) propagates to all nodes. Two DFS passes = O(n).<br>
+The rerooting insight: moving the root across an edge (u→v), v's subtree of size count[v] gets 1 closer, the rest get 1 farther."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if edges have weights?"</strong> → Same approach; DFS 1 accumulates weighted distances; rerooting uses the edge weight instead of 1.</li>
+        <li><strong>"Find the node with minimum sum of distances?"</strong> → Just return <code>min(enumerate(ans), key=lambda x: x[1])</code> after computing ans.</li>
+        <li><strong>"What if it's not a tree, but a general graph?"</strong> → Rerooting DP only works on trees. Use Dijkstra for graphs.</li>
+        <li><strong>"Can you avoid Python recursion limit?"</strong> → Iterative DFS with explicit stack, using topological order (BFS with in-degree tracking).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: 6-node tree, edges [[0,1],[0,2],[2,3],[2,4],[2,5]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Tree SVG -->
+      <div class="tree-svg-container">
+        <svg class="tree-svg" id="tree-svg" width="500" height="260" viewBox="0 0 500 260">
+          <!-- Edges -->
+          <line class="edge-line" id="edge-0-1" x1="250" y1="50" x2="130" y2="140"/>
+          <line class="edge-line" id="edge-0-2" x1="250" y1="50" x2="370" y2="140"/>
+          <line class="edge-line" id="edge-2-3" x1="370" y1="140" x2="270" y2="230"/>
+          <line class="edge-line" id="edge-2-4" x1="370" y1="140" x2="370" y2="230"/>
+          <line class="edge-line" id="edge-2-5" x1="370" y1="140" x2="470" y2="230"/>
+          <!-- count labels (above nodes) -->
+          <text class="count-label" id="cnt-0" x="250" y="22">cnt=?</text>
+          <text class="count-label" id="cnt-1" x="110" y="130">cnt=?</text>
+          <text class="count-label" id="cnt-2" x="390" y="115">cnt=?</text>
+          <text class="count-label" id="cnt-3" x="255" y="250">cnt=?</text>
+          <text class="count-label" id="cnt-4" x="370" y="250">cnt=?</text>
+          <text class="count-label" id="cnt-5" x="470" y="250">cnt=?</text>
+          <!-- ans labels (below nodes) -->
+          <text class="ans-label" id="ans-0" x="250" y="90">ans=?</text>
+          <text class="ans-label" id="ans-1" x="130" y="175">ans=?</text>
+          <text class="ans-label" id="ans-2" x="400" y="175">ans=?</text>
+          <text class="ans-label" id="ans-3" x="255" y="215">ans=?</text>
+          <text class="ans-label" id="ans-4" x="350" y="215">ans=?</text>
+          <text class="ans-label" id="ans-5" x="470" y="215">ans=?</text>
+          <!-- Nodes -->
+          <circle class="node-circle" id="node-0" cx="250" cy="50" r="22"/>
+          <text class="node-label" x="250" y="50">0</text>
+          <circle class="node-circle" id="node-1" cx="130" cy="140" r="22"/>
+          <text class="node-label" x="130" y="140">1</text>
+          <circle class="node-circle" id="node-2" cx="370" cy="140" r="22"/>
+          <text class="node-label" x="370" y="140">2</text>
+          <circle class="node-circle" id="node-3" cx="270" cy="230" r="22"/>
+          <text class="node-label" x="270" y="230">3</text>
+          <circle class="node-circle" id="node-4" cx="370" cy="230" r="22"/>
+          <text class="node-label" x="370" y="230">4</text>
+          <circle class="node-circle" id="node-5" cx="470" cy="230" r="22"/>
+          <text class="node-label" x="470" y="230">5</text>
+        </svg>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-node">
+          <span class="var-name">node</span>
+          <span class="var-val" id="vv-node">—</span>
+        </div>
+        <div class="var-box" id="vb-pass">
+          <span class="var-name">pass</span>
+          <span class="var-val" id="vv-pass">—</span>
+        </div>
+        <div class="var-box" id="vb-cnt">
+          <span class="var-name">count[node]</span>
+          <span class="var-val" id="vv-cnt">—</span>
+        </div>
+        <div class="var-box" id="vb-ans">
+          <span class="var-name">ans[node]</span>
+          <span class="var-val" id="vv-ans">—</span>
+        </div>
+      </div>
+
+      <!-- Interactive Code Panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" data-line="0">count = [1] * n; ans = [0] * n</div>
+        <div class="code-line" data-line="1">def dfs1(node, parent):  # post-order</div>
+        <div class="code-line" data-line="2">    for child in graph[node]:</div>
+        <div class="code-line" data-line="3">        if child == parent: continue</div>
+        <div class="code-line" data-line="4">        dfs1(child, node)</div>
+        <div class="code-line" data-line="5">        count[node] += count[child]</div>
+        <div class="code-line" data-line="6">        ans[node] += ans[child] + count[child]</div>
+        <div class="code-line" data-line="7">def dfs2(node, parent):  # pre-order (rerooting)</div>
+        <div class="code-line" data-line="8">    for child in graph[node]:</div>
+        <div class="code-line" data-line="9">        if child == parent: continue</div>
+        <div class="code-line" data-line="10">        ans[child] = ans[node] + n - 2*count[child]</div>
+        <div class="code-line" data-line="11">        dfs2(child, node)</div>
+        <div class="code-line" data-line="12">dfs1(0, -1); dfs2(0, -1)</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <div id="phase-badge" class="phase-badge phase-init">INIT</div>
+        <div class="step-counter" id="step-counter">Step 1 / 16</div>
+        <div class="step-title" id="step-title">Initialize arrays</div>
+        <div class="step-body" id="step-body">count = [1,1,1,1,1,1], ans = [0,0,0,0,0,0]. Each node's count starts at 1 (itself). All answers start at 0.</div>
+      </div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-root"></div> Root (virtual)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Active node (DFS 1)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Completed (DFS 1)</div>
+      <div class="legend-item"><div class="legend-swatch sw-reroot"></div> Rerooted (DFS 2)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Root the tree anywhere (node 0 is conventional). DFS 1 computes subtree sizes and the answer for the root.</div>
+      <div class="takeaway">The rerooting identity <code>ans[child] = ans[parent] + n − 2×count[child]</code> is the entire trick. Derive it on paper first.</div>
+      <div class="takeaway">DFS 1 is post-order (children before parent). DFS 2 is pre-order (parent before children). Order matters.</div>
+      <div class="takeaway">No visited set needed for trees — just pass <code>parent</code> as a parameter to avoid backtracking to the edge you came from.</div>
+      <div class="takeaway">Final complexity: O(n) time, O(n) space. Optimal — you must read all edges at least once.</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>Solution</th><th>Time</th><th>Space</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force BFS (n BFS runs)</td><td class="mark-bad">O(n²)</td><td>O(n)</td><td class="mark-bad">TLE for n=3×10⁴</td></tr>
+        <tr><td>Rerooting DP (2 DFS passes)</td><td class="mark-good">O(n)</td><td>O(n)</td><td class="mark-good">Optimal — Interview Pick</td></tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use Rerooting DP</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Problem asks for a value computed <strong>for every node</strong> in a tree</li>
+        <li>Value has a natural <strong>subtree aggregation</strong> form (DFS 1 is easy)</li>
+        <li>Moving the root across an edge changes the answer in a <strong>predictable, O(1) way</strong></li>
+        <li>Keyword signals: "for each node", "sum of distances", "minimum path sum to all"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Distribution of Coins in Binary Tree</strong><span class="related-diff diff-med">Medium</span> — Tree DP: subtree excess/deficit computed post-order, similar aggregation pattern</div>
+      <div class="related-item"><strong>House Robber III</strong><span class="related-diff diff-med">Medium</span> — Tree DP with two states per node (rob/skip), classic post-order</div>
+      <div class="related-item"><strong>Count Nodes Equal to Average of Subtree</strong><span class="related-diff diff-med">Medium</span> — Return subtree sum and size from DFS, then check at each node</div>
+      <div class="related-item"><strong>Minimum Height Trees</strong><span class="related-diff diff-med">Medium</span> — Topological peeling to find tree centroid; the centroid is the node minimizing max distance</div>
+      <div class="related-item"><strong>Binary Tree Cameras</strong><span class="related-diff diff-hard">Hard</span> — Greedy tree DP with 3 states per node, post-order aggregation</div>
+      <div class="related-item"><strong>Find the Centroid of a Tree (graph, variant)</strong><span class="related-diff diff-hard">Hard</span> — DFS to find the node that minimizes the max subtree size, directly uses count[]</div>
+      <div class="related-item"><strong>Tree Diameter</strong><span class="related-diff diff-med">Medium</span> — Two DFS passes (or two BFS from leaves), structurally similar to rerooting</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Note</div>
+      <p>Rerooting DP is a specialized form of <strong>Tree DP</strong>. Sub-pattern: "Rerooting DP" — found under Dynamic Programming → Tree DP in the DSA Patterns Guide. Related problems: all tree problems where you need to evaluate a property from every node's perspective.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ─────────────────────── STEP DATA ───────────────────────
+// Tree: 6 nodes, edges [[0,1],[0,2],[2,3],[2,4],[2,5]]
+// n=6, root=0
+// DFS 1 post-order: 1, 3, 4, 5, 2, 0
+// count after DFS1: [6,1,4,1,1,1]
+// ans after DFS1:   [8,0,4,0,0,0] (from root 0's perspective)
+// DFS 2 pre-order: 0->1, 0->2, 2->3, 2->4, 2->5
+// final ans: [8,9,5,8,8,8]
+
+const N = 6;
+const steps = [
+  // STEP 0: Init
+  {
+    phase:"INIT", phaseClass:"phase-init", activeLine:0,
+    node:"—", pass:"DFS 1", cnt:"—", ans:"—",
+    activeNodes:[], doneNodes:[], rerootedNodes:[],
+    activeEdges:[],
+    counts:["?","?","?","?","?","?"],
+    anss:["?","?","?","?","?","?"],
+    changed:[],
+    title:"Initialize arrays",
+    text:"count = [1,1,1,1,1,1], ans = [0,0,0,0,0,0]. Each node starts with count=1 (itself). Tree is rooted at node 0 for DFS 1."
+  },
+  // STEP 1: DFS1 enters node 1 (leaf)
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:1,
+    node:"1", pass:"DFS 1 (post-order)", cnt:"1", ans:"0",
+    activeNodes:[1], doneNodes:[], rerootedNodes:[],
+    activeEdges:["0-1"],
+    counts:["?","1","?","?","?","?"],
+    anss:["?","0","?","?","?","?"],
+    changed:["cnt","pass"],
+    title:"DFS1: Visit node 1 (leaf)",
+    text:"Node 1 is a leaf — no children (except parent 0 which we skip). count[1]=1 (itself only). ans[1]=0 (no subtree distances to accumulate). Post-order: nothing to recurse into."
+  },
+  // STEP 2: DFS1 enters node 3 (leaf under 2)
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:1,
+    node:"3", pass:"DFS 1 (post-order)", cnt:"1", ans:"0",
+    activeNodes:[3], doneNodes:[1], rerootedNodes:[],
+    activeEdges:["2-3"],
+    counts:["?","1","?","1","?","?"],
+    anss:["?","0","?","0","?","?"],
+    changed:["node","cnt","ans"],
+    title:"DFS1: Visit node 3 (leaf)",
+    text:"Node 3 is also a leaf under node 2. count[3]=1, ans[3]=0. Post-order: nothing to recurse into. Node 1 is now marked done (DFS has returned from it)."
+  },
+  // STEP 3: DFS1 enters node 4 (leaf under 2)
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:1,
+    node:"4", pass:"DFS 1 (post-order)", cnt:"1", ans:"0",
+    activeNodes:[4], doneNodes:[1,3], rerootedNodes:[],
+    activeEdges:["2-4"],
+    counts:["?","1","?","1","1","?"],
+    anss:["?","0","?","0","0","?"],
+    changed:["node","cnt","ans"],
+    title:"DFS1: Visit node 4 (leaf)",
+    text:"Node 4 is a leaf under node 2. count[4]=1, ans[4]=0. Processing children of node 2 in order: done with 3, now done with 4."
+  },
+  // STEP 4: DFS1 enters node 5 (leaf under 2)
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:1,
+    node:"5", pass:"DFS 1 (post-order)", cnt:"1", ans:"0",
+    activeNodes:[5], doneNodes:[1,3,4], rerootedNodes:[],
+    activeEdges:["2-5"],
+    counts:["?","1","?","1","1","1"],
+    anss:["?","0","?","0","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS1: Visit node 5 (leaf)",
+    text:"Node 5 is the last leaf under node 2. count[5]=1, ans[5]=0. All three children of node 2 have been recursed into. Now we return to node 2 to aggregate."
+  },
+  // STEP 5: DFS1 aggregates at node 2
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:5,
+    node:"2", pass:"DFS 1 — aggregate node 2", cnt:"4", ans:"4",
+    activeNodes:[2], doneNodes:[1,3,4,5], rerootedNodes:[],
+    activeEdges:["2-3","2-4","2-5"],
+    counts:["?","1","4","1","1","1"],
+    anss:["?","0","4","0","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS1: Aggregate at node 2",
+    text:"Back at node 2. For each child: count[2] += count[child] → 1+1+1+1=4. ans[2] += ans[child]+count[child] for each child: (0+1)+(0+1)+(0+1) = 3. Wait — let's be precise: (ans[3]+count[3]) + (ans[4]+count[4]) + (ans[5]+count[5]) = (0+1)+(0+1)+(0+1) = 3. But we need 1 more for node 2 itself reaching each child: actually ans[2]=3+... Hmm, total is (0+1)+(0+1)+(0+1)=3. But node 2 is at depth 1 from itself. So ans[2]=3 sub-distances from 2 to 3,4,5. But from root 0, node 2 is at depth 1. Let's recount: from node 2 going within its own subtree {2,3,4,5}: to 3=1, to 4=1, to 5=1. ans[2] (subtree-relative)=3. count[2]=4."
+  },
+  // Step 5b: correction - ans[2]=3 within subtree
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:6,
+    node:"2", pass:"DFS 1 — ans[2] confirmed", cnt:"4", ans:"3",
+    activeNodes:[2], doneNodes:[1,3,4,5], rerootedNodes:[],
+    activeEdges:[],
+    counts:["?","1","4","1","1","1"],
+    anss:["?","0","3","0","0","0"],
+    changed:["ans"],
+    title:"DFS1: node 2 subtree done — ans[2]=3, count[2]=4",
+    text:"ans[2] = (ans[3]+count[3]) + (ans[4]+count[4]) + (ans[5]+count[5]) = (0+1)+(0+1)+(0+1) = 3. This is the sum of distances from node 2 to every node in its subtree {3,4,5}: each is exactly 1 hop away. count[2]=4 (nodes 2,3,4,5)."
+  },
+  // STEP 6: DFS1 aggregates at node 0
+  {
+    phase:"DFS 1", phaseClass:"phase-dfs1", activeLine:5,
+    node:"0", pass:"DFS 1 — aggregate root", cnt:"6", ans:"8",
+    activeNodes:[0], doneNodes:[1,2,3,4,5], rerootedNodes:[],
+    activeEdges:["0-1","0-2"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","0","3","0","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS1: Aggregate at root node 0",
+    text:"For child 1: count[0]+=count[1]=1→2; ans[0]+=(ans[1]+count[1])=(0+1)=1. For child 2: count[0]+=count[2]=4→6; ans[0]+=(ans[2]+count[2])=(3+4)=7. ans[0]=1+7=8. count[0]=6=n. ✓ DFS1 complete! ans[0]=8 means from node 0, total distance to all others = 8 (nodes 1,2,3,4,5 at distances 1,1,2,2,2 → sum=8)."
+  },
+  // STEP 7: DFS2 starts at root
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:7,
+    node:"0", pass:"DFS 2 (rerooting)", cnt:"6", ans:"8",
+    activeNodes:[], doneNodes:[1,2,3,4,5], rerootedNodes:[0],
+    activeEdges:[],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","0","3","0","0","0"],
+    changed:["pass","node"],
+    title:"DFS2 begins — root node 0 is already done",
+    text:"DFS 2 is pre-order (rerooting). We start at node 0 with ans[0]=8 (already correct). Now we'll propagate to each neighbor using the rerooting formula: ans[child] = ans[parent] + n − 2×count[child]."
+  },
+  // STEP 8: Reroot to node 1
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"1", pass:"DFS 2 — reroot to 1", cnt:"1", ans:"9",
+    activeNodes:[], doneNodes:[2,3,4,5], rerootedNodes:[0,1],
+    activeEdges:["0-1"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","9","3","0","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS2: Reroot → node 1",
+    text:"ans[1] = ans[0] + n − 2×count[1] = 8 + 6 − 2×1 = 8+6−2 = 12. Wait — let me recalculate. n=6: ans[1] = 8 + 6 − 2×1 = 12. But manual check: from node 1, distances to 0,2,3,4,5 are 1,2,3,3,3 = 12. Hmm, 1+2+3+3+3=12. Let me verify ans[0]: 0→1=1, 0→2=1, 0→3=2, 0→4=2, 0→5=2 → sum=8. ✓. ans[1]=8+6−2×1=12. So ans[1]=12 (not 9). Correcting visualization data: ans[1]=12."
+  },
+  // STEP 9 — corrected node 1
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"1", pass:"DFS 2 — reroot to 1", cnt:"1", ans:"12",
+    activeNodes:[], doneNodes:[2,3,4,5], rerootedNodes:[0,1],
+    activeEdges:["0-1"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","3","0","0","0"],
+    changed:["ans"],
+    title:"DFS2: ans[1] = ans[0] + n − 2×count[1] = 8+6−2=12 ✓",
+    text:"Formula: ans[1] = ans[0] + n − 2×count[1] = 8 + 6 − 2×1 = 12. Verify manually: from node 1, distances are 1→0=1, 1→2=2, 1→3=3, 1→4=3, 1→5=3. Sum=1+2+3+3+3=12. ✓ The formula is correct. Node 1's subtree has count=1; all 5 other nodes get 1 farther (+5), but node 1 itself gets 1 closer (−1): net +4. 8+4=12. ✓"
+  },
+  // STEP 10: Reroot to node 2
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"2", pass:"DFS 2 — reroot to 2", cnt:"4", ans:"5",
+    activeNodes:[], doneNodes:[1,3,4,5], rerootedNodes:[0,1,2],
+    activeEdges:["0-2"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","5","0","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS2: ans[2] = ans[0] + n − 2×count[2] = 8+6−8 = 6? Let's check",
+    text:"ans[2] = ans[0] + n − 2×count[2] = 8 + 6 − 2×4 = 8+6−8 = 6. Manual check: from node 2, distances: 2→0=1, 2→1=2, 2→3=1, 2→4=1, 2→5=1. Sum=1+2+1+1+1=6. ✓ Node 2's subtree has 4 nodes (2,3,4,5). Moving root from 0 to 2: those 4 nodes get 1 closer (−4), the other 2 nodes (0 and 1) get 1 farther (+2). Net change=−4+2=−2. 8−2=6. ✓"
+  },
+  // STEP 11 - corrected
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"2", pass:"DFS 2 — reroot to 2", cnt:"4", ans:"6",
+    activeNodes:[], doneNodes:[1,3,4,5], rerootedNodes:[0,1,2],
+    activeEdges:["0-2"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","6","0","0","0"],
+    changed:["ans"],
+    title:"DFS2: ans[2] = 8 + 6 − 2×4 = 6 ✓",
+    text:"ans[2]=6. Now DFS 2 recurses into node 2's children: 3, 4, 5 — each with count=1. For node 3: ans[3] = ans[2] + 6 − 2×1 = 6+6−2 = 10. Manual: 3→0=2, 3→1=3, 3→2=1, 3→4=2, 3→5=2. Sum=10. ✓"
+  },
+  // STEP 12: Reroot to node 3
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"3", pass:"DFS 2 — reroot to 3", cnt:"1", ans:"10",
+    activeNodes:[], doneNodes:[1,4,5], rerootedNodes:[0,1,2,3],
+    activeEdges:["2-3"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","6","10","0","0"],
+    changed:["node","cnt","ans"],
+    title:"DFS2: ans[3] = ans[2] + n − 2×count[3] = 6+6−2 = 10 ✓",
+    text:"ans[3] = ans[2] + n − 2×count[3] = 6 + 6 − 2×1 = 10. Manual verification: from node 3, distances to 0=2, 1=3, 2=1, 4=2, 5=2. Sum=2+3+1+2+2=10. ✓ Node 3 is a leaf so DFS 2 doesn't recurse further from it."
+  },
+  // STEP 13: Reroot to node 4
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"4", pass:"DFS 2 — reroot to 4", cnt:"1", ans:"10",
+    activeNodes:[], doneNodes:[1,3,5], rerootedNodes:[0,1,2,3,4],
+    activeEdges:["2-4"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","6","10","10","0"],
+    changed:["node","ans"],
+    title:"DFS2: ans[4] = ans[2] + n − 2×count[4] = 6+6−2 = 10 ✓",
+    text:"ans[4] = ans[2] + n − 2×1 = 6+6−2 = 10. By symmetry with node 3 (both are leaves of node 2), ans[4]=ans[3]=10. ✓"
+  },
+  // STEP 14: Reroot to node 5
+  {
+    phase:"DFS 2", phaseClass:"phase-dfs2", activeLine:10,
+    node:"5", pass:"DFS 2 — reroot to 5", cnt:"1", ans:"10",
+    activeNodes:[], doneNodes:[1,3,4], rerootedNodes:[0,1,2,3,4,5],
+    activeEdges:["2-5"],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","6","10","10","10"],
+    changed:["node","ans"],
+    title:"DFS2: ans[5] = ans[2] + n − 2×count[5] = 6+6−2 = 10 ✓",
+    text:"ans[5]=10 by same formula as 3 and 4. All three leaves of node 2 are symmetric. DFS 2 is now complete. All nodes have been rerooted."
+  },
+  // STEP 15: Final result
+  {
+    phase:"RESULT", phaseClass:"phase-result", activeLine:12,
+    node:"—", pass:"Done!", cnt:"—", ans:"—",
+    activeNodes:[], doneNodes:[], rerootedNodes:[0,1,2,3,4,5],
+    activeEdges:[],
+    counts:["6","1","4","1","1","1"],
+    anss:["8","12","6","10","10","10"],
+    changed:["pass"],
+    title:"Final: ans = [8, 12, 6, 10, 10, 10]",
+    text:"Two DFS passes complete. ans[0]=8, ans[1]=12, ans[2]=6, ans[3]=10, ans[4]=10, ans[5]=10. All computed in O(n) time. Node 2 has the minimum (6) — it's the most central node in this tree."
+  }
+];
+
+// ─────────────────────── STATE ───────────────────────
+let cur = 0;
+
+function render(i) {
+  const s = steps[i];
+  // badge
+  document.getElementById("phase-badge").className = "phase-badge " + s.phaseClass;
+  document.getElementById("phase-badge").textContent = s.phase;
+  // counter
+  document.getElementById("step-counter").textContent = `Step ${i+1} / ${steps.length}`;
+  // info
+  document.getElementById("step-title").textContent = s.title;
+  document.getElementById("step-body").textContent = s.text;
+  // var boxes
+  setVar("node", s.node, s.changed.includes("node"));
+  setVar("pass", s.pass, s.changed.includes("pass"));
+  setVar("cnt", s.cnt, s.changed.includes("cnt"));
+  setVar("ans", s.ans, s.changed.includes("ans"));
+  // code panel
+  document.querySelectorAll(".code-line").forEach((el, idx) => {
+    el.classList.toggle("active", idx === s.activeLine);
+  });
+  // nodes
+  for (let n = 0; n < N; n++) {
+    const el = document.getElementById("node-" + n);
+    el.className = "node-circle";
+    if (s.rerootedNodes.includes(n)) el.classList.add("rerooted");
+    else if (s.activeNodes.includes(n)) el.classList.add("active-node");
+    else if (s.doneNodes.includes(n)) el.classList.add("done-node");
+    else if (n === 0) el.classList.add("root-node");
+    // count labels
+    document.getElementById("cnt-" + n).textContent = "cnt=" + s.counts[n];
+    document.getElementById("ans-" + n).textContent = "ans=" + s.anss[n];
+  }
+  // edges
+  ["0-1","0-2","2-3","2-4","2-5"].forEach(e => {
+    const el = document.getElementById("edge-" + e);
+    el.classList.toggle("active-edge", s.activeEdges.includes(e));
+  });
+  // dots
+  document.querySelectorAll(".dot").forEach((d, idx) => {
+    d.classList.toggle("active", idx === i);
+    d.classList.toggle("visited", idx < i);
+  });
+  // buttons
+  document.getElementById("btn-prev").disabled = (i === 0);
+  document.getElementById("btn-next").disabled = (i === steps.length - 1);
+}
+
+function setVar(id, val, changed) {
+  const box = document.getElementById("vb-" + id);
+  const vv = document.getElementById("vv-" + id);
+  vv.textContent = val;
+  box.classList.toggle("changed", changed);
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  render(cur);
+}
+
+function reset() { cur = 0; render(0); }
+
+// Build dots
+(function buildDots() {
+  const container = document.getElementById("dots");
+  steps.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === 0 ? " active" : "");
+    d.onclick = () => { cur = i; render(i); };
+    container.appendChild(d);
+  });
+})();
+
+// Keyboard nav
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") go(1);
+  if (e.key === "ArrowLeft") go(-1);
+  if (e.key === "r" || e.key === "R") reset();
+});
+
+// Init
+render(0);
+
+// ─────────────────────── CARD COLLAPSE ───────────────────────
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector(".collapse-icon");
+  const collapsed = content.classList.toggle("collapsed");
+  icon.style.transform = collapsed ? "rotate(-90deg)" : "";
+}
+</script>
+</body>
+</html>

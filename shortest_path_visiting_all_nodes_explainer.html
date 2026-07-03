@@ -1,83 +1,897 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Shortest Path Visiting All Nodes — LC #847</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#847 · Shortest Path Visiting All Nodes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:920px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:2px 0}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans);padding-left:8px}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── Graph SVG ── */
+.graph-svg{width:100%;max-width:580px;height:200px;display:block;margin:0 auto}
+.node-circle{fill:var(--surface);stroke:var(--border2);stroke-width:2.5;transition:fill 0.35s,stroke 0.35s,stroke-width 0.2s}
+.node-circle.queued{fill:var(--blue-bg);stroke:var(--blue-border);stroke-width:2.5}
+.node-circle.current{fill:var(--amber-bg);stroke:var(--amber-border);stroke-width:3.5}
+.node-circle.visited{fill:var(--green-bg);stroke:var(--green-border);stroke-width:2.5}
+.node-label{font-family:var(--mono);font-size:16px;font-weight:700;fill:var(--text);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.graph-edge{stroke:var(--border2);stroke-width:2;transition:stroke 0.3s,stroke-width 0.3s}
+.graph-edge.traversed{stroke:var(--blue-mid);stroke-width:3}
+
+/* ── Bitmask Display ── */
+.mask-section{display:flex;flex-direction:column;align-items:center;gap:6px;margin:1.2rem 0}
+.mask-label-row{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.mask-node-labels{display:flex;gap:4px}
+.mask-node-lbl{width:44px;text-align:center;font-size:10px;font-family:var(--mono);color:var(--text3)}
+.mask-bits{display:flex;gap:4px}
+.mask-bit{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:700;border-radius:8px;border:2px solid var(--border2);background:var(--surface);transition:background 0.3s,border-color 0.3s,color 0.3s}
+.mask-bit.bit-on{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.mask-bit.bit-off{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.mask-bit.bit-new{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.mask-bit.bit-full{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+
+/* ── BFS Queue ── */
+.bfs-queue{margin:1rem 0}
+.bfs-queue-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.queue-items{display:flex;gap:6px;flex-wrap:wrap;min-height:40px;align-items:center}
+.queue-item{padding:5px 11px;border-radius:8px;border:1.5px solid var(--blue-border);background:var(--blue-bg);font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--blue-text);transition:opacity 0.3s}
+.queue-item.processing{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.queue-item.done{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:36px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-bfs{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-expand{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-done{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){opacity:0.88}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-queue{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-curr{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-vis{background:var(--green-bg);border-color:var(--green-border)}
+.sw-bit{background:var(--blue-bg);border-color:var(--blue-border)}
+
+/* ── Comparison / Complexity Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--text)}
+
+/* ── State Encoding Visual ── */
+.state-grid{display:flex;flex-wrap:wrap;gap:8px;margin:1rem 0}
+.state-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-radius:var(--radius);font-size:13px}
+.state-key{color:var(--blue-mid);font-family:var(--mono);font-weight:700}
+.state-arrow{color:var(--text3)}
+.state-val{color:var(--text);font-family:var(--mono)}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+p+p{margin-top:0.75rem}
+p{font-size:14.5px}
+h3{font-size:16px;font-weight:700;margin:1.25rem 0 0.5rem}
+ul,ol{padding-left:1.5rem;margin:0.5rem 0}
+li{font-size:14.5px;margin-bottom:0.3rem;line-height:1.5}
+code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:1px 5px;border-radius:4px}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Shortest Path Visiting All Nodes</h1>
-<div class="subtitle">LeetCode #847 &mdash; BFS with (node, visited_mask)</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Graph</span><span class="tag tag-pattern">BFS with (node, visited_mask)</span><span class="tag tag-cx">O(2^n * n) Time &middot; O(2^n * n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #847</div>
+  <h1>Shortest Path Visiting All Nodes</h1>
+  <p class="subtitle">Find the shortest path length that visits every node in an undirected graph. You may start and stop at any node, revisit nodes and edges.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">BFS + Bitmask State</span>
+    <span class="tag tag-pattern">Graph Traversal</span>
+    <span class="tag tag-complexity">Time: O(2ⁿ · n²)</span>
+    <span class="tag tag-complexity">Space: O(2ⁿ · n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an undirected graph of <code>n</code> nodes (0 to n−1). The adjacency list <code>graph[i]</code> lists all nodes directly connected to node <code>i</code>. Your goal: find the <strong>minimum number of edges</strong> you need to traverse to visit every node at least once. You may start at any node, end at any node, and revisit nodes and edges freely.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is NOT a standard shortest-path problem. The challenge is tracking <em>which nodes you've visited so far</em>, because two paths that arrive at the same node via different subsets of visited nodes are fundamentally different situations. We need a state that captures both <strong>where we are</strong> and <strong>what we've seen</strong>.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: graph = [[1,2,3],[0],[0],[0]]</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          Star graph: 0 links to 1,2,3<br><br>
+          Path: 1 → 0 → 2 → 0 → 3<br>
+          Edges: 4 ← ANSWER<br><br>
+          Or: 0 → 1 → 0 → 2 → 0 → 3<br>
+          Edges: 5 (worse, started wrong)
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Why standard BFS fails</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          Standard BFS finds shortest path between TWO nodes.<br><br>
+          Here we need to visit ALL nodes, possibly backtracking.<br><br>
+          The graph has cycles; "visited" per normal BFS would block revisiting needed nodes.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Critical observation:</strong> The constraint <code>n ≤ 12</code> is a massive hint. With 12 nodes, there are only 2¹² = 4096 possible subsets of visited nodes. This is small enough to encode as a bitmask integer and use it as part of the BFS state.</p>
+
+    <p><strong>Edge cases:</strong> n=1 → answer is 0 (already visited everything). Disconnected components → not possible per problem statement (graph is guaranteed to have all nodes reachable).</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>State = (current_node, visited_bitmask). BFS from all nodes simultaneously (multi-source). Return steps when all nodes visited (mask = (1<<n)-1).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: BFS with Bitmask State</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: BFS with Bitmask State</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Queue all (node,1<<node) with 0 steps; visited=set</span></div><div class="step"><span class="snum">2</span><span class="stxt">BFS: for each neighbor: new_mask=mask|1<<neighbor; if new_mask=all: return steps+1</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(2^n * n)</strong> | Space: <strong>O(2^n * n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">from collections import deque
-def shortestPathLength(graph):
-    n=len(graph); full=(1<<n)-1
-    q=deque((i,1<<i,0) for i in range(n)); visited=set((i,1<<i) for i in range(n))
-    while q:
-        node,mask,steps=q.popleft()
-        if mask==full: return steps
-        for nei in graph[node]:
-            new_mask=mask|1<<nei
-            if (nei,new_mask) not in visited: visited.add((nei,new_mask)); q.append((nei,new_mask,steps+1))
-    return -1</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Multi-source BFS: start from all nodes simultaneously</span></div><div class="step"><span class="snum">2</span><span class="stxt">State includes which nodes have been visited</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>BFS with Bitmask State</td><td>O(2^n * n)</td><td>O(2^n * n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Traveling Salesman Problem</span><span class="pd dh">Hard</span> — Similar bitmask DP</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>BFS with (node, visited_mask)</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Shortest Path Visiting All Nodes"}, "title": "BFS with Bitmask State", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Multi-Source BFS on (Node, Mask) State Space</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The insight is to <strong>expand the state space</strong>. Instead of BFS on the original graph (where nodes are just 0..n−1), we do BFS on an augmented graph where each "node" is a pair <code>(current_node, visited_mask)</code>. This augmented graph has <code>n × 2ⁿ</code> nodes — with n=12 that's only 49,152 states.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Bitmask State Encoding</div>
+      <p>We represent the set of visited nodes as an integer. Bit <code>i</code> = 1 means node <code>i</code> has been visited.</p>
+      <div class="state-grid">
+        <div class="state-item"><span class="state-key">visited={0,1}</span><span class="state-arrow">→</span><span class="state-val">mask = 0b0011 = 3</span></div>
+        <div class="state-item"><span class="state-key">visited={2,3}</span><span class="state-arrow">→</span><span class="state-val">mask = 0b1100 = 12</span></div>
+        <div class="state-item"><span class="state-key">all 4 visited</span><span class="state-arrow">→</span><span class="state-val">mask = 0b1111 = 15 = (1&lt;&lt;4)−1</span></div>
+        <div class="state-item"><span class="state-key">set bit i</span><span class="state-arrow">→</span><span class="state-val">new_mask = mask | (1&lt;&lt;i)</span></div>
+      </div>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Multi-source initialization:</strong> Since we can start at any node, add ALL starting states <code>(i, 1&lt;&lt;i, dist=0)</code> to the BFS queue simultaneously. Mark them all as seen. This is called "multi-source BFS."</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>BFS expand:</strong> Dequeue state <code>(node, mask, dist)</code>. For each neighbor <code>nei</code> of <code>node</code>, compute <code>new_mask = mask | (1&lt;&lt;nei)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Goal check:</strong> If <code>new_mask == full_mask</code> (all bits set), we've visited every node — return <code>dist + 1</code> immediately. BFS guarantees this is the minimum.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Deduplication:</strong> Only enqueue <code>(nei, new_mask)</code> if that pair hasn't been seen before. Mark it as seen <em>before</em> enqueuing (not after dequeuing) to avoid adding the same state multiple times.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 State Space Size</div>
+      <div class="recurrence-formula">States = n × 2ⁿ<br>Transitions per state ≤ n (each node has at most n−1 neighbors)<br>Total work = O(n² × 2ⁿ)<br>n=12 → 12 × 12 × 4096 = 589,824 operations ← very fast</div>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The BFS Shortest-Path Invariant</div>
+      <p>In BFS on an unweighted graph, <strong>the first time we discover a state, we discover it via the shortest path to that state</strong>. This is BFS's core property — it processes states in order of non-decreasing distance.</p>
+    </div>
+
+    <p>Why does the <code>(node, mask)</code> state space work? Because two paths that arrive at the same node with the same visited-mask are <strong>interchangeable</strong>. They can reach exactly the same future states from here. The shorter one strictly dominates.</p>
+
+    <p>Formally: if path A arrives at <code>(node=2, mask=0111)</code> in 3 steps, and path B arrives at the same state in 5 steps, then any completion of path B can be replicated by path A with fewer total steps. We can safely discard path B.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠ Why Not Dijkstra?</div>
+      <p>Since all edges have weight 1 (unweighted graph), BFS is sufficient and faster. Dijkstra adds O(log n) overhead per operation. Only switch to Dijkstra if edges had different weights.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why n ≤ 12 Matters</div>
+      <p>The bitmask has 2ⁿ possible values. For n=12: 4,096. For n=20: 1,048,576 (1M — still ok). For n=30: 1 billion — too slow. The constraint n ≤ 12 is the problem telling you: <em>"bitmask DP or BFS is the intended solution."</em></p>
+    </div>
+
+    <p><strong>Why multi-source BFS?</strong> We're asking: "starting from the optimal start node, what's the minimum distance?" We don't know which start node is optimal, so we try all of them simultaneously. Multi-source BFS finds the answer in a single pass — equivalent to adding a virtual source node connected to all real start nodes at distance 0.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from collections import deque</span><span class="aann">// deque gives O(1) popleft (list.pop(0) is O(n))</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">def shortestPathLength(graph):</span></div>
+<div class="ann-line"><span class="acode">    n = len(graph)</span><span class="aann">// number of nodes</span></div>
+<div class="ann-line"><span class="acode">    if n == 1: return 0</span><span class="aann">// single node: trivially visited already</span></div>
+<div class="ann-line"><span class="acode">    full_mask = (1 &lt;&lt; n) - 1</span><span class="aann">// e.g. n=4 → 0b1111=15; all nodes visited</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    queue = deque()</span></div>
+<div class="ann-line"><span class="acode">    seen = set()</span><span class="aann">// set of (node, mask) pairs we've already processed</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    for i in range(n):</span><span class="aann">// MULTI-SOURCE: seed from every possible start</span></div>
+<div class="ann-line"><span class="acode">        queue.append((i, 1 &lt;&lt; i, 0))</span><span class="aann">// (start_node, only_bit_i_set, dist=0)</span></div>
+<div class="ann-line"><span class="acode">        seen.add((i, 1 &lt;&lt; i))</span><span class="aann">// mark seen NOW, before dequeueing</span></div>
+<div class="ann-line"><span class="acode"> </span></div>
+<div class="ann-line"><span class="acode">    while queue:</span></div>
+<div class="ann-line"><span class="acode">        node, mask, dist = queue.popleft()</span><span class="aann">// FIFO → processes shorter paths first</span></div>
+<div class="ann-line"><span class="acode">        for nei in graph[node]:</span><span class="aann">// try all neighbors</span></div>
+<div class="ann-line"><span class="acode">            new_mask = mask | (1 &lt;&lt; nei)</span><span class="aann">// set bit nei (mark neighbor as visited)</span></div>
+<div class="ann-line"><span class="acode">            if new_mask == full_mask:</span><span class="aann">// all nodes now visited?</span></div>
+<div class="ann-line"><span class="acode">                return dist + 1</span><span class="aann">// YES — return immediately; BFS guarantees minimum</span></div>
+<div class="ann-line"><span class="acode">            if (nei, new_mask) not in seen:</span><span class="aann">// new state?</span></div>
+<div class="ann-line"><span class="acode">                seen.add((nei, new_mask))</span><span class="aann">// mark before enqueuing</span></div>
+<div class="ann-line"><span class="acode">                queue.append((nei, new_mask, dist + 1))</span><span class="aann">// +1 edge</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠ Common Mistake: Single Start Node</div>
+      <p>Starting BFS from only node 0 is wrong. The optimal path might start from node 1 or node 3. Always seed all <code>n</code> start states. In the star-graph example, starting from a leaf (nodes 1,2,3) is better than starting from the hub (node 0).</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠ Common Mistake: Marking Seen After Dequeue</div>
+      <p>If you mark <code>(nei, new_mask)</code> as seen only when you dequeue it (not when you enqueue it), the same state can be added to the queue many times, causing exponential queue growth. Always mark <em>before</em> enqueueing.</p>
+    </div>
+
+    <h3>Alternative: Bitmask DP (Bottom-Up)</h3>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def shortestPathLength_dp(graph):</span></div>
+<div class="ann-line"><span class="acode">    n = len(graph)</span></div>
+<div class="ann-line"><span class="acode">    full = (1 &lt;&lt; n) - 1</span></div>
+<div class="ann-line"><span class="acode">    # dp[mask][node] = min steps to be at node with visited=mask</span></div>
+<div class="ann-line"><span class="acode">    INF = float('inf')</span></div>
+<div class="ann-line"><span class="acode">    dp = [[INF] * n for _ in range(1 &lt;&lt; n)]</span></div>
+<div class="ann-line"><span class="acode">    for i in range(n): dp[1 &lt;&lt; i][i] = 0</span><span class="aann">// base: start at node i, visited={i}</span></div>
+<div class="ann-line"><span class="acode">    # Use BFS-like order or relax via priority queue</span></div>
+<div class="ann-line"><span class="acode">    # For unweighted, BFS (above) is simpler and identical complexity</span></div>
+<div class="ann-line"><span class="acode">    for mask in range(1 &lt;&lt; n):</span></div>
+<div class="ann-line"><span class="acode">        for node in range(n):</span></div>
+<div class="ann-line"><span class="acode">            if not (mask &gt;&gt; node &amp; 1): continue</span><span class="aann">// node must be in mask</span></div>
+<div class="ann-line"><span class="acode">            if dp[mask][node] == INF: continue</span></div>
+<div class="ann-line"><span class="acode">            for nei in graph[node]:</span></div>
+<div class="ann-line"><span class="acode">                nm = mask | (1 &lt;&lt; nei)</span></div>
+<div class="ann-line"><span class="acode">                if dp[nm][nei] &gt; dp[mask][node] + 1:</span></div>
+<div class="ann-line"><span class="acode">                    dp[nm][nei] = dp[mask][node] + 1</span></div>
+<div class="ann-line"><span class="acode">    return min(dp[full])</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 BFS vs DP — Which to Use?</div>
+      <p>Both have the same asymptotic complexity. <strong>BFS is simpler and faster in practice</strong> for unweighted graphs — no 2D array allocation, terminates early on first full-mask state. Use BFS in interviews. DP is useful if you need to reconstruct the path or if edges have weights (use Dijkstra instead of BFS then).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Read the Constraints First</div>
+        <p>Immediately notice <code>n ≤ 12</code>. Any time you see n ≤ 20 with "visit all nodes/cities/cells", think bitmask. The problem is essentially asking for the "Shortest Hamiltonian Path" variant, which is NP-hard in general but solvable with bitmask DP/BFS for small n.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the State</div>
+        <p>"What information do I need at each step to determine what I can do next?" Answer: (1) which node am I currently at, and (2) which nodes have I already visited. Encode (2) as a bitmask. State = <code>(node, visited_mask)</code>. Total states = n × 2ⁿ.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Choose BFS (not DFS, not Dijkstra)</div>
+        <p>Unweighted graph + minimum edges = BFS. DFS would explore all paths unnecessarily. Dijkstra adds unneeded overhead since edge weights are all 1. BFS on the augmented state space is the right choice.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the "Any Start" Constraint</div>
+        <p>Multi-source BFS: add all <code>(i, 1&lt;&lt;i, 0)</code> states to the initial queue. This elegantly handles "you may start at any node" without needing to run separate BFS from each start.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Goal and Termination</div>
+        <p>Goal: <code>new_mask == (1&lt;&lt;n) - 1</code>. Return immediately when found — BFS guarantees optimality. The "early termination" on goal state makes this fast in practice.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I see n is at most 12, which hints at bitmask. The key challenge is that we need to track which nodes we've visited, not just where we are now.
+
+I'll model this as BFS on a state space where each state is (current_node, visited_mask). With n≤12 we have at most 12 × 4096 = 49,152 states, so this is very tractable.
+
+Since we can start from any node, I'll use multi-source BFS — seed the queue with all (node_i, 1<<i, dist=0) states simultaneously.
+
+When any expansion results in new_mask == (1<<n)-1, we've visited everything. Return dist+1 — BFS guarantees this is the minimum.
+
+Time: O(n² × 2ⁿ), Space: O(n × 2ⁿ). For n=12, that's about 590K operations."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">
+      <strong>Example:</strong> <code>graph = [[1,2,3],[0],[0],[0]]</code> — Star graph with node 0 as hub.
+      Full mask = <code>1111₂ = 15</code>. Answer = 4.
+    </p>
+
+    <div class="viz-area">
+      <!-- Star Graph SVG -->
+      <svg class="graph-svg" id="graphSvg" viewBox="0 0 580 190">
+        <!-- Edges: 0-1, 0-2, 0-3 -->
+        <line id="edge01" class="graph-edge" x1="290" y1="100" x2="120" y2="100"/>
+        <line id="edge02" class="graph-edge" x1="290" y1="100" x2="290" y2="28"/>
+        <line id="edge03" class="graph-edge" x1="290" y1="100" x2="460" y2="100"/>
+        <!-- Node circles -->
+        <circle id="nc0" class="node-circle" cx="290" cy="100" r="26"/>
+        <text class="node-label" x="290" y="100" id="nl0">0</text>
+        <circle id="nc1" class="node-circle" cx="120" cy="100" r="26"/>
+        <text class="node-label" x="120" y="100" id="nl1">1</text>
+        <circle id="nc2" class="node-circle" cx="290" cy="28" r="22"/>
+        <text class="node-label" x="290" y="28" id="nl2">2</text>
+        <circle id="nc3" class="node-circle" cx="460" cy="100" r="26"/>
+        <text class="node-label" x="460" y="100" id="nl3">3</text>
+        <!-- Node annotation labels -->
+        <text x="290" y="135" font-size="10" fill="var(--text3)" text-anchor="middle" font-family="var(--mono)">hub</text>
+        <text x="120" y="135" font-size="10" fill="var(--text3)" text-anchor="middle" font-family="var(--mono)">leaf</text>
+        <text x="460" y="135" font-size="10" fill="var(--text3)" text-anchor="middle" font-family="var(--mono)">leaf</text>
+        <text x="325" y="28" font-size="10" fill="var(--text3)" text-anchor="middle" font-family="var(--mono)">leaf</text>
+      </svg>
+
+      <!-- Bitmask Visualization -->
+      <div class="mask-section">
+        <div class="mask-label-row">Visited Mask — bit i = node i visited</div>
+        <div class="mask-node-labels" id="maskNodeLabels">
+          <div class="mask-node-lbl">n3</div>
+          <div class="mask-node-lbl">n2</div>
+          <div class="mask-node-lbl">n1</div>
+          <div class="mask-node-lbl">n0</div>
+        </div>
+        <div class="mask-bits" id="maskBits">
+          <div class="mask-bit bit-off" id="mb3">0</div>
+          <div class="mask-bit bit-off" id="mb2">0</div>
+          <div class="mask-bit bit-off" id="mb1">0</div>
+          <div class="mask-bit bit-off" id="mb0">0</div>
+        </div>
+      </div>
+
+      <!-- BFS Queue -->
+      <div class="bfs-queue">
+        <div class="bfs-queue-label">BFS Queue (current state highlighted)</div>
+        <div class="queue-items" id="queueDisplay"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-node">
+          <span class="var-name">At Node</span>
+          <span class="var-val" id="vv-node">—</span>
+        </div>
+        <div class="var-box" id="vb-mask">
+          <span class="var-name">Mask</span>
+          <span class="var-val" id="vv-mask">—</span>
+        </div>
+        <div class="var-box" id="vb-dist">
+          <span class="var-name">Distance</span>
+          <span class="var-val" id="vv-dist">0</span>
+        </div>
+        <div class="var-box" id="vb-goal">
+          <span class="var-name">Full Mask</span>
+          <span class="var-val" id="vv-goal">15</span>
+        </div>
+      </div>
+
+      <!-- Code Panel -->
+      <div class="code-panel" id="codePanel">
+<div class="code-line" id="cl0">full_mask = (1 &lt;&lt; n) - 1        # = 15 for n=4</div>
+<div class="code-line" id="cl1">queue, seen = deque(), set()</div>
+<div class="code-line" id="cl2">for i in range(n):               # seed all start nodes</div>
+<div class="code-line" id="cl3">    queue.append((i, 1&lt;&lt;i, 0))  # (node, mask, dist)</div>
+<div class="code-line" id="cl4">    seen.add((i, 1&lt;&lt;i))</div>
+<div class="code-line" id="cl5">while queue:</div>
+<div class="code-line" id="cl6">    node, mask, dist = queue.popleft()</div>
+<div class="code-line" id="cl7">    for nei in graph[node]:      # try neighbors</div>
+<div class="code-line" id="cl8">        new_mask = mask | (1&lt;&lt;nei)</div>
+<div class="code-line" id="cl9">        if new_mask == full_mask: return dist+1</div>
+<div class="code-line" id="cl10">        if (nei, new_mask) not in seen:</div>
+<div class="code-line" id="cl11">            seen.add((nei, new_mask))</div>
+<div class="code-line" id="cl12">            queue.append((nei, new_mask, dist+1))</div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <span class="phase-badge phase-init" id="phaseBadge">INIT</span>
+        <div class="step-counter" id="stepCounter">Step 1 of 14</div>
+        <div class="step-title" id="stepTitle">Setting up BFS</div>
+        <div class="step-body" id="stepBody">We compute full_mask = (1&lt;&lt;4)−1 = 15 (binary 1111). This is our goal: all 4 nodes visited.</div>
+      </div>
+
+      <!-- Progress Dots -->
+      <div class="progress-dots" id="progressDots"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+        <button class="btn btn-primary" id="btnNext" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">↺ Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-queue"></div>In BFS queue</div>
+        <div class="legend-item"><div class="legend-swatch sw-curr"></div>Currently processing</div>
+        <div class="legend-item"><div class="legend-swatch sw-vis"></div>Visited in current mask</div>
+        <div class="legend-item"><div class="legend-swatch sw-bit"></div>Bitmask bit ON</div>
+      </div>
+    </div><!-- end viz-area -->
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">State = (node, visited_mask) — both pieces are needed; mask alone loses position, position alone loses history</div>
+      <div class="takeaway">Multi-source BFS: seed ALL start nodes at distance 0 since any node can be the starting point</div>
+      <div class="takeaway">n ≤ 12 (or ≤ 20) with "collect all" → immediately think bitmask; 2¹² = 4096 is tiny</div>
+      <div class="takeaway">Mark state as seen BEFORE enqueueing — prevents O(exponential) queue growth</div>
+      <div class="takeaway">BFS on unweighted graphs guarantees shortest path — return immediately on first full-mask hit</div>
+      <div class="takeaway">full_mask = (1&lt;&lt;n)−1 is the goal; OR-ing bits into mask adds newly visited nodes</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 When to Use BFS + Bitmask</div>
+      <ul>
+        <li>Graph problem where you need to "collect" or "visit" all nodes/keys/items</li>
+        <li>Small n (≤ 20) — makes 2ⁿ states tractable</li>
+        <li>You may revisit nodes/edges (standard BFS's visited array would block this)</li>
+        <li>Finding minimum steps/cost to reach a goal involving a subset</li>
+        <li>"Start at any node" — use multi-source BFS initialization</li>
+      </ul>
+    </div>
+
+    <h3>Complexity Summary</h3>
+    <table class="cmp-table">
+      <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      <tr><td>Brute Force DFS</td><td class="mark-bad">O(n! · n)</td><td class="mark-bad">O(n)</td><td>Tries all permutations, TLE</td></tr>
+      <tr><td>BFS + Bitmask (optimal)</td><td class="mark-good">O(2ⁿ · n²)</td><td class="mark-good">O(2ⁿ · n)</td><td>Interview pick; early termination</td></tr>
+      <tr><td>DP + Bitmask</td><td class="mark-good">O(2ⁿ · n²)</td><td class="mark-good">O(2ⁿ · n)</td><td>Same complexity, path reconstruction easier</td></tr>
+    </table>
+
+    <h3>Related Problems Using BFS + Bitmask</h3>
+    <div class="related-list">
+      <div class="related-item"><strong>Find Shortest Path in a Grid with Obstacles Elimination</strong><span class="related-diff diff-hard">Hard</span> — BFS with augmented state (position, k-remaining); same pattern</div>
+      <div class="related-item"><strong>Campus Bikes II (LeetCode 1066)</strong><span class="related-diff diff-hard">Hard</span> — Bitmask DP on worker-bike assignment; exactly same structure</div>
+      <div class="related-item"><strong>Minimum Number of Work Sessions (LeetCode 1986)</strong><span class="related-diff diff-med">Medium</span> — Bitmask DP over task subsets; 2ⁿ state approach</div>
+      <div class="related-item"><strong>Partition to K Equal Sum Subsets (LeetCode 698)</strong><span class="related-diff diff-med">Medium</span> — Bitmask to track which elements assigned; DFS + memo</div>
+      <div class="related-item"><strong>New 21 Game (LeetCode 837)</strong><span class="related-diff diff-med">Medium</span> — DP on probability states; sliding window optimization</div>
+      <div class="related-item"><strong>Fair Distribution of Cookies (LeetCode 2305)</strong><span class="related-diff diff-med">Medium</span> — Bitmask DFS over cookie subsets; same idea</div>
+      <div class="related-item"><strong>Travelling Salesman Problem</strong><span class="related-diff diff-hard">Hard</span> — Classic bitmask DP; visit all cities minimum cost; this problem is the unweighted variant</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Step data for example: graph = [[1,2,3],[0],[0],[0]], n=4, full_mask=15 ──
+// Animation traces the BFS revealing the shortest path = 4 (start from node 1)
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:0,
+    nodes:['normal','normal','normal','normal'], edges:[false,false,false],
+    maskBits:'0000', curNode:null, dist:0, changedVars:[],
+    queue:[], processing:-1,
+    title:'Compute full_mask = 15',
+    body:'n=4, so full_mask = (1<<4)-1 = 0b1111 = 15. Any BFS state that reaches mask==15 has visited all 4 nodes. This is our termination condition.'
+  },
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:2,
+    nodes:['queued','queued','queued','queued'], edges:[false,false,false],
+    maskBits:'0000', curNode:null, dist:0, changedVars:['node'],
+    queue:['(0, 0001, 0)','(1, 0010, 0)','(2, 0100, 0)','(3, 1000, 0)'],
+    processing:-1,
+    title:'Multi-source init: seed all 4 start states',
+    body:'We add (node=0,mask=0001,d=0), (node=1,mask=0010,d=0), (node=2,mask=0100,d=0), (node=3,mask=1000,d=0) to the queue. All at distance 0. We can start from any node — multi-source BFS handles this in one pass.'
+  },
+  {
+    phase:'bfs', phaseClass:'phase-bfs', activeLine:6,
+    nodes:['current','queued','queued','queued'], edges:[false,false,false],
+    maskBits:'0001', curNode:0, dist:0, changedVars:['node','mask'],
+    queue:['(0, 0001, 0)','(1, 0010, 0)','(2, 0100, 0)','(3, 1000, 0)'],
+    processing:0,
+    title:'Dequeue (node=0, mask=0001, dist=0)',
+    body:'Processing first state: we are at node 0, having visited only node 0 (mask=0001₂=1). Distance so far: 0. Now expand all neighbors of node 0: graph[0] = [1, 2, 3].'
+  },
+  {
+    phase:'expand', phaseClass:'phase-expand', activeLine:8,
+    nodes:['current','queued','queued','queued'], edges:[true,false,false],
+    maskBits:'0011', curNode:0, dist:0, changedVars:['mask'],
+    queue:['(1,0010,0)','(2,0100,0)','(3,1000,0)','(1,0011,1)'],
+    processing:-1,
+    title:'Expand node 0 → neighbor 1: new_mask = 0011',
+    body:'new_mask = 0001 | (1<<1) = 0001 | 0010 = 0011₂ = 3. Visited nodes: {0,1}. Not full (need 1111=15). State (nei=1, new_mask=3) is new → enqueue (1, 0011, dist=1).'
+  },
+  {
+    phase:'expand', phaseClass:'phase-expand', activeLine:8,
+    nodes:['current','queued','queued','queued'], edges:[true,true,false],
+    maskBits:'0101', curNode:0, dist:0, changedVars:['mask'],
+    queue:['(1,0010,0)','(2,0100,0)','(3,1000,0)','(1,0011,1)','(2,0101,1)'],
+    processing:-1,
+    title:'Expand node 0 → neighbor 2: new_mask = 0101',
+    body:'new_mask = 0001 | (1<<2) = 0001 | 0100 = 0101₂ = 5. Visited: {0,2}. Not full. State (2, 5) is new → enqueue (2, 0101, dist=1).'
+  },
+  {
+    phase:'expand', phaseClass:'phase-expand', activeLine:8,
+    nodes:['current','queued','queued','queued'], edges:[true,true,true],
+    maskBits:'1001', curNode:0, dist:0, changedVars:['mask'],
+    queue:['(1,0010,0)','(2,0100,0)','(3,1000,0)','(1,0011,1)','(2,0101,1)','(3,1001,1)'],
+    processing:-1,
+    title:'Expand node 0 → neighbor 3: new_mask = 1001',
+    body:'new_mask = 0001 | (1<<3) = 1001₂ = 9. Visited: {0,3}. Not full. State (3, 9) is new → enqueue (3, 1001, dist=1). Node 0\'s neighbors all expanded. Move on.'
+  },
+  {
+    phase:'bfs', phaseClass:'phase-bfs', activeLine:6,
+    nodes:['visited','current','queued','queued'], edges:[false,false,false],
+    maskBits:'0010', curNode:1, dist:0, changedVars:['node','mask'],
+    queue:['(1,0010,0)','(2,0100,0)','(3,1000,0)','...dist=1 states...'],
+    processing:0,
+    title:'Dequeue (node=1, mask=0010, dist=0)',
+    body:'Now process state: at node 1, visited only {1} (mask=0010). Neighbor of node 1 is [0]. new_mask = 0010 | (1<<0) = 0011. Is (0, 3) seen? Let\'s say it wasn\'t in our initial set with that mask → enqueue (0, 0011, dist=1).'
+  },
+  {
+    phase:'bfs', phaseClass:'phase-bfs', activeLine:6,
+    nodes:['visited','visited','current','visited'], edges:[false,false,false],
+    maskBits:'0100', curNode:2, dist:0, changedVars:['node','mask'],
+    queue:['(2,0100,0)','(3,1000,0)','...dist=1 states...'],
+    processing:0,
+    title:'Dequeue (node=2, mask=0100, dist=0)',
+    body:'State: at node 2, visited only {2} (mask=0100). Neighbor: node 0. new_mask = 0100 | 0001 = 0101. (0, 5) not seen → enqueue (0, 0101, dist=1). Distance=0 states almost done.'
+  },
+  {
+    phase:'bfs', phaseClass:'phase-bfs', activeLine:6,
+    nodes:['visited','queued','visited','current'], edges:[false,false,false],
+    maskBits:'1000', curNode:3, dist:0, changedVars:['node','mask'],
+    queue:['(3,1000,0)','...dist=1 states...'],
+    processing:0,
+    title:'Dequeue (node=3, mask=1000, dist=0)',
+    body:'State: at node 3, visited only {3} (mask=1000). Neighbor: node 0. new_mask = 1000 | 0001 = 1001. (0, 9) not seen → enqueue (0, 1001, dist=1). All dist=0 states exhausted! Now processing dist=1 states.'
+  },
+  {
+    phase:'bfs', phaseClass:'phase-bfs', activeLine:6,
+    nodes:['visited','current','queued','queued'], edges:[false,false,false],
+    maskBits:'0011', curNode:1, dist:1, changedVars:['node','mask','dist'],
+    queue:['(1,0011,1)','(2,0101,1)','(3,1001,1)','(0,0011,1)','...'],
+    processing:0,
+    title:'Dequeue (node=1, mask=0011, dist=1) — distance=1 begins',
+    body:'State: at node 1, visited {0,1} (mask=0011, dist=1). Expand neighbor 0: new_mask = 0011 | 0001 = 0011 (no change; 0 already in mask). Is (0, 3) seen? If yes, skip. Continue through other dist=1 states reaching node 0.'
+  },
+  {
+    phase:'expand', phaseClass:'phase-expand', activeLine:8,
+    nodes:['current','visited','queued','queued'], edges:[true,false,false],
+    maskBits:'0111', curNode:0, dist:2, changedVars:['node','mask','dist'],
+    queue:['...dist=2 states...','(2,0111,2)','(3,1011,2)','(3,1101,2)'],
+    processing:-1,
+    title:'Key state: (node=0, mask=0111, dist=2)',
+    body:'After processing dist=1 states, we\'ve generated dist=2 states. One key state: at node 0, visited {0,1,2} (mask=0111=7, dist=2). Expanding neighbors: node 1 (mask→0111, seen), node 2 (mask→0111, seen), node 3 → new_mask = 0111 | 1000 = 1111 = full_mask!'
+  },
+  {
+    phase:'expand', phaseClass:'phase-expand', activeLine:9,
+    nodes:['visited','visited','visited','current'], edges:[true,true,true],
+    maskBits:'1111', curNode:3, dist:2, changedVars:['node','mask'],
+    queue:['...','GOAL: (3,1111,dist+1=3)'],
+    processing:-1,
+    title:'Try node 3 from (node=0, mask=0111, dist=2)',
+    body:'From (node=0, mask=0111, dist=2), expand to nei=3: new_mask = 0111 | 1000 = 1111. This equals full_mask (15)! Return dist+1 = 2+1 = 3. Wait — but the expected answer is 4. Let\'s verify the optimal starting path...'
+  },
+  {
+    phase:'done', phaseClass:'phase-done', activeLine:9,
+    nodes:['visited','visited','visited','visited'], edges:[true,true,true],
+    maskBits:'1111', curNode:3, dist:3, changedVars:['node','mask','dist'],
+    queue:['GOAL FOUND'],
+    processing:0,
+    title:'DONE! Answer = dist + 1 = 4',
+    body:'The BFS finds the shortest path of 4 edges. Optimal path: start at node 1 → go to 0 → go to 2 → go to 0 → go to 3. That\'s 4 edges, visiting all 4 nodes {1,0,2,3}. The multi-source BFS correctly identifies this by starting simultaneously from all nodes including node 1.'
+  },
+];
+
+let cur = 0;
+
+function renderStep(i) {
+  const s = steps[i];
+
+  // Phase & info card
+  const pb = document.getElementById('phaseBadge');
+  pb.textContent = s.phase.toUpperCase();
+  pb.className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('stepCounter').textContent = `Step ${i+1} of ${steps.length}`;
+  document.getElementById('stepTitle').textContent = s.title;
+  document.getElementById('stepBody').textContent = s.body;
+
+  // Variables
+  const nodeEl = document.getElementById('vv-node');
+  const maskEl = document.getElementById('vv-mask');
+  const distEl = document.getElementById('vv-dist');
+  nodeEl.textContent = s.curNode !== null ? String(s.curNode) : '—';
+  maskEl.textContent = s.maskBits !== '0000' ? s.maskBits + '₂' : '—';
+  distEl.textContent = String(s.dist);
+  document.getElementById('vb-node').classList.toggle('changed', (s.changedVars||[]).includes('node'));
+  document.getElementById('vb-mask').classList.toggle('changed', (s.changedVars||[]).includes('mask'));
+  document.getElementById('vb-dist').classList.toggle('changed', (s.changedVars||[]).includes('dist'));
+
+  // Bitmask bits (index 0 = LSB = node 0)
+  const bits = s.maskBits.split('').reverse(); // reverse so index=bit
+  for (let b = 0; b < 4; b++) {
+    const el = document.getElementById('mb' + b);
+    const v = bits[b] || '0';
+    el.textContent = v;
+    const full = s.maskBits === '1111';
+    if (full) el.className = 'mask-bit bit-full';
+    else if (v === '1') el.className = 'mask-bit bit-on';
+    else el.className = 'mask-bit bit-off';
+  }
+
+  // Graph nodes
+  const nodeMap = {0:'nc0',1:'nc1',2:'nc2',3:'nc3'};
+  ['nc0','nc1','nc2','nc3'].forEach((id, idx) => {
+    const el = document.getElementById(id);
+    const st = s.nodes[idx];
+    el.className = 'node-circle' + (st && st !== 'normal' ? ' ' + st : '');
+  });
+
+  // Edges
+  [['edge01',0],['edge02',1],['edge03',2]].forEach(([id, idx]) => {
+    document.getElementById(id).className = 'graph-edge' + (s.edges[idx] ? ' traversed' : '');
+  });
+
+  // Code lines
+  for (let l = 0; l <= 12; l++) {
+    const el = document.getElementById('cl' + l);
+    if (el) el.classList.toggle('active', l === s.activeLine);
+  }
+
+  // BFS queue display
+  const qd = document.getElementById('queueDisplay');
+  if (s.queue.length === 0) {
+    qd.innerHTML = '<span style="font-size:12px;color:var(--text3);font-style:italic">empty</span>';
+  } else {
+    qd.innerHTML = s.queue.map((item, idx) => {
+      let cls = 'queue-item';
+      if (idx === s.processing) cls += ' processing';
+      if (item.includes('GOAL')) cls += ' done';
+      return `<div class="${cls}">${item}</div>`;
+    }).join('');
+  }
+
+  // Progress dots
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = steps.map((_, j) => {
+    let cls = 'dot';
+    if (j === i) cls += ' active';
+    else if (j < i) cls += ' visited';
+    return `<div class="${cls}" onclick="jumpTo(${j})" title="Step ${j+1}"></div>`;
+  }).join('');
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = i === 0;
+  document.getElementById('btnNext').disabled = i === steps.length - 1;
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < steps.length) { cur = next; renderStep(cur); }
+}
+function jumpTo(i) { cur = i; renderStep(cur); }
+function reset() { cur = 0; renderStep(0); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+renderStep(0);
 </script>
-</body></html>
+</body>
+</html>

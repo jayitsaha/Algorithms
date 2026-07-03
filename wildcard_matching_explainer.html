@@ -1,81 +1,902 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Wildcard Matching — LC #44</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#44 · Wildcard Matching</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6Da; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.75rem}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.3;color:var(--text)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* col header above table */
+.dp-col-header{display:flex;align-items:center;margin-bottom:4px;padding-left:52px}
+.dph-cell{width:44px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text3);flex-shrink:0}
+.dph-gap{width:4px;flex-shrink:0}
+
+/* DP table */
+.dp-table-wrap{display:flex;flex-direction:column;gap:4px}
+.dp-table-row{display:flex;align-items:center;gap:4px}
+.dp-row-lbl{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text3);flex-shrink:0}
+.dp-cell{
+  width:44px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.dp-cell.dp-empty{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.dp-cell.dp-t{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.dp-cell.dp-f{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.dp-cell.dp-base{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.dp-cell.dp-cur{background:var(--purple-bg);border-color:var(--purple-mid);color:var(--purple-text);outline:2px solid var(--purple-mid);outline-offset:1px}
+.dp-cell.dp-dep{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:36px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-base{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-fill{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-cur{background:var(--purple-bg);border-color:var(--purple-mid)}
+.sw-dep{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-t{background:var(--green-bg);border-color:var(--green-border)}
+.sw-f{background:var(--red-bg);border-color:var(--red-border)}
+.sw-base{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-empty{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Wildcard Matching</h1>
-<div class="subtitle">LeetCode #44 &mdash; 2D DP with * handling</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Dynamic Programming</span><span class="tag tag-pattern">2D DP with * handling</span><span class="tag tag-cx">O(m*n) Time &middot; O(m*n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #44</div>
+  <h1>Wildcard Matching</h1>
+  <p class="subtitle">Given a string <code>s</code> and a pattern <code>p</code> containing <code>?</code> (matches any single char) and <code>*</code> (matches any sequence), determine if <code>p</code> matches <code>s</code> entirely.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">2D DP · Star Handling</span>
+    <span class="tag tag-complexity">Time: O(m·n)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a string <code>s</code> and a pattern <code>p</code>. Two wildcard characters are allowed in the pattern: <code>?</code> matches <strong>exactly one</strong> character (any character), and <code>*</code> matches <strong>zero or more</strong> characters (any sequence, including empty). The pattern must match the <em>entire</em> string — not just a substring.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The <code>*</code> wildcard is what makes this a Hard problem — it can absorb 0, 1, 2, … characters from <code>s</code>. We cannot decide greedily. The trick is to define <strong>dp[i][j] = "do the first <em>i</em> chars of s match the first <em>j</em> chars of p?"</strong> Each cell depends on just 1–2 previously-computed cells, turning O(2<sup>n</sup>) backtracking into O(m·n) table filling.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Matches: s="adceb", p="*a*b"</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          * matches "" (zero chars)<br>
+          a matches 'a'<br>
+          * matches "dce"<br>
+          b matches 'b'<br>
+          → <strong>True</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ No match: s="cb", p="?a"</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          ? matches 'c' (ok)<br>
+          a must match 'b' — FAILS<br>
+          No wildcard to save this<br>
+          → <strong>False</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Wildcard rules summary:</strong></p>
+    <ul style="margin-left:1.25rem;line-height:2.1;font-size:14px">
+      <li><code>?</code> — matches exactly <strong>one</strong> character (any character)</li>
+      <li><code>*</code> — matches <strong>zero or more</strong> characters (any sequence)</li>
+      <li>Regular character — must match the <strong>same</strong> character in <code>s</code></li>
+    </ul>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> <code>p = "*"</code> matches any string including empty; <code>p = ""</code> only matches <code>s = ""</code>; consecutive stars <code>"**"</code> are equivalent to one <code>"*"</code>; a pattern of all stars matches anything.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>dp[i][j] = True if p[0..j-1] matches s[0..i-1]. '*' matches empty or any sequence: dp[i][j] = dp[i][j-1] (empty) OR dp[i-1][j] (any char). '?' or char match: dp[i][j] = dp[i-1][j-1].</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: 2D DP</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: 2D DP</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dp[0][0]=True; dp[0][j]=dp[0][j-1] and p[j-1]=='*'</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each (i,j): if *: dp[i][j]=dp[i][j-1]|dp[i-1][j]; elif match: dp[i][j]=dp[i-1][j-1]</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n)</strong> | Space: <strong>O(m*n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def isMatch(s,p):
-    m,n=len(s),len(p)
-    dp=[[False]*(n+1) for _ in range(m+1)]; dp[0][0]=True
-    for j in range(1,n+1): dp[0][j]=dp[0][j-1] and p[j-1]=='*'
-    for i in range(1,m+1):
-        for j in range(1,n+1):
-            if p[j-1]=='*': dp[i][j]=dp[i][j-1] or dp[i-1][j]
-            elif p[j-1]=='?' or p[j-1]==s[i-1]: dp[i][j]=dp[i-1][j-1]
-    return dp[m][n]</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">* semantics: matches empty (dp[i][j-1]) or one-more-char (dp[i-1][j])</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>2D DP</td><td>O(m*n)</td><td>O(m*n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Regular Expression Matching</span><span class="pd dh">Hard</span> — '*' has different semantics</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>2D DP with * handling</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Wildcard Matching"}, "title": "2D DP", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 2D Bottom-Up DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We build a 2D boolean table where <strong>dp[i][j] = "do the first i characters of s match the first j characters of p?"</strong> Rows index into <code>s</code> (0 = empty prefix), columns index into <code>p</code> (0 = empty prefix). The answer is <code>dp[m][n]</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Base case dp[0][0] = True:</strong> Empty string matches empty pattern exactly.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Base row (i=0, empty string):</strong> <code>dp[0][j] = dp[0][j-1]</code> only if <code>p[j-1] == '*'</code>. A star can match the empty string, so a run of leading stars still matches empty <code>s</code>. Any non-star character immediately breaks this chain (dp[0][j] = False).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Letter or ? match:</strong> If <code>p[j-1] == s[i-1]</code> or <code>p[j-1] == '?'</code>, then <code>dp[i][j] = dp[i-1][j-1]</code>. Both pointers advance — take the diagonal.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Star case:</strong> <code>dp[i][j] = dp[i][j-1]</code> (star matches <em>empty</em> — skip it, pattern advances) <strong>OR</strong> <code>dp[i-1][j]</code> (star matches <em>one more char</em> — string advances, star stays put). The star "grows" by keeping column <code>j</code> fixed and moving row <code>i</code> upward.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Otherwise False:</strong> Characters don't match and it's not a wildcard → dp[i][j] = False.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 Recurrence Relations</div>
+      <div class="recurrence-formula">dp[0][0] = True<br>
+dp[0][j] = dp[0][j-1]  &nbsp;if p[j-1] == '*'  else False<br><br>
+if p[j-1] == s[i-1] or p[j-1] == '?':<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dp[i][j] = dp[i-1][j-1]  &nbsp;&nbsp;&nbsp;<span style="color:var(--text3)">← diagonal</span><br><br>
+elif p[j-1] == '*':<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dp[i][j] = dp[i][j-1] or dp[i-1][j]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text3)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ star=ε  &nbsp;&nbsp;&nbsp;↑ star eats s[i-1]</span><br><br>
+else:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dp[i][j] = False</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why dp[i-1][j] Lets the Star Eat a Character</div>
+      <p>When <code>p[j-1] == '*'</code>, the star occupies column <code>j</code>. <code>dp[i-1][j]</code> asks: "could this star (still at column j) have already matched <code>s[0..i-2]</code>?" If yes, then the same star can consume one more character <code>s[i-1]</code>, making <code>dp[i][j]</code> True. The star does not advance its column — that's how it expands across multiple characters.</p>
+    </div>
+  </div>
 </div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times, <code>dp[i][j]</code> is <code>True</code> if and only if <code>s[0..i-1]</code> (the first <em>i</em> characters of s) can be fully matched by <code>p[0..j-1]</code> (the first <em>j</em> characters of p), using the wildcard rules. Every cell is derived from smaller subproblems (top, left, or diagonal) that were already computed — this is the optimal substructure property.</p>
+    </div>
+
+    <p><strong>Why not greedy?</strong> Greedy works for simple patterns, but a <code>*</code> creates ambiguity: how many characters should it consume? Consider <code>s="aab"</code>, <code>p="a*b"</code>. A greedy approach might let <code>*</code> match nothing (leaving "b" unmatched) or match "ab" (consuming too much). DP explores all possibilities implicitly: <code>dp[i][j-1]</code> (skip) OR <code>dp[i-1][j]</code> (eat), and takes True if either works.</p>
+
+    <p style="margin-top:0.75rem"><strong>Overlapping subproblems:</strong> Pure recursion on <code>(i, j)</code> from the top re-visits the same pair from many branches. Consider any <code>*</code> in the pattern: it fans out to call <code>match(i-1, j)</code>, <code>match(i-2, j)</code>, etc., each of which calls each other recursively. Memoisation (top-down) or tabulation (bottom-up) collapses this to one computation per cell.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Confusing Wildcard Matching (#44) with Regex Matching (#10)</div>
+      <p>In <strong>Regex Matching</strong> (LC #10), <code>*</code> is a <em>quantifier</em> for the preceding element: <code>"a*"</code> means "zero or more a's". Its recurrence is <code>dp[i][j] = dp[i][j-2] OR (dp[i-1][j] if chars match)</code>. In <strong>Wildcard Matching</strong>, <code>*</code> stands alone and matches any sequence. Its recurrence is <code>dp[i][j-1] OR dp[i-1][j]</code> — no need to look two columns back. Mixing these up is the #1 interview bug.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — 2D DP Bottom-Up (Interview Pick, O(mn) time &amp; space)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isMatch(s: str, p: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(s), len(p)                    </span><span class="aann">← lengths of s and p</span></div>
+<div class="ann-line"><span class="acode">    dp = [[False]*(n+1) for _ in range(m+1)]  </span><span class="aann">← (m+1)×(n+1) table; index 0 = empty prefix</span></div>
+<div class="ann-line"><span class="acode">    dp[0][0] = True                           </span><span class="aann">← empty string vs empty pattern = match</span></div>
+<div class="ann-line"><span class="acode">    for j in range(1, n+1):                   </span><span class="aann">← base row: empty s vs pattern prefix</span></div>
+<div class="ann-line"><span class="acode">        if p[j-1] == '*':                     </span><span class="aann">← star can absorb empty string</span></div>
+<div class="ann-line"><span class="acode">            dp[0][j] = dp[0][j-1]             </span><span class="aann">← carry True forward only if chain of stars</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, m+1):                   </span><span class="aann">← fill rows 1..m (each char of s)</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n+1):               </span><span class="aann">← fill cols 1..n (each char of p)</span></div>
+<div class="ann-line"><span class="acode">            if p[j-1] == '*':                 </span><span class="aann">← star case: two sub-cases</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = dp[i][j-1] or dp[i-1][j]  </span><span class="aann">← star=ε OR star eats s[i-1]</span></div>
+<div class="ann-line"><span class="acode">            elif p[j-1] == s[i-1] or p[j-1] == '?':  </span><span class="aann">← char match or ? wildcard</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = dp[i-1][j-1]       </span><span class="aann">← diagonal: both advance</span></div>
+<div class="ann-line"><span class="acode">            # else: dp[i][j] remains False     </span><span class="aann">← mismatch, no wildcard</span></div>
+<div class="ann-line"><span class="acode">    return dp[m][n]                           </span><span class="aann">← full s vs full p</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why dp[i][j-1] for "star skips"?</div>
+      <p><code>dp[i][j-1]</code> asks: "does s[0..i-1] match p[0..j-2]?" If yes, adding a <code>*</code> that matches zero characters still gives a match — so dp[i][j] is also True. This is the "empty consumption" case: the star contributes nothing and we just skip past it.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Space-Optimised Rolling Array (O(n) space)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def isMatch(s: str, p: str) -> bool:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(s), len(p)</span></div>
+<div class="ann-line"><span class="acode">    prev = [False] * (n + 1)              </span><span class="aann">← represents dp[i-1][*], the "previous row"</span></div>
+<div class="ann-line"><span class="acode">    prev[0] = True</span></div>
+<div class="ann-line"><span class="acode">    for j in range(1, n + 1):             </span><span class="aann">← base row initialization</span></div>
+<div class="ann-line"><span class="acode">        prev[j] = prev[j-1] and p[j-1] == '*'</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, m + 1):</span></div>
+<div class="ann-line"><span class="acode">        curr = [False] * (n + 1)          </span><span class="aann">← current row (i-th row)</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n + 1):</span></div>
+<div class="ann-line"><span class="acode">            if p[j-1] == '*':</span></div>
+<div class="ann-line"><span class="acode">                curr[j] = curr[j-1] or prev[j]   </span><span class="aann">← skip* OR eat (prev[j] = dp[i-1][j])</span></div>
+<div class="ann-line"><span class="acode">            elif p[j-1] == s[i-1] or p[j-1] == '?':</span></div>
+<div class="ann-line"><span class="acode">                curr[j] = prev[j-1]               </span><span class="aann">← diagonal = dp[i-1][j-1]</span></div>
+<div class="ann-line"><span class="acode">        prev = curr</span></div>
+<div class="ann-line"><span class="acode">    return prev[n]</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>2D DP:</strong> Time O(m·n), Space O(m·n) — most readable for interviews<br>
+        <strong>Space-Optimised DP:</strong> Time O(m·n), Space O(n) — rolling two rows<br>
+        <strong>Brute Force Recursion:</strong> Time O(2<sup>m+n</sup>) — exponential, times out
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p style="font-size:14px;color:var(--text)">"Two strings, one is a pattern — 'does p fully match s?' The <code>*</code> wildcard can consume any number of characters, so there's no greedy choice. That plus the phrase 'match the entire string' both signal 2D DP on prefixes."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the State</div>
+        <p style="font-size:14px;color:var(--text)">"dp[i][j] = True if the first i chars of s can be matched by the first j chars of p. I need (m+1)×(n+1) cells. Answer: dp[m][n]."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Write the Recurrence (3 cases)</div>
+        <p style="font-size:14px;color:var(--text)">"Case 1: p[j-1] is a letter or '?' that matches s[i-1] → take diagonal dp[i-1][j-1]. Case 2: p[j-1]=='*' → dp[i][j-1] (star=empty) OR dp[i-1][j] (star eats one char). Case 3: mismatch → False."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Set Base Cases Carefully</div>
+        <p style="font-size:14px;color:var(--text)">"dp[0][0]=True. Row 0 (empty s): dp[0][j] = dp[0][j-1] only if p[j-1]=='*'. Column 0 (empty p): all False except dp[0][0] — a non-empty pattern cannot match empty s."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Mention the Space Optimization</div>
+        <p style="font-size:14px;color:var(--text)">"Since each row only depends on the previous row, I can roll two arrays to reduce space from O(mn) to O(n). Worth noting, though the 2D version is clearer for an interview."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use 2D DP. dp[i][j] = can s[0..i-1] be matched by p[0..j-1]?<br>
+Base: dp[0][0]=True. Empty s matches all-star prefixes, so dp[0][j]=dp[0][j-1] when p[j-1]=='*'.<br>
+Fill: For each (i,j) — if p[j-1]=='*', take dp[i][j-1] OR dp[i-1][j].<br>
+If char match or '?', take dp[i-1][j-1]. Otherwise False.<br>
+Answer: dp[m][n]. Time O(mn), Space O(mn) reducible to O(n)."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you reduce space to O(n)?"</strong> → Yes — roll prev/curr arrays (Solution 2 above)</li>
+        <li><strong>"How is this different from Regex Matching (#10)?"</strong> → In regex, <code>*</code> quantifies the preceding char; here <code>*</code> stands alone</li>
+        <li><strong>"What if * can match at most k characters?"</strong> → Change <code>dp[i-1][j]</code> to only look back k rows</li>
+        <li><strong>"Implement top-down with memoisation?"</strong> → Same recurrence, add <code>@lru_cache</code> to recursive function</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: s="aab", p="a*b"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="viz-area">
+      <!-- Column headers above dp table -->
+      <div class="dp-col-header" id="col-header"></div>
+      <!-- DP table -->
+      <div class="dp-table-wrap" id="dp-table"></div>
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i (s)</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-j">
+          <span class="var-name">j (p)</span>
+          <span class="var-val" id="vv-j">—</span>
+        </div>
+        <div class="var-box" id="vb-val">
+          <span class="var-name">dp[i][j]</span>
+          <span class="var-val" id="vv-val">—</span>
+        </div>
+        <div class="var-box" id="vb-rule">
+          <span class="var-name">rule</span>
+          <span class="var-val" id="vv-rule" style="font-size:13px">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def isMatch(s, p):</div>
+      <div class="code-line" id="cl-1">    m, n = len(s), len(p)</div>
+      <div class="code-line" id="cl-2">    dp = [[False]*(n+1) for _ in range(m+1)]</div>
+      <div class="code-line" id="cl-3">    dp[0][0] = True</div>
+      <div class="code-line" id="cl-4">    for j in range(1, n+1):</div>
+      <div class="code-line" id="cl-5">        if p[j-1] == '*': dp[0][j] = dp[0][j-1]</div>
+      <div class="code-line" id="cl-6">    for i in range(1, m+1):</div>
+      <div class="code-line" id="cl-7">        for j in range(1, n+1):</div>
+      <div class="code-line" id="cl-8">            if p[j-1] == '*':</div>
+      <div class="code-line" id="cl-9">                dp[i][j] = dp[i][j-1] or dp[i-1][j]</div>
+      <div class="code-line" id="cl-10">            elif p[j-1] == s[i-1] or p[j-1] == '?':</div>
+      <div class="code-line" id="cl-11">                dp[i][j] = dp[i-1][j-1]</div>
+      <div class="code-line" id="cl-12">    return dp[m][n]</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the DP table cell by cell.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div> Current cell</div>
+      <div class="legend-item"><div class="legend-swatch sw-dep"></div> Dependency cells</div>
+      <div class="legend-item"><div class="legend-swatch sw-t"></div> dp = True</div>
+      <div class="legend-item"><div class="legend-swatch sw-f"></div> dp = False</div>
+      <div class="legend-item"><div class="legend-swatch sw-base"></div> Base case</div>
+      <div class="legend-item"><div class="legend-swatch sw-empty"></div> Not yet computed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">dp[i][j] = "first i chars of s match first j chars of p?" — the canonical 2D string DP state</div>
+      <div class="takeaway">Star case is OR of two cells: dp[i][j-1] (empty match) and dp[i-1][j] (eat one char)</div>
+      <div class="takeaway">Letter/? case takes the diagonal only: dp[i-1][j-1]</div>
+      <div class="takeaway">Base row: empty s matches a prefix of p only if that prefix is all stars</div>
+      <div class="takeaway">Space reduces to O(n) with rolling prev/curr arrays — same O(mn) time</div>
+      <div class="takeaway">Critical distinction from Regex (#10): here * is standalone, not a quantifier</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (recursion)</td>
+          <td class="mark-bad">O(2<sup>m+n</sup>)</td>
+          <td>O(m+n)</td>
+          <td>TLE — revisits (i,j) pairs exponentially</td>
+        </tr>
+        <tr>
+          <td><strong>2D DP ✓ (Interview Pick)</strong></td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Clear state, easy to explain</td>
+        </tr>
+        <tr>
+          <td>Space-Optimised DP</td>
+          <td class="mark-good">O(m·n)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Rolling prev/curr rows</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognise the 2D String DP Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Two strings, "does A match/transform to B?" — 2D DP on prefixes</li>
+        <li>Pattern matching where wildcards create ambiguous choices — DP over all splits</li>
+        <li>Must match the <em>entire</em> string (not substring) — dp[m][n] is the answer</li>
+        <li>Each character has OR of sub-results → True if any branch works</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: 2D String DP)</div>
+      <div class="related-item"><strong>Regular Expression Matching</strong><span class="related-diff diff-hard">Hard</span> — Same 2D DP shape but * is a quantifier for the preceding element (#10)</div>
+      <div class="related-item"><strong>Longest Common Subsequence</strong><span class="related-diff diff-med">Medium</span> — Classic 2D DP on two strings; diagonal vs skip case (#1143)</div>
+      <div class="related-item"><strong>Edit Distance</strong><span class="related-diff diff-med">Medium</span> — 2D DP with insert/delete/replace operations; same (m+1)×(n+1) table (#72)</div>
+      <div class="related-item"><strong>Distinct Subsequences</strong><span class="related-diff diff-hard">Hard</span> — Count ways t appears as subsequence in s; dp[i][j] on prefixes (#115)</div>
+      <div class="related-item"><strong>Interleaving String</strong><span class="related-diff diff-med">Medium</span> — 2D DP: is s3 an interleaving of s1 and s2? (#97)</div>
+      <div class="related-item"><strong>Shortest Common Supersequence</strong><span class="related-diff diff-hard">Hard</span> — Build on LCS table to reconstruct the shortest supersequence (#1092)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming → 2D String DP)<br>
+      Sub-Pattern: <strong>2D DP with Star Handling</strong> · Source: Analysis (LCS/Regex DP family)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Problem data ──
+const S = "aab";
+const P = "a*b";
+const M = S.length; // 3
+const N = P.length; // 3
+
+// Pre-compute full DP table
+function computeDP(s, p) {
+  const m = s.length, n = p.length;
+  const dp = Array.from({length: m+1}, () => Array(n+1).fill(false));
+  dp[0][0] = true;
+  for (let j = 1; j <= n; j++) {
+    if (p[j-1] === '*') dp[0][j] = dp[0][j-1];
+  }
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (p[j-1] === '*') {
+        dp[i][j] = dp[i][j-1] || dp[i-1][j];
+      } else if (p[j-1] === s[i-1] || p[j-1] === '?') {
+        dp[i][j] = dp[i-1][j-1];
+      }
+    }
+  }
+  return dp;
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+const FULL_DP = computeDP(S, P);
+
+// ── Step definitions (13 steps total) ──
+// Each step carries: which cell is "current", which cells are "deps", which cells are "revealed"
+const steps = [
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init',
+    cur:null, deps:[], revealed:[[0,0]], activeLine:3,
+    title:'Initialize: dp[0][0] = True',
+    text:'We create a 4×4 table (m+1=4 rows, n+1=4 cols). Indices 0 represent empty prefixes. dp[0][0]=True: empty string "ε" matches empty pattern "ε" perfectly.',
+    vars:{i:'—',j:'—',val:'T',rule:'base'}
+  },
+  {
+    phase:'base', phaseLabel:'BASE ROW', phaseClass:'phase-base',
+    cur:[0,1], deps:[[0,0]], revealed:[[0,0],[0,1]], activeLine:5,
+    title:"Base dp[0][1]: p[0]='a' — not a star",
+    text:"Can empty string match pattern prefix 'a'? p[0]='a' is not a *, so dp[0][1] stays False. A non-star character demands a matching character from s — but s is empty here.",
+    vars:{i:'0',j:'1',val:'F',rule:'p[j-1]!=*'}
+  },
+  {
+    phase:'base', phaseLabel:'BASE ROW', phaseClass:'phase-base',
+    cur:[0,2], deps:[[0,1]], revealed:[[0,0],[0,1],[0,2]], activeLine:5,
+    title:"Base dp[0][2]: p[1]='*' — star can match empty",
+    text:"p[1]='*'. dp[0][2] = dp[0][1] = False. The star could absorb empty string, but dp[0][1] is already False because 'a' failed before the star. A star can only propagate True, not create it.",
+    vars:{i:'0',j:'2',val:'F',rule:'dp[0][j-1]=F'}
+  },
+  {
+    phase:'base', phaseLabel:'BASE ROW', phaseClass:'phase-base',
+    cur:[0,3], deps:[[0,2]], revealed:[[0,0],[0,1],[0,2],[0,3]], activeLine:5,
+    title:"Base dp[0][3]: p[2]='b' — not a star",
+    text:"p[2]='b' is not a star, so dp[0][3]=False. Base row is now complete: only dp[0][0]=True. Patterns starting with a non-star letter cannot match the empty string.",
+    vars:{i:'0',j:'3',val:'F',rule:'p[j-1]!=*'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=1', phaseClass:'phase-fill',
+    cur:[1,1], deps:[[0,0]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1]], activeLine:11,
+    title:"dp[1][1]: s[0]='a' vs p[0]='a' — direct match!",
+    text:"p[0]='a' equals s[0]='a'. Rule: take diagonal → dp[1][1] = dp[0][0] = True. Intuitively: 'a' matches 'a', and the empty prefixes before them already matched.",
+    vars:{i:'1',j:'1',val:'T',rule:'match→diag'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=1', phaseClass:'phase-fill',
+    cur:[1,2], deps:[[1,1],[0,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2]], activeLine:9,
+    title:"dp[1][2]: s[0]='a' vs p[1]='*' — star expands!",
+    text:"p[1]='*'. Two choices: dp[1][1]=True (star matches empty, skip it) OR dp[0][2]=False (star eats 'a'). True OR False = True. dp[1][2]=True. The star chose the 'skip' branch here.",
+    vars:{i:'1',j:'2',val:'T',rule:'*: skip=T|eat=F'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=1', phaseClass:'phase-fill',
+    cur:[1,3], deps:[[0,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3]], activeLine:11,
+    title:"dp[1][3]: s[0]='a' vs p[2]='b' — mismatch",
+    text:"p[2]='b' ≠ s[0]='a'. Not a wildcard either. dp[1][3] = False. No way to match 'a' (string) with 'b' (pattern).",
+    vars:{i:'1',j:'3',val:'F',rule:'mismatch'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=2', phaseClass:'phase-fill',
+    cur:[2,1], deps:[[1,0]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1]], activeLine:11,
+    title:"dp[2][1]: s[1]='a' vs p[0]='a' — match but diagonal is False",
+    text:"p[0]='a' matches s[1]='a'. dp[2][1] = dp[1][0]. But dp[1][0] = False (one char of s vs empty pattern is always False). So dp[2][1]=False despite the char match.",
+    vars:{i:'2',j:'1',val:'F',rule:'match→diag=F'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=2', phaseClass:'phase-fill',
+    cur:[2,2], deps:[[2,1],[1,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2]], activeLine:9,
+    title:"dp[2][2]: s[1]='a' vs p[1]='*' — star grows to cover 'aa'!",
+    text:"p[1]='*'. Skip star: dp[2][1]=False. Eat 'a': dp[1][2]=True. False OR True = True. dp[2][2]=True! The star has now grown to match 'a' (from row 1) + 'a' (this row). It covered 'aa' by chaining dp[i-1][j].",
+    vars:{i:'2',j:'2',val:'T',rule:'*: skip=F|eat=T'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=2', phaseClass:'phase-fill',
+    cur:[2,3], deps:[[1,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3]], activeLine:11,
+    title:"dp[2][3]: s[1]='a' vs p[2]='b' — mismatch",
+    text:"p[2]='b' ≠ s[1]='a'. dp[2][3]=False. Pattern 'b' can't match string 'a' even though we're close to the end.",
+    vars:{i:'2',j:'3',val:'F',rule:'mismatch'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=3', phaseClass:'phase-fill',
+    cur:[3,1], deps:[[2,0]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1]], activeLine:11,
+    title:"dp[3][1]: s[2]='b' vs p[0]='a' — mismatch",
+    text:"p[0]='a' ≠ s[2]='b'. dp[3][1]=False. 'a' in pattern cannot match 'b' in string.",
+    vars:{i:'3',j:'1',val:'F',rule:'mismatch'}
+  },
+  {
+    phase:'fill', phaseLabel:'FILL i=3', phaseClass:'phase-fill',
+    cur:[3,2], deps:[[3,1],[2,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2]], activeLine:9,
+    title:"dp[3][2]: s[2]='b' vs p[1]='*' — star keeps growing",
+    text:"p[1]='*'. Skip: dp[3][1]=False. Eat 'b': dp[2][2]=True. False OR True = True. dp[3][2]=True. The star has now expanded to cover 'aab' (length 3 of s), though the final 'b' in p hasn't matched yet.",
+    vars:{i:'3',j:'2',val:'T',rule:'*: skip=F|eat=T'}
+  },
+  {
+    phase:'result', phaseLabel:'ANSWER', phaseClass:'phase-result',
+    cur:[3,3], deps:[[2,2]], revealed:[[0,0],[0,1],[0,2],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2],[3,3]], activeLine:12,
+    title:"dp[3][3]: s[2]='b' vs p[2]='b' — MATCH! Answer = True ✓",
+    text:"p[2]='b' equals s[2]='b'. Diagonal: dp[3][3] = dp[2][2] = True! This is dp[m][n] — the full answer. Interpretation: 'a' matched 'a', '*' matched 'a' (one char), 'b' matched 'b'. s='aab' fully matches p='a*b'. Result: True!",
+    vars:{i:'3',j:'3',val:'T',rule:'match→diag=T!'}
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Column headers: row-label-width spacer + ε + P chars
+  const header = document.getElementById('col-header');
+  // corner (same width as row label)
+  const corner = document.createElement('div');
+  corner.style.cssText = 'width:44px;flex-shrink:0';
+  header.appendChild(corner);
+  // col labels: ε, a, *, b
+  ['ε', ...P.split('')].forEach((ch, j) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'dph-cell';
+    lbl.textContent = ch;
+    header.appendChild(lbl);
+    if (j < N) {
+      const gap = document.createElement('div'); gap.className='dph-gap'; header.appendChild(gap);
+    }
+  });
+
+  // DP table rows
+  const table = document.getElementById('dp-table');
+  const rowLabels = ['ε', ...S.split('')]; // ε, a, a, b
+  for (let i = 0; i <= M; i++) {
+    const row = document.createElement('div');
+    row.className = 'dp-table-row';
+    // Row label
+    const lbl = document.createElement('div');
+    lbl.className = 'dp-row-lbl';
+    lbl.textContent = rowLabels[i];
+    row.appendChild(lbl);
+    // Cells
+    for (let j = 0; j <= N; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'dp-cell dp-empty';
+      cell.id = `cell-${i}-${j}`;
+      cell.textContent = '?';
+      row.appendChild(cell);
+      if (j < N) {
+        const gap = document.createElement('div');
+        gap.style.cssText = 'width:4px;flex-shrink:0';
+        row.appendChild(gap);
+      }
+    }
+    table.appendChild(row);
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current=idx; render(); }; })(i);
+    pd.appendChild(d);
+  });
+}
+
+function render() {
+  const step = steps[current];
+  const revSet = new Set((step.revealed||[]).map(([r,c]) => `${r},${c}`));
+  const depSet = new Set((step.deps||[]).map(([r,c]) => `${r},${c}`));
+  const curKey = step.cur ? `${step.cur[0]},${step.cur[1]}` : null;
+
+  // Determine which cells are "base" (row 0 or col 0)
+  for (let i = 0; i <= M; i++) {
+    for (let j = 0; j <= N; j++) {
+      const key = `${i},${j}`;
+      const cell = document.getElementById(`cell-${i}-${j}`);
+      if (!cell) continue;
+      if (key === curKey) {
+        cell.className = 'dp-cell dp-cur';
+        cell.textContent = FULL_DP[i][j] ? 'T' : 'F';
+      } else if (depSet.has(key)) {
+        cell.className = 'dp-cell dp-dep';
+        cell.textContent = FULL_DP[i][j] ? 'T' : 'F';
+      } else if (revSet.has(key)) {
+        const isBase = (i === 0 || j === 0);
+        if (isBase) {
+          cell.className = 'dp-cell dp-base';
+        } else {
+          cell.className = FULL_DP[i][j] ? 'dp-cell dp-t' : 'dp-cell dp-f';
+        }
+        cell.textContent = FULL_DP[i][j] ? 'T' : 'F';
+      } else {
+        cell.className = 'dp-cell dp-empty';
+        cell.textContent = '?';
+      }
+    }
+  }
+
+  // Code panel
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current+1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  const v = step.vars;
+  document.getElementById('vv-i').textContent = v.i;
+  document.getElementById('vv-j').textContent = v.j;
+  document.getElementById('vv-val').textContent = v.val;
+  document.getElementById('vv-rule').textContent = v.rule;
+  document.getElementById('vb-val').classList.toggle('changed', step.phase !== 'init');
+  document.getElementById('vb-rule').classList.toggle('changed', step.phase === 'fill' || step.phase === 'result');
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

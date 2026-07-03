@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#968 · Binary Tree Cameras</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Tree Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.tree-svg-container{display:flex;justify-content:center;margin-bottom:1.5rem}
+.tree-svg-container svg{max-width:100%;overflow:visible}
+.node-circle{stroke-width:2.5;transition:fill 0.35s, stroke 0.35s}
+.node-label{font-family:'JetBrains Mono','Fira Code',monospace;font-size:14px;font-weight:700;dominant-baseline:central;text-anchor:middle;pointer-events:none;transition:fill 0.35s}
+.node-state-label{font-family:'DM Sans',system-ui,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;dominant-baseline:central;text-anchor:middle;pointer-events:none;transition:fill 0.35s}
+.tree-edge{stroke-width:2;transition:stroke 0.35s}
+
+/* Node states */
+.state-unvisited .node-circle{fill:var(--surface);stroke:var(--border2)}
+.state-unvisited .node-label{fill:var(--text3)}
+.state-unvisited .node-state-label{fill:var(--text3)}
+.state-active .node-circle{fill:var(--purple-bg);stroke:var(--purple-mid)}
+.state-active .node-label{fill:var(--purple-mid)}
+.state-active .node-state-label{fill:var(--purple-mid)}
+.state-0 .node-circle{fill:var(--amber-bg);stroke:var(--amber-border)}
+.state-0 .node-label{fill:var(--amber-mid)}
+.state-0 .node-state-label{fill:var(--amber-mid)}
+.state-1 .node-circle{fill:var(--red-bg);stroke:var(--red-border)}
+.state-1 .node-label{fill:var(--red-mid)}
+.state-1 .node-state-label{fill:var(--red-mid)}
+.state-2 .node-circle{fill:var(--green-bg);stroke:var(--green-border)}
+.state-2 .node-label{fill:var(--green-mid)}
+.state-2 .node-state-label{fill:var(--green-mid)}
+.state-camera .node-circle{fill:var(--blue-bg);stroke:var(--blue-border)}
+.state-camera .node-label{fill:var(--blue-mid)}
+.state-camera .node-state-label{fill:var(--blue-mid)}
+
+/* ── State Legend ── */
+.state-diagram{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin:1rem 0}
+@media(max-width:560px){.state-diagram{grid-template-columns:1fr}}
+.state-box{padding:12px 14px;border-radius:var(--radius);border:1.5px solid;text-align:center}
+.state-box.s0{background:var(--amber-bg);border-color:var(--amber-border)}
+.state-box.s0 .s-num{color:var(--amber-mid)}
+.state-box.s1{background:var(--red-bg);border-color:var(--red-border)}
+.state-box.s1 .s-num{color:var(--red-mid)}
+.state-box.s2{background:var(--green-bg);border-color:var(--green-border)}
+.state-box.s2 .s-num{color:var(--green-mid)}
+.s-num{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
+.s-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 2px}
+.s-desc{font-size:11px;color:var(--text2);line-height:1.4}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.4;color:var(--text)}
+.var-s0{color:var(--amber-mid);font-weight:700}
+.var-s1{color:var(--red-mid);font-weight:700}
+.var-s2{color:var(--green-mid);font-weight:700}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-visit{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-return{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-camera{background:var(--red-bg);color:var(--red-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-s0{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-s1{background:var(--red-bg);border-color:var(--red-border)}
+.sw-s2{background:var(--green-bg);border-color:var(--green-border)}
+.sw-camera{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-unvisited{background:var(--surface);border-color:var(--border2)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #968</div>
+  <h1>Binary Tree Cameras</h1>
+  <p class="subtitle">Place the minimum number of cameras in a binary tree such that every node is monitored. A camera placed at a node covers its parent, itself, and its children.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Tree DP</span>
+    <span class="tag tag-pattern">Post-order 3 States</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(h)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a binary tree. You can install a <strong>camera</strong> at any node. A camera placed at node X <em>monitors</em>: the node itself, its parent, and both its children. Your goal is to find the <strong>minimum number of cameras</strong> needed so that <em>every single node</em> in the tree is monitored by at least one camera.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>A camera is most efficient when placed at an <strong>internal node</strong> (not a leaf), because it can cover both its children AND its parent in one shot. Placing cameras at leaves is wasteful — they can only cover themselves and their parent. The greedy insight: <strong>never place a camera at a leaf</strong>. Instead, force their parents to hold the camera, which then covers the grandparent too.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Bad Strategy: Camera at every leaf</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Tree: 0 → 0 → 0 (chain)<br>
+          Camera at leaf (bottom) covers only 2 nodes<br>
+          Camera at root needed for 3rd node<br>
+          Total: 2 cameras ✗
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Optimal: Camera at middle node</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          Tree: 0 → 0 → 0 (chain)<br>
+          Camera at middle covers all 3 nodes!<br>
+          (itself + parent + child)<br>
+          Total: 1 camera ✓
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge Cases:</strong> A tree with a single node (1 camera needed, since null children don't count as uncovered). A path of 2 nodes needs 1 camera (at either node, since one covers both). The empty tree is not in the input. Note that <code>null</code> nodes are treated as already-covered (they don't need monitoring).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Null = Covered, Not Missing</div>
+      <p>A critical rule: <code>null</code> children are treated as <strong>"covered"</strong> (not "uncovered"). This means a camera at a leaf node does NOT need to cover null — it just covers itself and its parent. This shapes the entire 3-state design.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Post-order Tree DP with 3 States</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>This is a <strong>Tree DP</strong> problem. We run a post-order DFS (Left → Right → Root), so each node receives full information about its subtrees before making its own decision. Each node returns one of <strong>3 states</strong>:</p>
+
+    <div class="state-diagram">
+      <div class="state-box s0">
+        <div class="s-num">0</div>
+        <div class="s-name">NOT Covered</div>
+        <div class="s-desc">This node is not yet monitored by any camera. Its parent must place a camera.</div>
+      </div>
+      <div class="state-box s1">
+        <div class="s-num">1</div>
+        <div class="s-name">HAS Camera</div>
+        <div class="s-desc">This node has a camera installed. It covers itself, its children, and its parent.</div>
+      </div>
+      <div class="state-box s2">
+        <div class="s-num">2</div>
+        <div class="s-name">Covered</div>
+        <div class="s-desc">This node is monitored (by a child's camera) but does not itself have a camera.</div>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Null nodes return state 2</strong> (covered/satisfied) — they don't need monitoring.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Post-order DFS:</strong> Recursively process left and right subtrees first, then the current node.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>If either child is uncovered (state 0):</strong> Place a camera here! Increment the counter and return state 1 (HAS_CAMERA). This is the greedy move — if a child needs coverage, the parent is the cheapest place to put the camera.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>If either child has a camera (state 1):</strong> This node is now covered. Return state 2 (COVERED) — no camera needed here.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Otherwise (both children covered but no camera among them):</strong> This node is not yet covered. Return state 0 (NOT_COVERED) and let the parent handle it.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Root special case:</strong> After the DFS, if the root itself returns state 0 (not covered), place one more camera there. The root has no parent to rescue it.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 State Transition Logic (per node)</div>
+      <div class="recurrence-formula">
+        <span>If</span> <span class="var-s0">left==0 or right==0</span>  →  place camera here, return <span class="var-s1">1 (HAS_CAMERA)</span><br>
+        <span>Elif</span> <span class="var-s1">left==1 or right==1</span>  →  covered by child, return <span class="var-s2">2 (COVERED)</span><br>
+        <span>Else</span> (both children are COVERED but no camera)  →  return <span class="var-s0">0 (NOT_COVERED)</span><br>
+        <span>After root:</span> if root returns <span class="var-s0">0</span>  →  cameras += 1
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Greedy Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At each node during post-order traversal: <strong>every node in the already-processed subtrees is guaranteed to be covered</strong>. We never leave a subtree with an uncovered node — we always pass the "not covered" responsibility upward exactly once, to be resolved by the immediate parent.</p>
+    </div>
+
+    <p><strong>Why is this greedy optimal?</strong> Consider a chain of nodes A → B → C (A is root, C is leaf). If we process bottom-up:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.25rem;line-height:2.2;font-size:14px">
+      <li>C (leaf) has null children (state 2). C returns state 0: "I'm not covered, parent B must act."</li>
+      <li>B sees C is uncovered → places camera at B. B returns state 1: "I have a camera, which covers C and A."</li>
+      <li>A sees B has a camera → A is covered. A returns state 2.</li>
+      <li>Root is A, state 2 (covered). Done! 1 camera.</li>
+    </ul>
+    <p>If we had placed the camera at C instead, A would remain uncovered (C's camera doesn't reach A). We'd need 2 cameras. By deferring the camera decision upward, we always get maximum coverage per camera.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why Post-order (not Pre-order)?</div>
+      <p>Pre-order processes the root first — but a root-first approach can't know whether its children will "rescue" it via a camera. Post-order guarantees full subtree information before a node makes its camera decision. This is the essential difference.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge case: null nodes return 2 (covered).</strong> If we returned 0 instead, leaf nodes would always think their null children need cameras — they'd always install a camera, which is wasteful. Returning 2 from null means: "I'm fine, don't worry about me."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The optimal solution is a post-order DFS returning one of 3 integer states per node, with a nonlocal camera counter.</p>
+
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def minCameraCover(root):</span></div>
+      <div class="ann-line"><span class="acode">    cameras = 0</span><span class="aann">← global counter for cameras placed</span></div>
+      <div class="ann-line"><span class="acode">    </span></div>
+      <div class="ann-line"><span class="acode">    def dfs(node):</span><span class="aann">← returns state: 0=not_covered, 1=has_camera, 2=covered</span></div>
+      <div class="ann-line"><span class="acode">        nonlocal cameras</span></div>
+      <div class="ann-line"><span class="acode">        if node is None: return 2</span><span class="aann">← null = treated as already covered (base case)</span></div>
+      <div class="ann-line"><span class="acode">        </span></div>
+      <div class="ann-line"><span class="acode">        left  = dfs(node.left)</span><span class="aann">← process left subtree first (post-order)</span></div>
+      <div class="ann-line"><span class="acode">        right = dfs(node.right)</span><span class="aann">← process right subtree</span></div>
+      <div class="ann-line"><span class="acode">        </span></div>
+      <div class="ann-line"><span class="acode">        if left == 0 or right == 0:</span><span class="aann">← a child is uncovered → MUST place camera here</span></div>
+      <div class="ann-line"><span class="acode">            cameras += 1</span><span class="aann">← install camera at this node</span></div>
+      <div class="ann-line"><span class="acode">            return 1</span><span class="aann">← state: has_camera (covers parent too)</span></div>
+      <div class="ann-line"><span class="acode">        </span></div>
+      <div class="ann-line"><span class="acode">        if left == 1 or right == 1:</span><span class="aann">← a child has a camera → this node is covered!</span></div>
+      <div class="ann-line"><span class="acode">            return 2</span><span class="aann">← state: covered (no camera needed here)</span></div>
+      <div class="ann-line"><span class="acode">        </span></div>
+      <div class="ann-line"><span class="acode">        return 0</span><span class="aann">← both children covered but no camera → this node is NOT covered yet</span></div>
+      <div class="ann-line"><span class="acode">    </span></div>
+      <div class="ann-line"><span class="acode">    if dfs(root) == 0:</span><span class="aann">← root has no parent; if it's uncovered, place final camera</span></div>
+      <div class="ann-line"><span class="acode">        cameras += 1</span></div>
+      <div class="ann-line"><span class="acode">    return cameras</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Checking state 1 before state 0</div>
+      <p>The order of the <code>if</code> checks matters! Check for <strong>state 0 (uncovered) first</strong>. If you check for state 1 first, a node with one uncovered child and one camera child would return state 2 (covered) — incorrectly skipping the uncovered child.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📊 Complexity</div>
+      <p><strong>Time: O(n)</strong> — Each node is visited exactly once in the DFS. <strong>Space: O(h)</strong> — The recursion stack depth equals the tree height h. In the worst case (a path/chain), h = n, so O(n). For a balanced tree, O(log n).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern — Greedy on Trees = Post-order DP</div>
+        <p style="font-size:14px">When you see "binary tree + optimization (min/max)" and each node's decision depends on its children's state, think <strong>post-order DFS</strong>. You need to process leaves first because their state feeds into the parent's decision. This is the Tree DP pattern.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define the Minimal State — What Does a Node Need to Know?</div>
+        <p style="font-size:14px">A node needs to report to its parent: "Do you need to rescue me (state 0)?" "Do I have a camera that covers you (state 1)?" or "I'm fine, don't worry about me (state 2)?". Three states are the minimum needed to propagate correct decisions upward.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Write Transitions — Greedy Choice at Each Node</div>
+        <p style="font-size:14px">Given child states, what should the current node do? The key greedy principle: <strong>delay cameras as high as possible</strong>. Only place a camera if you MUST (a child is uncovered). Otherwise, propagate the right state upward and let the parent decide.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Root Edge Case</div>
+        <p style="font-size:14px">The root has no parent. If the post-order DFS returns state 0 for the root, there's no parent to rescue it — you must place one final camera at the root. Always check the root's return value explicitly.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a tree optimization problem. I see a node covers itself, parent, and children — so coverage propagates upward and downward. I'll use post-order DFS because I need to know the subtree state before deciding what to do at a node.
+
+I'll define 3 states per node: 0 = not covered yet, 1 = has a camera, 2 = covered by a child's camera.
+
+Base case: null nodes return 2 — they don't need coverage.
+
+The greedy rule: if any child returns 0 (uncovered), I MUST place a camera here — that's the earliest optimal moment. If any child returns 1, I'm covered — return 2. Otherwise, return 0 to signal my parent.
+
+After DFS, if the root is state 0, I need one more camera there.
+
+Time: O(n), Space: O(h) for the recursion stack."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 Follow-up Questions to Expect</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Can you solve it iteratively? (Yes — using an explicit stack for post-order traversal)</li>
+        <li>What if cameras cover 2 levels instead of 1? (Extend the state machine)</li>
+        <li>What if each camera has a cost? (Weighted DP on the tree)</li>
+        <li>Similar: House Robber III — same "cannot take adjacent" constraint, same Tree DP pattern</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Post-order DFS on [0,0,null,0,0]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:0.75rem">Tree: root=0, left=0, right=null, left.left=0, left.right=0. Expected: 1 camera.</p>
+
+    <div class="viz-area">
+      <!-- Tree SVG Visualization -->
+      <div class="tree-svg-container">
+        <svg id="tree-svg" viewBox="0 0 420 230" width="420" height="230">
+          <!-- Edges -->
+          <line id="edge-root-left" x1="210" y1="50" x2="120" y2="130" class="tree-edge" stroke="var(--border2)"/>
+          <line id="edge-root-right" x1="210" y1="50" x2="300" y2="130" class="tree-edge" stroke="var(--border2)"/>
+          <line id="edge-left-ll" x1="120" y1="130" x2="70" y2="210" class="tree-edge" stroke="var(--border2)"/>
+          <line id="edge-left-lr" x1="120" y1="130" x2="170" y2="210" class="tree-edge" stroke="var(--border2)"/>
+          <!-- Null right node indicator -->
+          <text x="310" y="148" font-family="'DM Sans',system-ui,sans-serif" font-size="11" fill="var(--text3)" text-anchor="middle">null</text>
+
+          <!-- Node groups -->
+          <g id="node-root" class="state-unvisited">
+            <circle cx="210" cy="50" r="26" class="node-circle"/>
+            <text x="210" y="48" class="node-label">0</text>
+            <text x="210" y="63" class="node-state-label" id="lbl-root">ROOT</text>
+          </g>
+          <g id="node-left" class="state-unvisited">
+            <circle cx="120" cy="130" r="26" class="node-circle"/>
+            <text x="120" y="128" class="node-label">0</text>
+            <text x="120" y="143" class="node-state-label" id="lbl-left">LEFT</text>
+          </g>
+          <g id="node-ll" class="state-unvisited">
+            <circle cx="70" cy="210" r="26" class="node-circle"/>
+            <text x="70" y="208" class="node-label">0</text>
+            <text x="70" y="223" class="node-state-label" id="lbl-ll">L.L</text>
+          </g>
+          <g id="node-lr" class="state-unvisited">
+            <circle cx="170" cy="210" r="26" class="node-circle"/>
+            <text x="170" y="208" class="node-label">0</text>
+            <text x="170" y="223" class="node-state-label" id="lbl-lr">L.R</text>
+          </g>
+          <!-- Camera icons (hidden by default) -->
+          <text id="cam-left" x="120" y="125" font-size="16" text-anchor="middle" dominant-baseline="central" opacity="0">📷</text>
+        </svg>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-node">
+          <span class="var-name">Current Node</span>
+          <span class="var-val" id="vv-node">—</span>
+        </div>
+        <div class="var-box" id="vb-left">
+          <span class="var-name">left state</span>
+          <span class="var-val" id="vv-left">—</span>
+        </div>
+        <div class="var-box" id="vb-right">
+          <span class="var-name">right state</span>
+          <span class="var-val" id="vv-right">—</span>
+        </div>
+        <div class="var-box" id="vb-cameras">
+          <span class="var-name">cameras</span>
+          <span class="var-val" id="vv-cameras">0</span>
+        </div>
+        <div class="var-box" id="vb-ret">
+          <span class="var-name">returns</span>
+          <span class="var-val" id="vv-ret">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def minCameraCover(root):</div>
+      <div class="code-line" id="cl-1">    cameras = 0</div>
+      <div class="code-line" id="cl-2">    def dfs(node):</div>
+      <div class="code-line" id="cl-3">        nonlocal cameras</div>
+      <div class="code-line" id="cl-4">        if node is None: return 2  # null = covered</div>
+      <div class="code-line" id="cl-5">        left  = dfs(node.left)</div>
+      <div class="code-line" id="cl-6">        right = dfs(node.right)</div>
+      <div class="code-line" id="cl-7">        if left == 0 or right == 0:</div>
+      <div class="code-line" id="cl-8">            cameras += 1; return 1  # place camera here</div>
+      <div class="code-line" id="cl-9">        if left == 1 or right == 1:</div>
+      <div class="code-line" id="cl-10">            return 2               # covered by child camera</div>
+      <div class="code-line" id="cl-11">        return 0                   # not covered yet</div>
+      <div class="code-line" id="cl-12">    if dfs(root) == 0:</div>
+      <div class="code-line" id="cl-13">        cameras += 1  # root has no parent to rescue it</div>
+      <div class="code-line" id="cl-14">    return cameras</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to step through the post-order DFS. We process leaf nodes first, bubbling results up to the root.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Currently visiting</div>
+      <div class="legend-item"><div class="legend-swatch sw-s0"></div> State 0: Not covered</div>
+      <div class="legend-item"><div class="legend-swatch sw-s1"></div> State 1: Has camera</div>
+      <div class="legend-item"><div class="legend-swatch sw-s2"></div> State 2: Covered</div>
+      <div class="legend-item"><div class="legend-swatch sw-unvisited"></div> Not yet visited</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Post-order DFS is the key — process children before the parent so decisions flow bottom-up</div>
+      <div class="takeaway">3 states per node: 0 (not covered), 1 (has camera), 2 (covered by child)</div>
+      <div class="takeaway">Greedy rule: only place a camera when a child is uncovered (state 0) — never greedily at leaves</div>
+      <div class="takeaway">Null nodes return state 2 (covered) — they don't need monitoring</div>
+      <div class="takeaway">Always check the root after DFS — it has no parent to rescue it if it returns state 0</div>
+      <div class="takeaway">This "return pair/tuple of states" pattern extends to House Robber III and similar Tree DP problems</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (try all subsets)</td>
+          <td class="mark-bad">O(2^n)</td>
+          <td>O(n)</td>
+          <td>Exponential — infeasible</td>
+        </tr>
+        <tr>
+          <td><strong>Post-order Tree DP (3 States) ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td>O(h)</td>
+          <td>Optimal. Interview answer.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Tree DP / Post-order 3 States Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Problem involves a binary tree with an optimization objective (min/max)</li>
+        <li>Each node's decision depends on the state of its children</li>
+        <li>There are a small, fixed number of possible "states" a node can be in</li>
+        <li>The result must propagate upward — post-order is natural</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Tree DP / Post-order 3 States)</div>
+      <div class="related-item"><strong>House Robber III</strong><span class="related-diff diff-med">Medium</span> — Return (rob, not_rob) pair per node; same post-order DP on tree (#337)</div>
+      <div class="related-item"><strong>Distribute Coins in Binary Tree</strong><span class="related-diff diff-med">Medium</span> — Post-order excess flow: return net excess per subtree (#979)</div>
+      <div class="related-item"><strong>Delete Nodes and Return Forest</strong><span class="related-diff diff-med">Medium</span> — Post-order with parent context (#1110)</div>
+      <div class="related-item"><strong>Diameter of Binary Tree</strong><span class="related-diff diff-easy">Easy</span> — Post-order: return height, update global max at each node (#543)</div>
+      <div class="related-item"><strong>Largest BST Subtree</strong><span class="related-diff diff-med">Medium</span> — Post-order with (size, min, max) tuple per subtree (#333)</div>
+      <div class="related-item"><strong>Path Sum III</strong><span class="related-diff diff-med">Medium</span> — Post-order DFS with path counting (#437)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming → Tree DP)<br>
+      Sub-Pattern: <strong>Post-order 3 States</strong> · Source: Guide Section 18 (line ~1030)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── Node states per step: which CSS class to apply to each node group ───
+// Nodes: 'root', 'left', 'll', 'lr'
+// States: 'state-unvisited', 'state-active', 'state-0', 'state-1', 'state-2', 'state-camera'
+
+const steps = [
+  {
+    id:0, phase:'init', phaseLabel:'START', phaseClass:'phase-init',
+    activeLine:0,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-unvisited',lr:'state-unvisited'},
+    labels:{root:'ROOT',left:'LEFT',ll:'L.L',lr:'L.R'},
+    showCamera:false,
+    vars:{node:'—',left:'—',right:'—',cameras:0,ret:'—'},
+    changed:[],
+    title:'Begin: Post-order DFS',
+    text:'Tree: root(0) → left(0) → [ll(0), lr(0)]; root→right is null. We call dfs(root). Post-order means we go all the way to the leaves FIRST before making any decisions. Watch the traversal order: ll → lr → left → root.'
+  },
+  {
+    id:1, phase:'visit', phaseLabel:'VISIT ll', phaseClass:'phase-visit',
+    activeLine:4,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-active',lr:'state-unvisited'},
+    labels:{root:'ROOT',left:'LEFT',ll:'visiting',lr:'L.R'},
+    showCamera:false,
+    vars:{node:'ll',left:'—',right:'—',cameras:0,ret:'—'},
+    changed:['node'],
+    title:"dfs(ll): Visiting left-left leaf node",
+    text:"We reach node ll — a leaf. First we call dfs(ll.left) = dfs(null). Since the node is null, we hit the base case 'if node is None: return 2'. Null = covered."
+  },
+  {
+    id:2, phase:'visit', phaseLabel:'NULL BASE CASE', phaseClass:'phase-visit',
+    activeLine:4,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-active',lr:'state-unvisited'},
+    labels:{root:'ROOT',left:'LEFT',ll:'visiting',lr:'L.R'},
+    showCamera:false,
+    vars:{node:'ll',left:'2',right:'—',cameras:0,ret:'—'},
+    changed:['left'],
+    title:"dfs(null) = 2: Both children of ll are null → covered",
+    text:"ll.left is null → returns 2 (covered). ll.right is null → returns 2 (covered). So left=2, right=2 for node ll. Now we check: is left==0? No. Is right==0? No. Is left==1? No. Is right==1? No. So we fall through to 'return 0'."
+  },
+  {
+    id:3, phase:'return', phaseLabel:'RETURN 0', phaseClass:'phase-return',
+    activeLine:11,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-0',lr:'state-unvisited'},
+    labels:{root:'ROOT',left:'LEFT',ll:'state=0',lr:'L.R'},
+    showCamera:false,
+    vars:{node:'ll',left:'2',right:'2',cameras:0,ret:'0'},
+    changed:['right','ret'],
+    title:"dfs(ll) returns 0 — Not Covered",
+    text:"Node ll has null children (both state 2 — covered, no camera). Neither child has a camera to cover ll. So ll returns state 0: 'I am not yet covered — my parent must rescue me!' The bubble travels up to node left."
+  },
+  {
+    id:4, phase:'visit', phaseLabel:'VISIT lr', phaseClass:'phase-visit',
+    activeLine:4,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-0',lr:'state-active'},
+    labels:{root:'ROOT',left:'LEFT',ll:'state=0',lr:'visiting'},
+    showCamera:false,
+    vars:{node:'lr',left:'2',right:'—',cameras:0,ret:'—'},
+    changed:['node'],
+    title:"dfs(lr): Visiting left-right leaf node",
+    text:"Now we visit the right child of node 'left': node lr. Again a leaf. dfs(lr.left) = dfs(null) = 2, dfs(lr.right) = dfs(null) = 2. Same situation as ll — both children are null."
+  },
+  {
+    id:5, phase:'return', phaseLabel:'RETURN 0', phaseClass:'phase-return',
+    activeLine:11,
+    nodes:{root:'state-unvisited',left:'state-unvisited',ll:'state-0',lr:'state-0'},
+    labels:{root:'ROOT',left:'LEFT',ll:'state=0',lr:'state=0'},
+    showCamera:false,
+    vars:{node:'lr',left:'2',right:'2',cameras:0,ret:'0'},
+    changed:['right','ret'],
+    title:"dfs(lr) returns 0 — Not Covered",
+    text:"Node lr also returns 0. Both ll and lr are leaves with null children; neither has anyone to give them a camera. They both propagate 'I need coverage!' upward to their parent — node 'left'."
+  },
+  {
+    id:6, phase:'visit', phaseLabel:'VISIT left', phaseClass:'phase-visit',
+    activeLine:5,
+    nodes:{root:'state-unvisited',left:'state-active',ll:'state-0',lr:'state-0'},
+    labels:{root:'ROOT',left:'visiting',ll:'state=0',lr:'state=0'},
+    showCamera:false,
+    vars:{node:'left',left:'0',right:'0',cameras:0,ret:'—'},
+    changed:['node','left','right'],
+    title:"dfs(left): Node 'left' receives children's states",
+    text:"Post-order arrives at node 'left'. Its children returned: left(ll)=0, right(lr)=0. Both children are uncovered! We check: 'if left==0 or right==0' → TRUE. This triggers the greedy action: place a camera here!"
+  },
+  {
+    id:7, phase:'camera', phaseLabel:'PLACE CAMERA', phaseClass:'phase-camera',
+    activeLine:8,
+    nodes:{root:'state-unvisited',left:'state-camera',ll:'state-2',lr:'state-2'},
+    labels:{root:'ROOT',left:'📷 cam',ll:'covered',lr:'covered'},
+    showCamera:true,
+    vars:{node:'left',left:'0',right:'0',cameras:1,ret:'1'},
+    changed:['cameras','ret'],
+    title:"Camera placed at node 'left'! cameras=1, returns 1",
+    text:"cameras += 1 (now cameras=1). A camera at 'left' covers: itself, both children (ll and lr are now COVERED ✓), and its parent (root). Node 'left' returns state 1: 'I have a camera!' This bubbles up to the root."
+  },
+  {
+    id:8, phase:'visit', phaseLabel:'VISIT root', phaseClass:'phase-visit',
+    activeLine:6,
+    nodes:{root:'state-active',left:'state-1',ll:'state-2',lr:'state-2'},
+    labels:{root:'visiting',left:'state=1',ll:'covered',lr:'covered'},
+    showCamera:true,
+    vars:{node:'root',left:'1',right:'—',cameras:1,ret:'—'},
+    changed:['node','left'],
+    title:"dfs(root): Root receives left=1, now checking right",
+    text:"Post-order DFS now processes the root. left_state = dfs(node.left) = 1 (the node 'left' has a camera). Now we call dfs(node.right) = dfs(null) = 2. So for root: left=1, right=2."
+  },
+  {
+    id:9, phase:'visit', phaseLabel:'CHECK ROOT', phaseClass:'phase-visit',
+    activeLine:9,
+    nodes:{root:'state-active',left:'state-1',ll:'state-2',lr:'state-2'},
+    labels:{root:'checking',left:'state=1',ll:'covered',lr:'covered'},
+    showCamera:true,
+    vars:{node:'root',left:'1',right:'2',cameras:1,ret:'—'},
+    changed:['right'],
+    title:"Root: left=1, right=2. Is left==0 or right==0?",
+    text:"Check first branch: 'if left==0 or right==0' → 1==0 is False, 2==0 is False. So NO camera needed for uncovered children. Check second branch: 'if left==1 or right==1' → 1==1 is TRUE! A child has a camera."
+  },
+  {
+    id:10, phase:'return', phaseLabel:'RETURN 2', phaseClass:'phase-return',
+    activeLine:10,
+    nodes:{root:'state-2',left:'state-1',ll:'state-2',lr:'state-2'},
+    labels:{root:'state=2',left:'state=1',ll:'covered',lr:'covered'},
+    showCamera:true,
+    vars:{node:'root',left:'1',right:'2',cameras:1,ret:'2'},
+    changed:['ret'],
+    title:"dfs(root) returns 2 — Root is Covered!",
+    text:"Since left==1 (node 'left' has a camera), the root is covered by that camera. Root returns state 2: 'I'm covered — no camera needed here.' The camera at 'left' reaches up to cover root. Every node is now covered!"
+  },
+  {
+    id:11, phase:'result', phaseLabel:'FINAL CHECK', phaseClass:'phase-result',
+    activeLine:12,
+    nodes:{root:'state-2',left:'state-camera',ll:'state-2',lr:'state-2'},
+    labels:{root:'COVERED',left:'📷 CAMERA',ll:'COVERED',lr:'COVERED'},
+    showCamera:true,
+    vars:{node:'root',left:'1',right:'2',cameras:1,ret:'2'},
+    changed:[],
+    title:"Root returned 2 (not 0) — No extra camera needed!",
+    text:"'if dfs(root) == 0' → 2==0 is False. The root is covered. We don't need to add a camera at the root. Final answer: cameras = 1. The single camera at node 'left' covers all 4 nodes in the tree. Optimal!"
+  },
+  {
+    id:12, phase:'result', phaseLabel:'DONE', phaseClass:'phase-result',
+    activeLine:14,
+    nodes:{root:'state-2',left:'state-camera',ll:'state-2',lr:'state-2'},
+    labels:{root:'COVERED',left:'📷 CAMERA',ll:'COVERED',lr:'COVERED'},
+    showCamera:true,
+    vars:{node:'—',left:'—',right:'—',cameras:1,ret:'1'},
+    changed:[],
+    title:"Return cameras = 1",
+    text:"We return cameras = 1. The single camera at node 'left' (the parent of both leaves) covers all 4 nodes: ll (its child), lr (its child), itself, and root (its parent). This is the minimum — no placement of 0 cameras can cover everything, and 1 camera is achievable. Greedy post-order Tree DP gives the optimal answer."
+  }
+];
+
+let current = 0;
+
+function setNodeState(nodeId, stateClass) {
+  const el = document.getElementById('node-' + nodeId);
+  if (!el) return;
+  el.className = stateClass;
+}
+
+function setNodeLabel(nodeId, text) {
+  const el = document.getElementById('lbl-' + nodeId);
+  if (el) el.textContent = text;
+}
+
+function buildDom() {
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // Update node states
+  ['root','left','ll','lr'].forEach(nodeId => {
+    setNodeState(nodeId, step.nodes[nodeId]);
+    setNodeLabel(nodeId, step.labels[nodeId]);
+  });
+
+  // Show/hide camera icon
+  const camEl = document.getElementById('cam-left');
+  if (camEl) camEl.setAttribute('opacity', step.showCamera ? '1' : '0');
+
+  // Update variable tracker
+  const varMap = {
+    'node': 'vv-node', 'left': 'vv-left', 'right': 'vv-right',
+    'cameras': 'vv-cameras', 'ret': 'vv-ret'
+  };
+  const vbMap = {
+    'node': 'vb-node', 'left': 'vb-left', 'right': 'vb-right',
+    'cameras': 'vb-cameras', 'ret': 'vb-ret'
+  };
+  Object.keys(varMap).forEach(key => {
+    const vEl = document.getElementById(varMap[key]);
+    const bEl = document.getElementById(vbMap[key]);
+    if (vEl) vEl.textContent = step.vars[key];
+    if (bEl) {
+      bEl.classList.toggle('changed', step.changed.includes(key));
+    }
+  });
+
+  // Update code panel
+  for (let i = 0; i <= 14; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.className = 'code-line' + (i === step.activeLine ? ' active' : '');
+  }
+
+  // Update info card
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = step.phaseLabel;
+  badge.className = 'phase-badge ' + step.phaseClass;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Update progress dots
+  for (let i = 0; i < steps.length; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    dot.className = 'dot' + (i === current ? ' active' : (i < current ? ' visited' : ''));
+  }
+
+  // Button states
+  document.getElementById('prev-btn').disabled = (current === 0);
+  document.getElementById('next-btn').disabled = (current === steps.length - 1);
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < steps.length) {
+    current = next;
+    render();
+  }
+}
+
+function reset() {
+  current = 0;
+  render();
+}
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

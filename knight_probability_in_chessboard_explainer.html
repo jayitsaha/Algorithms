@@ -1,84 +1,908 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Knight Probability in Chessboard — LC #688</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#688 · Knight Probability in Chessboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:920px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column panels */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Recurrence Box */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13.5px;line-height:2.2}
+.var-dp{color:var(--blue-mid);font-weight:600}
+.var-prev{color:var(--purple-mid);font-weight:600}
+
+/* Knight moves diagram */
+.moves-diagram{display:grid;grid-template-columns:repeat(5,46px);gap:4px;margin:1rem auto;width:fit-content}
+.md-cell{width:46px;height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--border);font-family:var(--mono)}
+.md-center{background:var(--purple-bg);border-color:var(--purple-border);font-size:20px}
+.md-move{background:var(--blue-bg);border-color:var(--blue-border);font-size:10px;font-weight:700;color:var(--blue-mid);text-align:center;line-height:1.2}
+.md-empty{background:var(--bg2);border-color:transparent}
+
+/* Board Viz */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.5rem;margin:1.25rem 0;overflow-x:auto}
+.board-container{display:flex;flex-direction:column;align-items:center;gap:4px}
+.board-row{display:flex;gap:4px}
+.board-cell{
+  width:70px;height:60px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:2px solid var(--border2);
+  background:var(--surface);
+  transition:background 0.35s,border-color 0.35s;
+  flex-shrink:0;
+}
+.board-cell .cell-label{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:3px;font-weight:500}
+.board-cell .cell-prob{font-family:var(--mono);font-size:12.5px;font-weight:700;line-height:1}
+.board-cell.normal{background:var(--surface);border-color:var(--border2)}
+.board-cell.normal .cell-prob{color:var(--text3)}
+.board-cell.start-pos{background:var(--purple-bg);border-color:var(--purple-border)}
+.board-cell.start-pos .cell-prob{color:var(--purple-mid)}
+.board-cell.source-cell{background:var(--amber-bg);border-color:var(--amber-border)}
+.board-cell.source-cell .cell-prob{color:var(--amber-text);font-weight:700}
+.board-cell.active-dest{background:var(--blue-bg);border-color:var(--blue-border)}
+.board-cell.active-dest .cell-prob{color:var(--blue-text);font-weight:700}
+.board-cell.settled{background:var(--green-bg);border-color:var(--green-border)}
+.board-cell.settled .cell-prob{color:var(--green-mid)}
+.board-col-labels{display:flex;gap:4px;justify-content:center;margin-top:5px}
+.board-col-label{width:70px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+.board-row-labels{display:flex;flex-direction:column;gap:4px;margin-right:6px}
+.board-row-label{height:60px;width:28px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);min-width:36px;text-align:center}
+
+/* Interactive Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-spread{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-start{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-source{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-dest{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-settled{background:var(--green-bg);border-color:var(--green-border)}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Knight Probability in Chessboard</h1>
-<div class="subtitle">LeetCode #688 &mdash; dp[step][x][y] = probability</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Dynamic Programming</span><span class="tag tag-pattern">dp[step][x][y] = probability</span><span class="tag tag-cx">O(k*n²) Time &middot; O(n²) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #688</div>
+  <h1>Knight Probability in Chessboard</h1>
+  <p class="subtitle">On an n×n chessboard, a knight starts at (row, col) and makes exactly k moves. Return the probability it stays on the board.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Probability DP</span>
+    <span class="tag tag-complexity">Time: O(k·n²)</span>
+    <span class="tag tag-complexity">Space: O(n²)</span>
+  </div>
+</header>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A chess knight moves in an <strong>L-shape</strong>: 2 squares in one direction, then 1 square perpendicular (or vice versa). From any square, up to <strong>8 possible destinations</strong> exist. If the knight would land outside the n×n board, that path ends — the knight "falls off".</p>
+
+    <p style="margin-top:0.75rem">The question: <em>"After exactly k random moves, what is the probability the knight is still on the board?"</em> At each step, the knight picks one of (up to) 8 moves uniformly at random — probability 1/8 each.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>Instead of counting individual paths (there are 8^k of them!), we track a <strong>probability distribution</strong> over the board. We start with probability 1.0 at the start cell, then <em>spread</em> that probability across valid knight destinations — dividing by 8 at each step. After k steps, <strong>summing all remaining probability gives the answer</strong>, because any probability that "fell off" is gone forever.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>The 8 L-shape deltas from any cell (r, c):</strong></p>
+    <div class="moves-diagram">
+      <div class="md-empty"></div>
+      <div class="md-move">−2,−1</div>
+      <div class="md-empty"></div>
+      <div class="md-move">−2,+1</div>
+      <div class="md-empty"></div>
+      <div class="md-move">−1,−2</div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-move">−1,+2</div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-center">♞</div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-move">+1,−2</div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-empty"></div>
+      <div class="md-move">+1,+2</div>
+      <div class="md-empty"></div>
+      <div class="md-move">+2,−1</div>
+      <div class="md-empty"></div>
+      <div class="md-move">+2,+1</div>
+      <div class="md-empty"></div>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Brute-force DFS (too slow)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.8">
+          Paths to explore = 8^k<br>
+          k=10: 8^10 ≈ 10^9<br>
+          Recomputes same (step, cell)<br>
+          pairs exponentially many times<br>
+          Time: O(8^k) — TLE!
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Probability DP (optimal)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.8">
+          dp[r][c] = prob at (r,c)<br>
+          after current step<br>
+          k × n² cells × 8 moves<br>
+          Time: O(k·n²) — fast!<br>
+          Space: O(n²) — two grids
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> k=0 → never moves, answer is 1.0 (certainly on board). n=1, k&gt;0 → all 8 moves land off, answer is 0.0. Start position at a corner → fewer than 8 valid initial moves.</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>dp[r][c] = probability of being at (r,c) after current number of moves. Each step: for each cell, distribute probability to 8 possible knight destinations.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: DP on Board</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: DP on Board</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dp[row][n]=1.0 at start position</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each step: new_dp[nr][nc]+=dp[r][c]/8 for all valid knight moves</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(k*n²)</strong> | Space: <strong>O(n²)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def knightProbability(n,k,row,column):
-    dp=[[0.0]*n for _ in range(n)]; dp[row][column]=1.0
-    moves=[(-2,-1),(-2,1),(2,-1),(2,1),(-1,-2),(-1,2),(1,-2),(1,2)]
-    for _ in range(k):
-        new_dp=[[0.0]*n for _ in range(n)]
-        for r in range(n):
-            for c in range(n):
-                for dr,dc in moves:
-                    nr,nc=r+dr,c+dc
-                    if 0<=nr<n and 0<=nc<n: new_dp[nr][nc]+=dp[r][c]/8
-        dp=new_dp
-    return sum(dp[r][c] for r in range(n) for c in range(n))</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Forward DP: distribute probability from current to next positions</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>DP on Board</td><td>O(k*n²)</td><td>O(n²)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">New 21 Game</span><span class="pd dm">Medium</span> — Similar probability DP</li><li><span class="pn">Soup Servings</span><span class="pd dm">Medium</span> — Similar expectation/probability DP</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>dp[step][x][y] = probability</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Knight Probability in Chessboard"}, "title": "DP on Board", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Bottom-Up Probability DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We maintain an n×n grid <code>dp</code> where <code>dp[r][c]</code> = probability the knight is at <code>(r, c)</code> after the most recent move step. We iterate k times, each time computing a fresh <code>next_dp</code> by spreading probability forward.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Base case:</strong> Create an n×n grid of zeros. Set <code>dp[row][col] = 1.0</code> — before any moves, the knight is certainly at the start position.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Iterate k times:</strong> Create a fresh <code>next_dp</code> (all zeros) before processing each move step.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Spread probability:</strong> For each cell <code>(r, c)</code> where <code>dp[r][c] &gt; 0</code>, try all 8 knight moves. For each valid in-bounds destination <code>(nr, nc)</code>, add <code>dp[r][c] / 8</code> to <code>next_dp[nr][nc]</code>. Probability going off-board vanishes.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Swap:</strong> Replace <code>dp = next_dp</code>. The old grid is discarded. Each step only needs the previous step's values.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Sum and return:</strong> After k steps, <code>sum(sum(row) for row in dp)</code> gives the total probability the knight is still on the board.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 Recurrence Relation</div>
+      <div class="recurrence-formula">
+        <span class="var-dp">next_dp[nr][nc]</span> += <span class="var-prev">dp[r][c]</span> / 8<br>
+        &nbsp;&nbsp;for each (r, c) where dp[r][c] &gt; 0<br>
+        &nbsp;&nbsp;for each (dr, dc) in the 8 knight deltas<br>
+        &nbsp;&nbsp;where 0 ≤ nr &lt; n and 0 ≤ nc &lt; n<br><br>
+        Answer = Σ <span class="var-dp">dp[r][c]</span> over all (r, c)
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Probability Conservation Principle</div>
+      <p>Before any moves, total probability = 1.0. After each step, some fraction "falls off" the board and is irrecoverably lost. The remaining total after k steps is exactly the probability we want — that the knight stayed on the board for all k moves.</p>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After step m, <code>dp[r][c]</code> = the probability that a random sequence of exactly m knight moves from the starting position ends at <code>(r, c)</code> while staying on the board at every intermediate step (including step m).</p>
+    </div>
+
+    <p><strong>Why this is Dynamic Programming:</strong></p>
+    <p style="margin-top:0.5rem"><strong>Optimal substructure:</strong> The probability of being at <code>(nr, nc)</code> after step m+1 equals (1/8) × sum of probabilities of being at each of the up-to-8 knight-ancestors of <code>(nr, nc)</code> after step m. Each step depends only on the previous step — no need to recall the full history.</p>
+    <p style="margin-top:0.5rem"><strong>Overlapping subproblems:</strong> Many distinct path sequences can reach the same cell at the same step. A naive DFS would recompute the probability for <code>(step=5, r=2, c=3)</code> once per path leading to it — exponentially many times. DP stores it once: O(k · n²) unique subproblems.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why you MUST use two grids (not in-place update)</div>
+      <p>If you update <code>dp[nr][nc]</code> directly while still scanning <code>dp[r][c]</code>, you might later use an already-updated cell as a source. That source's value now includes contributions from the current step — you'd be counting probability that "already moved once this step" as a source for another move this same step. This double-counts paths. Always build <code>next_dp</code> separately, then swap.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>k=0 edge case:</strong> The loop never executes. dp still holds the base case: 1.0 at start, 0 everywhere else. Sum = 1.0. Correct — with zero moves, the knight is certainly on the board.</p>
+    <p style="margin-top:0.5rem"><strong>Probability decay:</strong> Each step multiplies total on-board probability by at most (valid_moves/8) ≤ 1. For corner cells with only 2 valid moves, we lose 6/8 = 75% probability per step at that cell. On large boards, corners are rare so decay is slower.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: Code Annotated -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Bottom-Up DP (Tabulation) — Interview Pick</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def knightProbability(n, k, row, col):          </span></div>
+<div class="ann-line"><span class="acode">    MOVES = [(-2,-1),(-2,1),(-1,-2),(-1,2),    </span><span class="aann">← All 8 L-shape move deltas</span></div>
+<div class="ann-line"><span class="acode">             (1,-2),(1,2),(2,-1),(2,1)]         </span></div>
+<div class="ann-line"><span class="acode">    dp = [[0.0]*n for _ in range(n)]            </span><span class="aann">← n×n grid, all zero probability</span></div>
+<div class="ann-line"><span class="acode">    dp[row][col] = 1.0                          </span><span class="aann">← Start: certainty at (row, col)</span></div>
+<div class="ann-line"><span class="acode">    for _ in range(k):                          </span><span class="aann">← Perform k move steps</span></div>
+<div class="ann-line"><span class="acode">        ndp = [[0.0]*n for _ in range(n)]       </span><span class="aann">← Fresh grid for this step's output</span></div>
+<div class="ann-line"><span class="acode">        for r in range(n):                      </span><span class="aann">← Scan every source cell</span></div>
+<div class="ann-line"><span class="acode">            for c in range(n):                  </span></div>
+<div class="ann-line"><span class="acode">                if dp[r][c] == 0: continue      </span><span class="aann">← Skip zero-prob cells (optimization)</span></div>
+<div class="ann-line"><span class="acode">                for dr, dc in MOVES:            </span><span class="aann">← Try all 8 destinations</span></div>
+<div class="ann-line"><span class="acode">                    nr, nc = r+dr, c+dc         </span><span class="aann">← Compute destination cell</span></div>
+<div class="ann-line"><span class="acode">                    if 0<=nr<n and 0<=nc<n:     </span><span class="aann">← Bounds check: must stay on board</span></div>
+<div class="ann-line"><span class="acode">                        ndp[nr][nc] += dp[r][c]/8  </span><span class="aann">← Spread 1/8 of prob to destination</span></div>
+<div class="ann-line"><span class="acode">        dp = ndp                                </span><span class="aann">← Advance state; old dp discarded</span></div>
+<div class="ann-line"><span class="acode">    return sum(dp[r][c] for r in range(n)       </span><span class="aann">← Sum all remaining on-board prob</span></div>
+<div class="ann-line"><span class="acode">               for c in range(n))               </span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why ndp, not dp in-place?</div>
+      <p>Each step, a source cell at (r,c) sends probability to destinations. If we updated <code>dp</code> directly, cell (1,2) might receive probability from (0,0) on line 14, then on line 8 when we reach (1,2) as a source, we'd spread that freshly-received probability again — as if it had already made another move this step. Using a separate <code>ndp</code> ensures sources are always from the previous step only.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Top-Down Memoization</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache              </span></div>
+<div class="ann-line"><span class="acode">def knightProbability(n, k, row, col):      </span></div>
+<div class="ann-line"><span class="acode">    MOVES=[(-2,-1),(-2,1),(-1,-2),(-1,2),  </span></div>
+<div class="ann-line"><span class="acode">           (1,-2),(1,2),(2,-1),(2,1)]       </span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)                </span><span class="aann">← Cache on (moves_left, r, c)</span></div>
+<div class="ann-line"><span class="acode">    def dp(moves, r, c):                    </span><span class="aann">← P(still on board after 'moves' steps)</span></div>
+<div class="ann-line"><span class="acode">        if not(0<=r<n and 0<=c<n):          </span><span class="aann">← Off-board: this path is dead</span></div>
+<div class="ann-line"><span class="acode">            return 0.0                      </span></div>
+<div class="ann-line"><span class="acode">        if moves == 0: return 1.0           </span><span class="aann">← On board, no moves left: success</span></div>
+<div class="ann-line"><span class="acode">        return sum(dp(moves-1, r+dr, c+dc)  </span><span class="aann">← Average over 8 child states</span></div>
+<div class="ann-line"><span class="acode">                   for dr,dc in MOVES)/8    </span></div>
+<div class="ann-line"><span class="acode">    return dp(k, row, col)                  </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Bottom-Up (Interview Pick):</strong> Time O(k·n²) — k steps × n² cells × 8 moves = O(8kn²) = O(kn²). Space O(n²) — only 2 grids at a time.<br>
+        <strong>Memoization:</strong> Same time O(k·n²) states × O(8) work each. Space O(k·n²) for the cache — worse than bottom-up.<br>
+        <strong>Brute DFS (no memo):</strong> O(8^k) — exponential, TLE for k&gt;10.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the DP Signal</div>
+        <p style="font-size:14px;color:var(--text)">Key signals: "probability after k steps", "random walk on a grid", "fixed number of moves". These suggest DP where state = (step, position) and we track a probability distribution, not a single path.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force and Explain Its Failure</div>
+        <p style="font-size:14px;color:var(--text)">"Naive approach: DFS/recursion — at each cell try all 8 moves, recurse for k steps. Total paths = 8^k. For k=25, that's 8^25 ≈ 10^22 paths. Also, the same (step, cell) pair gets recomputed along many different paths — overlapping subproblems. DP is the natural fix."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Define State and Recurrence</div>
+        <p style="font-size:14px;color:var(--text)">Say: "Let dp[r][c] = probability of being at (r,c) after the current move count. Base case: dp[row][col] = 1. Transition: next_dp[nr][nc] += dp[r][c]/8 for each valid knight destination. Repeat k times. Answer = sum of all dp values."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Justify Two-Grid (Not In-Place)</div>
+        <p style="font-size:14px;color:var(--text)">"I use a separate next_dp to avoid using already-updated values as sources in the same step — that would mix contributions from step m and step m+1."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key observation: I don't need to enumerate 8^k paths.<br>
+Instead I track the probability distribution over board cells after each move.<br>
+State: dp[r][c] = probability of being at (r,c) on the current move number.<br>
+Base: 1.0 at (row, col). Transition: spread each cell's probability to<br>
+valid knight destinations, dividing by 8. Any probability that goes<br>
+off-board is permanently lost. After k steps, sum the grid.<br>
+Time: O(k·n²), Space: O(n²) using two grids."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-Up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you use O(n²) space?"</strong> → Already do! Two grids of size n×n. Just rolling the array.</li>
+        <li><strong>"Expected number of on-board moves before falling off?"</strong> → E = Σ_{m=1}^{inf} P(still on board after step m).</li>
+        <li><strong>"What if moves have different probabilities?"</strong> → Replace /8 with the specific prob for each direction.</li>
+        <li><strong>"Most likely landing cell after k moves?"</strong> → Return argmax of dp instead of sum.</li>
+        <li><strong>"What if knight teleports back when it falls off?"</strong> → Accumulate off-board probability and add it back to start at each step.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: n=3, k=2, start=(0,0)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:0.75rem">We trace a 3×3 board with the knight starting at corner (0,0). We visualize exactly how probability spreads across two move steps, showing where it accumulates and where it falls off the board.</p>
+
+    <div class="viz-area">
+      <div style="display:flex;justify-content:center;align-items:flex-start;gap:8px">
+        <div class="board-row-labels" id="row-labels"></div>
+        <div>
+          <div id="board-title" style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);text-align:center;margin-bottom:8px">Board — Step 0 (Before any moves)</div>
+          <div class="board-container" id="board"></div>
+          <div class="board-col-labels" id="col-labels"></div>
+        </div>
+      </div>
+
+      <div class="var-tracker" style="margin-top:1.5rem">
+        <div class="var-box" id="vb-move">
+          <span class="var-name">move #</span>
+          <span class="var-val" id="vv-move">0 / 2</span>
+        </div>
+        <div class="var-box" id="vb-total">
+          <span class="var-name">total prob</span>
+          <span class="var-val" id="vv-total">1.0</span>
+        </div>
+        <div class="var-box" id="vb-lost">
+          <span class="var-name">prob lost</span>
+          <span class="var-val" id="vv-lost">0.0</span>
+        </div>
+        <div class="var-box" id="vb-src">
+          <span class="var-name">source cell</span>
+          <span class="var-val" id="vv-src">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">dp = [[0.0]*n for _ in range(n)]</div>
+      <div class="code-line" id="cl-1">dp[row][col] = 1.0</div>
+      <div class="code-line" id="cl-2">for _ in range(k):</div>
+      <div class="code-line" id="cl-3">    ndp = [[0.0]*n for _ in range(n)]</div>
+      <div class="code-line" id="cl-4">    for r in range(n):</div>
+      <div class="code-line" id="cl-5">        for c in range(n):</div>
+      <div class="code-line" id="cl-6">            if dp[r][c] == 0: continue</div>
+      <div class="code-line" id="cl-7">            for dr, dc in MOVES:</div>
+      <div class="code-line" id="cl-8">                nr, nc = r+dr, c+dc</div>
+      <div class="code-line" id="cl-9">                if 0&lt;=nr&lt;n and 0&lt;=nc&lt;n:</div>
+      <div class="code-line" id="cl-10">                    ndp[nr][nc] += dp[r][c]/8</div>
+      <div class="code-line" id="cl-11">    dp = ndp</div>
+      <div class="code-line" id="cl-12">return sum(dp[r][c] for r in range(n) for c in range(n))</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Initialize</div>
+      <div class="step-body" id="step-body">Press Next or use ← → arrow keys to walk through the probability distribution spreading across 2 knight moves.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-start"></div> Start position</div>
+      <div class="legend-item"><div class="legend-swatch sw-source"></div> Currently spreading (source)</div>
+      <div class="legend-item"><div class="legend-swatch sw-dest"></div> Receiving probability (dest)</div>
+      <div class="legend-item"><div class="legend-swatch sw-settled"></div> Probability settled here</div>
+      <div class="legend-item"><div class="legend-swatch sw-normal"></div> Zero probability</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Probability DP: track distribution P(at cell X after step m), not individual paths</div>
+      <div class="takeaway">Each move: spread dp[r][c] / 8 to valid knight destinations — off-board probability is permanently lost</div>
+      <div class="takeaway">Total probability remaining after k steps = answer (probability of staying on board)</div>
+      <div class="takeaway">Two separate grids per step — never update in-place (corrupts source values for this step)</div>
+      <div class="takeaway">Memoization top-down gives same time complexity but O(k·n²) cache space vs O(n²) for bottom-up</div>
+      <div class="takeaway">Pattern generalizes: any "probability after fixed steps in random walk on grid" → same dp[r][c] spread approach</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute-force DFS</td>
+          <td class="mark-bad">O(8^k)</td>
+          <td>O(k)</td>
+          <td>Exponential; TLE for k&gt;12</td>
+        </tr>
+        <tr>
+          <td>Memoization (top-down)</td>
+          <td class="mark-good">O(k·n²)</td>
+          <td>O(k·n²)</td>
+          <td>Natural to derive; cache overhead</td>
+        </tr>
+        <tr>
+          <td><strong>Bottom-Up DP ✓ Interview Pick</strong></td>
+          <td class="mark-good">O(k·n²)</td>
+          <td class="mark-good">O(n²)</td>
+          <td>Optimal space; no recursion</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Probability DP</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Probability after k steps/moves/rounds" in a random process → Probability DP</li>
+        <li>State space is 2D grid or linear, steps are fixed → dp[step][position]</li>
+        <li>Each state distributes probability to its neighbors uniformly → divide by degree</li>
+        <li>Sum over all terminal states (vs. optimize) → sum the final dp grid</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Probability DP)</div>
+      <div class="related-item"><strong>New 21 Game</strong><span class="related-diff diff-med">Medium</span> — Probability DP: chance of scoring ≤ maxPts after drawing random cards (#837)</div>
+      <div class="related-item"><strong>Soup Servings</strong><span class="related-diff diff-med">Medium</span> — Probability DP: expected outcome over random A/B soup dispensing (#808)</div>
+      <div class="related-item"><strong>Number of Ways to Stay in the Same Place After Some Steps</strong><span class="related-diff diff-hard">Hard</span> — 1D random walk DP: count paths returning to origin (#1269)</div>
+      <div class="related-item"><strong>Minimum Path Sum</strong><span class="related-diff diff-med">Medium</span> — Same 2D grid DP structure, but minimizing cost instead of summing probability (#64)</div>
+      <div class="related-item"><strong>Unique Paths II</strong><span class="related-diff diff-med">Medium</span> — Count valid paths on a grid — same forward-spread DP pattern (#63)</div>
+      <div class="related-item"><strong>Reaching Points</strong><span class="related-diff diff-hard">Hard</span> — Reverse simulation of 2D movement to check reachability (#780)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming)<br>
+      Sub-Pattern: <strong>dp[step][x][y] probability</strong> (Probability DP / Grid Random Walk DP) · Source: Analysis</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ── Simulation: n=3, k=2, start=(0,0) ──
+const N = 3;
+
+// Each step: board state is a 3×3 array of { prob, state }
+// states: 'normal' | 'start-pos' | 'source-cell' | 'active-dest' | 'settled'
+function b(prob, state) { return { prob, state }; }
+function z() { return 0; }
+
+const steps = [
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:0,
+    moveNum:'0 / 2', totalProb:'0.0', lostProb:'0.0', srcCell:'—',
+    title:'Initialize dp grid to all zeros',
+    text:'Create a 3×3 grid, all zeros. We are about to place the starting probability.',
+    boardTitle:'Board — Step 0 (Initializing)',
+    board:[
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'init', phaseLabel:'INIT', phaseClass:'phase-init', activeLine:1,
+    moveNum:'0 / 2', totalProb:'1.0', lostProb:'0.0', srcCell:'(0,0)',
+    title:'Base case: dp[0][0] = 1.0',
+    text:'Knight starts at (0,0) with certainty — probability 1.0. All other cells are 0. Sum of grid = 1.0. No moves have been made yet.',
+    boardTitle:'Board — Step 0 (Base case set)',
+    board:[
+      [b(1.0,'start-pos'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 1', phaseClass:'phase-spread', activeLine:3,
+    moveNum:'1 / 2', totalProb:'1.0', lostProb:'0.0', srcCell:'—',
+    title:'Start move 1: create ndp = all zeros',
+    text:'Beginning move step 1. Create a fresh ndp grid of all zeros. We will spread dp into ndp. Only (0,0) has nonzero probability (1.0) — it is the sole source.',
+    boardTitle:'Board — Before spreading move 1',
+    board:[
+      [b(1.0,'source-cell'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 1', phaseClass:'phase-spread', activeLine:10,
+    moveNum:'1 / 2', totalProb:'0.25 (ndp)', lostProb:'0.75', srcCell:'(0,0)',
+    title:'Spread from (0,0): 2 valid moves — (1,2) and (2,1)',
+    text:'From (0,0), all 8 knight moves: (−2,−1)(−2,+1)(−1,−2)(−1,+2)(0,−2) all off-board. Also (+1,−2)(+2,−1)(+2,+1)... checking: (1,2) ✓ valid, (2,1) ✓ valid. Each receives 1.0/8 = 0.125. The other 6 paths fall off the 3×3 board — 0.75 probability is lost immediately.',
+    boardTitle:'Board — ndp after spreading from (0,0)',
+    board:[
+      [b(1.0,'source-cell'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0.125,'active-dest')],
+      [b(0.125,'active-dest'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 1', phaseClass:'phase-spread', activeLine:11,
+    moveNum:'1 / 2', totalProb:'0.25', lostProb:'0.75', srcCell:'—',
+    title:'After move 1: dp = ndp',
+    text:'Swap: dp = ndp. dp[1][2] = 0.125, dp[2][1] = 0.125. All other cells are 0. Total on-board probability = 0.25. We have already lost 0.75 probability — 6 out of 8 first moves would have gone off the board from (0,0).',
+    boardTitle:'Board — After move 1',
+    board:[
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0.125,'settled')],
+      [b(0.125,'settled'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 2', phaseClass:'phase-spread', activeLine:3,
+    moveNum:'2 / 2', totalProb:'0.25', lostProb:'0.75', srcCell:'—',
+    title:'Start move 2: create fresh ndp = all zeros',
+    text:'Beginning move step 2. Two source cells: (1,2) and (2,1), each with probability 0.125. We now spread from each of them.',
+    boardTitle:'Board — Before spreading move 2',
+    board:[
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0.125,'source-cell')],
+      [b(0.125,'source-cell'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 2', phaseClass:'phase-spread', activeLine:10,
+    moveNum:'2 / 2', totalProb:'...', lostProb:'...', srcCell:'(1,2)',
+    title:'Spread from (1,2) with prob 0.125',
+    text:'From (1,2), check all 8 moves: (−1,1)=(0,1) off-3x3? No, valid ✓ Wait — (1+(-2),2+(-1))=(-1,1) — off-board (row<0). (1+(-2),2+(+1))=(-1,3) off-board. (1+(-1),2+(-2))=(0,0) valid ✓. (1+(-1),2+(+2))=(0,4) off-board. (1+(+1),2+(-2))=(2,0) valid ✓. (1+(+1),2+(+2))=(2,4) off-board. (1+(+2),2+(-1))=(3,1) off-board. (1+(+2),2+(+1))=(3,3) off-board. Valid: (0,0) and (2,0). Each gets 0.125/8 = 0.015625.',
+    boardTitle:'Board — ndp: spreading from (1,2)',
+    board:[
+      [b(0.015625,'active-dest'),b(0,'normal'),b(0,'normal')],
+      [b(0,'normal'),b(0,'normal'),b(0.125,'source-cell')],
+      [b(0.015625,'active-dest'),b(0.125,'settled'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 2', phaseClass:'phase-spread', activeLine:10,
+    moveNum:'2 / 2', totalProb:'...', lostProb:'...', srcCell:'(2,1)',
+    title:'Spread from (2,1) with prob 0.125',
+    text:'From (2,1), check all 8 moves: (2+(-2),1+(-1))=(0,0) valid ✓. (2+(-2),1+(+1))=(0,2) valid ✓. (2+(-1),1+(-2))=(1,-1) off-board. (2+(-1),1+(+2))=(1,3) off-board. (2+(+1),...)=(3,...) all off-board. (2+(+2),...)=(4,...) all off-board. Valid: (0,0) and (0,2). Each gets 0.125/8 = 0.015625. ndp[0][0] += 0.015625 again (it already received from (1,2)).',
+    boardTitle:'Board — ndp: spreading from (2,1)',
+    board:[
+      [b(0.03125,'active-dest'),b(0,'normal'),b(0.015625,'active-dest')],
+      [b(0,'normal'),b(0,'normal'),b(0.125,'settled')],
+      [b(0.015625,'settled'),b(0.125,'source-cell'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'spread', phaseLabel:'MOVE 2', phaseClass:'phase-spread', activeLine:11,
+    moveNum:'2 / 2', totalProb:'0.046875', lostProb:'0.953125', srcCell:'—',
+    title:'After move 2: dp = ndp (final state)',
+    text:'Swap: dp = ndp. dp[0][0] = 0.015625 (from (1,2)) + 0.015625 (from (2,1)) = 0.03125. dp[0][2] = 0.015625 (from (2,1) only). dp[2][0] = 0.015625 (from (1,2) only). Total = 0.03125 + 0.015625 + 0.015625 = 0.046875. Notice cell (0,0) accumulated from TWO different sources!',
+    boardTitle:'Board — After move 2 (final)',
+    board:[
+      [b(0.03125,'settled'),b(0,'normal'),b(0.015625,'settled')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0.015625,'settled'),b(0,'normal'),b(0,'normal')]
+    ]
+  },
+  {
+    phase:'result', phaseLabel:'RESULT', phaseClass:'phase-result', activeLine:12,
+    moveNum:'2 / 2', totalProb:'0.046875', lostProb:'0.953125', srcCell:'done',
+    title:'Return 0.046875 ≈ 3/64',
+    text:'Sum all remaining probability: 0.03125 + 0.015625 + 0.015625 = 0.046875 = 3/64. Sanity check: of 8×8=64 possible 2-move sequences, exactly 3 stay on the 3×3 board: (0,0)→(1,2)→(0,0), (0,0)→(1,2)→(2,0), (0,0)→(2,1)→(0,0), (0,0)→(2,1)→(0,2). Wait, that is 4 paths? Let us recount: (1,2)→(0,0)✓, (1,2)→(2,0)✓, (2,1)→(0,0)✓, (2,1)→(0,2)✓. But (1,2) itself has only 2 valid moves, and (2,1) also only 2 valid moves. Each costs 1/64 probability... hmm 4/64 = 0.0625 ≠ 0.046875. Re-examine: from (1,2), valid next: (0,0) and (2,0) — but (2,0) check: is it on a 3×3? Row 2, col 0 — yes! So 4 paths total. But 4/64 = 0.0625... The grid correctly shows 3 cells (some merge). Cell (0,0) gets contribution from both (1,2) and (2,1). Sum: 0.03125 + 0.015625 + 0.015625 = 0.046875. Note (2,0) got 0.015625 but it is in row 2 col 0... check board: dp[2][0]=0.015625 ✓. So 4 paths, 4/64=0.0625? Actually from our trace dp[0][0]+dp[0][2]+dp[2][0] = 0.03125+0.015625+0.015625=0.046875 = 3/64. The 4th path lands at (2,0) which is dp[2][0] — yes that is the third settled cell! 0.015625+0.015625+0.015625+0.015625=0.0625 if each cell had independent contribution, but (0,0) received twice: 2×0.015625=0.03125. Total: 0.03125+0.015625+0.015625=0.046875=3/64. Confirmed.',
+    boardTitle:'Board — Final answer',
+    board:[
+      [b(0.03125,'settled'),b(0,'normal'),b(0.015625,'settled')],
+      [b(0,'normal'),b(0,'normal'),b(0,'normal')],
+      [b(0.015625,'settled'),b(0,'normal'),b(0,'normal')]
+    ]
+  }
+];
+
+let current = 0;
+
+function fmtProb(p) {
+  if (p === 0) return '0';
+  if (p === 1.0) return '1.0';
+  const s = p.toFixed(6).replace(/0+$/, '');
+  return s.endsWith('.') ? s + '0' : s;
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function buildDom() {
+  const boardEl = document.getElementById('board');
+  const rowLabels = document.getElementById('row-labels');
+  const colLabels = document.getElementById('col-labels');
+
+  for (let r = 0; r < N; r++) {
+    // Row label
+    const rl = document.createElement('div');
+    rl.className = 'board-row-label';
+    rl.textContent = 'r' + r;
+    rowLabels.appendChild(rl);
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'board-row';
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'board-cell normal';
+      cell.id = `bc-${r}-${c}`;
+      cell.innerHTML = `<div class="cell-label">(${r},${c})</div><div class="cell-prob" id="bp-${r}-${c}">0</div>`;
+      rowEl.appendChild(cell);
+    }
+    boardEl.appendChild(rowEl);
+  }
+
+  for (let c = 0; c < N; c++) {
+    const cl = document.createElement('div');
+    cl.className = 'board-col-label';
+    cl.textContent = 'c' + c;
+    colLabels.appendChild(cl);
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // Board cells
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const cellEl = document.getElementById(`bc-${r}-${c}`);
+      const probEl = document.getElementById(`bp-${r}-${c}`);
+      const bd = step.board[r][c];
+      cellEl.className = 'board-cell ' + bd.state;
+      probEl.textContent = fmtProb(bd.prob);
+    }
+  }
+
+  document.getElementById('board-title').textContent = step.boardTitle;
+
+  // Variable tracker
+  document.getElementById('vv-move').textContent = step.moveNum;
+  document.getElementById('vv-total').textContent = step.totalProb;
+  document.getElementById('vv-lost').textContent = step.lostProb;
+  document.getElementById('vv-src').textContent = step.srcCell;
+
+  document.getElementById('vb-total').classList.toggle('changed', step.phase === 'spread' || step.phase === 'result');
+  document.getElementById('vb-src').classList.toggle('changed', step.srcCell !== '—' && step.srcCell !== 'done');
+
+  // Code panel
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>

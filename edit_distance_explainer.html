@@ -1,83 +1,1015 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Edit Distance — LC #72</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#72 · Edit Distance</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Two Column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Recurrence Box */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.75rem;letter-spacing:0.5px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.4;color:var(--cyan-text)}
+.rf-match{color:var(--green-mid);font-weight:600}
+.rf-op{color:var(--purple-mid);font-weight:600}
+.rf-base{color:var(--amber-mid);font-weight:600}
+
+/* State Machine Diagram */
+.state-machine-wrapper{display:flex;justify-content:center;margin:1.5rem 0}
+.state-machine{display:flex;align-items:center;gap:2rem;flex-wrap:wrap;justify-content:center}
+.state-node{border-radius:14px;border:2.5px solid;padding:14px 22px;text-align:center;min-width:140px}
+.state-node.match-node{background:var(--green-bg);border-color:var(--green-border)}
+.state-node.op-node{background:var(--purple-bg);border-color:var(--purple-border)}
+.state-node-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.state-node.match-node .state-node-title{color:var(--green-mid)}
+.state-node.op-node .state-node-title{color:var(--purple-mid)}
+.state-node-formula{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+.state-node-cost{font-size:11px;margin-top:4px}
+.state-node.match-node .state-node-cost{color:var(--green-mid)}
+.state-node.op-node .state-node-cost{color:var(--purple-mid)}
+.state-arrow{font-size:20px;color:var(--text3)}
+
+/* DP Table Viz */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.dp-table-wrap{overflow-x:auto;margin:0.5rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;margin:0 auto}
+.dp-table th,.dp-table td{padding:9px 13px;text-align:center;border:1px solid var(--border2);min-width:44px}
+.dp-table th{background:var(--bg2);font-weight:600;font-size:12px;color:var(--text2)}
+.dp-table .row-header{background:var(--bg2);font-weight:700;color:var(--text2);font-size:12px}
+.dp-table td.computed{background:var(--surface);color:var(--text)}
+.dp-table td.active-cell{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text);font-weight:700}
+.dp-table td.dep-cell{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.dp-table td.match-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text);font-weight:700}
+.dp-table td.future-cell{background:var(--bg2);color:var(--text3)}
+.dp-table td.base-cell{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.dp-table td.result-cell{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text);font-weight:700}
+
+/* Decision Panel */
+.decision-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.decision-header{margin-bottom:0.75rem}
+.decision-phase{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.decision-phase.match{background:var(--green-bg);color:var(--green-mid)}
+.decision-phase.op{background:var(--purple-bg);color:var(--purple-mid)}
+.decision-phase.base{background:var(--amber-bg);color:var(--amber-mid)}
+.decision-phase.init{background:var(--blue-bg);color:var(--blue-mid)}
+.decision-question{font-size:14px;color:var(--text);font-weight:600;display:block}
+.decision-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:0.75rem}
+.decision-option{padding:10px 12px;border-radius:var(--radius);border:1.5px solid var(--border2);background:var(--bg2);text-align:center}
+.decision-option.selected{border-color:var(--green-border);background:var(--green-bg)}
+.decision-option.rejected{opacity:0.5}
+.option-action{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px}
+.option-formula{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px}
+.option-result{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text)}
+.decision-option.selected .option-result{color:var(--green-mid)}
+.option-check{color:var(--green-mid);margin-right:4px}
+.option-x{color:var(--text3);margin-right:4px}
+
+/* Variable Tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Interactive Code Panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info Card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-base{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-fill{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-dep{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-match{background:var(--green-bg);border-color:var(--green-border)}
+.sw-base{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-done{background:var(--surface);border-color:var(--border2)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Edit Distance</h1>
-<div class="subtitle">LeetCode #72 &mdash; Insert/Delete/Replace</div>
-<div class="tags"><span class="tag tag-med">🟡 Medium</span><span class="tag tag-pattern">Dynamic Programming</span><span class="tag tag-pattern">Insert/Delete/Replace</span><span class="tag tag-cx">O(m*n) Time &middot; O(min(m,n)) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #72</div>
+  <h1>Edit Distance</h1>
+  <p class="subtitle">Given two strings <code>word1</code> and <code>word2</code>, return the minimum number of operations required to convert <code>word1</code> to <code>word2</code>. Each operation is an insert, delete, or replace of a single character.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">DP: LCS / Insert-Delete-Replace</span>
+    <span class="tag tag-complexity">Time: O(m·n)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Imagine you have a word on a whiteboard and want to erase-and-rewrite it into a different word, one character at a time. Each step you can: <strong>insert</strong> a new character anywhere, <strong>delete</strong> an existing character, or <strong>replace</strong> one character with another. The <em>edit distance</em> (Levenshtein distance) is the <strong>fewest steps needed</strong>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>At every position (i, j) in the two strings, we face a binary choice: the characters either <strong>match</strong> (free — inherit the diagonal) or they <strong>don't</strong> (pay 1 operation — but which? Try all three and keep the cheapest). This "try everything, cache results" structure is the signature of dynamic programming.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Example: "horse" → "ros" (answer: 3)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          horse → <strong>r</strong>orse (replace h→r)<br>
+          rorse → r<strong>o</strong>se  (delete 2nd r)<br>
+          rose  → ros   (delete e)<br>
+          <strong>3 operations total</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Example: "intention" → "execution" (answer: 5)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          intention → inention  (delete t)<br>
+          inention  → enention  (replace i→e)<br>
+          enention  → exention  (replace n→x)<br>
+          exention  → exection  (replace n→c)<br>
+          exection  → execution (insert u)<br>
+          <strong>5 operations total</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases to watch:</strong> If either string is empty — converting empty to "abc" costs 3 (all inserts); converting "abc" to empty costs 3 (all deletes). Both empty → 0. Strings up to 500 characters (so O(n²) is fine, O(3^n) is not).</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Can't We Use Greedy?</div>
+      <p>A greedy approach — always picking the locally cheapest operation — fails here. For "horse" → "ros", deleting 'h' greedily creates "orse" and leads to a longer path. Replacing 'h'→'r' first opens a much cheaper path overall. We need to <em>explore all subproblem branches</em>, which is exactly what DP does.</p>
+    </div>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode problem statement.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>dp[i][j] = min operations to transform word1[0..i-1] to word2[0..j-1]. If chars equal: dp[i][j]=dp[i-1][j-1]. Else: min(insert,delete,replace)+1.</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: 2D DP (Wagner-Fischer)</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: 2D DP (Wagner-Fischer)</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dp[0][j]=j (delete all); dp[i][0]=i (insert all)</span></div><div class="step"><span class="snum">2</span><span class="stxt">For each i,j: if equal: dp[i][j]=dp[i-1][j-1]; else: dp[i][j]=1+min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the invariant maintained at each step.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n)</strong> | Space: <strong>O(min(m,n))</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def minDistance(word1: str, word2: str) -> int:
-    m, n = len(word1), len(word2)
-    dp = list(range(n+1))    # O(n) space
-    for i in range(1, m+1):
-        prev = dp[0]; dp[0] = i
-        for j in range(1, n+1):
-            tmp = dp[j]
-            if word1[i-1] == word2[j-1]: dp[j] = prev
-            else: dp[j] = 1 + min(prev, dp[j], dp[j-1])
-            prev = tmp
-    return dp[n]</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">O</span></div><div class="step"><span class="snum">2</span><span class="stxt">p</span></div><div class="step"><span class="snum">3</span><span class="stxt">e</span></div><div class="step"><span class="snum">4</span><span class="stxt">r</span></div><div class="step"><span class="snum">5</span><span class="stxt">a</span></div><div class="step"><span class="snum">6</span><span class="stxt">t</span></div><div class="step"><span class="snum">7</span><span class="stxt">i</span></div><div class="step"><span class="snum">8</span><span class="stxt">o</span></div><div class="step"><span class="snum">9</span><span class="stxt">n</span></div><div class="step"><span class="snum">10</span><span class="stxt">s</span></div><div class="step"><span class="snum">11</span><span class="stxt">:</span></div><div class="step"><span class="snum">12</span><span class="stxt"> </span></div><div class="step"><span class="snum">13</span><span class="stxt">d</span></div><div class="step"><span class="snum">14</span><span class="stxt">p</span></div><div class="step"><span class="snum">15</span><span class="stxt">[</span></div><div class="step"><span class="snum">16</span><span class="stxt">i</span></div><div class="step"><span class="snum">17</span><span class="stxt">-</span></div><div class="step"><span class="snum">18</span><span class="stxt">1</span></div><div class="step"><span class="snum">19</span><span class="stxt">]</span></div><div class="step"><span class="snum">20</span><span class="stxt">[</span></div><div class="step"><span class="snum">21</span><span class="stxt">j</span></div><div class="step"><span class="snum">22</span><span class="stxt">]</span></div><div class="step"><span class="snum">23</span><span class="stxt">+</span></div><div class="step"><span class="snum">24</span><span class="stxt">1</span></div><div class="step"><span class="snum">25</span><span class="stxt">=</span></div><div class="step"><span class="snum">26</span><span class="stxt">d</span></div><div class="step"><span class="snum">27</span><span class="stxt">e</span></div><div class="step"><span class="snum">28</span><span class="stxt">l</span></div><div class="step"><span class="snum">29</span><span class="stxt">e</span></div><div class="step"><span class="snum">30</span><span class="stxt">t</span></div><div class="step"><span class="snum">31</span><span class="stxt">e</span></div><div class="step"><span class="snum">32</span><span class="stxt"> </span></div><div class="step"><span class="snum">33</span><span class="stxt">f</span></div><div class="step"><span class="snum">34</span><span class="stxt">r</span></div><div class="step"><span class="snum">35</span><span class="stxt">o</span></div><div class="step"><span class="snum">36</span><span class="stxt">m</span></div><div class="step"><span class="snum">37</span><span class="stxt"> </span></div><div class="step"><span class="snum">38</span><span class="stxt">w</span></div><div class="step"><span class="snum">39</span><span class="stxt">o</span></div><div class="step"><span class="snum">40</span><span class="stxt">r</span></div><div class="step"><span class="snum">41</span><span class="stxt">d</span></div><div class="step"><span class="snum">42</span><span class="stxt">1</span></div><div class="step"><span class="snum">43</span><span class="stxt">,</span></div><div class="step"><span class="snum">44</span><span class="stxt"> </span></div><div class="step"><span class="snum">45</span><span class="stxt">d</span></div><div class="step"><span class="snum">46</span><span class="stxt">p</span></div><div class="step"><span class="snum">47</span><span class="stxt">[</span></div><div class="step"><span class="snum">48</span><span class="stxt">i</span></div><div class="step"><span class="snum">49</span><span class="stxt">]</span></div><div class="step"><span class="snum">50</span><span class="stxt">[</span></div><div class="step"><span class="snum">51</span><span class="stxt">j</span></div><div class="step"><span class="snum">52</span><span class="stxt">-</span></div><div class="step"><span class="snum">53</span><span class="stxt">1</span></div><div class="step"><span class="snum">54</span><span class="stxt">]</span></div><div class="step"><span class="snum">55</span><span class="stxt">+</span></div><div class="step"><span class="snum">56</span><span class="stxt">1</span></div><div class="step"><span class="snum">57</span><span class="stxt">=</span></div><div class="step"><span class="snum">58</span><span class="stxt">i</span></div><div class="step"><span class="snum">59</span><span class="stxt">n</span></div><div class="step"><span class="snum">60</span><span class="stxt">s</span></div><div class="step"><span class="snum">61</span><span class="stxt">e</span></div><div class="step"><span class="snum">62</span><span class="stxt">r</span></div><div class="step"><span class="snum">63</span><span class="stxt">t</span></div><div class="step"><span class="snum">64</span><span class="stxt"> </span></div><div class="step"><span class="snum">65</span><span class="stxt">i</span></div><div class="step"><span class="snum">66</span><span class="stxt">n</span></div><div class="step"><span class="snum">67</span><span class="stxt">t</span></div><div class="step"><span class="snum">68</span><span class="stxt">o</span></div><div class="step"><span class="snum">69</span><span class="stxt"> </span></div><div class="step"><span class="snum">70</span><span class="stxt">w</span></div><div class="step"><span class="snum">71</span><span class="stxt">o</span></div><div class="step"><span class="snum">72</span><span class="stxt">r</span></div><div class="step"><span class="snum">73</span><span class="stxt">d</span></div><div class="step"><span class="snum">74</span><span class="stxt">1</span></div><div class="step"><span class="snum">75</span><span class="stxt">,</span></div><div class="step"><span class="snum">76</span><span class="stxt"> </span></div><div class="step"><span class="snum">77</span><span class="stxt">d</span></div><div class="step"><span class="snum">78</span><span class="stxt">p</span></div><div class="step"><span class="snum">79</span><span class="stxt">[</span></div><div class="step"><span class="snum">80</span><span class="stxt">i</span></div><div class="step"><span class="snum">81</span><span class="stxt">-</span></div><div class="step"><span class="snum">82</span><span class="stxt">1</span></div><div class="step"><span class="snum">83</span><span class="stxt">]</span></div><div class="step"><span class="snum">84</span><span class="stxt">[</span></div><div class="step"><span class="snum">85</span><span class="stxt">j</span></div><div class="step"><span class="snum">86</span><span class="stxt">-</span></div><div class="step"><span class="snum">87</span><span class="stxt">1</span></div><div class="step"><span class="snum">88</span><span class="stxt">]</span></div><div class="step"><span class="snum">89</span><span class="stxt">+</span></div><div class="step"><span class="snum">90</span><span class="stxt">1</span></div><div class="step"><span class="snum">91</span><span class="stxt">=</span></div><div class="step"><span class="snum">92</span><span class="stxt">r</span></div><div class="step"><span class="snum">93</span><span class="stxt">e</span></div><div class="step"><span class="snum">94</span><span class="stxt">p</span></div><div class="step"><span class="snum">95</span><span class="stxt">l</span></div><div class="step"><span class="snum">96</span><span class="stxt">a</span></div><div class="step"><span class="snum">97</span><span class="stxt">c</span></div><div class="step"><span class="snum">98</span><span class="stxt">e</span></div><div class="step"><span class="snum">99</span><span class="stxt">.</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>2D DP (Wagner-Fischer)</td><td>O(m*n)</td><td>O(min(m,n))</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">3</span><span class="pd dh"> </span> — t</li><li><span class="pn">O</span><span class="pd dh">(</span> — m</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Insert/Delete/Replace</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Edit Distance"}, "title": "2D DP (Wagner-Fischer)", "desc": "See code for step-by-step.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>data structure</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 2D Tabulation DP</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Define <code>dp[i][j]</code> = minimum edits to convert the <strong>first i characters of word1</strong> into the <strong>first j characters of word2</strong>. We build a (m+1) × (n+1) table row by row, left to right.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Create the table:</strong> <code>dp[0..m][0..n]</code>. The extra row/column (index 0) represents the empty-string prefix. Initialize all to 0.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Base case — first column:</strong> <code>dp[i][0] = i</code>. Converting the first i chars of word1 to an empty string requires exactly i deletions.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Base case — first row:</strong> <code>dp[0][j] = j</code>. Converting an empty string to the first j chars of word2 requires exactly j insertions.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Fill the table:</strong> For each cell (i, j) — if <code>word1[i-1] == word2[j-1]</code>: free match, <code>dp[i][j] = dp[i-1][j-1]</code>. Otherwise: <code>dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])</code> — cheapest of delete, insert, replace.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return dp[m][n]</strong> — the answer for the full strings.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relation</div>
+      <div class="recurrence-formula">
+<span class="rf-base">dp[i][0] = i</span>  &nbsp;(delete all i chars to reach empty string)<br>
+<span class="rf-base">dp[0][j] = j</span>  &nbsp;(insert all j chars from empty string)<br><br>
+If word1[i-1] == word2[j-1]:  <span style="color:var(--text3);font-size:12px">← characters match</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-match">dp[i][j] = dp[i-1][j-1]</span>  &nbsp;(free — no cost)<br><br>
+Else:  <span style="color:var(--text3);font-size:12px">← characters differ</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-op">dp[i][j] = 1 + min(</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-op">dp[i-1][j],</span>   &nbsp;← delete word1[i-1]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-op">dp[i][j-1],</span>   &nbsp;← insert word2[j-1]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-op">dp[i-1][j-1]</span>  &nbsp;← replace word1[i-1] with word2[j-1]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="rf-op">)</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Visual decision at each cell:</strong></p>
+    <div class="state-machine-wrapper">
+      <div class="state-machine">
+        <div class="state-node match-node">
+          <div class="state-node-title">Match (free)</div>
+          <div class="state-node-formula">dp[i-1][j-1]</div>
+          <div class="state-node-cost">cost: +0 ✓</div>
+        </div>
+        <div class="state-arrow">or</div>
+        <div class="state-node op-node">
+          <div class="state-node-title">Mismatch — best of 3</div>
+          <div class="state-node-formula">1 + min(↑, ←, ↖)</div>
+          <div class="state-node-cost">cost: +1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ What Each Direction Means</div>
+      <p>
+        <strong>↖ dp[i-1][j-1]</strong> = replace word1[i-1] with word2[j-1] — align both chars<br>
+        <strong>↑ dp[i-1][j]</strong> = delete word1[i-1] — word1 gets one char shorter<br>
+        <strong>← dp[i][j-1]</strong> = insert word2[j-1] into word1 — word2 gets one more char covered
+      </p>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3: Why It Works (DP Deep-Dive) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: DP Invariant &amp; Correctness</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why Is This Dynamic Programming?</div>
+      <p><strong>Optimal Substructure:</strong> The optimal edit distance for "horse"→"ros" <em>depends on</em> the optimal distance for their prefixes. Knowing the best way to convert "hors"→"ro" lets you extend it to "horse"→"ros" — smaller answers compose into larger ones without interference.<br><br>
+      <strong>Overlapping Subproblems:</strong> In naive recursion, the subproblem dp("hor","r") would be recomputed from multiple parent calls. With an (m+1)×(n+1) table, we solve each of the O(m·n) subproblems exactly once.</p>
+    </div>
+
+    <p><strong>The Invariant:</strong> When we compute <code>dp[i][j]</code>, every cell above and to its left is already the correct optimal value. We always read from precomputed correct cells — the invariant holds by induction from the base cases.</p>
+
+    <p style="margin-top:1rem"><strong>Proof sketch for the recurrence:</strong></p>
+    <ul style="margin-left:1.25rem;margin-top:0.5rem;font-size:14px;line-height:2">
+      <li>If characters match, aligning them costs nothing — we simply inherit the optimal cost for the smaller prefixes.</li>
+      <li>If they don't match, any optimal edit sequence must eventually handle this position. It either: (a) deletes word1[i-1] — leaving the subproblem dp[i-1][j]; (b) inserts word2[j-1] — leaving dp[i][j-1]; or (c) replaces word1[i-1] — leaving dp[i-1][j-1]. Taking 1 + min of these three covers all cases.</li>
+    </ul>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Misconception: Replace = Delete + Insert?</div>
+      <p>Mathematically yes, a replace can be simulated as delete then insert (2 ops). But in Levenshtein distance, replace is defined as <em>one single operation</em>. The recurrence correctly assigns cost 1 to replace. If you used cost 2 for replace, you'd get a different (and wrong for this problem) distance metric.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Edge case correctness:</strong> dp[i][0] = i is trivially correct (delete all i chars). dp[0][j] = j is trivially correct (insert all j chars). Both sequences of deletions/insertions are the <em>only</em> option when one string is empty, so they are trivially optimal.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — Tabulation / Bottom-Up DP (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def minDistance(word1: str, word2: str) -> int:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(word1), len(word2)          </span><span class="aann">← store lengths (cleaner than re-calling len repeatedly)</span></div>
+<div class="ann-line"><span class="acode">    dp = [[0]*(n+1) for _ in range(m+1)]   </span><span class="aann">← (m+1)×(n+1) table; extra row/col for empty-string prefixes</span></div>
+<div class="ann-line"><span class="acode">    for i in range(m+1):                   </span><span class="aann">← base: dp[i][0] = i (delete all i chars to get to empty)</span></div>
+<div class="ann-line"><span class="acode">        dp[i][0] = i</span></div>
+<div class="ann-line"><span class="acode">    for j in range(n+1):                   </span><span class="aann">← base: dp[0][j] = j (insert all j chars from empty)</span></div>
+<div class="ann-line"><span class="acode">        dp[0][j] = j</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, m+1):                </span><span class="aann">← iterate over each character of word1 (1-indexed)</span></div>
+<div class="ann-line"><span class="acode">        for j in range(1, n+1):            </span><span class="aann">← iterate over each character of word2 (1-indexed)</span></div>
+<div class="ann-line"><span class="acode">            if word1[i-1] == word2[j-1]:   </span><span class="aann">← i-th char of word1 = word1[i-1] (0-indexed string!)</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = dp[i-1][j-1]   </span><span class="aann">← match: inherit diagonal, no cost</span></div>
+<div class="ann-line"><span class="acode">            else:</span></div>
+<div class="ann-line"><span class="acode">                dp[i][j] = 1 + min(        </span><span class="aann">← mismatch: pay 1 for whichever op is cheapest</span></div>
+<div class="ann-line"><span class="acode">                    dp[i-1][j],            </span><span class="aann">← delete word1[i-1] (look up = word1 shrinks)</span></div>
+<div class="ann-line"><span class="acode">                    dp[i][j-1],            </span><span class="aann">← insert word2[j-1] (look left = word2 covered)</span></div>
+<div class="ann-line"><span class="acode">                    dp[i-1][j-1]           </span><span class="aann">← replace word1[i-1] with word2[j-1] (diagonal)</span></div>
+<div class="ann-line"><span class="acode">                )</span></div>
+<div class="ann-line"><span class="acode">    return dp[m][n]                        </span><span class="aann">← answer: full word1 (len m) converted to full word2 (len n)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Top Bug: word1[i-1] vs word1[i]</div>
+      <p>Our DP table uses 1-based prefix lengths: dp[i][j] = "first i chars of word1." So the <em>i-th character</em> (1-based) is at position <code>i-1</code> in the 0-indexed Python string. Forgetting this off-by-one causes silent wrong answers — a frequent interview mistake.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Memoization / Top-Down DP</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache</span></div>
+<div class="ann-line"><span class="acode">def minDistance(word1: str, word2: str) -> int:</span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)               </span><span class="aann">← Python caches every (i,j) pair automatically</span></div>
+<div class="ann-line"><span class="acode">    def dp(i, j):                          </span><span class="aann">← solve: min edits for word1[:i] → word2[:j]</span></div>
+<div class="ann-line"><span class="acode">        if i == 0: return j                </span><span class="aann">← base: word1 exhausted, insert remaining j chars of word2</span></div>
+<div class="ann-line"><span class="acode">        if j == 0: return i                </span><span class="aann">← base: word2 exhausted, delete remaining i chars of word1</span></div>
+<div class="ann-line"><span class="acode">        if word1[i-1] == word2[j-1]:       </span><span class="aann">← match: recurse on smaller subproblem, no cost</span></div>
+<div class="ann-line"><span class="acode">            return dp(i-1, j-1)</span></div>
+<div class="ann-line"><span class="acode">        return 1 + min(                    </span><span class="aann">← mismatch: try all three ops, pick cheapest</span></div>
+<div class="ann-line"><span class="acode">            dp(i-1, j),                    </span><span class="aann">← delete from word1</span></div>
+<div class="ann-line"><span class="acode">            dp(i, j-1),                    </span><span class="aann">← insert into word1</span></div>
+<div class="ann-line"><span class="acode">            dp(i-1, j-1)                   </span><span class="aann">← replace in word1</span></div>
+<div class="ann-line"><span class="acode">        )</span></div>
+<div class="ann-line"><span class="acode">    return dp(len(word1), len(word2))</span></div>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 3 — Brute Force Recursion (for understanding only):</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def minDistance(word1, word2):             </span><span class="aann">← WARNING: O(3^max(m,n)) — time limit exceeded</span></div>
+<div class="ann-line"><span class="acode">    def rec(i, j):</span></div>
+<div class="ann-line"><span class="acode">        if i == 0: return j</span></div>
+<div class="ann-line"><span class="acode">        if j == 0: return i</span></div>
+<div class="ann-line"><span class="acode">        if word1[i-1] == word2[j-1]: return rec(i-1, j-1)</span></div>
+<div class="ann-line"><span class="acode">        return 1 + min(rec(i-1,j), rec(i,j-1), rec(i-1,j-1))</span></div>
+<div class="ann-line"><span class="acode">    return rec(len(word1), len(word2))     </span><span class="aann">← recomputes rec("hor","r") many times without cache</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Tabulation:</strong> Time O(m·n), Space O(m·n) for the full table.<br>
+        <strong>Memoization:</strong> Time O(m·n), Space O(m·n) for cache + O(m+n) call stack.<br>
+        <strong>Space-optimized tabulation:</strong> O(min(m,n)) — use two 1D arrays (current and previous row).<br>
+        m = len(word1), n = len(word2)
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Identify the DP Signal</div>
+        <p style="font-size:14px;color:var(--text)">"We want the <em>minimum number of operations</em> to go from A to B. 'Minimum cost to transform X into Y' is the canonical DP signal — especially when there are multiple ways to make progress and local decisions affect future cost."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Define State Clearly</div>
+        <p style="font-size:14px;color:var(--text)">"Let dp[i][j] = min edits to convert word1[0..i) to word2[0..j). This is a 2D state over prefix lengths. Final answer = dp[m][n]."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Enumerate Transitions</div>
+        <p style="font-size:14px;color:var(--text)">"At (i,j): if chars match, free — dp[i-1][j-1]. If not: try delete (dp[i-1][j]), insert (dp[i][j-1]), replace (dp[i-1][j-1]). Take 1 + min of the three."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Set Base Cases</div>
+        <p style="font-size:14px;color:var(--text)">"dp[i][0] = i (all deletes), dp[0][j] = j (all inserts). These seed the first row and column of the table."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Mention Optimization</div>
+        <p style="font-size:14px;color:var(--text)">"For bonus points: since dp[i][j] only needs the current and previous row, space reduces from O(m·n) to O(min(m,n)) with a rolling array."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"This is a classic 2D DP problem — the edit distance (Levenshtein distance).<br>
+I'll define dp[i][j] = min edits to convert word1's first i chars to word2's first j chars.<br>
+Base cases: dp[i][0] = i, dp[0][j] = j.<br>
+Recurrence: if chars match → dp[i-1][j-1]. If not → 1 + min(delete=dp[i-1][j], insert=dp[i][j-1], replace=dp[i-1][j-1]).<br>
+Time O(m·n), Space O(m·n), reducible to O(min(m,n)) with rolling rows."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Reduce space to O(n)?"</strong> → Keep only previous row; use one extra variable for the diagonal (dp[i-1][j-1]).</li>
+        <li><strong>"Print the actual edit sequence?"</strong> → Backtrack from dp[m][n]: at each cell, check which neighbor it came from (diagonal=replace or match, up=delete, left=insert).</li>
+        <li><strong>"Allow only insert and delete?"</strong> → Replace = delete + insert (cost 2). Adjust recurrence: only min(dp[i-1][j], dp[i][j-1]) + 1. This also gives 2*(m+n−2*LCS) as a formula.</li>
+        <li><strong>"Weighted operations?"</strong> → Replace <code>1 +</code> with individual costs <code>c_del</code>, <code>c_ins</code>, <code>c_rep</code>.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interactive Walkthrough -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: "horse" → "ros"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <div class="dp-table-wrap">
+        <table class="dp-table" id="dp-table"></table>
+      </div>
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i (word1 prefix)</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-j">
+          <span class="var-name">j (word2 prefix)</span>
+          <span class="var-val" id="vv-j">—</span>
+        </div>
+        <div class="var-box" id="vb-val">
+          <span class="var-name">dp[i][j]</span>
+          <span class="var-val" id="vv-val">—</span>
+        </div>
+        <div class="var-box" id="vb-op">
+          <span class="var-name">operation</span>
+          <span class="var-val" id="vv-op" style="font-size:12px;min-width:60px">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def minDistance(word1, word2):</div>
+      <div class="code-line" id="cl-1">    m, n = len(word1), len(word2)</div>
+      <div class="code-line" id="cl-2">    dp = [[0]*(n+1) for _ in range(m+1)]</div>
+      <div class="code-line" id="cl-3">    for i in range(m+1): dp[i][0] = i</div>
+      <div class="code-line" id="cl-4">    for j in range(n+1): dp[0][j] = j</div>
+      <div class="code-line" id="cl-5">    for i in range(1, m+1):</div>
+      <div class="code-line" id="cl-6">        for j in range(1, n+1):</div>
+      <div class="code-line" id="cl-7">            if word1[i-1] == word2[j-1]:</div>
+      <div class="code-line" id="cl-8">                dp[i][j] = dp[i-1][j-1]</div>
+      <div class="code-line" id="cl-9">            else:</div>
+      <div class="code-line" id="cl-10">                dp[i][j] = 1 + min(</div>
+      <div class="code-line" id="cl-11">                    dp[i-1][j], dp[i][j-1], dp[i-1][j-1]</div>
+      <div class="code-line" id="cl-12">                )</div>
+      <div class="code-line" id="cl-13">    return dp[m][n]</div>
+    </div>
+
+    <!-- Decision Panel -->
+    <div class="decision-panel" id="decision-panel" style="display:none">
+      <div class="decision-header">
+        <span class="decision-phase init" id="dec-phase">INIT</span>
+        <span class="decision-question" id="dec-question"></span>
+      </div>
+      <div class="decision-options" id="dec-options"></div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 19</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to watch the DP table fill for "horse" → "ros". Each step shows which cell is being computed and why.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Current cell</div>
+      <div class="legend-item"><div class="legend-swatch sw-dep"></div> Dependencies (↑ ← ↖)</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div> Match — free!</div>
+      <div class="legend-item"><div class="legend-swatch sw-base"></div> Base cases</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Computed</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Summary & Key Takeaways -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Edit distance = Levenshtein distance: min insert/delete/replace to go from word1 to word2</div>
+      <div class="takeaway">State: dp[i][j] = min edits for word1[0..i) → word2[0..j)</div>
+      <div class="takeaway">Match = free (inherit diagonal); mismatch = 1 + min(delete, insert, replace)</div>
+      <div class="takeaway">Base cases: dp[i][0] = i and dp[0][j] = j (empty string conversions)</div>
+      <div class="takeaway">Off-by-one trap: word1[i-1] not word1[i] — DP is 1-indexed, strings are 0-indexed</div>
+      <div class="takeaway">Space optimization: rolling two rows cuts O(m·n) → O(min(m,n))</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Naive Recursion</td>
+          <td class="mark-bad">O(3^max(m,n))</td>
+          <td>O(m+n)</td>
+          <td>Exponential — understanding only</td>
+        </tr>
+        <tr>
+          <td>Memoization (Top-Down)</td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Natural recursion, easy to derive</td>
+        </tr>
+        <tr>
+          <td><strong>Tabulation (Bottom-Up) ✓</strong></td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Interview pick; iterative, no stack</td>
+        </tr>
+        <tr>
+          <td>Space-Optimized Tabulation</td>
+          <td class="mark-good">O(m·n)</td>
+          <td class="mark-good">O(min(m,n))</td>
+          <td>Mention for bonus points</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the Edit Distance Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Minimum operations to transform sequence X into sequence Y"</li>
+        <li>Two strings/arrays, comparing subproblems on prefixes of both</li>
+        <li>Three or more choices at each mismatch (generalize to weighted costs)</li>
+        <li>DNA sequence alignment, spell-checking, diff tools (e.g., git diff)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same DP on two strings sub-pattern)</div>
+      <div class="related-item"><strong>Longest Common Subsequence</strong><span class="related-diff diff-med">Medium</span> — The matching recurrence is the backbone Edit Distance builds on (#1143)</div>
+      <div class="related-item"><strong>Delete Operation for Two Strings</strong><span class="related-diff diff-med">Medium</span> — Edit distance with only delete allowed; equivalent to m+n−2*LCS (#583)</div>
+      <div class="related-item"><strong>Minimum ASCII Delete Sum for Two Strings</strong><span class="related-diff diff-med">Medium</span> — Weighted delete: minimize total ASCII value of deleted chars (#712)</div>
+      <div class="related-item"><strong>Distinct Subsequences</strong><span class="related-diff diff-hard">Hard</span> — Count ways s contains t as subsequence; same 2D DP skeleton (#115)</div>
+      <div class="related-item"><strong>One Edit Distance</strong><span class="related-diff diff-med">Medium</span> — Check if exactly one insert/delete/replace separates two strings — no DP needed, O(n) (#161)</div>
+      <div class="related-item"><strong>Interleaving String</strong><span class="related-diff diff-med">Medium</span> — 2D DP on two strings to check valid interleaving (#97)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming → DP: LCS)<br>
+      Sub-Pattern: <strong>DP: LCS / Insert-Delete-Replace</strong> · Source: Guide Section 18</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+const WORD1 = "horse";
+const WORD2 = "ros";
+const M = WORD1.length;
+const N = WORD2.length;
+
+// Precompute full DP table
+const dpFull = Array.from({length:M+1}, () => new Array(N+1).fill(0));
+for (let i=0;i<=M;i++) dpFull[i][0] = i;
+for (let j=0;j<=N;j++) dpFull[0][j] = j;
+for (let i=1;i<=M;i++) {
+  for (let j=1;j<=N;j++) {
+    if (WORD1[i-1]===WORD2[j-1]) dpFull[i][j] = dpFull[i-1][j-1];
+    else dpFull[i][j] = 1 + Math.min(dpFull[i-1][j], dpFull[i][j-1], dpFull[i-1][j-1]);
+  }
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+const steps = [
+  {id:0,phase:'init',phaseLabel:'INIT',phaseClass:'phase-init',
+   ci:-1,cj:-1,activeLine:2,op:'init',deps:[],decision:null,
+   title:'Initialize: Create DP Table',
+   text:'word1 = "horse" (m=5), word2 = "ros" (n=3). We create a 6×4 table (m+1 rows, n+1 cols). The extra row and column will hold our base cases for empty-string prefixes.'},
+  {id:1,phase:'base',phaseLabel:'BASE CASES',phaseClass:'phase-base',
+   ci:0,cj:-1,activeLine:3,op:'base-col',deps:[],decision:null,
+   title:'Base Case: First Column dp[i][0] = i',
+   text:'Converting the first i characters of word1 to an empty string requires exactly i deletions. So dp[0][0]=0, dp[1][0]=1, dp[2][0]=2, dp[3][0]=3, dp[4][0]=4, dp[5][0]=5. These fill column 0.'},
+  {id:2,phase:'base',phaseLabel:'BASE CASES',phaseClass:'phase-base',
+   ci:-1,cj:0,activeLine:4,op:'base-row',deps:[],decision:null,
+   title:'Base Case: First Row dp[0][j] = j',
+   text:'Converting an empty string to the first j characters of word2 requires exactly j insertions. dp[0][0]=0, dp[0][1]=1, dp[0][2]=2, dp[0][3]=3. These fill row 0.'},
+  {id:3,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:1,cj:1,activeLine:10,op:'mismatch',deps:[[0,1],[1,0],[0,0]],
+   decision:{phase:'op',question:"h ≠ r — try all 3 operations, pick cheapest",options:[
+     {action:'Delete h',formula:'dp[0][1]=1',result:1,selected:false},
+     {action:'Insert r',formula:'dp[1][0]=1',result:1,selected:false},
+     {action:'Replace h→r',formula:'dp[0][0]=0',result:0,selected:true}]},
+   title:"dp[1][1]: 'h' vs 'r' — Mismatch",
+   text:"h ≠ r. Check all 3 ops: delete h (dp[0][1]=1), insert r (dp[1][0]=1), replace h→r (dp[0][0]=0). Minimum is 0. dp[1][1] = 1+0 = 1."},
+  {id:4,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:1,cj:2,activeLine:10,op:'mismatch',deps:[[0,2],[1,1],[0,1]],
+   decision:{phase:'op',question:"h ≠ o — try all 3 operations, pick cheapest",options:[
+     {action:'Delete h',formula:'dp[0][2]=2',result:2,selected:false},
+     {action:'Insert o',formula:'dp[1][1]=1',result:1,selected:true},
+     {action:'Replace h→o',formula:'dp[0][1]=1',result:1,selected:false}]},
+   title:"dp[1][2]: 'h' vs 'o' — Mismatch",
+   text:"h ≠ o. Delete h: dp[0][2]=2. Insert o: dp[1][1]=1. Replace: dp[0][1]=1. Min is 1. dp[1][2] = 1+1 = 2."},
+  {id:5,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:1,cj:3,activeLine:10,op:'mismatch',deps:[[0,3],[1,2],[0,2]],
+   decision:{phase:'op',question:"h ≠ s — try all 3 operations, pick cheapest",options:[
+     {action:'Delete h',formula:'dp[0][3]=3',result:3,selected:false},
+     {action:'Insert s',formula:'dp[1][2]=2',result:2,selected:true},
+     {action:'Replace h→s',formula:'dp[0][2]=2',result:2,selected:false}]},
+   title:"dp[1][3]: 'h' vs 's' — Mismatch",
+   text:"h ≠ s. Delete: dp[0][3]=3. Insert: dp[1][2]=2. Replace: dp[0][2]=2. Min is 2. dp[1][3] = 1+2 = 3."},
+  {id:6,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:2,cj:1,activeLine:10,op:'mismatch',deps:[[1,1],[2,0],[1,0]],
+   decision:{phase:'op',question:"o ≠ r — try all 3 operations, pick cheapest",options:[
+     {action:'Delete o',formula:'dp[1][1]=1',result:1,selected:true},
+     {action:'Insert r',formula:'dp[2][0]=2',result:2,selected:false},
+     {action:'Replace o→r',formula:'dp[1][0]=1',result:1,selected:false}]},
+   title:"dp[2][1]: 'o' vs 'r' — Mismatch",
+   text:"o ≠ r. Delete: dp[1][1]=1. Insert: dp[2][0]=2. Replace: dp[1][0]=1. Min is 1. dp[2][1] = 1+1 = 2."},
+  {id:7,phase:'fill',phaseLabel:'MATCH',phaseClass:'phase-match',
+   ci:2,cj:2,activeLine:8,op:'match',deps:[[1,1]],
+   decision:{phase:'match',question:"o == o — FREE MATCH! Inherit diagonal.",options:[
+     {action:'Inherit diagonal',formula:'dp[1][1] = 1',result:1,selected:true}]},
+   title:"dp[2][2]: 'o' vs 'o' — MATCH! Free.",
+   text:"o == o! Characters match. dp[2][2] = dp[1][1] = 1. No operation needed — we align both 'o's and inherit the cost of the smaller subproblem. This is the power of the match case."},
+  {id:8,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:2,cj:3,activeLine:10,op:'mismatch',deps:[[1,3],[2,2],[1,2]],
+   decision:{phase:'op',question:"o ≠ s — try all 3 operations, pick cheapest",options:[
+     {action:'Delete o',formula:'dp[1][3]=3',result:3,selected:false},
+     {action:'Insert s',formula:'dp[2][2]=1',result:1,selected:true},
+     {action:'Replace o→s',formula:'dp[1][2]=2',result:2,selected:false}]},
+   title:"dp[2][3]: 'o' vs 's' — Mismatch",
+   text:"o ≠ s. Delete: dp[1][3]=3. Insert: dp[2][2]=1. Replace: dp[1][2]=2. Min is 1! dp[2][3] = 1+1 = 2. The match at dp[2][2] pays dividends here."},
+  {id:9,phase:'fill',phaseLabel:'MATCH',phaseClass:'phase-match',
+   ci:3,cj:1,activeLine:8,op:'match',deps:[[2,0]],
+   decision:{phase:'match',question:"r == r — FREE MATCH! Inherit diagonal.",options:[
+     {action:'Inherit diagonal',formula:'dp[2][0] = 2',result:2,selected:true}]},
+   title:"dp[3][1]: 'r' vs 'r' — MATCH! Free.",
+   text:"r == r! Match. dp[3][1] = dp[2][0] = 2. We align the two 'r's and carry forward the cost of converting 'ho' to empty string (2 deletions). No cost for aligning the r's themselves."},
+  {id:10,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:3,cj:2,activeLine:10,op:'mismatch',deps:[[2,2],[3,1],[2,1]],
+   decision:{phase:'op',question:"r ≠ o — try all 3 operations, pick cheapest",options:[
+     {action:'Delete r',formula:'dp[2][2]=1',result:1,selected:true},
+     {action:'Insert o',formula:'dp[3][1]=2',result:2,selected:false},
+     {action:'Replace r→o',formula:'dp[2][1]=2',result:2,selected:false}]},
+   title:"dp[3][2]: 'r' vs 'o' — Mismatch",
+   text:"r ≠ o. Delete r: dp[2][2]=1. Insert o: dp[3][1]=2. Replace: dp[2][1]=2. Min is 1. dp[3][2] = 1+1 = 2."},
+  {id:11,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:3,cj:3,activeLine:10,op:'mismatch',deps:[[2,3],[3,2],[2,2]],
+   decision:{phase:'op',question:"r ≠ s — try all 3 operations, pick cheapest",options:[
+     {action:'Delete r',formula:'dp[2][3]=2',result:2,selected:false},
+     {action:'Insert s',formula:'dp[3][2]=2',result:2,selected:false},
+     {action:'Replace r→s',formula:'dp[2][2]=1',result:1,selected:true}]},
+   title:"dp[3][3]: 'r' vs 's' — Mismatch",
+   text:"r ≠ s. Delete: dp[2][3]=2. Insert: dp[3][2]=2. Replace: dp[2][2]=1. Min is 1! dp[3][3] = 1+1 = 2. Replace 'r'→'s' is cheapest — capitalizes on the diagonal match at (2,2)."},
+  {id:12,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:4,cj:1,activeLine:10,op:'mismatch',deps:[[3,1],[4,0],[3,0]],
+   decision:{phase:'op',question:"s ≠ r — try all 3 operations, pick cheapest",options:[
+     {action:'Delete s',formula:'dp[3][1]=2',result:2,selected:true},
+     {action:'Insert r',formula:'dp[4][0]=4',result:4,selected:false},
+     {action:'Replace s→r',formula:'dp[3][0]=3',result:3,selected:false}]},
+   title:"dp[4][1]: 's' vs 'r' — Mismatch",
+   text:"s ≠ r. Delete s: dp[3][1]=2. Insert r: dp[4][0]=4. Replace: dp[3][0]=3. Min is 2. dp[4][1] = 1+2 = 3."},
+  {id:13,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:4,cj:2,activeLine:10,op:'mismatch',deps:[[3,2],[4,1],[3,1]],
+   decision:{phase:'op',question:"s ≠ o — try all 3 operations, pick cheapest",options:[
+     {action:'Delete s',formula:'dp[3][2]=2',result:2,selected:true},
+     {action:'Insert o',formula:'dp[4][1]=3',result:3,selected:false},
+     {action:'Replace s→o',formula:'dp[3][1]=2',result:2,selected:false}]},
+   title:"dp[4][2]: 's' vs 'o' — Mismatch",
+   text:"s ≠ o. Delete s: dp[3][2]=2. Insert o: dp[4][1]=3. Replace: dp[3][1]=2. Min is 2. dp[4][2] = 1+2 = 3."},
+  {id:14,phase:'fill',phaseLabel:'MATCH',phaseClass:'phase-match',
+   ci:4,cj:3,activeLine:8,op:'match',deps:[[3,2]],
+   decision:{phase:'match',question:"s == s — FREE MATCH! Inherit diagonal.",options:[
+     {action:'Inherit diagonal',formula:'dp[3][2] = 2',result:2,selected:true}]},
+   title:"dp[4][3]: 's' vs 's' — MATCH! Free.",
+   text:"s == s! Third match. dp[4][3] = dp[3][2] = 2. The 's' in both strings aligns perfectly. We inherit the cost from converting 'hor' to 'ro' (2 ops), no cost for the s alignment."},
+  {id:15,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:5,cj:1,activeLine:10,op:'mismatch',deps:[[4,1],[5,0],[4,0]],
+   decision:{phase:'op',question:"e ≠ r — try all 3 operations, pick cheapest",options:[
+     {action:'Delete e',formula:'dp[4][1]=3',result:3,selected:true},
+     {action:'Insert r',formula:'dp[5][0]=5',result:5,selected:false},
+     {action:'Replace e→r',formula:'dp[4][0]=4',result:4,selected:false}]},
+   title:"dp[5][1]: 'e' vs 'r' — Mismatch",
+   text:"e ≠ r. Delete e: dp[4][1]=3. Insert r: dp[5][0]=5. Replace: dp[4][0]=4. Min is 3. dp[5][1] = 1+3 = 4."},
+  {id:16,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:5,cj:2,activeLine:10,op:'mismatch',deps:[[4,2],[5,1],[4,1]],
+   decision:{phase:'op',question:"e ≠ o — try all 3 operations, pick cheapest",options:[
+     {action:'Delete e',formula:'dp[4][2]=3',result:3,selected:true},
+     {action:'Insert o',formula:'dp[5][1]=4',result:4,selected:false},
+     {action:'Replace e→o',formula:'dp[4][1]=3',result:3,selected:false}]},
+   title:"dp[5][2]: 'e' vs 'o' — Mismatch",
+   text:"e ≠ o. Delete e: dp[4][2]=3. Insert o: dp[5][1]=4. Replace: dp[4][1]=3. Min is 3. dp[5][2] = 1+3 = 4."},
+  {id:17,phase:'fill',phaseLabel:'FILL',phaseClass:'phase-fill',
+   ci:5,cj:3,activeLine:10,op:'mismatch',deps:[[4,3],[5,2],[4,2]],
+   decision:{phase:'op',question:"e ≠ s — try all 3 operations, pick cheapest",options:[
+     {action:'Delete e',formula:'dp[4][3]=2',result:2,selected:true},
+     {action:'Insert s',formula:'dp[5][2]=4',result:4,selected:false},
+     {action:'Replace e→s',formula:'dp[4][2]=3',result:3,selected:false}]},
+   title:"dp[5][3]: 'e' vs 's' — Mismatch — FINAL CELL!",
+   text:"e ≠ s. Delete e: dp[4][3]=2. Insert s: dp[5][2]=4. Replace: dp[4][2]=3. Min is 2 (delete!). dp[5][3] = 1+2 = 3. This is our answer cell!"},
+  {id:18,phase:'result',phaseLabel:'RESULT',phaseClass:'phase-result',
+   ci:5,cj:3,activeLine:13,op:'result',deps:[],decision:null,
+   title:'Answer: minDistance("horse","ros") = 3',
+   text:'Return dp[m][n] = dp[5][3] = 3. The minimum edit sequence: (1) replace h→r, (2) delete second r, (3) delete e. Three operations, each proven optimal by the DP table. Full table computed!'}
+];
+
+let current = 0;
+
+function computedCells(stepIdx) {
+  const s = new Set();
+  if (stepIdx >= 1) for (let i=0;i<=M;i++) s.add(i+',0');
+  if (stepIdx >= 2) for (let j=0;j<=N;j++) s.add('0,'+j);
+  for (let k=3;k<=stepIdx;k++) {
+    const sk = steps[k];
+    if (sk.ci > 0 && sk.cj > 0) s.add(sk.ci+','+sk.cj);
+  }
+  return s;
+}
+
+function buildTable() {
+  const tbl = document.getElementById('dp-table');
+  let html = '<thead><tr><th>dp[i][j]</th><th>&epsilon;</th>';
+  for (let j=0;j<N;j++) html += '<th>'+WORD2[j]+'</th>';
+  html += '</tr></thead><tbody>';
+  for (let i=0;i<=M;i++) {
+    const rLabel = i===0?'&epsilon;':WORD1[i-1];
+    html += '<tr><td class="row-header">'+rLabel+'</td>';
+    for (let j=0;j<=N;j++) {
+      html += '<td id="cell-'+i+'-'+j+'" class="future-cell">?</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+function renderDecision(step) {
+  const panel = document.getElementById('decision-panel');
+  if (!step.decision) { panel.style.display='none'; return; }
+  panel.style.display = 'block';
+  const phEl = document.getElementById('dec-phase');
+  phEl.textContent = step.decision.question;
+  phEl.className = 'decision-phase ' + step.decision.phase;
+  document.getElementById('dec-question').textContent = '';
+  let html = '';
+  step.decision.options.forEach(opt => {
+    const sc = opt.selected?'selected':'rejected';
+    const icon = opt.selected?'<span class="option-check">✓</span>':'<span class="option-x">—</span>';
+    html += `<div class="decision-option ${sc}"><div class="option-action">${opt.action}</div><div class="option-formula">${opt.formula}</div><div class="option-result">${icon}${opt.result}</div></div>`;
+  });
+  document.getElementById('dec-options').innerHTML = html;
+}
+
+function render() {
+  const step = steps[current];
+  const computed = computedCells(current);
+
+  for (let i=0;i<=M;i++) {
+    for (let j=0;j<=N;j++) {
+      const cell = document.getElementById('cell-'+i+'-'+j);
+      if (!cell) continue;
+      const key = i+','+j;
+      const isCurrent = step.ci===i && step.cj===j;
+      const isDep = step.deps.some(d=>d[0]===i&&d[1]===j);
+      const isBase = j===0||i===0;
+      const isComputed = computed.has(key);
+
+      if (step.phase==='result') {
+        cell.className = (i===M&&j===N) ? 'result-cell' : 'computed';
+        cell.textContent = dpFull[i][j];
+      } else if (isCurrent) {
+        cell.className = step.op==='match'?'match-cell':'active-cell';
+        cell.textContent = dpFull[i][j];
+      } else if (isDep) {
+        cell.className = 'dep-cell';
+        cell.textContent = dpFull[i][j];
+      } else if (isBase && isComputed) {
+        cell.className = 'base-cell';
+        cell.textContent = dpFull[i][j];
+      } else if (isComputed) {
+        cell.className = 'computed';
+        cell.textContent = dpFull[i][j];
+      } else {
+        cell.className = 'future-cell';
+        cell.textContent = '?';
+      }
+    }
+  }
+
+  // Variable tracker
+  const prev = current>0?steps[current-1]:null;
+  function setVar(id, val, chg) {
+    document.getElementById('vv-'+id).textContent = val;
+    document.getElementById('vb-'+id).className = 'var-box'+(chg?' changed':'');
+  }
+  setVar('i', step.ci>=0?step.ci:'—', prev&&step.ci!==prev.ci);
+  setVar('j', step.cj>=0?step.cj:'—', prev&&step.cj!==prev.cj);
+  const v = (step.ci>0&&step.cj>0)?dpFull[step.ci][step.cj]:'—';
+  setVar('val', v, prev&&step.ci!==prev.ci||step.cj!==prev.cj);
+  const opLabels = {init:'setup','base-col':'col base','base-row':'row base',match:'match ✓',mismatch:'1+min(↑←↖)',result:'done!'};
+  setVar('op', opLabels[step.op]||step.op, prev&&step.op!==prev.op);
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el=>el.classList.remove('active'));
+  const cl = document.getElementById('cl-'+step.activeLine);
+  if (cl) cl.classList.add('active');
+
+  // Phase badge
+  const badge = document.getElementById('phase-badge');
+  badge.textContent = step.phaseLabel;
+  badge.className = 'phase-badge '+step.phaseClass;
+
+  // Info card
+  document.getElementById('step-counter').textContent = 'Step '+(current+1)+' / '+steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Decision
+  renderDecision(step);
+
+  // Progress dots
+  for (let i=0;i<steps.length;i++) {
+    const d = document.getElementById('dot-'+i);
+    if (!d) continue;
+    d.className = 'dot'+(i===current?' active':i<current?' visited':'');
+  }
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current===0;
+  document.getElementById('next-btn').disabled = current===steps.length-1;
+}
+
+function buildDom() {
+  buildTable();
+  const pd = document.getElementById('progress-dots');
+  for (let i=0;i<steps.length;i++) {
+    const d = document.createElement('div');
+    d.className='dot'; d.id='dot-'+i;
+    d.onclick=(function(idx){return function(){current=idx;render();};})(i);
+    pd.appendChild(d);
+  }
+}
+
+function go(dir) {
+  current = Math.max(0, Math.min(steps.length-1, current+dir));
+  render();
+}
+
+function reset() { current=0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') go(1);
+  if (e.key==='ArrowLeft') go(-1);
+  if (e.key==='r'||e.key==='R') reset();
+});
+
+buildDom();
+render();
 </script>
-</body></html>
+</body>
+</html>
