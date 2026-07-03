@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#546 · Remove Boxes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.5rem}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--cyan-text)}
+
+/* ── State Machine ── */
+.state-machine-container{background:var(--bg2);border-radius:var(--radius-lg);padding:1.5rem;margin:1rem 0;overflow-x:auto}
+.state-machine{display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;min-height:160px}
+.state-node{width:150px;min-height:90px;border-radius:14px;border:3px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;transition:all 0.3s}
+.state-node.active{transform:scale(1.06);box-shadow:0 4px 18px rgba(0,0,0,0.18)}
+.state-node.dp-state{border-color:var(--blue-border)}
+.state-node.dp-state.active{background:var(--blue-bg);border-color:var(--blue-mid)}
+.state-node.dp-opt{border-color:var(--purple-border)}
+.state-node.dp-opt.active{background:var(--purple-bg);border-color:var(--purple-mid)}
+.state-label{font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px}
+.state-desc{font-size:11px;color:var(--text2);line-height:1.4}
+.state-arrow{display:flex;flex-direction:column;align-items:center;gap:4px}
+.arrow-line{font-size:22px;color:var(--text3)}
+.arrow-label{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:var(--amber-bg);color:var(--amber-mid);border:1px solid var(--amber-border);white-space:nowrap}
+
+/* ── DP Table ── */
+.dp-table-wrap{overflow-x:auto;margin:1rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:13px;min-width:300px}
+.dp-table th,.dp-table td{padding:9px 14px;text-align:center;border:1px solid var(--border)}
+.dp-table th{background:var(--bg2);font-weight:600;font-size:12px;color:var(--text2)}
+.dp-table td.dp-cell{background:var(--surface)}
+.dp-table td.dp-current{background:var(--purple-bg);font-weight:700;color:var(--purple-mid);border-color:var(--purple-border)}
+.dp-table td.dp-base{background:var(--green-bg);color:var(--green-text)}
+.dp-table td.dp-filled{background:var(--blue-bg);color:var(--blue-text)}
+.dp-table td.dp-future{color:var(--text3)}
+
+/* ── Box Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.boxes-row{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;justify-content:center;min-height:80px}
+.box-wrapper{display:flex;flex-direction:column;align-items:center;gap:4px}
+.box-cell{
+  width:48px;height:48px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:17px;font-weight:700;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:all 0.3s;flex-shrink:0;
+}
+.box-cell.normal{background:var(--surface);border-color:var(--border2)}
+.box-cell.c1{background:#E6F1FB;border-color:#85B7EB;color:#042C53}
+.box-cell.c2{background:#EAF3DE;border-color:#97C459;color:#173404}
+.box-cell.c3{background:#FAEEDA;border-color:#EF9F27;color:#412402}
+.box-cell.c4{background:#EEEDFE;border-color:#AFA9EC;color:#26215C}
+.box-cell.c5{background:#FCEBEB;border-color:#F09595;color:#501313}
+.box-cell.active{transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,0.18)}
+.box-cell.removing{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid);animation:pulse 0.4s ease-in-out}
+.box-cell.removed{opacity:0;pointer-events:none;transform:scale(0.5)}
+.box-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.box-idx{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.box-score{font-size:10px;font-weight:700;color:var(--amber-mid);font-family:var(--mono)}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* ── Range Bracket ── */
+.range-indicator{display:flex;justify-content:center;margin-top:0.5rem;font-size:12px;color:var(--blue-mid);font-weight:700;font-family:var(--mono)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:30px;text-align:center}
+
+/* ── Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-base{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-split{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-join{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-c1{background:#E6F1FB;border-color:#85B7EB}
+.sw-c2{background:#EAF3DE;border-color:#97C459}
+.sw-c3{background:#FAEEDA;border-color:#EF9F27}
+.sw-active{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-removing{background:var(--red-bg);border-color:var(--red-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Score Display ── */
+.score-display{text-align:center;padding:1rem;background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);margin:0.5rem 0}
+.score-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:0.5px}
+.score-value{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--blue-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #546</div>
+  <h1>Remove Boxes</h1>
+  <p class="subtitle">Remove groups of same-colored boxes to maximize the total score, where removing k boxes of the same color scores k² points.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">3D DP with Count</span>
+    <span class="tag tag-pattern">Interval DP</span>
+    <span class="tag tag-complexity">Time: O(n⁴)</span>
+    <span class="tag tag-complexity">Space: O(n³)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a row of colored boxes (each box has an integer color). You can repeatedly choose a <strong>contiguous group of boxes of the same color</strong> and remove them. Removing <code>k</code> boxes earns <code>k²</code> points. Continue until all boxes are removed. Maximize the total score.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight: k² Rewards Patience</div>
+      <p>Removing 1 box = 1 pt. Removing 2 = 4 pts. Removing 3 = 9 pts. Removing 5 = 25 pts. The quadratic scoring <strong>heavily favors merging groups</strong>. Instead of greedily removing the largest available group, it's often better to remove intervening boxes first so that two same-colored groups merge into one giant group.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">❌ Greedy Remove: Score = 10</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          [1,1,1,<b>2</b>,1,1] → remove 2 → +1<br>
+          [1,1,1,1,1] → remove 5 → +25<br>
+          Total: <b>26 pts</b><br><br>
+          [1,1,<b>3,3</b>,1,1,1,1] → remove 3,3 → +4<br>
+          [1,1,1,1,1,1] → remove 6 → +36<br>
+          Total: <b>40</b>
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Optimal: Merge Groups First</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          Example: boxes=[1,3,2,2,2,3,4,3,1]<br>
+          Remove [2,2,2] → +9<br>
+          Remove [3,3,3] → +9 (merged!)<br>
+          Remove [1,1] → +4<br>
+          Remove [4] → +1<br>
+          Total: <b>23 pts</b>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why this is hard:</strong> Future removals affect current scores. Removing a box in the middle can <em>merge</em> two groups of the same color, which might dramatically increase future points. This <strong>dependency on future decisions</strong> makes greedy fail and requires DP to enumerate all strategies.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases:</strong> All boxes same color (remove all at once for n² pts), alternating colors (each removal scores 1 pt), single box (1 pt), n=1 (trivially 1).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 3D Interval DP with Count</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Standard Interval DP tracks subproblems on ranges <code>[l, r]</code>. For Remove Boxes, this is <strong>insufficient</strong> because when we remove boxes[r], we need to know how many boxes of the same color are "attached" to the right of position r but outside our current range. We add a third dimension <code>k</code> to track that count.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 The 3D State Definition</div>
+      <p><code>dp[l][r][k]</code> = maximum points from removing all boxes in <code>boxes[l..r]</code>, given that there are <code>k</code> additional boxes of the same color as <code>boxes[r]</code> attached to the right side of position <code>r</code>.</p>
+    </div>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Base case:</strong> <code>dp[i][i][k] = (k+1)²</code> — a single box at position i with k extra same-color boxes to the right can be removed as a group of k+1.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Choice A — Remove the tail group now:</strong> Remove all boxes from position r along with the k extra attached boxes. Score = <code>(k+1)²</code> + <code>dp[l][r-1][0]</code>. We cash in the right group immediately and solve the rest independently.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Choice B — Merge with a matching box:</strong> Find any position <code>m</code> in <code>[l, r-1]</code> where <code>boxes[m] == boxes[r]</code>. Remove everything between m and r first (score = <code>dp[m+1][r-1][0]</code>), then boxes[m] merges with the k+1 tail group: <code>dp[l][m][k+1]</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Take the maximum</strong> over Choice A and all valid positions m in Choice B. Memoize with a 3D table to avoid recomputation.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem">The key genius is <strong>Choice B</strong>: by splitting the range at m, we defer the removal of boxes[m] and boxes[r] together, capturing the quadratic bonus of a larger group. Without the k dimension, we couldn't express this "attached extra boxes" concept.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — DP Deep Dive         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why Is This DP? — Recurrence, Invariant & State Machine</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Why is greedy wrong?</strong> Removing the current largest group ignores that a smaller removal now might enable a <em>bigger</em> group later. The optimal strategy requires seeing the future — which is exactly what DP provides.</p>
+
+    <div class="two-col">
+      <div class="panel-box neutral">
+        <div class="panel-title">Optimal Substructure</div>
+        <p style="font-size:13px;color:var(--blue-text);line-height:1.8">The maximum score for range [l,r] with k extras is built from optimal scores of smaller subranges [l, r-1] and [m+1, r-1]. Each sub-problem has its own optimal solution that we can combine.</p>
+      </div>
+      <div class="panel-box neutral">
+        <div class="panel-title">Overlapping Subproblems</div>
+        <p style="font-size:13px;color:var(--blue-text);line-height:1.8">dp[l][r-1][0] and dp[l][m][k+1] appear in multiple parent calls with different (l, r, k) values. Without memoization, we'd recompute them exponentially many times.</p>
+      </div>
+    </div>
+
+    <div class="recurrence-box" style="margin-top:1rem">
+      <div class="recurrence-title">📐 The Recurrence Relations</div>
+      <div class="recurrence-formula">
+Base:   dp[i][i][k] = (k + 1)²<br><br>
+Option A (remove tail immediately):<br>
+  dp[l][r][k] = (k+1)² + dp[l][r-1][0]<br><br>
+Option B (merge with matching box at m, where boxes[m] == boxes[r]):<br>
+  dp[l][r][k] = max(dp[l][r][k],<br>
+                    dp[m+1][r-1][0] + dp[l][m][k+1])<br>
+                for all m in [l, r-1] with boxes[m] == boxes[r]<br><br>
+Final:  dp[l][r][k] = max(Option A, all Option B variants)
+      </div>
+    </div>
+
+    <div class="state-machine-container">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;text-align:center">Decision Tree for dp[l][r][k]</div>
+      <div class="state-machine">
+        <div class="state-node dp-state" id="sm-problem">
+          <div class="state-label">dp[l][r][k]</div>
+          <div class="state-desc">Solve range [l,r] with k extras attached to boxes[r]</div>
+        </div>
+        <div class="state-arrow">
+          <div class="arrow-line">↙</div>
+          <div class="arrow-label">Choice A: Remove tail now</div>
+        </div>
+        <div class="state-node dp-opt" id="sm-a">
+          <div class="state-label">Score = (k+1)²</div>
+          <div class="state-desc">+ dp[l][r-1][0]<br>Immediate removal</div>
+        </div>
+        <div class="state-arrow">
+          <div class="arrow-line">↘</div>
+          <div class="arrow-label">Choice B: Merge at m</div>
+        </div>
+        <div class="state-node dp-opt" id="sm-b">
+          <div class="state-label">Split at m</div>
+          <div class="state-desc">dp[m+1][r-1][0]<br>+ dp[l][m][k+1]</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At every call <code>dp[l][r][k]</code>, the k extra boxes to the right of r <em>will eventually be removed in the same operation as boxes[r]</em>. We commit to removing them together; the only question is whether we do it now (Option A) or wait until more matching boxes are merged in (Option B). This invariant ensures we never double-count or leave boxes unaccounted.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <p><strong>Solution 1 — Top-Down Memoization (Interview Pick) · O(n⁴) time, O(n³) space</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def removeBoxes(boxes):</span></div>
+<div class="ann-line"><span class="acode">    n = len(boxes)</span><span class="aann">← Total number of boxes</span></div>
+<div class="ann-line"><span class="acode">    memo = {}                        </span><span class="aann">← Cache: (l, r, k) → max points</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    def dp(l, r, k):                 </span><span class="aann">← Max pts from boxes[l..r] with k extra boxes[r]-colored boxes on right</span></div>
+<div class="ann-line"><span class="acode">        if l > r: return 0           </span><span class="aann">← Empty range: no boxes to remove</span></div>
+<div class="ann-line"><span class="acode">        if (l, r, k) in memo:        </span><span class="aann">← Already computed? Return cached result</span></div>
+<div class="ann-line"><span class="acode">            return memo[(l, r, k)]</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        # Optimization: extend k for consecutive matching boxes at right</span></div>
+<div class="ann-line"><span class="acode">        while r > l and boxes[r-1] == boxes[r]:</span><span class="aann">← Pull in adjacent same-color boxes at tail</span></div>
+<div class="ann-line"><span class="acode">            r -= 1; k += 1           </span><span class="aann">← Shrink range, grow the k-group</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        # Choice A: remove the tail group (boxes[r] + k extras) immediately</span></div>
+<div class="ann-line"><span class="acode">        res = (k + 1) ** 2 + dp(l, r - 1, 0)</span><span class="aann">← Score k+1 boxes, then solve remaining [l, r-1]</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        # Choice B: find a matching box at m and merge with the k+1 group</span></div>
+<div class="ann-line"><span class="acode">        for m in range(l, r):        </span><span class="aann">← Scan left of r for same-colored boxes</span></div>
+<div class="ann-line"><span class="acode">            if boxes[m] == boxes[r]:</span><span class="aann">← Found a match — can merge!</span></div>
+<div class="ann-line"><span class="acode">                res = max(res,</span></div>
+<div class="ann-line"><span class="acode">                    dp(m + 1, r - 1, 0) +</span><span class="aann">← Remove everything between m and r</span></div>
+<div class="ann-line"><span class="acode">                    dp(l, m, k + 1))  </span><span class="aann">← Now boxes[m] joins the k+1-group → solve [l,m] with k+1</span></div>
+<div class="ann-line"><span class="acode">        </span></div>
+<div class="ann-line"><span class="acode">        memo[(l, r, k)] = res        </span><span class="aann">← Cache result before returning</span></div>
+<div class="ann-line"><span class="acode">        return res</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    return dp(0, n - 1, 0)           </span><span class="aann">← Solve full range with 0 extra boxes initially</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why k starts at 0 and not 1?</div>
+      <p>k counts <em>extra</em> same-color boxes <strong>outside</strong> the current range. At the top level, boxes[r] is inside the range — it's the 1st box of its potential group, not an "extra". So k=0 means "just boxes[r] itself". When we call dp[l][m][k+1], we're saying: boxes[m] now has k+1 extras to its right (the original k plus boxes[r] itself has been conceptually shifted out).</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Bottom-Up Tabulation · O(n⁴) time, O(n³) space</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def removeBoxes(boxes):</span></div>
+<div class="ann-line"><span class="acode">    n = len(boxes)</span></div>
+<div class="ann-line"><span class="acode">    # dp[l][r][k]: max pts from boxes[l..r] with k extra boxes[r]-colored on right</span></div>
+<div class="ann-line"><span class="acode">    dp = [[[0]*n for _ in range(n)] for _ in range(n)]</span><span class="aann">← 3D table n×n×n</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    # Fill by increasing interval length</span></div>
+<div class="ann-line"><span class="acode">    for length in range(1, n + 1):   </span><span class="aann">← Subproblem length: 1 to n</span></div>
+<div class="ann-line"><span class="acode">        for l in range(n - length + 1):</span><span class="aann">← Left endpoint of range</span></div>
+<div class="ann-line"><span class="acode">            r = l + length - 1       </span><span class="aann">← Right endpoint</span></div>
+<div class="ann-line"><span class="acode">            for k in range(n):       </span><span class="aann">← k extra same-colored boxes on right</span></div>
+<div class="ann-line"><span class="acode">                dp[l][r][k] = (k+1)**2 + (dp[l][r-1][0] if r > l else 0)</span><span class="aann">← Choice A baseline</span></div>
+<div class="ann-line"><span class="acode">                for m in range(l, r):</span><span class="aann">← Try every split point m</span></div>
+<div class="ann-line"><span class="acode">                    if boxes[m] == boxes[r]:</span></div>
+<div class="ann-line"><span class="acode">                        score = dp[m+1][r-1][0] + dp[l][m][k+1] if r > m+1 else dp[l][m][k+1]</span></div>
+<div class="ann-line"><span class="acode">                        dp[l][r][k] = max(dp[l][r][k], score)</span><span class="aann">← Choice B</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    return dp[0][n-1][0]             </span><span class="aann">← Answer: full range, no extras</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Tabulation Order Matters</div>
+      <p>We fill by increasing <strong>interval length</strong>, not by l or r alone. This guarantees that when we compute dp[l][r][k], all sub-ranges dp[m+1][r-1][0] and dp[l][m][k+1] (which have shorter lengths) are already computed. Filling by l or r directly would access uninitialized cells.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Analysis</div>
+      <p>
+        <strong>States:</strong> O(n³) — all (l, r, k) with 0 ≤ l ≤ r &lt; n and 0 ≤ k &lt; n<br>
+        <strong>Transitions per state:</strong> O(n) — scan through up to n positions m<br>
+        <strong>Total time:</strong> O(n⁴)<br>
+        <strong>Space:</strong> O(n³) for the memo table / DP array<br>
+        <strong>In practice:</strong> With the consecutive-box optimization (merging the tail while l &lt; r), the constant factor is much better than the worst case.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize Greedy Fails</div>
+        <p style="font-size:14px;color:var(--text)">The scoring is non-linear (k²). Removing a smaller group now to set up a larger group later is <em>always</em> worth considering. Say: "Greedy doesn't work because future removals affect current scoring decisions — this screams DP."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start with 2D Interval DP (and show it fails)</div>
+        <p style="font-size:14px;color:var(--text)">A natural first attempt: dp[l][r] = max score from boxes[l..r]. But when we try to formulate the recurrence, we realize we can't express "boxes[r] might be removed together with same-colored boxes <em>outside</em> [l,r]." This insight motivates adding the third dimension k.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Introduce k — The Extra Count</div>
+        <p style="font-size:14px;color:var(--text)">k encodes the "context" we need: how many same-color boxes as boxes[r] are attached to its right (but outside the current range). Now dp[l][r][k] is self-contained. Two choices: (A) remove boxes[r] with its k extras now, or (B) find a matching box inside the range and merge.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Write the Recurrence, Then Code</div>
+        <p style="font-size:14px;color:var(--text)">Write the recurrence on the whiteboard before coding. Confirm base case (l &gt; r → 0, single box → (k+1)²), Option A formula, Option B formula. Then code a recursive solution with memo, starting simple and adding the consecutive-box optimization last.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The k² scoring makes greedy fail — merging groups is always worth exploring.<br>
+Interval DP seems right, but dp[l][r] alone can't capture same-color boxes outside the range.<br>
+I'll add a third dimension k: dp[l][r][k] = best score from boxes[l..r] with k extra<br>
+  same-color-as-boxes[r] boxes attached outside on the right.<br>
+Two choices: (A) remove the k+1 tail group now, or (B) find a matching box at m,<br>
+  clear the middle [m+1, r-1], and merge boxes[m] into the k+1 group.<br>
+Recurrence: dp[l][r][k] = max((k+1)² + dp[l][r-1][0],<br>
+  max over m where boxes[m]==boxes[r] of dp[m+1][r-1][0] + dp[l][m][k+1])<br>
+Complexity: O(n⁴) time, O(n³) space."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you optimize space?"</strong> → Not significantly; the n³ states are needed</li>
+        <li><strong>"Why not bottom-up?"</strong> → Bottom-up works; fill by interval length to avoid dependency issues</li>
+        <li><strong>"What if scoring is k instead of k²?"</strong> → Then greedy (always remove largest group) works optimally</li>
+        <li><strong>"Similar problems?"</strong> → Burst Balloons (#312), Strange Printer (#664), Zuma Game (#488)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: boxes=[1,3,2,2,2,3,4,3,1]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="margin-bottom:1rem;font-size:14px;color:var(--text2)">We trace the <strong>optimal removal sequence</strong> that yields 23 points, and show which DP decision was made at each step. Each step shows the current boxes, what's being removed, and the points scored.</p>
+
+    <div class="viz-area">
+      <!-- Boxes visualization -->
+      <div class="boxes-row" id="boxes-row"></div>
+
+      <!-- Range indicator -->
+      <div class="range-indicator" id="range-indicator">&nbsp;</div>
+
+      <!-- Score display -->
+      <div class="score-display" style="margin-top:1rem">
+        <div class="score-label">Total Score</div>
+        <div class="score-value" id="score-val">0</div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-action">
+          <span class="var-name">action</span>
+          <span class="var-val" id="vv-action">—</span>
+        </div>
+        <div class="var-box" id="vb-k">
+          <span class="var-name">k (group size)</span>
+          <span class="var-val" id="vv-k">0</span>
+        </div>
+        <div class="var-box" id="vb-pts">
+          <span class="var-name">+points</span>
+          <span class="var-val" id="vv-pts">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def dp(l, r, k):</div>
+      <div class="code-line" id="cl-1">    if l > r: return 0</div>
+      <div class="code-line" id="cl-2">    if (l, r, k) in memo: return memo[(l, r, k)]</div>
+      <div class="code-line" id="cl-3">    # Option A: remove tail group (k+1 boxes) immediately</div>
+      <div class="code-line" id="cl-4">    res = (k + 1) ** 2 + dp(l, r - 1, 0)</div>
+      <div class="code-line" id="cl-5">    # Option B: find m where boxes[m] == boxes[r], merge groups</div>
+      <div class="code-line" id="cl-6">    for m in range(l, r):</div>
+      <div class="code-line" id="cl-7">        if boxes[m] == boxes[r]:</div>
+      <div class="code-line" id="cl-8">            res = max(res, dp(m+1,r-1,0) + dp(l,m,k+1))</div>
+      <div class="code-line" id="cl-9">    memo[(l, r, k)] = res</div>
+      <div class="code-line" id="cl-10">    return res</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 13</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys to walk through the optimal removal sequence for boxes=[1,3,2,2,2,3,4,3,1], yielding 23 points.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-c1"></div> Color 1 (blue)</div>
+      <div class="legend-item"><div class="legend-swatch sw-c2"></div> Color 2 (green)</div>
+      <div class="legend-item"><div class="legend-swatch sw-c3"></div> Color 3 (amber)</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Active/highlighted</div>
+      <div class="legend-item"><div class="legend-swatch sw-removing"></div> Being removed</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Already removed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Standard 2D Interval DP is insufficient — the 3rd dimension k tracks "attached" extra same-color boxes outside the range</div>
+      <div class="takeaway">The k² scoring means patience pays: always consider merging groups before removal</div>
+      <div class="takeaway">Two choices per subproblem: remove tail now (Option A) or merge with a matching interior box (Option B)</div>
+      <div class="takeaway">Top-down memoization is cleaner for this problem; bottom-up requires careful ordering by interval length</div>
+      <div class="takeaway">The "count attached boxes" trick generalizes to any problem where interval subproblems have context from outside the range</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force (all permutations)</td>
+          <td class="mark-bad">O(n! × n)</td>
+          <td>O(n)</td>
+          <td>Try every removal order — completely intractable</td>
+        </tr>
+        <tr>
+          <td>2D Interval DP (incomplete)</td>
+          <td class="mark-bad">Incorrect</td>
+          <td>O(n²)</td>
+          <td>Cannot capture cross-range merges</td>
+        </tr>
+        <tr>
+          <td><strong>3D DP Memoization ✓</strong></td>
+          <td class="mark-good">O(n⁴)</td>
+          <td>O(n³)</td>
+          <td>Interview pick; cleaner recursion</td>
+        </tr>
+        <tr>
+          <td>3D DP Tabulation</td>
+          <td class="mark-good">O(n⁴)</td>
+          <td>O(n³)</td>
+          <td>Same complexity; fill by interval length</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize 3D Interval DP</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Removing elements from a sequence with non-linear scoring (k², bonuses, cascades)</li>
+        <li>The value of removing a subset depends on what's <em>adjacent to</em> the subset (outside the interval)</li>
+        <li>Merging equal/compatible elements before removal unlocks bonuses</li>
+        <li>Classic signal: "remove k adjacent identical elements for k² points" or similar</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (DP: Interval / 3D DP)</div>
+      <div class="related-item"><strong>Burst Balloons</strong><span class="related-diff diff-hard">Hard</span> — Classic interval DP where last balloon burst determines subproblem independence (#312)</div>
+      <div class="related-item"><strong>Strange Printer</strong><span class="related-diff diff-hard">Hard</span> — 2D interval DP; merging equal-character runs to minimize print turns (#664)</div>
+      <div class="related-item"><strong>Zuma Game</strong><span class="related-diff diff-hard">Hard</span> — Similar remove-matching-groups-optimally structure (#488)</div>
+      <div class="related-item"><strong>Minimum Cost to Merge Stones</strong><span class="related-diff diff-hard">Hard</span> — Interval DP where each merge has a cost; build from small intervals (#1000)</div>
+      <div class="related-item"><strong>Palindrome Removal</strong><span class="related-diff diff-hard">Hard</span> — Remove palindromic subsequences, interval DP (#1246)</div>
+      <div class="related-item"><strong>Matrix Chain Multiplication</strong><span class="related-diff diff-hard">Hard</span> — Canonical interval DP; optimal parenthesization (#classic)</div>
+      <div class="related-item"><strong>Minimum Cost to Cut a Stick</strong><span class="related-diff diff-hard">Hard</span> — Interval DP on cut positions; similar subproblem decomposition (#1547)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18 (Dynamic Programming → DP: Interval)<br>
+      Sub-Pattern: <strong>3D DP with Count (Interval DP)</strong> · Source: Analysis<br>
+      Also relates to: Interval DP (Guide Section 18)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Problem Data ──
+// boxes = [1, 3, 2, 2, 2, 3, 4, 3, 1]
+// Colors: 1=blue, 3=amber, 2=green, 4=purple
+const BOXES_ORIG = [1, 3, 2, 2, 2, 3, 4, 3, 1];
+const COLOR_CLASS = {1:'c1', 2:'c2', 3:'c3', 4:'c4', 5:'c5'};
+
+// Each step: { boxes (remaining, null=removed), removing (indices to remove this step),
+//              activeLine, phase, phaseLabel, phaseClass,
+//              score, deltaScore, k, action, title, text, rangeText }
+const steps = [
+  {
+    boxes: [1, 3, 2, 2, 2, 3, 4, 3, 1],
+    removing: [],
+    activeLine: 0, phase:'init', phaseLabel:'START', phaseClass:'phase-init',
+    score:0, deltaScore:0, k:0, action:'setup',
+    title: 'Initial State: boxes=[1,3,2,2,2,3,4,3,1]',
+    text: 'We have 9 boxes. The DP will find the optimal removal order. We call dp(0, 8, 0) — solve the full range with 0 extra boxes outside. The recurrence will try both choices (remove tail now vs merge with matching box) at every step.',
+    rangeText: 'Full range: [0, 8], k=0'
+  },
+  {
+    boxes: [1, 3, 2, 2, 2, 3, 4, 3, 1],
+    removing: [],
+    activeLine: 5, phase:'split', phaseLabel:'OPTION B', phaseClass:'phase-split',
+    score:0, deltaScore:0, k:0, action:'merge',
+    title: 'dp(0,8,0): Option B — find matching box for boxes[8]=1',
+    text: 'boxes[8]=1. Option A: remove just box[8] for 1²=1pt + dp(0,7,0). Option B: look for box[m]==1. Found m=0 (boxes[0]=1)! So try: dp(1,7,0) + dp(0,0,1). Removing everything in [1,7] first then merging boxes[0] with boxes[8] could yield more.',
+    rangeText: 'Active range: [0, 8], seeking m where boxes[m]=1'
+  },
+  {
+    boxes: [1, 3, 2, 2, 2, 3, 4, 3, 1],
+    removing: [],
+    activeLine: 5, phase:'split', phaseLabel:'OPTION B', phaseClass:'phase-split',
+    score:0, deltaScore:0, k:0, action:'merge',
+    title: 'dp(1,7,0): Now solve the middle — boxes=[3,2,2,2,3,4,3]',
+    text: 'boxes[7]=3. Look for matching box: found m=5 (boxes[5]=3) and m=1 (boxes[1]=3)! Best strategy: merge all three 3s. We recursively clear [2,6] first, then the three 3s at positions 1,5,7 get removed together.',
+    rangeText: 'Active range: [1, 7], seeking m where boxes[m]=3'
+  },
+  {
+    boxes: [1, 3, 2, 2, 2, 3, 4, 3, 1],
+    removing: [2, 3, 4],
+    activeLine: 4, phase:'join', phaseLabel:'REMOVE', phaseClass:'phase-join',
+    score:0, deltaScore:9, k:3, action:'remove',
+    title: 'Remove [2,2,2] — 3 boxes of color 2 → +9 pts',
+    text: 'dp(2,4,0): solve boxes[2..4]=[2,2,2]. All three are same color. Option A immediately: remove all 3 as a group. Score = (0+1+2)... wait, with the tail-merge optimization, after merging r=4,3,2 all into the k-group: (k+1)²=(3)²=9. Score +9!',
+    rangeText: 'Removing indices 2,3,4 (color 2)'
+  },
+  {
+    boxes: [1, 3, null, null, null, 3, 4, 3, 1],
+    removing: [],
+    activeLine: 8, phase:'split', phaseLabel:'MERGE', phaseClass:'phase-split',
+    score:9, deltaScore:0, k:0, action:'merge',
+    title: 'After removing [2,2,2]: now solve [3, 4, 3] in range [1,5,6,7]',
+    text: 'Middle cleared. Now boxes[1]=3 sees boxes[5]=3 and boxes[7]=3 as potential merge partners. dp(1,7,0) with middle gone means boxes[1,5,7]=[3,3,3] can be merged. We call dp(6,6,0) for the lone 4, then the three 3s group together.',
+    rangeText: 'Ranges: solving [1,5,6,7] after clearing [2,3,4]'
+  },
+  {
+    boxes: [1, 3, null, null, null, 3, 4, 3, 1],
+    removing: [6],
+    activeLine: 4, phase:'join', phaseLabel:'REMOVE', phaseClass:'phase-join',
+    score:9, deltaScore:1, k:1, action:'remove',
+    title: 'Remove [4] — 1 box, color 4 → +1 pt',
+    text: 'dp(6,6,0): only one box (value=4). Option A: (0+1)²=1pt. No Option B (no other box[m]==4 in range). So remove it immediately for 1 point.',
+    rangeText: 'Removing index 6 (color 4)'
+  },
+  {
+    boxes: [1, 3, null, null, null, 3, null, 3, 1],
+    removing: [1, 5, 7],
+    activeLine: 8, phase:'join', phaseLabel:'MERGE + REMOVE', phaseClass:'phase-join',
+    score:10, deltaScore:9, k:3, action:'remove',
+    title: 'Remove [3,3,3] — 3 boxes merged across gap → +9 pts',
+    text: 'After clearing positions 2-4 and 6, boxes[1], boxes[5], and boxes[7] are all color 3. The DP merged them: dp(l,1,2) means boxes[1] had 2 extra 3s attached. Total group size = 3 → (3)²=9pts. This is the quadratic bonus from merging!',
+    rangeText: 'Removing indices 1,5,7 (color 3, merged group of 3)'
+  },
+  {
+    boxes: [1, null, null, null, null, null, null, null, 1],
+    removing: [],
+    activeLine: 8, phase:'split', phaseLabel:'MERGE', phaseClass:'phase-split',
+    score:19, deltaScore:0, k:0, action:'merge',
+    title: 'Middle cleared! Now dp(0,8,0) resumes: boxes[0]=1 merges with boxes[8]=1',
+    text: 'We\'ve cleared positions 1-7. Now dp(0,0,1): boxes[0]=1 with k=1 extra (boxes[8]=1 attached on right). Group size = k+1 = 2. Score = 2²=4pts. This is exactly Option B\'s payoff: patient merging lets boxes[0] and boxes[8] be removed together.',
+    rangeText: 'Final merge: boxes[0]=1 with boxes[8]=1, k=1'
+  },
+  {
+    boxes: [1, null, null, null, null, null, null, null, 1],
+    removing: [0, 8],
+    activeLine: 4, phase:'join', phaseLabel:'REMOVE', phaseClass:'phase-join',
+    score:19, deltaScore:4, k:2, action:'remove',
+    title: 'Remove [1,1] — 2 boxes of color 1 → +4 pts (merged!)',
+    text: 'dp(0,0,1): single box at index 0 with k=1. Score = (1+1)²=2²=4. We remove boxes[0] and boxes[8] together as a 2-box group. 4 points instead of 1+1=2! The patience paid off.',
+    rangeText: 'Removing indices 0,8 (color 1, group of 2)'
+  },
+  {
+    boxes: [null, null, null, null, null, null, null, null, null],
+    removing: [],
+    activeLine: 10, phase:'result', phaseLabel:'DONE', phaseClass:'phase-result',
+    score:23, deltaScore:0, k:0, action:'done',
+    title: 'All boxes removed! Total = 23 pts ✓',
+    text: 'Final score: 9 (three 2s) + 1 (lone 4) + 9 (three 3s merged) + 4 (two 1s merged) = 23. This is the optimal answer. The DP explored all possibilities: removing 1s separately gives only 1+1=2pts; merging gives 4pts. Similarly for the 3s.',
+    rangeText: 'Optimal: 9 + 1 + 9 + 4 = 23 pts'
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  const row = document.getElementById('boxes-row');
+  BOXES_ORIG.forEach((val, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'box-wrapper';
+    wrapper.id = 'bw-' + i;
+
+    const cell = document.createElement('div');
+    cell.className = 'box-cell ' + (COLOR_CLASS[val] || 'normal');
+    cell.id = 'bc-' + i;
+    cell.textContent = val;
+
+    const idx = document.createElement('div');
+    idx.className = 'box-idx';
+    idx.textContent = i;
+
+    wrapper.appendChild(cell);
+    wrapper.appendChild(idx);
+    row.appendChild(wrapper);
+  });
+
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // Update boxes visualization
+  BOXES_ORIG.forEach((val, i) => {
+    const cell = document.getElementById('bc-' + i);
+    const bw = document.getElementById('bw-' + i);
+    cell.className = 'box-cell';
+
+    if (step.boxes[i] === null) {
+      cell.classList.add('removed');
+    } else if (step.removing && step.removing.includes(i)) {
+      cell.classList.add('removing');
+      cell.classList.add(COLOR_CLASS[val] || 'normal');
+    } else if (step.boxes[i] !== undefined) {
+      cell.classList.add(COLOR_CLASS[val] || 'normal');
+    } else {
+      cell.classList.add('done');
+    }
+  });
+
+  // Range indicator
+  const ri = document.getElementById('range-indicator');
+  ri.textContent = step.rangeText || '';
+
+  // Score display
+  document.getElementById('score-val').textContent = step.score;
+
+  // Variable tracker
+  const actionEl = document.getElementById('vv-action');
+  const kEl = document.getElementById('vv-k');
+  const ptsEl = document.getElementById('vv-pts');
+  actionEl.textContent = step.action;
+  kEl.textContent = step.k;
+  ptsEl.textContent = step.deltaScore > 0 ? '+' + step.deltaScore : '0';
+
+  document.getElementById('vb-pts').classList.toggle('changed', step.deltaScore > 0);
+  document.getElementById('vb-k').classList.toggle('changed', step.k > 0);
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

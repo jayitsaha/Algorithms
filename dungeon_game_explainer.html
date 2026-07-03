@@ -1,81 +1,906 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Dungeon Game — LC #174</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#174 · Dungeon Game</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;--text:#e2e8f0;--muted:#8892a4;--blue:#4f9cf9;--green:#34d399;--yellow:#fbbf24;--red:#f87171;--purple:#a78bfa;--orange:#fb923c;--cyan:#22d3ee;}
-  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px 16px 60px}
-  .page-header{text-align:center;padding:40px 20px 32px}.page-header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin-bottom:10px}
-  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:18px}.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .tag{padding:4px 12px;border-radius:99px;font-size:.78rem;font-weight:600}.tag-easy{background:#0d3321;color:var(--green);border:1px solid #1a5c3a}.tag-med{background:#2a1f00;color:var(--yellow);border:1px solid #5a3a00}.tag-hard{background:#2a0d0d;color:var(--red);border:1px solid #5a1a1a}.tag-pattern{background:#1a1f3a;color:var(--blue);border:1px solid #2a3560}.tag-cx{background:#1e1a2e;color:var(--purple);border:1px solid #3a2d5c}
-  .container{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-  .sh{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border);background:var(--surface2);cursor:pointer;user-select:none}.sn{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}.st{font-weight:600;font-size:1rem;flex:1}.tog{color:var(--muted);font-size:1rem;transition:transform .2s}.tog.open{transform:rotate(180deg)}
-  .cb{padding:22px;display:none}.cb.open{display:block}p{line-height:1.7;margin-bottom:12px}p:last-child{margin-bottom:0}code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85em}
-  .box{border-radius:10px;padding:14px 18px;margin:14px 0}.boxt{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.bi{background:#0d2136;border:1px solid #1a4060}.bi .boxt{color:var(--blue)}.bk{background:#0d1f2e;border:1px solid #1a3a50}.bk .boxt{color:var(--cyan)}.bw{background:#1e1200;border:1px solid #4a3000}.bw .boxt{color:var(--yellow)}.bs{background:#0d2418;border:1px solid #1a5030}.bs .boxt{color:var(--green)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:14px 0}.step{display:flex;align-items:flex-start;gap:12px}.snum{width:24px;height:24px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}.stxt{line-height:1.6;font-size:.93rem}
-  pre.code{background:#0d0f18;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.83rem;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all}
-  .ctable{width:100%;border-collapse:collapse;font-size:.9rem}.ctable th{background:var(--surface2);color:var(--muted);font-weight:600;padding:10px 14px;text-align:left;border:1px solid var(--border)}.ctable td{padding:10px 14px;border:1px solid var(--border)}
-  .rlist{list-style:none;display:flex;flex-direction:column;gap:8px}.rlist li{padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:.9rem}.pn{font-weight:600;color:var(--blue)}.pd{font-size:.8rem;padding:2px 8px;border-radius:99px;margin-left:8px}.de{background:#0d3321;color:var(--green)}.dm{background:#2a1f00;color:var(--yellow)}.dh{background:#2a0d0d;color:var(--red)}
-  .vsec{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}.vh{background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 22px}.vh h3{font-size:1rem;font-weight:600}.vb{padding:24px 22px}
-  .arow{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:22px}.rlbl{font-size:.8rem;font-weight:600;width:72px;text-align:right;color:var(--muted);flex-shrink:0;padding-top:12px}
-  .cells{display:flex;gap:5px;flex-wrap:wrap}.cell{min-width:44px;height:44px;padding:0 6px;border-radius:8px;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;position:relative;transition:all .25s;background:var(--surface2)}.cell .il{position:absolute;bottom:-18px;font-size:.62rem;color:var(--muted)}
-  .c-bl{background:#0d1e36;border-color:var(--blue);color:var(--blue)}.c-gr{background:#0d2418;border-color:var(--green);color:var(--green)}.c-yw{background:#1e1505;border-color:var(--yellow);color:var(--yellow)}.c-pu{background:#1a1030;border-color:var(--purple);color:var(--purple)}.c-or{background:#1e1505;border-color:var(--orange);color:var(--orange)}.c-rd{background:#2a0d0d;border-color:var(--red);color:var(--red)}.c-cy{background:#0d1f2e;border-color:var(--cyan);color:var(--cyan)}.c-ac{box-shadow:0 0 14px rgba(251,191,36,.7);border-color:var(--yellow)!important;transform:translateY(-5px)}
-  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}.jpop{animation:pop .3s ease}
-  .vt{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px}.vc{padding:6px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;border:1px solid var(--border);background:var(--surface2)}.vc.ch{border-color:var(--yellow);background:#1e1505;color:var(--yellow)}
-  .ic{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}.ip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:700;background:var(--blue);color:#fff;margin-bottom:8px}.ip.done{background:var(--green)}.ip.warn{background:var(--red)}.ip.info{background:var(--purple)}.it{font-weight:600;font-size:.95rem;margin-bottom:6px}.id{color:var(--muted);font-size:.88rem;line-height:1.6}
-  .pdots{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}.dot.active{background:var(--blue)}.dot.visited{background:#2a3a60}
-  .ctrl{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:18px;flex-wrap:wrap}.btn{padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s}.btn:hover{background:var(--border)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:default}
-  .khint{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.li{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}.ld{width:12px;height:12px;border-radius:4px;flex-shrink:0}.sc{font-size:.82rem;color:var(--muted)}
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* Header */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* Concept Boxes */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* Algorithm Steps */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* Interview Strategy */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* Annotated Code */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* Recurrence box */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:0.75rem;letter-spacing:0.5px}
+.recurrence-formula{font-family:var(--mono);font-size:13.5px;line-height:2.6;color:var(--text)}
+.var-dp{color:var(--blue-mid);font-weight:600}
+.var-dp2{color:var(--purple-mid);font-weight:600}
+
+/* State machine */
+.state-machine{display:flex;align-items:center;justify-content:center;gap:16px;margin:1.5rem 0;flex-wrap:wrap}
+.state-node{width:150px;min-height:80px;border-radius:14px;border:3px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;transition:all 0.3s}
+.state-node .state-emoji{font-size:24px;margin-bottom:4px}
+.state-node .state-label{font-size:12px;font-weight:700;color:var(--text)}
+.state-node .state-val{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px}
+.state-node.s-prev{border-color:var(--purple-border);background:var(--purple-bg)}
+.state-node.s-prev .state-val{color:var(--purple-mid)}
+.state-node.s-current{border-color:var(--blue-border);background:var(--blue-bg)}
+.state-node.s-current .state-val{color:var(--blue-mid)}
+.state-node.s-final{border-color:var(--green-border);background:var(--green-bg)}
+.state-node.s-final .state-val{color:var(--green-mid)}
+.state-arrow{font-size:24px;color:var(--text3);flex-shrink:0}
+
+/* Dungeon grid viz */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.dungeon-grid{display:grid;gap:5px;width:fit-content;margin:0 auto}
+.dg-cell{width:62px;height:62px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;border:2px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.35s;flex-shrink:0}
+.dg-cell .dungeon-val{font-size:17px;line-height:1}
+.dg-cell .dp-val{font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--sans);font-weight:600}
+.dg-cell.normal{background:var(--surface);border-color:var(--border2)}
+.dg-cell.danger-cell{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.dg-cell.danger-cell .dp-val{color:var(--red-mid)}
+.dg-cell.safe-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.dg-cell.safe-cell .dp-val{color:var(--green-mid)}
+.dg-cell.active-cell{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.dg-cell.active-cell .dp-val{color:var(--blue-mid)}
+.dg-cell.done-cell{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.dg-cell.done-cell .dp-val{color:var(--text2);font-weight:700}
+.dg-cell.princess{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.dg-cell.princess .dp-val{color:var(--purple-mid)}
+
+/* Var tracker */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* Code panel */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* Info card */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-base{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-fill{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* Decision panel */
+.decision-panel{background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius);padding:1rem;margin-top:0.75rem}
+.decision-question{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:0.75rem}
+.decision-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.decision-options{grid-template-columns:1fr}}
+.decision-option{padding:10px 12px;border-radius:var(--radius);border:1.5px solid var(--border)}
+.decision-option.selected{border-color:var(--green-border);background:var(--green-bg)}
+.decision-option.rejected{border-color:var(--border);background:var(--bg2);opacity:0.65}
+.opt-action{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.opt-formula{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.opt-result{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:4px}
+.opt-result .check{color:var(--green-mid)}
+.opt-result .cross{color:var(--red-mid)}
+
+/* Progress / Controls */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* Legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+.sw-danger{background:var(--red-bg);border-color:var(--red-border)}
+.sw-safe{background:var(--green-bg);border-color:var(--green-border)}
+.sw-princess{background:var(--purple-bg);border-color:var(--purple-border)}
+
+/* Comparison Table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* Takeaways / Related */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
 </style>
 </head>
 <body>
-<div class="page-header"><h1>Dungeon Game</h1>
-<div class="subtitle">LeetCode #174 &mdash; Reverse DP from End</div>
-<div class="tags"><span class="tag tag-hard">🔴 Hard</span><span class="tag tag-pattern">Dynamic Programming</span><span class="tag tag-pattern">Reverse DP from End</span><span class="tag tag-cx">O(m*n) Time &middot; O(m*n) Space</span></div>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #174</div>
+  <h1>Dungeon Game</h1>
+  <p class="subtitle">Find the minimum initial health the knight needs to rescue the princess — moving only right or down through a grid of rooms that drain or restore health.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Reverse DP from End</span>
+    <span class="tag tag-complexity">Time: O(m·n)</span>
+    <span class="tag tag-complexity">Space: O(m·n)</span>
+  </div>
+</header>
+
+<!-- SECTION 1 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A knight starts at the top-left of a dungeon grid. The princess is trapped at the bottom-right. Each room has an integer value — <strong>negative</strong> means the room drains health (demons!), <strong>positive</strong> means it restores health (magic orbs). The knight can only move <strong>right or down</strong> at each step. The knight dies the instant his health drops to <strong>0 or below</strong>. What is the minimum initial health he needs?</p>
+
+    <div class="concept-box danger">
+      <div class="concept-box-title">⚡ The Trap: Why Forward DP Fails</div>
+      <p>Your first instinct might be: "track maximum health at each cell — take the path where you arrive healthiest." But this fails. A path through a +100 bonus room might lead into a -200 corridor that kills you, while a lower-health path avoids it. <strong>Future cells determine whether your current health is "enough."</strong> You cannot optimize locally without knowing the future.</p>
+    </div>
+
+    <p><strong>Worked Example (3×3):</strong></p>
+    <pre style="font-family:var(--mono);font-size:13px;line-height:1.9;background:var(--bg2);padding:14px;border-radius:var(--radius);margin:0.75rem 0;overflow-x:auto">Dungeon grid (value = health change when entering room):
+  [  -2,  -3,   3  ]   ← row 0
+  [  -5, -10,   1  ]   ← row 1
+  [  10,  30,  -5  ]   ← row 2 (princess at [2][2])
+
+Question: How much HP does the knight need at [0][0]?
+Answer: 7 (we'll verify this step-by-step in Section 6)</pre>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 What We're Really Asking</div>
+      <p>For every cell <code>(i, j)</code>: "If the knight enters this cell, what is the <em>minimum health</em> he needs at entry to guarantee he can reach the princess alive?" We call this <code>dp[i][j]</code>. The answer is <code>dp[0][0]</code>.</p>
+    </div>
+
+    <p><strong>Edge cases:</strong> 1×1 grid (knight is at princess cell — needs enough to survive that room, minimum 1), all-positive dungeon (answer is always 1), princess cell itself negative (knight must enter with at least <code>1 - dungeon[m-1][n-1]</code> HP).</p>
+  </div>
 </div>
-<div class="container">
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">1</div><div class="st">Understanding the Problem</div><div class="tog open">&#9660;</div></div><div class="cb open"><p>See LeetCode.</p><div class="box bi"><div class="boxt">&#128161; Key Insight</div><p>dp[i][j] = minimum health needed to survive FROM (i,j) to (n-1,n-1). Work backwards. dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j]).</p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">2</div><div class="st">The Algorithm: Reverse DP</div><div class="tog open">&#9660;</div></div><div class="cb open"><p><strong>Approach: Reverse DP</strong></p><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">dp[n-1][n-1]=max(1,1-dungeon[n-1][n-1])</span></div><div class="step"><span class="snum">2</span><span class="stxt">For (i,j): dp[i][j]=max(1,min(down,right)-dungeon[i][j])</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">3</div><div class="st">Why It Works: The Invariant</div><div class="tog ">&#9660;</div></div><div class="cb "><p>Correct by the stated approach.</p><div class="box bs"><div class="boxt">&#9989; Complexity</div><p>Time: <strong>O(m*n)</strong> | Space: <strong>O(m*n)</strong></p></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">4</div><div class="st">The Code (Annotated)</div><div class="tog open">&#9660;</div></div><div class="cb open"><pre class="code">def calculateMinimumHP(dungeon):
-    m,n=len(dungeon),len(dungeon[0])
-    dp=[[float('inf')]*(n+1) for _ in range(m+1)]
-    dp[m][n-1]=dp[m-1][n]=1
-    for r in range(m-1,-1,-1):
-        for c in range(n-1,-1,-1):
-            need=min(dp[r+1][c],dp[r][c+1])-dungeon[r][c]
-            dp[r][c]=max(1,need)
-    return dp[0][0]</pre></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">5</div><div class="st">&#127908; Interview Strategy</div><div class="tog ">&#9660;</div></div><div class="cb "><div class="steps"><div class="step"><span class="snum">1</span><span class="stxt">Work backwards: avoid forward DP which requires tracking both position and health</span></div><div class="step"><span class="snum">2</span><span class="stxt">At each cell: ensure health ≥ 1 (max with 1)</span></div></div></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">6</div><div class="st">Complexity Analysis</div><div class="tog open">&#9660;</div></div><div class="cb open"><table class="ctable"><tr><th>Solution</th><th>Time</th><th>Space</th></tr><tr><td>Reverse DP</td><td>O(m*n)</td><td>O(m*n)</td></tr></table></div></div>
-<div class="card"><div class="sh" onclick="toggle(this)"><div class="sn">7</div><div class="st">&#128279; Related Problems</div><div class="tog ">&#9660;</div></div><div class="cb "><ul class="rlist"><li><span class="pn">Unique Paths</span><span class="pd dm">Medium</span> — Basic path DP</li><li><span class="pn">Minimum Path Sum</span><span class="pd dm">Medium</span> — Forward DP version</li></ul><div class="box bi" style="margin-top:14px"><div class="boxt">&#128218; Reference</div><p>DSA_Patterns_and_SubPatterns_Guide.md — <strong>Reverse DP from End</strong></p></div></div></div>
-<div class="vsec"><div class="vh"><h3>&#127917; Step-by-Step Visualizer</h3></div><div class="vb">
-<script type="application/json" id="vd">[{"rows": [], "vars": {"problem": "Dungeon Game"}, "title": "Reverse DP", "desc": "See code.", "phase": "init", "pl": "Overview"}]</script>
-<div id="vc"></div><div id="vt" class="vt"></div><div id="vic" class="ic"></div><div id="vdots" class="pdots"></div>
-<div class="ctrl"><button class="btn" id="vp" onclick="pv()">&#9664; Prev</button><span class="sc" id="vs">Step 0/0</span><button class="btn primary" id="vn" onclick="nx()">Next &#9654;</button><button class="btn" onclick="rs()">&#8635;</button></div>
-<div class="khint">&#8592; &#8594; arrow keys</div><div class="legend"><div class="li"><div class="ld" style="background:var(--blue)"></div>key data</div><div class="li"><div class="ld" style="background:var(--green)"></div>result</div></div></div></div>
+
+<!-- SECTION 2 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Reverse DP from the Princess</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We work <strong>backwards</strong> — start at the princess cell and fill the DP table toward the knight's start. At each cell, we ask: "what minimum health do I need entering here, given what I know about cells ahead?"</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🧠 Why Is This Dynamic Programming?</div>
+      <p><strong>Optimal Substructure:</strong> The minimum HP needed at cell <code>(i, j)</code> depends <em>only</em> on <code>dp[i+1][j]</code> (going down) and <code>dp[i][j+1]</code> (going right). Nothing else from elsewhere in the grid matters. This is a clean recursive sub-problem decomposition.<br><br>
+      <strong>Overlapping Subproblems:</strong> Cell <code>(1,1)</code> can be reached via <code>(0,1)→(1,1)</code> or <code>(1,0)→(1,1)</code>. Without memoization, a recursive approach would recompute <code>dp[1][1]</code> once per path — exponentially wasteful for large grids.</p>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relations</div>
+      <div class="recurrence-formula">
+<span class="var-dp">Base case:</span> dp[m-1][n-1] = max(1, 1 − dungeon[m-1][n-1])
+<br>
+<span class="var-dp">Last row</span> (j from n-2 to 0):
+  dp[m-1][j] = max(1, dp[m-1][j+1] − dungeon[m-1][j])
+<br>
+<span class="var-dp">Last column</span> (i from m-2 to 0):
+  dp[i][n-1] = max(1, dp[i+1][n-1] − dungeon[i][n-1])
+<br>
+<span class="var-dp">Interior</span> (i from m-2 to 0, j from n-2 to 0):
+  <span class="var-dp2">best</span> = min(dp[i+1][j], dp[i][j+1])
+  dp[i][j] = max(1, <span class="var-dp2">best</span> − dungeon[i][j])
+      </div>
+    </div>
+
+    <p><strong>Reading the recurrence:</strong> <code>best - dungeon[i][j]</code> computes the required entry HP. If <code>dungeon[i][j]</code> is positive (heals), you need <em>less</em> HP to enter. If negative (drains), you need <em>more</em>. The <code>max(1, ...)</code> clamp ensures the knight is always alive (≥1 HP).</p>
+
+    <p style="margin-top:0.75rem"><strong>Fill Order — bottom-right to top-left:</strong></p>
+    <div class="state-machine">
+      <div class="state-node s-final">
+        <span class="state-emoji">👸</span>
+        <span class="state-label">Princess Cell</span>
+        <span class="state-val">Filled first (base case)</span>
+      </div>
+      <div class="state-arrow">⟸</div>
+      <div class="state-node s-current">
+        <span class="state-emoji">⚔️</span>
+        <span class="state-label">Interior Cell</span>
+        <span class="state-val">min(right, down) then clamp</span>
+      </div>
+      <div class="state-arrow">⟸</div>
+      <div class="state-node s-prev">
+        <span class="state-emoji">🏰</span>
+        <span class="state-label">Knight Start</span>
+        <span class="state-val">dp[0][0] = answer</span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--text2);text-align:center">Every cell's neighbors to the right and below are already computed when we process it.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Base case — princess cell (m-1, n-1):</strong> Knight must survive this cell with ≥1 HP. <code>dp[m-1][n-1] = max(1, 1 - dungeon[m-1][n-1])</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Fill last row (right → left):</strong> Only exit is rightward. <code>dp[m-1][j] = max(1, dp[m-1][j+1] - dungeon[m-1][j])</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Fill last column (bottom → top):</strong> Only exit is downward. <code>dp[i][n-1] = max(1, dp[i+1][n-1] - dungeon[i][n-1])</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Fill interior cells (bottom-right → top-left):</strong> Two exits. Take the cheaper one (min), then apply the recurrence.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return dp[0][0]</strong> — the minimum health the knight needs to start.</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- SECTION 3 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After we compute <code>dp[i][j]</code>, the following holds: <em>"If the knight enters cell (i, j) with exactly dp[i][j] health points, he can reach the princess alive via some path — and dp[i][j] is the minimum such value."</em></p>
+    </div>
+
+    <p><strong>Why <code>min(down, right)</code>?</strong> The knight chooses the optimal future path. We want the <em>minimum HP required to enter (i, j)</em>. If we use min(dp[i+1][j], dp[i][j+1]), we're asking: "of the two available exits, which requires less HP? Plan for that one." Taking max would over-estimate by pessimistically assuming the worse exit.</p>
+
+    <p style="margin-top:0.75rem"><strong>Why <code>max(1, ...)</code>?</strong> If a room has a large positive value (say +100), the formula gives <code>1 - 100 = -99</code>. But the knight must have at least 1 HP to be alive. The clamp to 1 reflects this physical constraint — you must be alive to enter any room.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forward DP with "Max Health Tracking"</div>
+      <p>Some try <code>dp[i][j] = max(dungeon[i][j] + max(dp[i-1][j], dp[i][j-1]), 1)</code>. This tracks the <em>most health</em> you can arrive at each cell. But this doesn't work — a path with maximum health at cell (i,j) might still die in later cells. We care about the <em>survival constraint end-to-end</em>, not the health at any single intermediate cell.</p>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Analogy: Backwards Expedition Planning</div>
+      <p>Imagine you're planning a dangerous mountain expedition. Rather than guessing how much food to pack from base camp, you work backwards: "How much food do I need at the summit to safely descend? Then how much at the midpoint to reach the summit? Then how much at base camp to reach the midpoint?" Each backward step is a clean, certain calculation — because you know what's needed next.</p>
+    </div>
+
+    <p><strong>1×1 edge case:</strong> <code>dp[0][0] = max(1, 1 - dungeon[0][0])</code>. If the princess room is -5, the knight needs 6 HP. If it's +10, the knight still needs at least 1 HP — you can't have zero health and be alive.</p>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Bottom-Up Tabulation (Optimal · Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def calculateMinimumHP(dungeon: list[list[int]]) -> int:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(dungeon), len(dungeon[0])          </span><span class="aann">← grid height and width</span></div>
+<div class="ann-line"><span class="acode">    dp = [[0] * n for _ in range(m)]              </span><span class="aann">← dp[i][j] = min HP to enter (i,j) and survive</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    dp[m-1][n-1] = max(1, 1 - dungeon[m-1][n-1])  </span><span class="aann">← base case: princess cell</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    for j in range(n-2, -1, -1):                  </span><span class="aann">← fill last row right-to-left (only exit: right)</span></div>
+<div class="ann-line"><span class="acode">        dp[m-1][j] = max(1, dp[m-1][j+1] - dungeon[m-1][j])</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    for i in range(m-2, -1, -1):                  </span><span class="aann">← fill last column bottom-to-top (only exit: down)</span></div>
+<div class="ann-line"><span class="acode">        dp[i][n-1] = max(1, dp[i+1][n-1] - dungeon[i][n-1])</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    for i in range(m-2, -1, -1):                  </span><span class="aann">← fill interior: bottom-to-top</span></div>
+<div class="ann-line"><span class="acode">        for j in range(n-2, -1, -1):              </span><span class="aann">← inner loop: right-to-left</span></div>
+<div class="ann-line"><span class="acode">            best = min(dp[i+1][j], dp[i][j+1])    </span><span class="aann">← cheaper exit (down vs right)</span></div>
+<div class="ann-line"><span class="acode">            dp[i][j] = max(1, best - dungeon[i][j])</span><span class="aann">← min HP to enter this cell; clamp at 1</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    return dp[0][0]                               </span><span class="aann">← answer: min HP for knight at start</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why max(1, ...) and NOT just the raw formula?</div>
+      <p>If a room gives +100 HP and the next cell only needs 5 HP, the raw formula gives <code>5 - 100 = -95</code>. But you can't start with -95 HP — you'd be dead. The clamp enforces the invariant that health is always a positive integer. Even in a room that heals massively, you need at least 1 HP to enter.</p>
+    </div>
+
+    <p style="margin-top:1.25rem"><strong>Solution 2 — Top-Down Memoization (easier to derive, same complexity)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from functools import lru_cache</span></div>
+<div class="ann-line"><span class="acode">def calculateMinimumHP(dungeon: list[list[int]]) -> int:</span></div>
+<div class="ann-line"><span class="acode">    m, n = len(dungeon), len(dungeon[0])</span></div>
+<div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)</span></div>
+<div class="ann-line"><span class="acode">    def dp(i, j) -> int:                          </span><span class="aann">← min HP to enter (i,j) and survive</span></div>
+<div class="ann-line"><span class="acode">        if i == m-1 and j == n-1:                 </span><span class="aann">← base case: princess cell</span></div>
+<div class="ann-line"><span class="acode">            return max(1, 1 - dungeon[i][j])</span></div>
+<div class="ann-line"><span class="acode">        exits = []</span></div>
+<div class="ann-line"><span class="acode">        if i + 1 < m: exits.append(dp(i+1, j))   </span><span class="aann">← can go down</span></div>
+<div class="ann-line"><span class="acode">        if j + 1 < n: exits.append(dp(i, j+1))   </span><span class="aann">← can go right</span></div>
+<div class="ann-line"><span class="acode">        return max(1, min(exits) - dungeon[i][j])  </span><span class="aann">← pick cheaper exit, apply recurrence</span></div>
+<div class="ann-line"><span class="acode">    return dp(0, 0)                               </span><span class="aann">← start from top-left</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Space Optimization: O(n) Rolling Array</div>
+      <p>We only ever look at the row below and the cell to the right. We can reduce space to O(n) by keeping just one row and updating it in-place right-to-left. Add <code>dp[m] = [float('inf')] * n</code> and <code>dp[m][n-1] = 1</code> as sentinels, then process each row updating left from right.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize Grid DP Signal</div>
+        <p style="font-size:14px;color:var(--text)">Grid + right/down moves + optimization → 2D DP. The twist: it's not a simple min/max path sum. There's a survival constraint. Say: "I see grid DP, but we need to track survival, not just total cost. Let me think about what state captures this."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Show Forward DP Breaks</div>
+        <p style="font-size:14px;color:var(--text)">Try forward DP mentally: "max health at each cell?" Quickly realize a path with high health at (1,1) might still die in row 2, while a lower-health path avoids deadly cells. Verbalize: "Forward DP can't encode the survival constraint — we need to know future cells to make optimal local decisions."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Redefine State → Reverse DP</div>
+        <p style="font-size:14px;color:var(--text)">Say: "Let dp[i][j] = minimum health needed at entry to (i,j) to survive to the end. This is computable backwards — at the princess cell, we know exactly what's needed. Each backward step only depends on cells already computed." This is the insight that unlocks everything.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Write the Recurrence Live</div>
+        <p style="font-size:14px;color:var(--text)">"At any interior cell, I can go right or down. I take the cheaper exit (min). Then I need enough HP to enter this cell and still have that much: <code>dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j])</code>. The max(1,...) clamp ensures health stays positive."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I'll use reverse DP. Forward DP doesn't work here because knowing max health at a cell doesn't tell you about future survival.
+<br>
+State: dp[i][j] = minimum HP to enter (i,j) and reach the princess alive.
+<br>
+Base case: princess cell → max(1, 1 - dungeon[m-1][n-1]).
+<br>
+Recurrence: dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j]).
+<br>
+I take min of two exits because the knight picks the optimal path. I clamp at 1 because HP must be positive.
+<br>
+Fill order: bottom-right to top-left. Time O(m·n), Space O(m·n) — reducible to O(n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"Can you optimize space?"</strong> → Yes, O(n) with a rolling 1D array. Update right-to-left in a single row.</li>
+        <li><strong>"What if movement includes left/up?"</strong> → No longer a DAG. Need Dijkstra on a (row, col, health) state graph.</li>
+        <li><strong>"What if you want to maximize final health instead?"</strong> → Now forward DP works (no survival constraint mid-path).</li>
+        <li><strong>"What if there are k magic potions to pick up on the path?"</strong> → Add dimension: dp[i][j][k_used].</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Dungeon [[-2,-3,3],[-5,-10,1],[10,30,-5]]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:14px;color:var(--text2);margin-bottom:1rem">Watch the DP table fill cell-by-cell from the princess (bottom-right) back to the knight (top-left). Each cell shows its dungeon value and computed dp value.</p>
+
+    <div class="viz-area">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:14px;text-align:center">3×3 Dungeon — cell shows: dungeon value / dp[i][j]</p>
+      <div class="dungeon-grid" id="dungeon-grid" style="grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,62px)">
+        <div class="dg-cell danger-cell" id="cell-0-0"><span class="dungeon-val">-2</span><span class="dp-val" id="dp-0-0">?</span></div>
+        <div class="dg-cell danger-cell" id="cell-0-1"><span class="dungeon-val">-3</span><span class="dp-val" id="dp-0-1">?</span></div>
+        <div class="dg-cell safe-cell"   id="cell-0-2"><span class="dungeon-val">+3</span><span class="dp-val" id="dp-0-2">?</span></div>
+        <div class="dg-cell danger-cell" id="cell-1-0"><span class="dungeon-val">-5</span><span class="dp-val" id="dp-1-0">?</span></div>
+        <div class="dg-cell danger-cell" id="cell-1-1"><span class="dungeon-val">-10</span><span class="dp-val" id="dp-1-1">?</span></div>
+        <div class="dg-cell safe-cell"   id="cell-1-2"><span class="dungeon-val">+1</span><span class="dp-val" id="dp-1-2">?</span></div>
+        <div class="dg-cell safe-cell"   id="cell-2-0"><span class="dungeon-val">+10</span><span class="dp-val" id="dp-2-0">?</span></div>
+        <div class="dg-cell safe-cell"   id="cell-2-1"><span class="dungeon-val">+30</span><span class="dp-val" id="dp-2-1">?</span></div>
+        <div class="dg-cell princess"    id="cell-2-2"><span class="dungeon-val">-5</span><span class="dp-val" id="dp-2-2">?</span></div>
+      </div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-cell">
+          <span class="var-name">cell</span>
+          <span class="var-val" id="vv-cell">—</span>
+        </div>
+        <div class="var-box" id="vb-dval">
+          <span class="var-name">dungeon</span>
+          <span class="var-val" id="vv-dval">—</span>
+        </div>
+        <div class="var-box" id="vb-best">
+          <span class="var-name">best_next</span>
+          <span class="var-val" id="vv-best">—</span>
+        </div>
+        <div class="var-box" id="vb-dpv">
+          <span class="var-name">dp[i][j]</span>
+          <span class="var-val" id="vv-dpv">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def calculateMinimumHP(dungeon):</div>
+      <div class="code-line" id="cl-1">    m, n = len(dungeon), len(dungeon[0])</div>
+      <div class="code-line" id="cl-2">    dp = [[0]*n for _ in range(m)]</div>
+      <div class="code-line" id="cl-3">    dp[m-1][n-1] = max(1, 1 - dungeon[m-1][n-1])  # base case</div>
+      <div class="code-line" id="cl-4">    for j in range(n-2, -1, -1):                   # last row</div>
+      <div class="code-line" id="cl-5">        dp[m-1][j] = max(1, dp[m-1][j+1] - dungeon[m-1][j])</div>
+      <div class="code-line" id="cl-6">    for i in range(m-2, -1, -1):                   # last col</div>
+      <div class="code-line" id="cl-7">        dp[i][n-1] = max(1, dp[i+1][n-1] - dungeon[i][n-1])</div>
+      <div class="code-line" id="cl-8">    for i in range(m-2, -1, -1):                   # interior</div>
+      <div class="code-line" id="cl-9">        for j in range(n-2, -1, -1):</div>
+      <div class="code-line" id="cl-10">            best = min(dp[i+1][j], dp[i][j+1])</div>
+      <div class="code-line" id="cl-11">            dp[i][j] = max(1, best - dungeon[i][j])</div>
+      <div class="code-line" id="cl-12">    return dp[0][0]</div>
+    </div>
+
+    <div class="info-card">
+      <span class="phase-badge phase-init" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 11</div>
+      <div class="step-title" id="step-title">Welcome to Dungeon Game</div>
+      <div class="step-body" id="step-body">We fill the DP table from the princess cell (bottom-right) backward to the knight (top-left). Each cell shows its dungeon value on top and computed dp value below. Press Next or use → to begin.</div>
+    </div>
+
+    <div class="decision-panel" id="decision-panel" style="display:none">
+      <div class="decision-question" id="dec-question"></div>
+      <div class="decision-options" id="dec-options"></div>
+    </div>
+
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Currently computing</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> dp value finalized</div>
+      <div class="legend-item"><div class="legend-swatch sw-danger"></div> Negative room (drains HP)</div>
+      <div class="legend-item"><div class="legend-swatch sw-safe"></div> Positive room (restores HP)</div>
+      <div class="legend-item"><div class="legend-swatch sw-princess"></div> Princess cell (base case)</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Reverse DP from end — forward DP can't satisfy survival constraints without knowing the future</div>
+      <div class="takeaway">State: dp[i][j] = minimum HP needed entering cell (i,j) to survive to the princess</div>
+      <div class="takeaway">Recurrence: dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j])</div>
+      <div class="takeaway">Always clamp to 1 — the knight must be alive (≥1 HP) to enter any room</div>
+      <div class="takeaway">Take min of exits because the knight will choose the optimal future path</div>
+      <div class="takeaway">Space optimizable to O(n) with a rolling 1D array updated right-to-left</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force DFS</td>
+          <td class="mark-bad">O(2^(m+n))</td>
+          <td>O(m+n)</td>
+          <td>Explores all paths — exponential</td>
+        </tr>
+        <tr>
+          <td>Forward DP</td>
+          <td class="mark-bad">INCORRECT</td>
+          <td>—</td>
+          <td>Cannot capture survival constraint</td>
+        </tr>
+        <tr>
+          <td><strong>Reverse Tabulation DP ✓</strong></td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)</td>
+          <td>Optimal; interview pick</td>
+        </tr>
+        <tr>
+          <td>Memoization (top-down)</td>
+          <td class="mark-good">O(m·n)</td>
+          <td>O(m·n)+stack</td>
+          <td>Easier to derive recursively</td>
+        </tr>
+        <tr>
+          <td>Space-optimized DP</td>
+          <td class="mark-good">O(m·n)</td>
+          <td class="mark-good">O(n)</td>
+          <td>Rolling 1D array; bonus points</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight" style="margin-top:1.5rem">
+      <div class="concept-box-title">🎯 When to Use Reverse DP from End</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Future cells determine whether your current state is "good enough"</li>
+        <li>Forward DP creates ambiguity — local optimality doesn't imply global optimality</li>
+        <li>The terminal condition is well-defined and simple (princess cell here)</li>
+        <li>Path optimization where a constraint must hold <em>throughout</em> the path, not just at the end</li>
+      </ul>
+    </div>
+
+    <div class="related-list" style="margin-top:1rem">
+      <div class="related-item"><strong>Minimum Path Sum</strong><span class="related-diff diff-med">Medium</span> — Same grid DP; minimize total cost top-left → bottom-right. Forward DP works here — no survival constraint.</div>
+      <div class="related-item"><strong>Triangle</strong><span class="related-diff diff-med">Medium</span> — Classic reverse DP: fill bottom-to-top in a triangular array for min-path-sum.</div>
+      <div class="related-item"><strong>Unique Paths II</strong><span class="related-diff diff-med">Medium</span> — Count all paths in grid with obstacles; builds the same 2D DP spatial reasoning.</div>
+      <div class="related-item"><strong>Cherry Pickup</strong><span class="related-diff diff-hard">Hard</span> — Two agents traverse same grid; extends to 3D DP. Same reverse-fill intuition.</div>
+      <div class="related-item"><strong>Maximal Square</strong><span class="related-diff diff-med">Medium</span> — Each cell's DP value depends on three neighboring cells — classic 2D DP dependency pattern.</div>
+      <div class="related-item"><strong>Coin Change</strong><span class="related-diff diff-med">Medium</span> — "Min cost to reach a target" framing — same flavor of DP where you optimize a constraint.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
 <script>
-function toggle(h){const b=h.nextElementSibling,t=h.querySelector('.tog');b.classList.toggle('open');t.classList.toggle('open');}
-const VZ=JSON.parse(document.getElementById('vd').textContent);let vc=0;
-function mkCell(v,cls,ptr,idx){return '<div class="cell '+(cls||'')+'">'+(ptr?'<span style="position:absolute;top:-20px;font-size:.7rem;font-weight:700;color:var(--yellow)">'+ptr+'</span>':'')+v+'<span class="il">'+idx+'</span></div>';}
-function rdr(s){
-  const p=vc>0?VZ[vc-1]:null;
-  let rh='';
-  (s.rows||[]).forEach(r=>{const cs=(r.cells||[]).map((v,i)=>mkCell(v,r.cls&&r.cls[i]||'',r.ptrs&&r.ptrs[i]||'',i)).join('');rh+='<div class="arow"><div class="rlbl">'+(r.lbl||'')+'</div><div class="cells">'+cs+'</div></div>';});
-  const vc2=document.getElementById('vc');if(vc2)vc2.innerHTML=rh;
-  const vt=document.getElementById('vt');if(vt&&s.vars){vt.innerHTML=Object.entries(s.vars).map(([k,v])=>{const ch=p&&p.vars&&JSON.stringify(p.vars[k])!==JSON.stringify(v);return '<div class="vc'+(ch?' ch':'')+'"><span style="color:var(--muted)">'+k+'</span>='+JSON.stringify(v)+'</div>';}).join('');}
-  const ic=document.getElementById('vic');if(ic)ic.innerHTML='<span class="ip '+(s.phase||'')+'">'+(s.pl||s.phase||'Step')+'</span><div class="it">'+(s.title||'')+'</div><div class="id">'+(s.desc||'')+'</div>';
-  const dots=document.getElementById('vdots');if(dots)dots.innerHTML=VZ.map((_,i)=>'<div class="dot'+(i<vc?' visited':'')+(i===vc?' active':'')+'" onclick="gs('+i+')"></div>').join('');
-  document.getElementById('vp').disabled=vc===0;document.getElementById('vn').disabled=vc===VZ.length-1;document.getElementById('vs').textContent='Step '+vc+' / '+(VZ.length-1);
+// ─── Dungeon data ────────────────────────────────────────────────────────────
+// dungeon = [[-2,-3,3],[-5,-10,1],[10,30,-5]]
+// Computed dp table:
+// dp[2][2] = max(1, 1-(-5)) = max(1,6) = 6
+// dp[2][1] = max(1, 6-30)   = max(1,-24) = 1
+// dp[2][0] = max(1, 1-10)   = max(1,-9)  = 1
+// dp[1][2] = max(1, 6-1)    = 5
+// dp[0][2] = max(1, 5-3)    = 2
+// dp[1][1] = max(1, min(1,5)-(-10)) = max(1,1+10) = 11
+// dp[1][0] = max(1, min(1,11)-(-5)) = max(1,1+5)  = 6
+// dp[0][1] = max(1, min(11,2)-(-3)) = max(1,2+3)  = 5
+// dp[0][0] = max(1, min(6,5)-(-2))  = max(1,5+2)  = 7
+
+const dungeon = [[-2,-3,3],[-5,-10,1],[10,30,-5]];
+
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:1,
+    active:null, done:[],
+    dpState:[[null,null,null],[null,null,null],[null,null,null]],
+    cellLbl:'—', dval:'—', best:'—', dpv:'—',
+    title:'Setup: Read the Dungeon',
+    body:'Dungeon is 3×3. Negative cells (red) drain HP — the knight loses health. Positive cells (green) restore HP. The princess is at [2][2] (purple). We will fill dp[i][j] = minimum HP to enter (i,j) and survive to the end. Fill order: bottom-right → top-left.',
+    showDec:false
+  },
+  {
+    phase:'base', phaseClass:'phase-base', activeLine:3,
+    active:[2,2], done:[],
+    dpState:[[null,null,null],[null,null,null],[null,null,6]],
+    cellLbl:'(2,2)', dval:'-5', best:'—', dpv:'6',
+    title:'Base Case: Princess Cell (2,2)',
+    body:'dp[2][2] = max(1, 1 − (−5)) = max(1, 6) = 6. The princess room drains 5 HP. To be alive (≥1 HP) after entering, the knight needs at least 6 HP on entry. This is our anchor — all other cells build on this.',
+    showDec:true,
+    decQ:'How much HP to enter the princess cell and survive?',
+    decOpts:[
+      {action:'Apply base formula: max(1, 1 − dungeon[2][2])', formula:'max(1, 1 − (−5)) = max(1, 6)', result:'6 HP ✓', sel:true},
+      {action:'Just need 1 HP (it heals you after)?', formula:'No — cell value is −5, it DRAINS', result:'Wrong ✗', sel:false}
+    ]
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:5,
+    active:[2,1], done:[[2,2]],
+    dpState:[[null,null,null],[null,null,null],[null,1,6]],
+    cellLbl:'(2,1)', dval:'+30', best:'6', dpv:'1',
+    title:'Last Row: Cell (2,1) — a massive +30 healer',
+    body:'Last row: only exit is right → (2,2). dp[2][1] = max(1, dp[2][2] − 30) = max(1, 6 − 30) = max(1, −24) = 1. The knight only needs 1 HP to enter this room — the +30 bonus is so large he arrives at (2,2) with plenty of health. Minimum is still clamped to 1.',
+    showDec:false
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:5,
+    active:[2,0], done:[[2,2],[2,1]],
+    dpState:[[null,null,null],[null,null,null],[1,1,6]],
+    cellLbl:'(2,0)', dval:'+10', best:'1', dpv:'1',
+    title:'Last Row: Cell (2,0) — another healer (+10)',
+    body:'dp[2][0] = max(1, dp[2][1] − 10) = max(1, 1 − 10) = max(1, −9) = 1. Only exit is right → (2,1). The +10 heals enough that 1 HP suffices. The entire last row only needs 1 HP to traverse — the healing cells make it trivial.',
+    showDec:false
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:7,
+    active:[1,2], done:[[2,2],[2,1],[2,0]],
+    dpState:[[null,null,null],[null,null,5],[1,1,6]],
+    cellLbl:'(1,2)', dval:'+1', best:'6', dpv:'5',
+    title:'Last Column: Cell (1,2) — a mild healer (+1)',
+    body:'Last column: only exit is down → (2,2). dp[1][2] = max(1, dp[2][2] − 1) = max(1, 6 − 1) = 5. Cell (1,2) gives +1 HP. The knight needs 5 HP to enter — the +1 brings him to 6, exactly what (2,2) requires.',
+    showDec:false
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:7,
+    active:[0,2], done:[[2,2],[2,1],[2,0],[1,2]],
+    dpState:[[null,null,2],[null,null,5],[1,1,6]],
+    cellLbl:'(0,2)', dval:'+3', best:'5', dpv:'2',
+    title:'Last Column: Cell (0,2) — bonus room (+3)',
+    body:'dp[0][2] = max(1, dp[1][2] − 3) = max(1, 5 − 3) = 2. The +3 bonus reduces the required entry HP significantly. The knight enters with 2 HP, gains 3 → arrives at (1,2) with 5 HP. This sets up the top-right path beautifully.',
+    showDec:false
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:10,
+    active:[1,1], done:[[2,2],[2,1],[2,0],[1,2],[0,2]],
+    dpState:[[null,null,2],[null,11,5],[1,1,6]],
+    cellLbl:'(1,1)', dval:'-10', best:'1', dpv:'11',
+    title:'Interior: Cell (1,1) — the DEADLIEST room (−10)',
+    body:'Two exits: dp[2][1]=1 (down) and dp[1][2]=5 (right). best = min(1,5) = 1. dp[1][1] = max(1, 1 − (−10)) = max(1, 11) = 11. Despite the "cheap" exit of 1 HP, the −10 drain means you need 11 HP just to enter (1,1) with enough left! This is the critical bottleneck cell.',
+    showDec:true,
+    decQ:'Which exit from (1,1) demands less HP? Pick min.',
+    decOpts:[
+      {action:'Go Down → (2,1): need dp[2][1]=1 HP there', formula:'min includes this: 1', result:'best=1 ✓', sel:true},
+      {action:'Go Right → (1,2): need dp[1][2]=5 HP there', formula:'min includes this: 5', result:'best=5', sel:false}
+    ]
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:10,
+    active:[1,0], done:[[2,2],[2,1],[2,0],[1,2],[0,2],[1,1]],
+    dpState:[[null,null,2],[6,11,5],[1,1,6]],
+    cellLbl:'(1,0)', dval:'-5', best:'1', dpv:'6',
+    title:'Interior: Cell (1,0) — another drain (−5)',
+    body:'Two exits: dp[2][0]=1 (down) and dp[1][1]=11 (right). best = min(1,11) = 1. dp[1][0] = max(1, 1 − (−5)) = 6. Going down to row 2 is far cheaper than fighting through (1,1). The −5 drain means 6 HP needed at entry.',
+    showDec:true,
+    decQ:'Which exit from (1,0) demands less HP? Pick min.',
+    decOpts:[
+      {action:'Go Down → (2,0): need dp[2][0]=1 HP there', formula:'best = 1 ← cheaper!', result:'best=1 ✓', sel:true},
+      {action:'Go Right → (1,1): need dp[1][1]=11 HP there', formula:'best = 11', result:'best=11', sel:false}
+    ]
+  },
+  {
+    phase:'fill', phaseClass:'phase-fill', activeLine:10,
+    active:[0,1], done:[[2,2],[2,1],[2,0],[1,2],[0,2],[1,1],[1,0]],
+    dpState:[[null,5,2],[6,11,5],[1,1,6]],
+    cellLbl:'(0,1)', dval:'-3', best:'2', dpv:'5',
+    title:'Interior: Cell (0,1) — mild drain (−3)',
+    body:'Two exits: dp[1][1]=11 (down) and dp[0][2]=2 (right). best = min(11,2) = 2. dp[0][1] = max(1, 2 − (−3)) = 5. The right path to (0,2) is vastly cheaper than descending into (1,1). The −3 drain bumps the requirement to 5 HP.',
+    showDec:true,
+    decQ:'Which exit from (0,1) demands less HP? Pick min.',
+    decOpts:[
+      {action:'Go Down → (1,1): need dp[1][1]=11 HP there', formula:'best includes: 11', result:'best=11', sel:false},
+      {action:'Go Right → (0,2): need dp[0][2]=2 HP there', formula:'best includes: 2 ← cheaper!', result:'best=2 ✓', sel:true}
+    ]
+  },
+  {
+    phase:'result', phaseClass:'phase-result', activeLine:11,
+    active:[0,0], done:[[2,2],[2,1],[2,0],[1,2],[0,2],[1,1],[1,0],[0,1]],
+    dpState:[[7,5,2],[6,11,5],[1,1,6]],
+    cellLbl:'(0,0)', dval:'-2', best:'5', dpv:'7',
+    title:'Knight Start: Cell (0,0) — THE ANSWER is 7',
+    body:'Two exits: dp[1][0]=6 (down) and dp[0][1]=5 (right). best = min(6,5) = 5. dp[0][0] = max(1, 5 − (−2)) = 7. The optimal path goes RIGHT first. The −2 drain adds 2 to the requirement. Answer: the knight needs exactly 7 HP! Optimal path: (0,0)→(0,1)→(0,2)→(1,2)→(2,2).',
+    showDec:true,
+    decQ:'Optimal first move — which exit is cheaper?',
+    decOpts:[
+      {action:'Go Right → (0,1): need dp[0][1]=5 HP', formula:'best=5; total=5+2=7 HP at start', result:'7 HP ✓', sel:true},
+      {action:'Go Down → (1,0): need dp[1][0]=6 HP', formula:'best=6; total=6+2=8 HP at start', result:'8 HP', sel:false}
+    ]
+  },
+  {
+    phase:'result', phaseClass:'phase-result', activeLine:12,
+    active:null, done:[[2,2],[2,1],[2,0],[1,2],[0,2],[1,1],[1,0],[0,1],[0,0]],
+    dpState:[[7,5,2],[6,11,5],[1,1,6]],
+    cellLbl:'dp[0][0]', dval:'—', best:'—', dpv:'7',
+    title:'Complete! Minimum Starting HP = 7',
+    body:'The full DP table is filled. dp[0][0] = 7. Optimal path: (0,0)→(0,1)→(0,2)→(1,2)→(2,2). Health trace: 7 −2=5 → 5−3=2 → 2+3=5 → 5+1=6 → 6−5=1. The knight always has ≥1 HP. He barely survives! Any less than 7 HP and he dies along the way.',
+    showDec:false
+  }
+];
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let cur = 0;
+const N = steps.length;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const dunVal = [['-2','-3','+3'],['-5','-10','+1'],['+10','+30','-5']];
+
+function getCellCls(i, j, s) {
+  if (s.active && s.active[0]===i && s.active[1]===j) return 'active-cell';
+  for (const d of s.done) if (d[0]===i && d[1]===j) return 'done-cell';
+  if (i===2 && j===2) return 'princess';
+  const v = dungeon[i][j];
+  return v < 0 ? 'danger-cell' : 'safe-cell';
 }
-function nx(){if(vc<VZ.length-1){vc++;rdr(VZ[vc]);}}
-function pv(){if(vc>0){vc--;rdr(VZ[vc]);}}
-function rs(){vc=0;rdr(VZ[0]);}
-function gs(n){vc=n;rdr(VZ[n]);}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')nx();if(e.key==='ArrowLeft')pv();});
-if(VZ.length)rdr(VZ[0]);
+
+function render() {
+  const s = steps[cur];
+  const prev = cur > 0 ? steps[cur-1] : null;
+
+  // Grid cells
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      const el = document.getElementById(`cell-${i}-${j}`);
+      el.className = 'dg-cell ' + getCellCls(i, j, s);
+      const dpEl = document.getElementById(`dp-${i}-${j}`);
+      const v = s.dpState[i][j];
+      dpEl.textContent = v !== null ? `dp:${v}` : '?';
+    }
+  }
+
+  // Code lines
+  for (let k = 0; k <= 12; k++) {
+    const el = document.getElementById(`cl-${k}`);
+    if (el) el.className = 'code-line' + (k === s.activeLine ? ' active' : '');
+  }
+
+  // Var tracker
+  const setVar = (id, valKey, val) => {
+    const box = document.getElementById(`vb-${id}`);
+    const valEl = document.getElementById(`vv-${id}`);
+    if (valEl) valEl.textContent = val;
+    const changed = prev && prev[valKey] !== s[valKey];
+    if (box) box.className = 'var-box' + (changed ? ' changed' : '');
+  };
+  setVar('cell', 'cellLbl', s.cellLbl);
+  setVar('dval', 'dval', s.dval);
+  setVar('best', 'best', s.best);
+  setVar('dpv', 'dpv', s.dpv);
+
+  // Info card
+  document.getElementById('phase-badge').textContent = s.phase.toUpperCase();
+  document.getElementById('phase-badge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${cur+1} / ${N}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Decision panel
+  const dp = document.getElementById('decision-panel');
+  if (s.showDec && s.decOpts) {
+    dp.style.display = 'block';
+    document.getElementById('dec-question').textContent = s.decQ;
+    const opts = document.getElementById('dec-options');
+    opts.innerHTML = '';
+    s.decOpts.forEach(o => {
+      const div = document.createElement('div');
+      div.className = 'decision-option ' + (o.sel ? 'selected' : 'rejected');
+      div.innerHTML = `<div class="opt-action">${o.action}</div><div class="opt-formula">${o.formula}</div><div class="opt-result"><span class="${o.sel?'check':'cross'}">${o.sel?'✓':'✗'}</span> ${o.result}</div>`;
+      opts.appendChild(div);
+    });
+  } else {
+    dp.style.display = 'none';
+  }
+
+  // Progress dots
+  const pd = document.getElementById('progress-dots');
+  pd.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===cur?' active':(i<cur?' visited':''));
+    d.onclick = (ii => () => { cur=ii; render(); })(i);
+    pd.appendChild(d);
+  }
+
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === N-1;
+}
+
+function go(dir) {
+  const nxt = cur + dir;
+  if (nxt >= 0 && nxt < N) { cur = nxt; render(); }
+}
+function reset() { cur = 0; render(); }
+function toggle(hdr) {
+  const c = hdr.nextElementSibling;
+  c.classList.toggle('collapsed');
+  hdr.querySelector('.collapse-icon').style.transform =
+    c.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
 </script>
-</body></html>
+</body>
+</html>

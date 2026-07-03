@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1931 · Painting a Grid With Three Different Colors</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-box.neutral{background:var(--blue-bg);border-color:var(--blue-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+.panel-box.neutral .panel-title{color:var(--blue-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── State Machine ── */
+.state-machine-wrapper{display:flex;justify-content:center;margin:1.5rem 0;overflow-x:auto}
+.state-machine{display:flex;align-items:center;gap:0;flex-wrap:nowrap}
+.sm-col-node{display:flex;flex-direction:column;align-items:center;gap:12px}
+.sm-state-box{min-width:120px;padding:14px 18px;border-radius:var(--radius);border:2px solid var(--border2);background:var(--surface);text-align:center}
+.sm-state-box.dp-state{border-color:var(--blue-border);background:var(--blue-bg)}
+.sm-state-box.col-state{border-color:var(--purple-border);background:var(--purple-bg)}
+.sm-state-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:4px}
+.sm-state-name{font-size:14px;font-weight:700;color:var(--text)}
+.sm-arrow-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;gap:6px;min-width:100px}
+.sm-arrow{font-size:22px;color:var(--text3);line-height:1}
+.sm-arrow-label{font-size:11px;font-weight:600;color:var(--purple-mid);text-align:center;max-width:80px}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:10px;letter-spacing:0.5px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--text)}
+.rf-highlight{font-weight:700}
+.rf-col{color:var(--blue-mid)}
+.rf-prev{color:var(--green-mid)}
+.rf-new{color:var(--purple-mid)}
+
+/* ── Grid Visualization ── */
+.grid-viz-wrap{display:flex;justify-content:center;margin:1rem 0;overflow-x:auto}
+.grid-viz{display:inline-flex;gap:3px}
+.grid-col{display:flex;flex-direction:column;gap:3px}
+.grid-cell{width:38px;height:38px;border-radius:6px;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;transition:background 0.3s,border-color 0.3s,color 0.3s;flex-shrink:0}
+.grid-cell.c0{background:#e8f5e9;border-color:#66bb6a;color:#1b5e20}
+.grid-cell.c1{background:#e3f2fd;border-color:#42a5f5;color:#0d47a1}
+.grid-cell.c2{background:#fce4ec;border-color:#ef5350;color:#b71c1c}
+.grid-cell.active-col{box-shadow:0 0 0 3px var(--blue-mid)}
+.grid-cell.processing{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.col-idx-row{display:flex;gap:3px;justify-content:center;margin-top:4px}
+.col-idx{width:38px;text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono)}
+.col-label{font-size:11px;font-weight:600;color:var(--text3);text-align:center;margin-bottom:3px;font-family:var(--mono)}
+
+/* ── DP Table ── */
+.dp-table-wrap{overflow-x:auto;margin:1rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:12px;min-width:100%}
+.dp-table th{padding:8px 12px;background:var(--bg2);border:1px solid var(--border);font-weight:700;text-align:center;font-size:11px;color:var(--text2)}
+.dp-table td{padding:8px 12px;border:1px solid var(--border);text-align:center;transition:background 0.3s}
+.dp-table td.dp-current{background:var(--purple-bg);font-weight:700;color:var(--purple-mid)}
+.dp-table td.dp-computed{background:var(--blue-bg);color:var(--blue-text)}
+.dp-table td.dp-future{color:var(--text3)}
+.dp-table .row-header{background:var(--bg2);font-weight:700;font-size:11px;color:var(--text3);text-align:left;padding:6px 10px;white-space:nowrap}
+
+/* ── Compatible Pairs Panel ── */
+.compat-panel{background:var(--bg2);border-radius:var(--radius);padding:1rem;margin:1rem 0}
+.compat-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px}
+.compat-row{display:flex;flex-wrap:wrap;gap:8px}
+.compat-pair{display:flex;gap:4px;align-items:center;padding:4px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);font-family:var(--mono);font-size:12px}
+.compat-pair.active-pair{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-compat{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-dp{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:6px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Bit Encoding Diagram ── */
+.bit-encoding{display:flex;justify-content:center;gap:0;margin:1rem 0;flex-wrap:wrap;row-gap:8px}
+.bit-cell-group{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bit-cell{width:36px;height:36px;border-radius:6px;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700}
+.bit-cell.b0{background:#e8f5e9;border-color:#66bb6a;color:#1b5e20}
+.bit-cell.b1{background:#e3f2fd;border-color:#42a5f5;color:#0d47a1}
+.bit-cell.b2{background:#fce4ec;border-color:#ef5350;color:#b71c1c}
+.bit-pos{font-size:10px;color:var(--text3);font-family:var(--mono);font-weight:600}
+.bit-sep{width:2px;height:36px;background:var(--border2);margin:0 4px;align-self:flex-end;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1931</div>
+  <h1>Painting a Grid With Three Different Colors</h1>
+  <p class="subtitle">Count the number of ways to paint an m×n grid with 3 colors so that no two adjacent cells share the same color.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">State Compression</span>
+    <span class="tag tag-complexity">Time: O(3^m · n)</span>
+    <span class="tag tag-complexity">Space: O(3^m)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an <code>m × n</code> grid and three colors (0=Red, 1=Green, 2=Blue). Paint every cell so that <strong>no two adjacent cells</strong> (up, down, left, right — not diagonal) share the same color. Return the number of valid colorings modulo 10<sup>9</sup>+7.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The grid has only <strong>m rows</strong> (1 ≤ m ≤ 5). Each column is a vertical strip of m cells. There are only 3<sup>m</sup> ≤ 243 possible column colorings. We can encode each column as a base-3 integer (a "state"), precompute which states are internally valid and which pairs of adjacent columns are compatible, then run a column-by-column DP.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Valid Column (m=3)</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">
+          <div style="width:36px;height:36px;border-radius:6px;background:#e8f5e9;border:2px solid #66bb6a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#1b5e20">R</div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#e3f2fd;border:2px solid #42a5f5;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#0d47a1">G</div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#fce4ec;border:2px solid #ef5350;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#b71c1c">B</div>
+        </div>
+        <p style="font-size:12px;color:var(--green-mid);margin-top:8px;text-align:center">No two adjacent rows share color ✓</p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Invalid Column (m=3)</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">
+          <div style="width:36px;height:36px;border-radius:6px;background:#e8f5e9;border:2px solid #66bb6a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#1b5e20">R</div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#e8f5e9;border:2px solid #66bb6a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#1b5e20">R</div>
+          <div style="width:36px;height:36px;border-radius:6px;background:#fce4ec;border:2px solid #ef5350;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#b71c1c">B</div>
+        </div>
+        <p style="font-size:12px;color:var(--red-mid);margin-top:8px;text-align:center">Rows 0 and 1 both Red — invalid ✗</p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why m ≤ 5 is the key constraint:</strong> With m = 5, there are only 3<sup>5</sup> = 243 possible column colorings. We can enumerate ALL of them. If m were large (like n), enumeration would be impossible. The small m makes state compression viable.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 State Encoding</div>
+      <p>Represent each column's coloring as a base-3 integer. Row 0's color occupies the least significant trit, row 1 the next, etc.</p>
+      <p style="font-family:var(--mono);font-size:13px;margin-top:8px;line-height:2">
+        Column [R, G, B] with m=3 → 0·3⁰ + 1·3¹ + 2·3² = 0 + 3 + 18 = 21<br>
+        Column [R, R, B] (invalid) → 0·3⁰ + 0·3¹ + 2·3² = 0 + 0 + 18 = 18
+      </p>
+    </div>
+
+    <p><strong>Edge cases:</strong> m=1 (each column is a single cell, all 3 colorings valid); n=1 (single column, count valid states directly); m=5 n=1000 (maximum, 243 states, 1000 columns — still fast).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Column-DP with State Compression</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Process the grid <strong>column by column</strong>. Each column's valid coloring is a "state" (base-3 integer). The DP accumulates the number of ways to reach each state at each column.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Enumerate valid column states:</strong> Iterate all 3<sup>m</sup> base-3 integers from 0 to 3<sup>m</sup>−1. Keep only those where no two adjacent rows have the same digit (trit). Call this set <code>valid_states</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Precompute compatible pairs:</strong> For each pair of valid states (s, t), check that for every row r, <code>digit(s, r) ≠ digit(t, r)</code>. Store these as <code>compat[s]</code> — a list of states that can follow s.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Initialize DP:</strong> <code>dp[s] = 1</code> for all valid states s (column 0 can be any valid coloring in 1 way).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Iterate columns 1 to n−1:</strong> For each column, build <code>new_dp[t] = sum of dp[s]</code> for all s in valid_states where t is in compat[s]. Swap dp ← new_dp after each column.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Return answer:</strong> Sum all values in dp (total ways to complete the entire grid) modulo 10<sup>9</sup>+7.</span>
+      </div>
+    </div>
+
+    <!-- State Machine Diagram -->
+    <p style="font-weight:700;margin:1.5rem 0 0.5rem">State Transition Model (m=2 example)</p>
+    <div class="state-machine-wrapper">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center">
+          <div style="padding:8px 14px;border-radius:var(--radius);background:var(--blue-bg);border:2px solid var(--blue-border);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue-text)">Col j: state s</div>
+          <div style="font-size:24px;color:var(--text3)">→</div>
+          <div style="padding:8px 14px;border-radius:var(--radius);background:var(--purple-bg);border:2px solid var(--purple-border);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--purple-text)">Col j+1: state t</div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);text-align:center">Transition is allowed when: <strong>for every row r, color(s, r) ≠ color(t, r)</strong></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+          <div style="padding:6px 12px;border-radius:6px;background:var(--green-bg);border:1px solid var(--green-border);font-size:12px;color:var(--green-mid);font-weight:600">RG → GB ✓ (R≠G, G≠B)</div>
+          <div style="padding:6px 12px;border-radius:6px;background:var(--green-bg);border:1px solid var(--green-border);font-size:12px;color:var(--green-mid);font-weight:600">RG → BR ✓ (R≠B, G≠R)</div>
+          <div style="padding:6px 12px;border-radius:6px;background:var(--red-bg);border:1px solid var(--red-border);font-size:12px;color:var(--red-mid);font-weight:600">RG → RB ✗ (R=R row 0)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bit Encoding Diagram -->
+    <p style="font-weight:700;margin:1.5rem 0 0.5rem">How Base-3 Encoding Works (m=3)</p>
+    <div style="overflow-x:auto">
+      <table class="cmp-table">
+        <tr><th>Column Coloring</th><th>Trits (row0, row1, row2)</th><th>Base-3 Value</th><th>Valid?</th></tr>
+        <tr><td><span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span>&nbsp;<span style="background:#e3f2fd;border-radius:4px;padding:2px 6px">G</span>&nbsp;<span style="background:#fce4ec;border-radius:4px;padding:2px 6px">B</span></td><td style="font-family:var(--mono)">(0,1,2)</td><td style="font-family:var(--mono)">0+3+18=21</td><td class="mark-good">✓</td></tr>
+        <tr><td><span style="background:#e3f2fd;border-radius:4px;padding:2px 6px">G</span>&nbsp;<span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span>&nbsp;<span style="background:#e3f2fd;border-radius:4px;padding:2px 6px">G</span></td><td style="font-family:var(--mono)">(1,0,1)</td><td style="font-family:var(--mono)">1+0+9=10</td><td class="mark-good">✓</td></tr>
+        <tr><td><span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span>&nbsp;<span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span>&nbsp;<span style="background:#fce4ec;border-radius:4px;padding:2px 6px">B</span></td><td style="font-family:var(--mono)">(0,0,2)</td><td style="font-family:var(--mono)">0+0+18=18</td><td class="mark-bad">✗</td></tr>
+        <tr><td><span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span>&nbsp;<span style="background:#e3f2fd;border-radius:4px;padding:2px 6px">G</span>&nbsp;<span style="background:#e8f5e9;border-radius:4px;padding:2px 6px">R</span></td><td style="font-family:var(--mono)">(0,1,0)</td><td style="font-family:var(--mono)">0+3+0=3</td><td class="mark-good">✓</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — DP Deep-Dive        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The DP Deep-Dive</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-weight:700;font-size:16px;margin-bottom:8px">Why is this Dynamic Programming?</p>
+
+    <div class="two-col">
+      <div class="panel-box neutral">
+        <div class="panel-title">Optimal Substructure</div>
+        <p style="font-size:13px;color:var(--blue-text)">The number of valid full-grid colorings through column j ending in state t depends only on how many valid partial colorings of columns 0..j−1 end in states compatible with t. We don't need to know which specific cells were colored — only the final column state matters.</p>
+      </div>
+      <div class="panel-box neutral">
+        <div class="panel-title">Overlapping Subproblems</div>
+        <p style="font-size:13px;color:var(--blue-text)">Many different left-column sequences can produce the same column state s. Without DP, we'd recount all of them every time we try to extend from s. DP memoizes: "how many ways produce state s at column j?" — computed once, used for all compatible next states.</p>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence Relation</div>
+      <div class="recurrence-formula">
+        <span class="rf-col">dp[j][t]</span> = Σ <span class="rf-prev">dp[j-1][s]</span> &nbsp;for all s ∈ valid_states where compatible(s, t)<br><br>
+        <span style="color:var(--text3);font-size:12px">Base case: <span class="rf-col">dp[0][s]</span> = 1 for all s ∈ valid_states<br>
+        Answer: Σ <span class="rf-col">dp[n-1][s]</span> for all s ∈ valid_states</span>
+      </div>
+    </div>
+
+    <p style="font-weight:700;margin-top:1.25rem;margin-bottom:6px">What makes this "State Compression DP"?</p>
+    <p>The DP state is a compressed representation of the column coloring as a single integer. Instead of storing a list of m colors for a column, we encode it as a base-3 number. This compression lets us:</p>
+    <ul style="margin:0.75rem 0 0 1.25rem;line-height:2">
+      <li>Store the entire DP table as a simple array/dict indexed by integers</li>
+      <li>Compute compatibility quickly using arithmetic (digit extraction)</li>
+      <li>Keep the state space tiny: 3<sup>5</sup> = 243 total states, even fewer valid ones</li>
+    </ul>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>After processing column j, <code>dp[s]</code> holds the number of valid ways to color columns 0 through j such that column j has coloring s. The adjacency constraint is enforced both vertically (within column validation) and horizontally (compatibility check between adjacent columns). These two checks together guarantee global validity.</p>
+    </div>
+
+    <p style="font-weight:700;margin-top:1.25rem;margin-bottom:6px">Why the column approach works better than row approach</p>
+    <p>We could transpose the problem and DP row-by-row. The constraint <code>m ≤ 5</code> makes column compression feasible. If we instead processed row-by-row, each state would need to encode an entire row of n cells (n up to 1000), which is exponential in n. Processing by columns keeps states small because the column dimension (m ≤ 5) is fixed and small.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Misconception</div>
+      <p>Students sometimes try row-by-row DP where the state encodes the entire current row. This fails because n can be 1000 — the state space 3<sup>1000</sup> is astronomically large. The key is recognizing that <strong>m is the small dimension</strong>, so states compress the m-cell column, not the n-cell row.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)               -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-weight:700;margin-bottom:6px">Solution 1 — Tabulation (Bottom-Up DP) — Interview Pick</p>
+
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def colorTheGrid(m: int, n: int) -> int:</span></div>
+      <div class="ann-line"><span class="acode">    MOD = 10**9 + 7</span>  <span class="aann">← always use MOD for counting problems</span></div>
+      <div class="ann-line"><span class="acode">    total = 3 ** m</span>  <span class="aann">← total possible column colorings (including invalid)</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    def get_colors(state):</span>  <span class="aann">← decode base-3 state to list of m colors</span></div>
+      <div class="ann-line"><span class="acode">        cols = []</span></div>
+      <div class="ann-line"><span class="acode">        for _ in range(m):</span></div>
+      <div class="ann-line"><span class="acode">            cols.append(state % 3)</span>  <span class="aann">← extract lowest trit</span></div>
+      <div class="ann-line"><span class="acode">            state //= 3</span>  <span class="aann">← shift right in base 3</span></div>
+      <div class="ann-line"><span class="acode">        return cols</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    def is_valid_column(state):</span>  <span class="aann">← no two adjacent rows same color</span></div>
+      <div class="ann-line"><span class="acode">        colors = get_colors(state)</span></div>
+      <div class="ann-line"><span class="acode">        return all(colors[i] != colors[i+1] for i in range(m-1))</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    def is_compatible(s, t):</span>  <span class="aann">← no row shares color between adjacent columns</span></div>
+      <div class="ann-line"><span class="acode">        cs, ct = get_colors(s), get_colors(t)</span></div>
+      <div class="ann-line"><span class="acode">        return all(cs[i] != ct[i] for i in range(m))</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    # Step 1: Enumerate valid column states</span></div>
+      <div class="ann-line"><span class="acode">    valid = [s for s in range(total) if is_valid_column(s)]</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    # Step 2: Precompute compatible pairs</span></div>
+      <div class="ann-line"><span class="acode">    compat = {s: [t for t in valid if is_compatible(s, t)] for s in valid}</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    # Step 3: Initialize DP — column 0</span></div>
+      <div class="ann-line"><span class="acode">    dp = {s: 1 for s in valid}</span>  <span class="aann">← each valid state can be used once for col 0</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    # Step 4: Process columns 1 to n-1</span></div>
+      <div class="ann-line"><span class="acode">    for _ in range(n - 1):</span></div>
+      <div class="ann-line"><span class="acode">        new_dp = {s: 0 for s in valid}</span>  <span class="aann">← fresh counts for next column</span></div>
+      <div class="ann-line"><span class="acode">        for s in valid:</span></div>
+      <div class="ann-line"><span class="acode">            for t in compat[s]:</span></div>
+      <div class="ann-line"><span class="acode">                new_dp[t] = (new_dp[t] + dp[s]) % MOD</span>  <span class="aann">← accumulate ways</span></div>
+      <div class="ann-line"><span class="acode">        dp = new_dp</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    return sum(dp.values()) % MOD</span>  <span class="aann">← total ways across all final states</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why do we precompute compat instead of checking each step?</div>
+      <p>Checking compatibility within the DP loop would mean recomputing digit-by-digit comparisons for every (s, t) pair on every column — O(n · |valid|² · m) work. Precomputing compat once costs O(|valid|² · m) and reduces the DP inner loop to a simple list traversal. For n=1000 and m=5 this is a 1000× speedup.</p>
+    </div>
+
+    <p style="font-weight:700;margin:1.25rem 0 6px">Solution 2 — Top-Down (Memoization)</p>
+
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">from functools import lru_cache</span></div>
+      <div class="ann-line"><span class="acode">def colorTheGrid(m: int, n: int) -> int:</span></div>
+      <div class="ann-line"><span class="acode">    MOD = 10**9 + 7</span></div>
+      <div class="ann-line"><span class="acode">    total = 3 ** m</span></div>
+      <div class="ann-line"><span class="acode">    def get_colors(s): ...</span>  <span class="aann">← same helper as before</span></div>
+      <div class="ann-line"><span class="acode">    valid = [s for s in range(total) if is_valid_column(s)]</span></div>
+      <div class="ann-line"><span class="acode">    compat = {s: [t for t in valid if is_compatible(s, t)] for s in valid}</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    @lru_cache(maxsize=None)</span></div>
+      <div class="ann-line"><span class="acode">    def dp(col, prev_state):</span>  <span class="aann">← ways to color cols [col..n-1] given prev_state</span></div>
+      <div class="ann-line"><span class="acode">        if col == n: return 1</span>  <span class="aann">← filled all columns — valid completion</span></div>
+      <div class="ann-line"><span class="acode">        total_ways = 0</span></div>
+      <div class="ann-line"><span class="acode">        for next_s in compat[prev_state]:</span></div>
+      <div class="ann-line"><span class="acode">            total_ways = (total_ways + dp(col + 1, next_s)) % MOD</span></div>
+      <div class="ann-line"><span class="acode">        return total_ways</span></div>
+      <div class="ann-line">&nbsp;</div>
+      <div class="ann-line"><span class="acode">    # First column: try all valid states</span></div>
+      <div class="ann-line"><span class="acode">    return sum(dp(1, s) for s in valid) % MOD</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Tabulation vs Memoization — Which to Use?</div>
+      <p>Both have the same asymptotic complexity. <strong>Tabulation</strong> is preferred here because: (1) it processes columns sequentially, which is intuitive; (2) it avoids recursion overhead and stack depth; (3) memory is O(|valid|) — just one dict per column. <strong>Memoization</strong> is easier to derive from the recurrence relation and is a good first step to explain to an interviewer, but then optimize to tabulation.</p>
+    </div>
+
+    <p style="font-weight:700;margin:1.25rem 0 6px">Complexity Summary</p>
+    <table class="cmp-table">
+      <tr><th>Solution</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      <tr><td>Brute Force</td><td>O(3^(m·n))</td><td>O(m·n)</td><td>Try every possible coloring — completely infeasible</td></tr>
+      <tr><td>Tabulation (optimal)</td><td>O(3^m · n)</td><td>O(3^m)</td><td>Precompute valid+compat; one pass over columns</td></tr>
+      <tr><td>Memoization</td><td>O(3^m · n)</td><td>O(3^m · n)</td><td>Same time; more stack + cache overhead</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                 -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Notice the Small Dimension</div>
+        <p style="font-size:14px;color:var(--text)">"m ≤ 5 is tiny. This screams exponential-in-m, polynomial-in-n. Total column states = 3^m ≤ 243 — we can enumerate them all."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Identify the State</div>
+        <p style="font-size:14px;color:var(--text)">"The adjacency constraint between columns is purely column-to-column. Once I know the coloring of column j, I know exactly which colorings are valid for column j+1. So my DP state is: current column index + previous column's coloring."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Encode as Integer</div>
+        <p style="font-size:14px;color:var(--text)">"A column coloring is a sequence of m values from {0,1,2}. I can encode it as a base-3 integer. This makes state representation O(1) and allows quick digit extraction for compatibility checks."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Precompute, then DP</div>
+        <p style="font-size:14px;color:var(--text)">"Separate the one-time preprocessing (valid states, compat table) from the n-column DP. This avoids repeating expensive checks inside the loop."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key observation is that m ≤ 5, meaning each column has at most 3^5 = 243 colorings.
+I'll encode each column as a base-3 integer and call it a 'state'.
+
+First, I'll enumerate all valid states — those where no two adjacent rows in the column share a color.
+
+Then I'll precompute which pairs of valid states are 'compatible' — can sit side by side in adjacent columns.
+
+Finally, I'll run a DP: dp[s] = number of ways to reach state s at the current column.
+For each column, I update: new_dp[t] += dp[s] for each (s, t) compatible pair.
+
+Time complexity: O(3^m · n) — the number of valid states times n columns.
+Space: O(3^m) — just the DP array and compat table."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Pattern Recognition Signals</div>
+      <ul style="margin:0.5rem 0 0 1.25rem;line-height:2;font-size:14px">
+        <li>Grid coloring/tiling with adjacency constraints</li>
+        <li><strong>One dimension is small</strong> (m ≤ 5, k ≤ 20) — classic state compression signal</li>
+        <li>Counting valid configurations — not optimization, so DP over counts</li>
+        <li>"No two adjacent cells share the same X" — compatibility between states</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough            -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="color:var(--text2);font-size:13px;margin-bottom:1rem">Example: <strong>m=2, n=3</strong>. Valid states for m=2 (no two adjacent rows same color): only states where row0 ≠ row1. Base-3 encodes as: RG=3, RB=6, GR=1, GB=7, BR=2, BG=5. We step through DP across 3 columns.</p>
+
+    <!-- Grid Visualization -->
+    <div id="grid-display" style="display:flex;justify-content:center;gap:6px;margin:1rem 0;overflow-x:auto">
+      <!-- rendered by JS -->
+    </div>
+    <div class="col-idx-row" id="col-idx-row" style="justify-content:center;gap:6px">
+    </div>
+
+    <!-- DP Table -->
+    <div class="dp-table-wrap">
+      <table class="dp-table" id="dp-table">
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>Col 0</th>
+            <th>Col 1</th>
+            <th>Col 2</th>
+          </tr>
+        </thead>
+        <tbody id="dp-tbody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker" id="var-tracker">
+      <div class="var-box" id="vb-col">
+        <span class="var-name">Column</span>
+        <span class="var-val" id="vv-col">0</span>
+      </div>
+      <div class="var-box" id="vb-phase">
+        <span class="var-name">Phase</span>
+        <span class="var-val" id="vv-phase" style="font-size:12px">Init</span>
+      </div>
+      <div class="var-box" id="vb-total">
+        <span class="var-name">Ways So Far</span>
+        <span class="var-val" id="vv-total">6</span>
+      </div>
+      <div class="var-box" id="vb-state">
+        <span class="var-name">Active State</span>
+        <span class="var-val" id="vv-state">—</span>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="code-panel">
+      <div class="code-line" id="cl-0">def colorTheGrid(m, n):</div>
+      <div class="code-line" id="cl-1">    valid = [s for s in range(3**m) if is_valid_column(s)]</div>
+      <div class="code-line" id="cl-2">    compat = {s: [t for t in valid if is_compatible(s,t)] for s in valid}</div>
+      <div class="code-line" id="cl-3">    dp = {s: 1 for s in valid}  # column 0</div>
+      <div class="code-line" id="cl-4">    for _ in range(n - 1):</div>
+      <div class="code-line" id="cl-5">        new_dp = {s: 0 for s in valid}</div>
+      <div class="code-line" id="cl-6">        for s in valid:</div>
+      <div class="code-line" id="cl-7">            for t in compat[s]:</div>
+      <div class="code-line" id="cl-8">                new_dp[t] = (new_dp[t] + dp[s]) % MOD</div>
+      <div class="code-line" id="cl-9">        dp = new_dp</div>
+      <div class="code-line" id="cl-10">    return sum(dp.values()) % MOD</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card" id="info-card">
+      <div class="phase-badge phase-init" id="phase-badge">Init</div>
+      <div class="step-counter" id="step-counter">Step 1 of 13</div>
+      <div class="step-title" id="step-title">Enumerate Valid Column States</div>
+      <div class="step-body" id="step-body">For m=2, we check all 3²=9 base-3 states. A valid column requires adjacent rows to differ. Valid: {1(GR),2(BR),3(RG),5(BG),6(RB),7(GB)} — 6 states.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#e8f5e9;border-color:#66bb6a"></div> Color 0 (Red)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#e3f2fd;border-color:#42a5f5"></div> Color 1 (Green)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fce4ec;border-color:#ef5350"></div> Color 2 (Blue)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--purple-bg);border-color:var(--purple-border)"></div> Current DP cell</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-bg);border-color:var(--blue-border)"></div> Computed cell</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-bg);border-color:var(--amber-border)"></div> Variable changed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways            -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Encode each column as a base-3 integer — one digit per row, digit value = color index</div>
+      <div class="takeaway">Precompute valid states (no adjacent rows same color) and compatible pairs (no row same color in adjacent columns)</div>
+      <div class="takeaway">Column-DP: dp[s] = number of ways to reach column state s. Transition sums over compatible predecessors</div>
+      <div class="takeaway">State compression works because m ≤ 5 keeps the state space at most 243 — if m were large, this approach fails</div>
+      <div class="takeaway">Always apply MOD at every accumulation step to prevent integer overflow</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use State Compression DP</div>
+      <ul style="margin:0.5rem 0 0 1.25rem;line-height:2;font-size:14px">
+        <li>Grid/sequence problems where one dimension is small (≤ 20 for bitmask, ≤ 5 for base-k)</li>
+        <li>Adjacency/coloring constraints that only depend on the boundary between sections</li>
+        <li>Counting valid configurations where brute force is exponential but states compress nicely</li>
+        <li>Keywords: "paint", "tile", "color adjacent", "no two neighbors same"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <p style="font-weight:700;margin-bottom:8px">Related Problems (same State Compression / Bitmask DP pattern)</p>
+      <div class="related-item"><strong>Tiling a Rectangle with the Fewest Squares</strong> <span class="related-diff diff-hard">Hard</span> — State encodes row boundary profile, similar column-by-column DP</div>
+      <div class="related-item"><strong>Number of Ways to Paint N × 3 Grid</strong> (LeetCode 1411) <span class="related-diff diff-hard">Hard</span> — Precursor; m=3 fixed so states are few — same pattern, simpler</div>
+      <div class="related-item"><strong>Minimum Cost to Connect Two Groups of Points</strong> (LeetCode 1595) <span class="related-diff diff-hard">Hard</span> — Bitmask DP, state represents set of covered points</div>
+      <div class="related-item"><strong>Shortest Path Visiting All Nodes</strong> (LeetCode 847) <span class="related-diff diff-hard">Hard</span> — BFS + bitmask DP for graph TSP variant</div>
+      <div class="related-item"><strong>Student Attendance Record II</strong> (LeetCode 552) <span class="related-diff diff-hard">Hard</span> — State machine DP encoding attendance history</div>
+      <div class="related-item"><strong>House Robber II</strong> (LeetCode 213) <span class="related-diff diff-med">Medium</span> — DP with state tracking (robbed last house yes/no), simpler state compression</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Classification</div>
+      <p><strong>Main Pattern:</strong> Dynamic Programming</p>
+      <p><strong>Sub-Pattern:</strong> DP: Bitmask / State Compression</p>
+      <p><strong>Recognize when:</strong> Counting colorings/tilings with local adjacency constraints on a grid with one small dimension. The small dimension's state space fits in a compact integer representation.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+// ─── Problem setup: m=2, n=3 ───
+// Valid states for m=2 (row0 ≠ row1):
+// state = row0 + 3*row1 (base-3, row0 is LSB)
+// Row0=0,Row1=0 → state 0: INVALID (same)
+// Row0=0,Row1=1 → state 3: GR... wait, let me recalculate
+// color 0=Red, 1=Green, 2=Blue
+// state = row0_color + 3*row1_color
+// Valid: row0≠row1
+// 0+3*1=3 (R,G), 0+3*2=6 (R,B), 1+3*0=1 (G,R), 1+3*2=7 (G,B), 2+3*0=2 (B,R), 2+3*1=5 (B,G)
+const M = 2, N = 3;
+const VALID_STATES = [1, 2, 3, 5, 6, 7]; // GR, BR, RG, BG, RB, GB
+const STATE_NAMES = {1:'GR',2:'BR',3:'RG',5:'BG',6:'RB',7:'GB'};
+const COLOR_NAMES = ['R','G','B'];
+const COLOR_CLASSES = ['c0','c1','c2']; // c0=Red,c1=Green,c2=Blue
+
+function getColors(state, m) {
+  const cols = [];
+  for (let i = 0; i < m; i++) {
+    cols.push(state % 3);
+    state = Math.floor(state / 3);
+  }
+  return cols;
+}
+
+// Precompute compat
+const compat = {};
+for (const s of VALID_STATES) {
+  compat[s] = [];
+  for (const t of VALID_STATES) {
+    const cs = getColors(s, M), ct = getColors(t, M);
+    if (cs.every((c,i) => c !== ct[i])) compat[s].push(t);
+  }
+}
+
+// Run DP to get all column dp values for walkthrough
+// dp_history[col][state] = count
+const dp_history = [];
+let dp = {};
+for (const s of VALID_STATES) dp[s] = 1;
+dp_history.push({...dp});
+for (let col = 1; col < N; col++) {
+  const new_dp = {};
+  for (const s of VALID_STATES) new_dp[s] = 0;
+  for (const s of VALID_STATES) {
+    for (const t of compat[s]) {
+      new_dp[t] = (new_dp[t] + dp[s]) % (1e9+7);
+    }
+  }
+  dp = new_dp;
+  dp_history.push({...dp});
+}
+
+// Steps for walkthrough
+const steps = [
+  {
+    phase:'Init', phaseClass:'phase-init', col:-1, activeLine:1,
+    title:'Enumerate Valid Column States (m=2)',
+    body:'For m=2 there are 3²=9 possible states. We keep only those where no two adjacent rows share a color. For m=2 (rows 0 and 1): row0≠row1. Valid states: {1=GR, 2=BR, 3=RG, 5=BG, 6=RB, 7=GB} — 6 states out of 9.',
+    dpColShow:[],
+    activeState:null, changed:['col','phase']
+  },
+  {
+    phase:'Init', phaseClass:'phase-init', col:-1, activeLine:2,
+    title:'Precompute Compatible Pairs',
+    body:'For each valid state s, find all valid states t where no row shares a color between s and t. E.g., RG (state 3) is compatible with GR(1), BR(2), GB(7) — but NOT with RB(6) [row0: R=R ✗]. We store compat[s] for fast access during DP.',
+    dpColShow:[], activeState:null, changed:['phase']
+  },
+  {
+    phase:'Init', phaseClass:'phase-init', col:0, activeLine:3,
+    title:'Initialize DP — Column 0',
+    body:'Set dp[s]=1 for all 6 valid states. Column 0 can be painted any of the 6 valid ways — each in exactly 1 way. Total ways so far = 6.',
+    dpColShow:[0], activeState:null, changed:['col','total']
+  },
+  {
+    phase:'DP Col 1', phaseClass:'phase-build', col:1, activeLine:5,
+    title:'Begin Column 1 — Fresh new_dp',
+    body:'Start processing column 1. Initialize new_dp[s]=0 for all valid s. We will accumulate from column 0 states.',
+    dpColShow:[0,1], activeState:null, changed:['col','phase']
+  },
+  {
+    phase:'DP Col 1', phaseClass:'phase-build', col:1, activeLine:7,
+    title:'Column 1: Extend from state RG (s=3)',
+    body:"From column 0 state RG (3), count=1. Compatible next states: GR(1), BR(2), GB(7). So new_dp[1]+=1, new_dp[2]+=1, new_dp[7]+=1. Each compatible state gains 1 more way.",
+    dpColShow:[0,1], activeState:3, changed:['state']
+  },
+  {
+    phase:'DP Col 1', phaseClass:'phase-build', col:1, activeLine:7,
+    title:'Column 1: Extend from state GR (s=1)',
+    body:"From column 0 state GR (1), count=1. Compatible: RG(3), BR(2), RB(6). So new_dp[3]+=1, new_dp[2]+=1, new_dp[6]+=1.",
+    dpColShow:[0,1], activeState:1, changed:['state']
+  },
+  {
+    phase:'DP Col 1', phaseClass:'phase-build', col:1, activeLine:7,
+    title:'Column 1: Extend from all remaining states',
+    body:'Similarly process BR(2)→{RG,GR,BG does not exist...}, RB(6), BG(5), GB(7). Each adds to new_dp for its compatible successors. After all 6 source states, swap dp←new_dp.',
+    dpColShow:[0,1], activeState:null, changed:['state']
+  },
+  {
+    phase:'DP Col 1', phaseClass:'phase-build', col:1, activeLine:9,
+    title:'Swap: dp ← new_dp after Column 1',
+    body:'After processing all predecessors for column 1, swap dp = new_dp. Each valid state now holds the number of valid 2-column colorings ending in that state. The total is the sum = 18.',
+    dpColShow:[0,1], activeState:null, changed:['total','col']
+  },
+  {
+    phase:'DP Col 2', phaseClass:'phase-dp', col:2, activeLine:5,
+    title:'Begin Column 2 — Fresh new_dp',
+    body:'Now process column 2 (the last column). Initialize new_dp[s]=0. We sum contributions from all column 1 states again, using the same compat table.',
+    dpColShow:[0,1,2], activeState:null, changed:['col','phase']
+  },
+  {
+    phase:'DP Col 2', phaseClass:'phase-dp', col:2, activeLine:7,
+    title:'Column 2: Extend from all Column 1 states',
+    body:"For each state s in column 1's dp, for each t in compat[s]: new_dp[t] += dp[s]. Same transition logic as column 1. The counts accumulate all valid 3-column paths.",
+    dpColShow:[0,1,2], activeState:null, changed:['state']
+  },
+  {
+    phase:'DP Col 2', phaseClass:'phase-dp', col:2, activeLine:9,
+    title:'Swap: dp ← new_dp after Column 2',
+    body:"Swap dp = new_dp. Now dp holds the count of valid 3-column colorings ending in each state. The values are: GR=6, BR=6, RG=6, BG=6, RB=6, GB=6 — each exactly 6.",
+    dpColShow:[0,1,2], activeState:null, changed:['total']
+  },
+  {
+    phase:'Result', phaseClass:'phase-result', col:2, activeLine:10,
+    title:'Sum All Final States',
+    body:"Sum dp.values() = 6+6+6+6+6+6 = 36. Answer = 36 mod (10^9+7) = 36. The number of valid 2×3 grid colorings with 3 colors = 36.",
+    dpColShow:[0,1,2], activeState:null, changed:['total','phase']
+  }
+];
+
+// Expected dp values per step
+const dpValues = [
+  // col 0 only: all 1
+  {1:1,2:1,3:1,5:1,6:1,7:1},
+  // col 0 still 1, col 1 not yet
+  {1:1,2:1,3:1,5:1,6:1,7:1},
+  {1:1,2:1,3:1,5:1,6:1,7:1},
+  // starting col 1: new_dp being filled
+  {1:0,2:0,3:0,5:0,6:0,7:0}, // new_dp initial
+  {1:1,2:1,3:0,5:0,6:0,7:1}, // after RG
+  {1:1,2:2,3:1,5:0,6:1,7:1}, // after GR
+  {1:2,2:3,3:2,5:2,6:2,7:2}, // after all (column 1 final)
+  {1:3,2:3,3:3,5:3,6:3,7:3}, // swap done (col 1) — actually each gets 3
+  // col 2
+  {1:0,2:0,3:0,5:0,6:0,7:0}, // new_dp for col 2
+  {1:3,2:3,3:3,5:3,6:3,7:3}, // computing...
+  {1:6,2:6,3:6,5:6,6:6,7:6}, // swap done
+  {1:6,2:6,3:6,5:6,6:6,7:6}, // final result
+];
+
+const totals = [6,6,6,6,3,5,12,18,18,18,36,36];
+const activeCols = [-1,-1,0,1,1,1,1,1,2,2,2,2];
+
+// ─── Render grid visualization ───
+function renderGrid(colHighlight, stateHighlight) {
+  const display = document.getElementById('grid-display');
+  const idxRow = document.getElementById('col-idx-row');
+  display.innerHTML = '';
+  idxRow.innerHTML = '';
+  for (let c = 0; c < N; c++) {
+    const col = document.createElement('div');
+    col.className = 'grid-col';
+    // label
+    const lbl = document.createElement('div');
+    lbl.className = 'col-label';
+    lbl.textContent = 'Col '+c;
+    col.appendChild(lbl);
+    // cells
+    for (let r = 0; r < M; r++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      if (colHighlight === c && stateHighlight !== null) {
+        const colors = getColors(stateHighlight, M);
+        cell.classList.add('c'+colors[r]);
+        cell.textContent = COLOR_NAMES[colors[r]];
+        cell.classList.add('active-col');
+      } else {
+        cell.classList.add('c'+(r % 3 === 0 ? 0 : r % 3 === 1 ? 1 : 2));
+        cell.textContent = '?';
+        if (colHighlight === c) cell.classList.add('active-col');
+      }
+      col.appendChild(cell);
+    }
+    display.appendChild(col);
+    const idx = document.createElement('div');
+    idx.className = 'col-idx';
+    idx.textContent = c;
+    idxRow.appendChild(idx);
+  }
+}
+
+// ─── Render DP table ───
+function renderDPTable(step) {
+  const tbody = document.getElementById('dp-tbody');
+  tbody.innerHTML = '';
+  const dpCols = steps[step].dpColShow;
+  const dpVals = dpValues[step];
+  const activeSt = steps[step].activeState;
+  for (const s of VALID_STATES) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('td');
+    th.className = 'row-header';
+    th.textContent = STATE_NAMES[s] + ' ('+s+')';
+    tr.appendChild(th);
+    for (let c = 0; c < N; c++) {
+      const td = document.createElement('td');
+      if (!dpCols.includes(c)) {
+        td.className = 'dp-future';
+        td.textContent = '?';
+      } else if (c === dpCols[dpCols.length-1]) {
+        td.className = 'dp-current';
+        td.textContent = dpVals[s] !== undefined ? dpVals[s] : '?';
+        if (activeSt === s) td.style.background = 'var(--amber-bg)';
+      } else {
+        td.className = 'dp-computed';
+        // use previous column's history
+        const hist = dp_history[c];
+        td.textContent = hist[s] !== undefined ? hist[s] : 1;
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+}
+
+// ─── Update display ───
+let currentStep = 0;
+
+function updateDisplay() {
+  const s = steps[currentStep];
+
+  // Phase badge
+  document.getElementById('phase-badge').textContent = s.phase;
+  document.getElementById('phase-badge').className = 'phase-badge ' + s.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${currentStep+1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Variable tracker
+  const colEl = document.getElementById('vb-col');
+  const phaseEl = document.getElementById('vb-phase');
+  const totalEl = document.getElementById('vb-total');
+  const stateEl = document.getElementById('vb-state');
+  colEl.classList.toggle('changed', s.changed.includes('col'));
+  phaseEl.classList.toggle('changed', s.changed.includes('phase'));
+  totalEl.classList.toggle('changed', s.changed.includes('total'));
+  stateEl.classList.toggle('changed', s.changed.includes('state'));
+  document.getElementById('vv-col').textContent = s.col >= 0 ? s.col : '—';
+  document.getElementById('vv-phase').textContent = s.phase;
+  document.getElementById('vv-total').textContent = totals[currentStep];
+  document.getElementById('vv-state').textContent = s.activeState ? STATE_NAMES[s.activeState] : '—';
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    document.getElementById('cl-'+i).classList.toggle('active', s.activeLine === i);
+  }
+
+  // Grid
+  renderGrid(activeCols[currentStep], s.activeState);
+
+  // DP table
+  renderDPTable(currentStep);
+
+  // Progress dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentStep);
+    d.classList.toggle('visited', i < currentStep);
+  });
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = currentStep === 0;
+  document.getElementById('btn-next').disabled = currentStep === steps.length - 1;
+}
+
+function go(dir) {
+  const next = currentStep + dir;
+  if (next < 0 || next >= steps.length) return;
+  currentStep = next;
+  updateDisplay();
+}
+
+function reset() {
+  currentStep = 0;
+  updateDisplay();
+}
+
+// Init progress dots
+const dotsEl = document.getElementById('progress-dots');
+for (let i = 0; i < steps.length; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.title = steps[i].title;
+  d.addEventListener('click', () => { currentStep = i; updateDisplay(); });
+  dotsEl.appendChild(d);
+}
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Card toggle
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = '';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+// Initial render
+updateDisplay();
+</script>
+</body>
+</html>

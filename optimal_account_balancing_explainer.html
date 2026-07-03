@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#465 · Optimal Account Balancing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Debt Balance Viz ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.person-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.person-label{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text3);width:40px;text-align:right;flex-shrink:0}
+.balance-bar-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.balance-bar{height:32px;border-radius:6px;min-width:4px;transition:width 0.4s,background 0.3s;display:flex;align-items:center;justify-content:center}
+.bar-positive{background:var(--blue-bg);border:1.5px solid var(--blue-border)}
+.bar-negative{background:var(--red-bg);border:1.5px solid var(--red-border)}
+.bar-zero{background:var(--green-bg);border:1.5px solid var(--green-border)}
+.bar-active{background:var(--amber-bg);border:1.5px solid var(--amber-border)}
+.balance-val{font-family:var(--mono);font-size:13px;font-weight:700;min-width:40px}
+.val-pos{color:var(--blue-mid)}
+.val-neg{color:var(--red-mid)}
+.val-zero{color:var(--green-mid)}
+.val-active{color:var(--amber-mid)}
+
+/* ── Subset / Bitmask display ── */
+.bitmask-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0.5rem 0}
+.bit-cell{width:30px;height:30px;border-radius:6px;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;transition:background 0.3s,border-color 0.3s;flex-shrink:0}
+.bit-cell.bit-on{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.bit-cell.bit-off{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.bit-cell.bit-active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.mask-label{font-size:12px;color:var(--text3);font-family:var(--mono)}
+
+/* ── DP Table ── */
+.dp-table-wrap{overflow-x:auto;margin:1rem 0}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:12px;min-width:200px}
+.dp-table th,.dp-table td{padding:8px 12px;text-align:center;border:1px solid var(--border)}
+.dp-table th{background:var(--bg2);font-weight:600;color:var(--text)}
+.dp-table td.dp-computed{background:var(--purple-bg);color:var(--purple-text);font-weight:700}
+.dp-table td.dp-current{background:var(--amber-bg);color:var(--amber-text);font-weight:700}
+.dp-table td.dp-future{color:var(--text3)}
+.dp-table td.dp-inf{color:var(--text3);font-style:italic}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--cyan-text)}
+
+/* ── State Machine ── */
+.state-diagram{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:1rem 0}
+.state-node-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.state-node{width:110px;height:80px;border-radius:14px;border:3px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background 0.3s,border-color 0.3s}
+.state-node.creditor{border-color:var(--blue-border)}
+.state-node.creditor.active{background:var(--blue-bg);border-color:var(--blue-mid)}
+.state-node.debtor{border-color:var(--red-border)}
+.state-node.debtor.active{background:var(--red-bg);border-color:var(--red-mid)}
+.state-node.settled{border-color:var(--green-border)}
+.state-node.settled.active{background:var(--green-bg);border-color:var(--green-mid)}
+.state-node-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3)}
+.state-node-val{font-family:var(--mono);font-size:20px;font-weight:700}
+.state-arrow{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:22px;padding-top:20px}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-recurse{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-settle{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-creditor{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-debtor{background:var(--red-bg);border-color:var(--red-border)}
+.sw-settled{background:var(--green-bg);border-color:var(--green-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #465</div>
+  <h1>Optimal Account Balancing</h1>
+  <p class="subtitle">Given a list of transactions, return the minimum number of transactions needed to settle all debts.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Dynamic Programming</span>
+    <span class="tag tag-pattern">Bitmask DP</span>
+    <span class="tag tag-complexity">Time: O(3ⁿ)</span>
+    <span class="tag tag-complexity">Space: O(2ⁿ)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have a group of friends who split expenses throughout a trip. Each transaction <code>[from, to, amount]</code> means person <code>from</code> paid person <code>to</code> the given amount. After all is done, some people are owed money (<em>creditors</em>, positive net balance) and some owe money (<em>debtors</em>, negative net balance). The goal: settle all debts using the <strong>fewest possible transactions</strong>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The original transactions don't matter — only each person's <strong>net balance</strong> does. After collapsing everyone to a single "owes/is-owed" number, the problem becomes: partition the non-zero balances into groups that each sum to zero, then minimize the number of payments within those groups (each zero-sum group of size k needs exactly k−1 transactions).</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">Given Transactions</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:2">
+          0→1: $10<br>
+          1→0: $1<br>
+          1→2: $5<br>
+          0→3: $5
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">Net Balances (what matters)</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:2">
+          Person 0: +10 −1 −5 = <strong>+4</strong> (creditor)<br>
+          Person 1: +1 −10 +5 = <strong>−4</strong> (debtor)<br>
+          Person 2: +5 = <strong>+5</strong> (creditor)<br>
+          Person 3: −5 = <strong>−5</strong> (debtor)
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:0.75rem">With net balances <code>[+4, −4, +5, −5]</code>: we can settle 0→1 ($4) and 3→2 ($5) — just <strong>2 transactions</strong>. The balances form two zero-sum pairs, so each pair needs exactly 1 transaction.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> All balances already zero (answer = 0); only two non-zero people with opposite balances (answer = 1); a single creditor collecting from many debtors (answer = number of debtors); n people with all same magnitude (may pair perfectly).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Bitmask DP on Debt Subsets</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>After reducing to net balances, we work with a list of non-zero values (at most ~12 people practically). A <strong>bitmask</strong> represents which subset of these balances we are considering. We precompute for every subset: does it sum to zero? And the key recurrence: <em>the minimum transactions to settle a zero-sum subset of k people is (k − 1).</em></p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Compute net balances:</strong> Build a map from person → net balance by processing all transactions. Then extract only the non-zero balances into a list <code>debts</code> of length <code>n</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Define dp[mask]:</strong> The minimum number of transactions to settle exactly the subset of people indicated by <code>mask</code>. There are 2ⁿ masks. Only masks whose elements sum to zero are "settleable" independently.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Base case:</strong> <code>dp[0] = 0</code> (empty set, no transactions needed). All other masks start at ∞.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Enumerate zero-sum sub-masks:</strong> For each non-zero mask <code>m</code>, iterate through all non-empty sub-masks <code>s</code> of <code>m</code>. If <code>s</code> is zero-sum (its elements sum to zero), the minimum transactions to settle <code>s</code> is <code>popcount(s) − 1</code>. Update: <code>dp[m] = min(dp[m], dp[m ^ s] + popcount(s) − 1)</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Answer:</strong> <code>dp[(1 &lt;&lt; n) − 1]</code> — the minimum transactions to settle everyone.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 The Recurrence</div>
+      <div class="recurrence-formula">
+        <span style="color:var(--purple-mid)">dp[mask]</span> = min over all non-empty zero-sum sub-masks <span style="color:var(--blue-mid)">s</span> of mask:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--purple-mid)">dp[mask ^ s]</span> + <span style="color:var(--blue-mid)">popcount(s)</span> − 1<br><br>
+        <span style="color:var(--text3);font-size:11px">popcount(s) = number of bits set in s = size of the zero-sum group<br>
+        A zero-sum group of k people settles in exactly k−1 transactions</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why k−1 transactions for a zero-sum group of size k?</div>
+      <p>Think of it as a chain: person 1 pays person 2, person 2 pays person 3, ..., person k-1 pays person k. That's k−1 payments and it fully settles all k balances. This is always optimal — you can't do better than k−1 for a group where everyone has a non-zero balance. A group of 2 needs 1 payment, a group of 3 needs 2, etc.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Sub-mask enumeration trick:</strong> To enumerate all non-empty sub-masks of mask <code>m</code>, use the classic idiom: <code>for s = m; s > 0; s = (s-1) &amp; m</code>. This visits every subset in O(3ⁿ) total work (each element is either in the outer mask, the sub-mask, or neither — 3 choices per element).</p>
+
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Why is This Dynamic Programming?</div>
+      <p><strong>Optimal Substructure:</strong> The optimal way to settle the full set decomposes into settling independent zero-sum subgroups. Once we find a zero-sum subset <code>s</code>, its settlement is independent of the remaining people — no shared transactions. So the total cost = cost(s) + cost(rest).<br><br>
+      <strong>Overlapping Subproblems:</strong> The same subset mask can appear as a "remaining debt group" in many different decomposition paths. Without memoization (the dp array), we'd recompute the same subset costs exponentially many times.</p>
+    </div>
+
+    <p><strong>Why only zero-sum subsets?</strong> A group of people can settle among themselves without involving outsiders if and only if their net balances sum to zero — otherwise, money would have to flow in or out of the group, which contradicts settling "among themselves."</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Invariant</div>
+      <p>At any point in the DP, <code>dp[mask]</code> represents the minimum number of transactions to completely settle all debts among the people indicated by <code>mask</code>, assuming their balances sum to zero (otherwise dp[mask] = ∞). The invariant is maintained because we only update <code>dp[mask]</code> by combining a zero-sum sub-mask with an already-solved remainder.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Greedy doesn't work:</strong> You might think "always match the biggest creditor with the biggest debtor." This greedy is locally optimal but not globally. Example: balances <code>[+3, +3, −4, −2]</code>. Greedy: match +3 with −4 (one payment, +3 left for −2 → −2 leftover won't close), resulting in sub-optimal paths. The DP finds the partition into zero-sum groups first, then handles each optimally.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ DFS Backtracking Alternative</div>
+      <p>There's a popular DFS approach where you try each creditor paying each debtor, recurse, and track the minimum. This is correct but harder to analyze. The Bitmask DP is cleaner for interviews: it encodes ALL subset states explicitly and is provably O(3ⁿ). Both approaches have exponential worst-case complexity because the problem is NP-hard in general.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Bitmask DP (Interview Pick, O(3ⁿ) time)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def minTransfers(transactions):</span></div>
+<div class="ann-line"><span class="acode">    bal = {}                          </span><span class="aann">← net balance map: person → amount owed/owing</span></div>
+<div class="ann-line"><span class="acode">    for u, v, w in transactions:      </span><span class="aann">← process each transaction [from, to, amount]</span></div>
+<div class="ann-line"><span class="acode">        bal[u] = bal.get(u, 0) - w    </span><span class="aann">← u paid out w → net decreases</span></div>
+<div class="ann-line"><span class="acode">        bal[v] = bal.get(v, 0) + w    </span><span class="aann">← v received w → net increases</span></div>
+<div class="ann-line"><span class="acode">    debts = [v for v in bal.values() if v != 0]  </span><span class="aann">← only non-zero balances matter</span></div>
+<div class="ann-line"><span class="acode">    n = len(debts)                    </span><span class="aann">← number of people with non-zero balance</span></div>
+<div class="ann-line"><span class="acode">    INF = float('inf')</span></div>
+<div class="ann-line"><span class="acode">    dp = [INF] * (1 &lt;&lt; n)            </span><span class="aann">← dp[mask] = min transactions to settle mask group</span></div>
+<div class="ann-line"><span class="acode">    dp[0] = 0                         </span><span class="aann">← base case: empty group needs 0 transactions</span></div>
+<div class="ann-line"><span class="acode">    for mask in range(1, 1 &lt;&lt; n):    </span><span class="aann">← iterate every non-empty subset</span></div>
+<div class="ann-line"><span class="acode">        # precompute sum of this subset</span></div>
+<div class="ann-line"><span class="acode">        total = sum(debts[i] for i in range(n) if mask &amp; (1 &lt;&lt; i))</span></div>
+<div class="ann-line"><span class="acode">        sub = mask                    </span><span class="aann">← start sub-mask enumeration at mask itself</span></div>
+<div class="ann-line"><span class="acode">        while sub:                    </span><span class="aann">← enumerate all non-empty sub-masks of mask</span></div>
+<div class="ann-line"><span class="acode">            # sum of sub-mask</span></div>
+<div class="ann-line"><span class="acode">            s_sum = sum(debts[i] for i in range(n) if sub &amp; (1 &lt;&lt; i))</span></div>
+<div class="ann-line"><span class="acode">            if s_sum == 0:            </span><span class="aann">← this sub-group can settle among themselves!</span></div>
+<div class="ann-line"><span class="acode">                k = bin(sub).count('1')     </span><span class="aann">← how many people in this zero-sum group</span></div>
+<div class="ann-line"><span class="acode">                dp[mask] = min(dp[mask], dp[mask ^ sub] + k - 1)  </span><span class="aann">← k people need k−1 transactions</span></div>
+<div class="ann-line"><span class="acode">            sub = (sub - 1) &amp; mask    </span><span class="aann">← classic sub-mask enumeration step</span></div>
+<div class="ann-line"><span class="acode">    return dp[(1 &lt;&lt; n) - 1]          </span><span class="aann">← answer: settle the full set (all bits on)</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why (sub - 1) &amp; mask?</div>
+      <p>This is the classical bit trick for enumerating all submasks of a mask. <code>sub - 1</code> flips the lowest set bit of <code>sub</code> to 0 and sets all bits below it to 1. ANDing with <code>mask</code> removes any bits not in the original mask. The loop terminates when <code>sub</code> reaches 0 (empty set). Total iterations across all masks is exactly 3ⁿ — each element is in mask-only, sub-only, or neither.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — DFS Backtracking (Simpler to derive, same worst case)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def minTransfers(transactions):</span></div>
+<div class="ann-line"><span class="acode">    bal = {}                          </span><span class="aann">← same net balance computation</span></div>
+<div class="ann-line"><span class="acode">    for u, v, w in transactions:</span></div>
+<div class="ann-line"><span class="acode">        bal[u] = bal.get(u, 0) - w</span></div>
+<div class="ann-line"><span class="acode">        bal[v] = bal.get(v, 0) + w</span></div>
+<div class="ann-line"><span class="acode">    debts = [v for v in bal.values() if v != 0]</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    def dfs(idx):                     </span><span class="aann">← try to settle from person at index idx</span></div>
+<div class="ann-line"><span class="acode">        while idx &lt; len(debts) and debts[idx] == 0:</span></div>
+<div class="ann-line"><span class="acode">            idx += 1                  </span><span class="aann">← skip already-settled people</span></div>
+<div class="ann-line"><span class="acode">        if idx == len(debts): return 0  </span><span class="aann">← all settled! 0 more transactions needed</span></div>
+<div class="ann-line"><span class="acode">        res = float('inf')</span></div>
+<div class="ann-line"><span class="acode">        for j in range(idx + 1, len(debts)):    </span><span class="aann">← try each other person as the settlement partner</span></div>
+<div class="ann-line"><span class="acode">            if debts[j] * debts[idx] &lt; 0:      </span><span class="aann">← only if one is positive, other negative</span></div>
+<div class="ann-line"><span class="acode">                debts[j] += debts[idx]          </span><span class="aann">← idx pays/receives from j, clearing idx</span></div>
+<div class="ann-line"><span class="acode">                res = min(res, 1 + dfs(idx + 1)) </span><span class="aann">← 1 transaction + recursively settle rest</span></div>
+<div class="ann-line"><span class="acode">                debts[j] -= debts[idx]          </span><span class="aann">← backtrack: undo the settlement</span></div>
+<div class="ann-line"><span class="acode">        return res</span></div>
+<div class="ann-line"><span class="acode">    return dfs(0)</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Bitmask DP:</strong> Time O(3ⁿ), Space O(2ⁿ) — n ≤ 12 in practice (constraint: ≤12 people)<br>
+        <strong>DFS Backtracking:</strong> Time O(n!) worst case (trying every permutation), Space O(n) stack<br>
+        Both are exponential; n ≤ 12 makes them feasible. DP is faster in practice due to memoization.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Simplify the Problem</div>
+        <p style="font-size:14px;color:var(--text)">"First, I notice the original transaction list is irrelevant — all that matters is each person's net balance. I'll compute net balances in O(T) where T = number of transactions. Then I only care about the non-zero balances."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Recognize the Partition Problem</div>
+        <p style="font-size:14px;color:var(--text)">"The sub-problem is: partition the non-zero balances into groups that each sum to zero. Each zero-sum group of k people needs exactly k−1 transactions. I want to minimize the total by finding the best partition — this screams exponential search over subsets."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Recognize n ≤ 12 → Bitmask DP is Feasible</div>
+        <p style="font-size:14px;color:var(--text)">"With at most 12 people, we have at most 2¹² = 4096 subsets. Bitmask DP over all subsets, using the sub-mask enumeration trick, gives O(3¹²) ≈ 531,441 operations — totally feasible. This is the classic subset-sum DP pattern."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: State, Recurrence, Base Case</div>
+        <p style="font-size:14px;color:var(--text)">"State: dp[mask] = min transactions to settle the people in mask (if mask is zero-sum). Recurrence: try every zero-sum sub-mask s of mask: dp[mask] = dp[mask XOR s] + popcount(s) − 1. Base: dp[0] = 0."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key observation is that we only need net balances, not the original transactions.<br>
+Once I have the net balances, the problem is: find the minimum way to partition<br>
+non-zero balances into zero-sum groups, where each group of k people costs k−1 transactions.<br>
+Since there are at most 12 people, I can use Bitmask DP over all 2^n subsets.<br>
+For each subset, I find all zero-sum sub-masks using the (s-1)&amp;mask trick and update.<br>
+Total time: O(3^n) with O(2^n) space — both around 500K for n=12."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if n is larger, say 100?"</strong> → Problem becomes NP-hard. Approximate with greedy (always match largest creditor ↔ largest debtor).</li>
+        <li><strong>"Why not just greedy?"</strong> → Greedy finds local matches but may miss a globally cheaper partition. Example: [+3, −2, −1, +2, −3, +1] — greedy uses 5, optimal uses 3.</li>
+        <li><strong>"Explain the sub-mask enumeration."</strong> → Each element either is in mask (not sub), is in both (sub), or is in neither. 3 choices → 3ⁿ total.</li>
+        <li><strong>"What does popcount(s)−1 represent?"</strong> → A chain of k−1 one-to-one payments fully settles k people: A→B→C...→last. Optimal lower bound for any zero-sum group.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: Balances [+4, −4, +5, −5]</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Balance bars for 4 people -->
+      <div id="balance-viz"></div>
+
+      <!-- Bitmask display -->
+      <div style="margin-top:1.5rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">Current Mask (bits = active people)</div>
+        <div class="bitmask-row" id="mask-display"></div>
+      </div>
+
+      <!-- Sub-mask display -->
+      <div style="margin-top:1rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">Testing Sub-mask</div>
+        <div class="bitmask-row" id="submask-display"></div>
+        <div style="margin-top:6px;font-size:13px;color:var(--text2)" id="submask-sum-display"></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-mask">
+          <span class="var-name">mask</span>
+          <span class="var-val" id="vv-mask">—</span>
+        </div>
+        <div class="var-box" id="vb-sub">
+          <span class="var-name">sub-mask</span>
+          <span class="var-val" id="vv-sub">—</span>
+        </div>
+        <div class="var-box" id="vb-sum">
+          <span class="var-name">sub sum</span>
+          <span class="var-val" id="vv-sum">—</span>
+        </div>
+        <div class="var-box" id="vb-dp">
+          <span class="var-name">dp[mask]</span>
+          <span class="var-val" id="vv-dp">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">debts = [+4, -4, +5, -5]  # net balances</div>
+      <div class="code-line" id="cl-1">dp = [INF] * 16; dp[0] = 0  # 2^4 states</div>
+      <div class="code-line" id="cl-2">for mask in range(1, 16):  # each subset</div>
+      <div class="code-line" id="cl-3">    sub = mask  # start sub-mask at mask</div>
+      <div class="code-line" id="cl-4">    while sub:  # enumerate all sub-masks</div>
+      <div class="code-line" id="cl-5">        s_sum = sum(debts[i] for i in ... if sub&(1&lt;&lt;i))</div>
+      <div class="code-line" id="cl-6">        if s_sum == 0:  # zero-sum found!</div>
+      <div class="code-line" id="cl-7">            k = bin(sub).count('1')  # group size</div>
+      <div class="code-line" id="cl-8">            dp[mask] = min(dp[mask], dp[mask^sub] + k-1)</div>
+      <div class="code-line" id="cl-9">        sub = (sub-1) & mask  # next sub-mask</div>
+      <div class="code-line" id="cl-10">return dp[15]  # dp[1111] = answer</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 18</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use arrow keys. We'll walk through the Bitmask DP for 4 people with net balances [+4, −4, +5, −5].</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-creditor"></div> Creditor (owed money)</div>
+      <div class="legend-item"><div class="legend-swatch sw-debtor"></div> Debtor (owes money)</div>
+      <div class="legend-item"><div class="legend-swatch sw-settled"></div> Balanced / zero</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div> Active in current mask</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Reduce all transactions to net balances first — the original graph doesn't matter</div>
+      <div class="takeaway">A zero-sum group of k people always settles in exactly k−1 transactions (chain payment)</div>
+      <div class="takeaway">Bitmask DP over subsets: dp[mask] = min transactions to settle the masked group</div>
+      <div class="takeaway">Sub-mask enumeration (s-1)&amp;mask runs in O(3ⁿ) total — each element has 3 states</div>
+      <div class="takeaway">Greedy (max creditor ↔ max debtor) is O(n log n) but suboptimal — exponential is required for optimal</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Greedy (max-match)</td>
+          <td class="mark-good">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Fast but NOT optimal — misses better partitions</td>
+        </tr>
+        <tr>
+          <td>DFS Backtracking</td>
+          <td class="mark-bad">O(n!)</td>
+          <td>O(n)</td>
+          <td>Correct; simpler to code; pruning helps in practice</td>
+        </tr>
+        <tr>
+          <td><strong>Bitmask DP ✓</strong></td>
+          <td class="mark-good">O(3ⁿ)</td>
+          <td>O(2ⁿ)</td>
+          <td>Optimal &amp; elegant; clearly O(3ⁿ) complexity proof</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize Bitmask DP</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Small n (≤ 20): each element can be "in" or "out" of a subset</li>
+        <li>"Partition into groups" with an optimization objective</li>
+        <li>Traveling Salesman: visited cities as a bitmask</li>
+        <li>Assignment problems: assigned workers as a bitmask</li>
+        <li>Any problem where state = "which subset of elements have been processed"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (Bitmask DP on Debts / Partition Subsets)</div>
+      <div class="related-item"><strong>Partition to K Equal Sum Subsets</strong><span class="related-diff diff-med">Medium</span> — dp[mask] = which subsets can be assigned to k equal-sum groups (#698)</div>
+      <div class="related-item"><strong>Minimum Number of Work Sessions to Finish Tasks</strong><span class="related-diff diff-med">Medium</span> — dp[mask] = min sessions; similar subset partitioning (#1986)</div>
+      <div class="related-item"><strong>Campus Bikes II</strong><span class="related-diff diff-med">Medium</span> — dp[bike_mask] = min distance assigned so far (#1066)</div>
+      <div class="related-item"><strong>Shortest Path Visiting All Nodes</strong><span class="related-diff diff-hard">Hard</span> — BFS with (node, visited_mask) state (#847)</div>
+      <div class="related-item"><strong>Travelling Salesman Problem</strong><span class="related-diff diff-hard">Hard</span> — Classic bitmask DP: dp[mask][city] = min cost to visit subset and end at city</div>
+      <div class="related-item"><strong>Find the Minimum Cost to Divide Chocolate</strong><span class="related-diff diff-hard">Hard</span> — Partition with cost minimization; bitmask or greedy</div>
+      <div class="related-item"><strong>Maximum Score Words Formed by Letters</strong><span class="related-diff diff-hard">Hard</span> — Enumerate subsets of words; bitmask over words (#1255)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Classification</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 18.8 (Bitmask DP)<br>
+      <strong>Main Pattern:</strong> Dynamic Programming · <strong>Sub-Pattern:</strong> Bitmask DP on Debts<br>
+      Source: Guide Section 18 + Analysis (problem listed explicitly in Section 18 general table)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// Net balances for our example: [+4, -4, +5, -5]
+// Person 0: +4 (creditor), Person 1: -4 (debtor), Person 2: +5 (creditor), Person 3: -5 (debtor)
+const DEBTS = [4, -4, 5, -5];
+const N = 4;
+const NAMES = ['P0', 'P1', 'P2', 'P3'];
+
+// Pre-compute dp values for display
+const INF = 999;
+const dpVals = new Array(1 << N).fill(INF);
+dpVals[0] = 0;
+for (let mask = 1; mask < (1 << N); mask++) {
+  let sub = mask;
+  while (sub > 0) {
+    let s_sum = 0;
+    for (let i = 0; i < N; i++) if (sub & (1 << i)) s_sum += DEBTS[i];
+    if (s_sum === 0) {
+      const k = sub.toString(2).split('').filter(c => c === '1').length;
+      const rem = mask ^ sub;
+      if (dpVals[rem] < INF) {
+        dpVals[mask] = Math.min(dpVals[mask], dpVals[rem] + k - 1);
+      }
+    }
+    sub = (sub - 1) & mask;
+  }
+}
+
+const steps = [
+  {
+    id: 0, phase: 'init', phaseLabel: 'INIT', phaseClass: 'phase-init',
+    mask: 0, sub: 0, subSum: 0, dpVal: 0, activeLine: 0,
+    title: 'Initialize',
+    text: 'We have 4 people with net balances: P0 = +4 (creditor), P1 = −4 (debtor), P2 = +5 (creditor), P3 = −5 (debtor). dp = [0, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞, ∞]. dp[0] = 0 (empty group).',
+    dpShow: 0, activePeople: [], subPeople: []
+  },
+  {
+    id: 1, phase: 'build', phaseLabel: 'MASK 0011', phaseClass: 'phase-build',
+    mask: 3, sub: 3, subSum: 0, dpVal: 1, activeLine: 2,
+    title: 'mask = 3 (binary 0011): Testing P0 and P1',
+    text: 'mask = 0011 means we consider persons 0 and 1. Their balances: +4 + (−4) = 0. This is a ZERO-SUM sub-mask! Group size k = 2, so we need k−1 = 1 transaction. dp[3] = min(∞, dp[0] + 1) = 1.',
+    dpShow: 3, activePeople: [0, 1], subPeople: [0, 1]
+  },
+  {
+    id: 2, phase: 'build', phaseLabel: 'MASK 0011', phaseClass: 'phase-build',
+    mask: 3, sub: 2, subSum: -4, dpVal: 1, activeLine: 4,
+    title: 'mask = 3: Testing sub-mask 0010 (only P1)',
+    text: 'Next sub-mask: 0010 (just P1). Sum = −4 ≠ 0, not zero-sum. No update. Continue enumeration.',
+    dpShow: 3, activePeople: [0, 1], subPeople: [1]
+  },
+  {
+    id: 3, phase: 'build', phaseLabel: 'MASK 0011', phaseClass: 'phase-build',
+    mask: 3, sub: 1, subSum: 4, dpVal: 1, activeLine: 4,
+    title: 'mask = 3: Testing sub-mask 0001 (only P0)',
+    text: 'Next sub-mask: 0001 (just P0). Sum = +4 ≠ 0. Not zero-sum, no update. All sub-masks of mask=3 exhausted. dp[3] = 1.',
+    dpShow: 3, activePeople: [0, 1], subPeople: [0]
+  },
+  {
+    id: 4, phase: 'build', phaseLabel: 'MASK 1100', phaseClass: 'phase-build',
+    mask: 12, sub: 12, subSum: 0, dpVal: 1, activeLine: 2,
+    title: 'mask = 12 (binary 1100): Testing P2 and P3',
+    text: 'mask = 1100 means we consider persons 2 and 3. Their balances: +5 + (−5) = 0. Another ZERO-SUM sub-mask! k = 2, so 1 transaction. dp[12] = min(∞, dp[0] + 1) = 1.',
+    dpShow: 12, activePeople: [2, 3], subPeople: [2, 3]
+  },
+  {
+    id: 5, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 15, subSum: 0, dpVal: 2, activeLine: 2,
+    title: 'mask = 15 (1111): Testing full set of all 4 people',
+    text: 'mask = 1111: all four people. Sum = +4−4+5−5 = 0. Full group is zero-sum! k=4, so 3 transactions if settled as one group: dp[15] = min(∞, dp[0]+3) = 3. But we can do better by splitting...',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 1, 2, 3]
+  },
+  {
+    id: 6, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 3, subSum: 0, dpVal: 2, activeLine: 6,
+    title: 'mask = 15: Testing sub-mask 0011 (P0 + P1)',
+    text: 'Now we test sub-mask 0011 of mask 1111. Sum of {P0,P1} = +4−4 = 0. ZERO-SUM! k=2 → 1 transaction. Remaining mask = 1111 XOR 0011 = 1100. dp[15] = min(3, dp[12] + 1) = min(3, 1+1) = 2. IMPROVEMENT!',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 1]
+  },
+  {
+    id: 7, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 12, subSum: 0, dpVal: 2, activeLine: 6,
+    title: 'mask = 15: Testing sub-mask 1100 (P2 + P3)',
+    text: 'Sub-mask 1100 of mask 1111. Sum of {P2,P3} = +5−5 = 0. ZERO-SUM! Remaining = 1111 XOR 1100 = 0011. dp[15] = min(2, dp[3] + 1) = min(2, 1+1) = 2. Same result — two valid splits both give 2.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [2, 3]
+  },
+  {
+    id: 8, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 9, subSum: -1, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 1001 (P0 + P3)',
+    text: 'Sub-mask 1001: {P0, P3} = +4 + (−5) = −1 ≠ 0. Not zero-sum. Skip.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 3]
+  },
+  {
+    id: 9, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 6, subSum: 1, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 0110 (P1 + P2)',
+    text: 'Sub-mask 0110: {P1, P2} = −4 + 5 = +1 ≠ 0. Not zero-sum. Skip.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [1, 2]
+  },
+  {
+    id: 10, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 5, subSum: 9, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 0101 (P0 + P2)',
+    text: 'Sub-mask 0101: {P0, P2} = +4 + 5 = +9 ≠ 0. Not zero-sum. Skip.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 2]
+  },
+  {
+    id: 11, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 10, subSum: -9, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 1010 (P1 + P3)',
+    text: 'Sub-mask 1010: {P1, P3} = −4 + (−5) = −9 ≠ 0. Not zero-sum. Skip. All size-2 sub-masks tested.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [1, 3]
+  },
+  {
+    id: 12, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 7, subSum: 5, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 0111 (P0+P1+P2)',
+    text: 'Sub-mask 0111: {P0,P1,P2} = 4−4+5 = +5 ≠ 0. Not zero-sum.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 1, 2]
+  },
+  {
+    id: 13, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 11, subSum: -5, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 1011 (P0+P1+P3)',
+    text: 'Sub-mask 1011: {P0,P1,P3} = 4−4−5 = −5 ≠ 0. Not zero-sum.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [0, 1, 3]
+  },
+  {
+    id: 14, phase: 'build', phaseLabel: 'MASK 1111', phaseClass: 'phase-build',
+    mask: 15, sub: 14, subSum: -4, dpVal: 2, activeLine: 4,
+    title: 'mask = 15: Testing sub-mask 1110 (P1+P2+P3)',
+    text: 'Sub-mask 1110: {P1,P2,P3} = −4+5−5 = −4 ≠ 0. Not zero-sum. All sub-masks exhausted.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: [1, 2, 3]
+  },
+  {
+    id: 15, phase: 'settle', phaseLabel: 'SETTLE', phaseClass: 'phase-settle',
+    mask: 15, sub: 0, subSum: 0, dpVal: 2, activeLine: 9,
+    title: 'Optimal Split Found: {P0,P1} and {P2,P3}',
+    text: 'We found the best partition: Group {P0,P1} sums to zero → 1 transaction (P1 pays P0 $4). Group {P2,P3} sums to zero → 1 transaction (P3 pays P2 $5). Total: 2 transactions. dp[1111] = 2.',
+    dpShow: 15, activePeople: [0, 1, 2, 3], subPeople: []
+  },
+  {
+    id: 16, phase: 'settle', phaseLabel: 'SETTLE', phaseClass: 'phase-settle',
+    mask: 3, sub: 0, subSum: 0, dpVal: 1, activeLine: 9,
+    title: 'Transaction 1: P1 pays P0 ($4)',
+    text: 'Person 1 (debtor, −4) pays Person 0 (creditor, +4). P0 balance: +4→0 ✓. P1 balance: −4→0 ✓. One transaction used.',
+    dpShow: 3, activePeople: [0, 1], subPeople: [0, 1]
+  },
+  {
+    id: 17, phase: 'result', phaseLabel: 'RETURN 2', phaseClass: 'phase-result',
+    mask: 15, sub: 0, subSum: 0, dpVal: 2, activeLine: 10,
+    title: 'Return dp[15] = 2 ✓',
+    text: 'Answer: 2 transactions. Transaction 1: P1→P0 ($4). Transaction 2: P3→P2 ($5). All 4 balances reach zero. The Bitmask DP correctly identified that splitting into two zero-sum pairs of size 2 is optimal: 2×(2−1) = 2 total transactions.',
+    dpShow: 15, activePeople: [], subPeople: []
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build balance viz
+  const viz = document.getElementById('balance-viz');
+  DEBTS.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.className = 'person-row';
+    row.id = 'person-row-' + i;
+    row.innerHTML = `<div class="person-label">${NAMES[i]}</div>
+      <div class="balance-bar-wrap">
+        <div class="balance-bar" id="bar-${i}" style="width:60px"></div>
+        <div class="balance-val" id="bval-${i}">${d > 0 ? '+' + d : d}</div>
+      </div>`;
+    viz.appendChild(row);
+  });
+
+  // Build mask display (4 bits)
+  const md = document.getElementById('mask-display');
+  for (let i = N - 1; i >= 0; i--) {
+    const bc = document.createElement('div');
+    bc.className = 'bit-cell'; bc.id = 'mbit-' + i;
+    bc.textContent = '0';
+    md.appendChild(bc);
+    const lbl = document.createElement('span');
+    lbl.className = 'mask-label'; lbl.textContent = 'P' + i;
+    md.appendChild(lbl);
+  }
+
+  // Build submask display (4 bits)
+  const sd = document.getElementById('submask-display');
+  for (let i = N - 1; i >= 0; i--) {
+    const bc = document.createElement('div');
+    bc.className = 'bit-cell'; bc.id = 'sbit-' + i;
+    bc.textContent = '0';
+    sd.appendChild(bc);
+    const lbl = document.createElement('span');
+    lbl.className = 'mask-label'; lbl.textContent = 'P' + i;
+    sd.appendChild(lbl);
+  }
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // Update balance bars
+  DEBTS.forEach((d, i) => {
+    const bar = document.getElementById('bar-' + i);
+    const bval = document.getElementById('bval-' + i);
+    const isActive = step.activePeople.includes(i);
+    const isResult = step.phase === 'result';
+
+    bar.className = 'balance-bar';
+    let barWidth = Math.min(Math.abs(d) * 10, 100);
+
+    if (isResult) {
+      bar.classList.add('bar-zero');
+      bval.className = 'balance-val val-zero';
+      bval.textContent = '0';
+      bar.style.width = '4px';
+    } else if (isActive) {
+      bar.classList.add('bar-active');
+      bval.className = 'balance-val val-active';
+      bval.textContent = d > 0 ? '+' + d : String(d);
+      bar.style.width = barWidth + 'px';
+    } else if (d > 0) {
+      bar.classList.add('bar-positive');
+      bval.className = 'balance-val val-pos';
+      bval.textContent = '+' + d;
+      bar.style.width = barWidth + 'px';
+    } else {
+      bar.classList.add('bar-negative');
+      bval.className = 'balance-val val-neg';
+      bval.textContent = String(d);
+      bar.style.width = barWidth + 'px';
+    }
+  });
+
+  // Update mask bits
+  for (let i = 0; i < N; i++) {
+    const mbit = document.getElementById('mbit-' + i);
+    const inMask = (step.mask & (1 << i)) !== 0;
+    mbit.className = 'bit-cell ' + (inMask ? 'bit-on' : 'bit-off');
+    mbit.textContent = inMask ? '1' : '0';
+  }
+
+  // Update submask bits
+  for (let i = 0; i < N; i++) {
+    const sbit = document.getElementById('sbit-' + i);
+    const inSub = step.subPeople.includes(i);
+    sbit.className = 'bit-cell ' + (inSub ? 'bit-active' : 'bit-off');
+    sbit.textContent = inSub ? '1' : '0';
+  }
+
+  // Update submask sum display
+  const sumDisplay = document.getElementById('submask-sum-display');
+  if (step.subPeople.length > 0) {
+    const subSum = step.subPeople.reduce((acc, i) => acc + DEBTS[i], 0);
+    const isZero = subSum === 0;
+    sumDisplay.style.color = isZero ? 'var(--green-mid)' : 'var(--text2)';
+    sumDisplay.textContent = `Sum of {${step.subPeople.map(i => NAMES[i]).join(', ')}}: ${subSum > 0 ? '+' : ''}${subSum}${isZero ? ' ✓ ZERO-SUM!' : ' — not zero-sum'}`;
+  } else {
+    sumDisplay.textContent = step.mask === 0 ? 'Empty mask — base case' : 'Sub-mask enumeration complete.';
+    sumDisplay.style.color = 'var(--text3)';
+  }
+
+  // Code panel
+  for (let i = 0; i <= 10; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // Variable tracker
+  document.getElementById('vv-mask').textContent = step.mask.toString(2).padStart(4, '0');
+  const subBin = step.subPeople.reduce((acc, i) => acc | (1 << i), 0);
+  document.getElementById('vv-sub').textContent = subBin.toString(2).padStart(4, '0');
+  const subSum2 = step.subPeople.reduce((acc, i) => acc + DEBTS[i], 0);
+  document.getElementById('vv-sum').textContent = subSum2 > 0 ? '+' + subSum2 : String(subSum2) || '0';
+  const dpDisplayVal = step.dpVal >= INF ? '∞' : String(step.dpVal);
+  document.getElementById('vv-dp').textContent = dpDisplayVal;
+
+  document.getElementById('vb-dp').classList.toggle('changed', step.phase !== 'init' && step.dpVal < INF && step.dpVal !== undefined);
+  document.getElementById('vb-sum').classList.toggle('changed', subSum2 === 0 && step.subPeople.length > 0);
+
+  // Progress dots
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // Buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>
