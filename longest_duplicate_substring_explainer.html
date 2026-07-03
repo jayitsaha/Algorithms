@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1044 · Longest Duplicate Substring</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Deep Dive Box ── */
+.deepdive-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin:1rem 0}
+.deepdive-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--cyan-mid);margin-bottom:0.75rem}
+.deepdive-box p{font-size:14px;line-height:1.7;margin-bottom:0.75rem;color:var(--text)}
+.deepdive-box p:last-child{margin-bottom:0}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Binary Search Visualization (Section 2 diagram) ── */
+.bs-diagram{margin:1.25rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius)}
+.bs-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.bs-label{font-size:12px;font-weight:700;color:var(--text3);width:50px;text-align:right;flex-shrink:0}
+.bs-bar{display:flex;gap:3px}
+.bs-seg{height:28px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:11px;font-weight:600;padding:0 10px;font-family:var(--mono)}
+.bs-seg.lo{background:var(--green-bg);color:var(--green-text);border:1.5px solid var(--green-border)}
+.bs-seg.hi{background:var(--red-bg);color:var(--red-text);border:1.5px solid var(--red-border)}
+.bs-seg.mid{background:var(--purple-bg);color:var(--purple-text);border:1.5px solid var(--purple-border)}
+.bs-seg.neutral{background:var(--bg);color:var(--text2);border:1.5px solid var(--border2)}
+.bs-annotation{font-size:11px;color:var(--text3);margin-top:4px;padding-left:58px}
+
+/* ── Hash Window visualization ── */
+.hash-window{margin:1rem 0;padding:1rem;background:var(--bg2);border-radius:var(--radius);overflow-x:auto}
+.hw-str{display:flex;gap:3px;margin-bottom:6px}
+.hw-cell{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;border:2px solid var(--border2);background:var(--surface);color:var(--text);flex-shrink:0}
+.hw-cell.win{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.hw-cell.match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.hw-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.hw-idx{display:flex;gap:3px;margin-top:3px}
+.hw-idx-cell{width:36px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.str-row{display:flex;gap:3px;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+.str-cell{
+  width:38px;height:38px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.str-cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.str-cell.window{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.str-cell.match-a{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.str-cell.match-b{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.str-cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.str-cell.result{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.idx-row-viz{display:flex;gap:3px;margin-top:4px;overflow-x:auto}
+.idx-cell{width:38px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-bs{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-hash{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-found{background:var(--green-bg);color:var(--green-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-win{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-ma{background:var(--green-bg);border-color:var(--green-border)}
+.sw-mb{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-done{background:var(--bg2);border-color:var(--border)}
+.sw-res{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Hash display ── */
+.hash-display{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin:8px 0;font-family:var(--mono);font-size:13px;flex-wrap:wrap}
+.hash-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans)}
+.hash-val{font-size:15px;font-weight:700;color:var(--purple-mid)}
+.hash-detail{font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1044</div>
+  <h1>Longest Duplicate Substring</h1>
+  <p class="subtitle">Find the longest substring that appears at least twice in a given string <code>s</code>.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">Binary Search</span>
+    <span class="tag tag-pattern">Rabin-Karp Rolling Hash</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>Given a string <code>s</code>, find the <strong>longest substring</strong> that appears at least twice. The two occurrences may overlap.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Example: s = "banana"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          "an" appears at index 1 and 3 ✓<br>
+          "ana" appears at index 1 and 3 ✓<br>
+          "anan" appears at index 1 only ✗<br>
+          Answer: <strong>"ana"</strong> (length 3)
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Why is this Hard?</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          n up to 30,000<br>
+          Brute force: O(n³) — TLE<br>
+          Need: O(n log n) approach<br>
+          Key challenge: Compare all substrings fast
+        </p>
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight: The Monotonic Property</div>
+      <p>If a duplicate substring of length <strong>k</strong> exists, then a duplicate of length <strong>k−1</strong> also exists (just take any k-1 prefix of that substring). Conversely, if no duplicate of length k exists, no duplicate of length k+1 can exist. This <em>monotone binary structure</em> — "all shorter lengths are feasible, all longer lengths are not" — is the trigger for binary search on the answer.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Problem reformulation:</strong> Binary search on length <code>L</code>. For a candidate length <code>L</code>, check: "Does any substring of length <code>L</code> appear more than once?" If yes, L is feasible — try longer. If no, L is too large — try shorter. The check runs in O(n) using Rabin-Karp rolling hash.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> All characters identical (e.g., "aaa") → answer is s[:-1]. All distinct characters → answer is "". Single character → "". Overlapping duplicates are allowed.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Binary Search + Rabin-Karp Rolling Hash</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We combine two powerful ideas: <strong>binary search on the answer</strong> (the length) and <strong>Rabin-Karp rolling hash</strong> (fast substring comparison). Together they bring the solution from O(n³) to O(n log n).</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Binary search on length L</strong> in range [1, n−1]. Invariant: if a duplicate of length L exists, try L+1. If not, try L−1. Converge on the maximum feasible L. This takes O(log n) rounds.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Feasibility check via rolling hash:</strong> Slide a window of length L over s. Compute a polynomial hash for each window in O(1) per step (one addition and one removal). Store all seen hashes in a set. A collision means a duplicate exists.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Track the best result:</strong> When the feasibility check finds a match at positions i and j, record s[i:i+L] as the current best answer. After binary search converges, return the best recorded substring.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Handle hash collisions:</strong> When two hashes match, verify with actual string comparison s[i:i+L] == s[j:j+L]. In practice with large primes, collisions are near-impossible, but comparison makes the solution provably correct.</span>
+      </div>
+    </div>
+
+    <!-- Binary Search Convergence Diagram -->
+    <p style="margin-top:1.25rem;font-weight:600">Binary Search Convergence on length for "banana" (n=6):</p>
+    <div class="bs-diagram">
+      <div class="bs-row">
+        <div class="bs-label">Round 1</div>
+        <div class="bs-bar">
+          <div class="bs-seg lo">L=1</div>
+          <div class="bs-seg mid">L=3 (mid)</div>
+          <div class="bs-seg hi">L=5</div>
+        </div>
+      </div>
+      <div class="bs-annotation">mid=3: "ana" appears twice → feasible → lo=3, best="ana"</div>
+      <div class="bs-row" style="margin-top:10px">
+        <div class="bs-label">Round 2</div>
+        <div class="bs-bar">
+          <div class="bs-seg lo">L=3</div>
+          <div class="bs-seg mid">L=4 (mid)</div>
+          <div class="bs-seg hi">L=5</div>
+        </div>
+      </div>
+      <div class="bs-annotation">mid=4: "bana","anan","nana" — no duplicates → hi=3</div>
+      <div class="bs-row" style="margin-top:10px">
+        <div class="bs-label">Done</div>
+        <div class="bs-bar">
+          <div class="bs-seg neutral">lo = hi = 3</div>
+        </div>
+      </div>
+      <div class="bs-annotation">Binary search converges. Answer = "ana"</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Rolling Hash Formula</div>
+      <p>For a window [i, i+L), the hash is: <strong>H = (s[i]·BASE^(L-1) + s[i+1]·BASE^(L-2) + ... + s[i+L-1]) mod MOD</strong></p>
+      <p style="margin-top:0.5rem">Rolling update from position i to i+1: <strong>H_new = (H_old × BASE − s[i] × BASE^L + s[i+L]) mod MOD</strong></p>
+      <p style="margin-top:0.5rem">This computes each new hash in O(1) — the key insight that makes the check O(n).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works — The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Binary Search Invariant</div>
+      <p>At all times during binary search: <strong>lo ≤ answer ≤ hi</strong>. We maintain: any length ≤ current best is known feasible; any length > hi is known infeasible. When lo &gt; hi, the answer has been found.</p>
+    </div>
+
+    <p><strong>Why the monotone property holds:</strong> If "abc" appears twice, then "ab" also appears twice (at the same positions). So if length k is feasible, all lengths 1..k are feasible. This makes the search space a clean binary partition — exactly the condition for binary search to work.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Rolling Hash Invariant</div>
+      <p>At every window position i, the current hash value represents the polynomial fingerprint of <strong>s[i:i+L]</strong>. Two windows with identical hashes are the same string (with overwhelming probability). The seen-set tracks all fingerprints encountered so far — a hit means we found a duplicate at an earlier position.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why rolling hash is correct:</strong> The polynomial hash function is a linear transformation over the string characters. When we slide the window right by one position, we: (1) multiply the entire sum by BASE (shifting all characters left), (2) subtract the contribution of the character that left the window, (3) add the new character. The result is identical to computing the hash of the new window from scratch — but in O(1) instead of O(L).</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Hash Collisions</div>
+      <p>Two different strings can produce the same hash (a collision). Use a large prime MOD (e.g., 2^61−1) and verify with actual string comparison on collision. Alternatively, use double hashing (two different MOD values) to reduce false-positive probability to near zero.</p>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Edge case — lo=0:</strong> When lo stays 0 throughout (no feasible length found at all), the answer is "" — no duplicate substring exists.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3b: Algorithm Deep-Dive                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3b</span>
+    <span class="section-title">🔬 Algorithm Deep-Dive: Binary Search + Rabin-Karp</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="deepdive-box">
+      <div class="deepdive-title">Binary Search on Answer</div>
+      <p><strong>Origin:</strong> Classical technique. Any time you need to find the optimal value and the feasibility function is monotone (true for all values below a threshold, false above), binary search on the value is applicable.</p>
+      <p><strong>Core invariant:</strong> lo is always a feasible length (or 0), hi is always an infeasible length (or n). Every iteration halves the search space. After O(log n) rounds, lo and hi converge.</p>
+      <p><strong>When to recognize it:</strong> "Find the maximum/minimum X such that condition(X) holds" where condition is monotone. Typical signals: "minimum time", "maximum length", "smallest k".</p>
+      <p><strong>Generalization:</strong> Binary search on answer can be combined with ANY O(n) feasibility check. Here it's rolling hash; elsewhere it could be BFS, two-pointer, greedy, etc.</p>
+    </div>
+
+    <div class="deepdive-box" style="margin-top:1rem">
+      <div class="deepdive-title">Rabin-Karp Rolling Hash</div>
+      <p><strong>Origin:</strong> Michael O. Rabin and Richard M. Karp, 1987. Originally designed for multi-pattern string search, but the rolling hash mechanism is universally applicable to any fixed-window substring comparison.</p>
+      <p><strong>Core invariant:</strong> For any window [i, i+L), H(i) = Σ s[i+k] × BASE^(L-1-k) mod MOD for k in [0, L). The rolling update H(i+1) = (H(i) × BASE − s[i] × BASE^L + s[i+L]) mod MOD preserves this invariant in O(1).</p>
+      <p><strong>Why it works:</strong> Polynomial hashing is a homomorphism — the hash of a concatenation and the hash of its parts are related by simple arithmetic. Sliding the window = one multiply + one add + one subtract. No re-traversal of the window is needed.</p>
+      <p><strong>When to recognize it:</strong> "Find repeated/matching substrings of fixed length." "Does pattern P appear in text T?" "Are two windows of the same string identical?" Any problem requiring O(1) window-to-window comparison.</p>
+      <p><strong>Generalization:</strong> 2D Rabin-Karp for matrix pattern matching. Multi-hash for near-zero collision probability. Z-algorithm and KMP solve similar problems with different tradeoffs (exact, no collisions, but O(n+m) per query vs. O(n) amortized for Rabin-Karp).</p>
+    </div>
+
+    <div class="ann-code">
+<div class="ann-line"><span class="acode"># Rolling Hash Template</span></div>
+<div class="ann-line"><span class="acode">MOD = (1 &lt;&lt; 61) - 1  </span><span class="aann">← Mersenne prime — large, fast modular arithmetic</span></div>
+<div class="ann-line"><span class="acode">BASE = 31             </span><span class="aann">← Larger than alphabet size (26 for a-z)</span></div>
+<div class="ann-line"><span class="acode">h = 0                 </span><span class="aann">← Initial hash for empty window</span></div>
+<div class="ann-line"><span class="acode">power = 1             </span><span class="aann">← BASE^L mod MOD (precompute for the remove step)</span></div>
+<div class="ann-line"><span class="acode">for i in range(L):</span></div>
+<div class="ann-line"><span class="acode">    h = (h * BASE + ord(s[i])) % MOD  </span><span class="aann">← Build initial window hash</span></div>
+<div class="ann-line"><span class="acode">    power = power * BASE % MOD         </span><span class="aann">← power = BASE^L</span></div>
+<div class="ann-line"><span class="acode">seen = {h: 0}                          </span><span class="aann">← Map hash → start index for O(1) lookup</span></div>
+<div class="ann-line"><span class="acode">for i in range(1, n - L + 1):</span></div>
+<div class="ann-line"><span class="acode">    h = (h * BASE - ord(s[i-1]) * power + ord(s[i+L-1])) % MOD</span></div>
+<div class="ann-line"><span class="acode">    if h in seen: </span><span class="aann">← Hash collision → potential duplicate</span></div>
+<div class="ann-line"><span class="acode">        if s[seen[h]:seen[h]+L] == s[i:i+L]: return s[i:i+L]</span></div>
+<div class="ann-line"><span class="acode">    seen[h] = i</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Binary Search + Rabin-Karp (Optimal, O(n log n))</strong> — Interview Pick</p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestDupSubstring(s: str) -> str:</span></div>
+<div class="ann-line"><span class="acode">    n = len(s)                          </span><span class="aann">← Input length</span></div>
+<div class="ann-line"><span class="acode">    MOD = (1 &lt;&lt; 61) - 1                 </span><span class="aann">← 2^61 - 1: large Mersenne prime for low collision probability</span></div>
+<div class="ann-line"><span class="acode">    BASE = 131                           </span><span class="aann">← Base > 128 (all ASCII values) ensures unique char encoding</span></div>
+<div class="ann-line"><span class="acode">    nums = [ord(c) for c in s]          </span><span class="aann">← Convert chars to numbers once (reuse across all hash calls)</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    def check(L):</span></div>
+<div class="ann-line"><span class="acode">        # Build initial hash for window s[0:L]</span></div>
+<div class="ann-line"><span class="acode">        h, power = 0, 1</span></div>
+<div class="ann-line"><span class="acode">        for i in range(L):</span></div>
+<div class="ann-line"><span class="acode">            h = (h * BASE + nums[i]) % MOD  </span><span class="aann">← Horner's method for polynomial evaluation</span></div>
+<div class="ann-line"><span class="acode">            power = power * BASE % MOD       </span><span class="aann">← power = BASE^L after loop</span></div>
+<div class="ann-line"><span class="acode">        seen = {h: 0}                        </span><span class="aann">← Hash → start index; 0 is the start of the first window</span></div>
+<div class="ann-line"><span class="acode">        for i in range(1, n - L + 1):</span></div>
+<div class="ann-line"><span class="acode">            # Roll: remove s[i-1], add s[i+L-1]</span></div>
+<div class="ann-line"><span class="acode">            h = (h * BASE - nums[i-1] * power + nums[i+L-1]) % MOD</span></div>
+<div class="ann-line"><span class="acode">            if h in seen:</span></div>
+<div class="ann-line"><span class="acode">                j = seen[h]                  </span><span class="aann">← j is the earlier occurrence's start index</span></div>
+<div class="ann-line"><span class="acode">                if s[j:j+L] == s[i:i+L]:    </span><span class="aann">← Confirm: not a hash collision</span></div>
+<div class="ann-line"><span class="acode">                    return s[i:i+L]          </span><span class="aann">← Return the actual duplicate substring</span></div>
+<div class="ann-line"><span class="acode">            seen[h] = i</span></div>
+<div class="ann-line"><span class="acode">        return ""                             </span><span class="aann">← No duplicate of length L found</span></div>
+<div class="ann-line"><span class="acode">    </span></div>
+<div class="ann-line"><span class="acode">    lo, hi = 1, n - 1                   </span><span class="aann">← Min possible duplicate length=1; max=n-1</span></div>
+<div class="ann-line"><span class="acode">    ans = ""</span></div>
+<div class="ann-line"><span class="acode">    while lo &lt;= hi:</span></div>
+<div class="ann-line"><span class="acode">        mid = (lo + hi) // 2</span></div>
+<div class="ann-line"><span class="acode">        result = check(mid)</span></div>
+<div class="ann-line"><span class="acode">        if result:                           </span><span class="aann">← Feasible: a duplicate of length mid exists</span></div>
+<div class="ann-line"><span class="acode">            ans = result                     </span><span class="aann">← Update best answer</span></div>
+<div class="ann-line"><span class="acode">            lo = mid + 1                     </span><span class="aann">← Try to find a longer duplicate</span></div>
+<div class="ann-line"><span class="acode">        else:</span></div>
+<div class="ann-line"><span class="acode">            hi = mid - 1                     </span><span class="aann">← No duplicate of this length; try shorter</span></div>
+<div class="ann-line"><span class="acode">    return ans                               </span><span class="aann">← Best duplicate substring found</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Pitfall: Negative Hash Values</div>
+      <p>The rolling step <code>h * BASE - nums[i-1] * power</code> can go negative in Python due to Python's integer semantics. Always apply <code>% MOD</code> <em>after</em> the entire expression, and in Python specifically, <code>% MOD</code> always returns a non-negative result (Python's modulo preserves sign of divisor, not dividend). In C++/Java you'd need an extra <code>+ MOD</code> before the final <code>% MOD</code>.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (O(n³) — for conceptual clarity only)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def longestDupSubstring_brute(s: str) -> str:</span></div>
+<div class="ann-line"><span class="acode">    n = len(s)</span></div>
+<div class="ann-line"><span class="acode">    ans = ""</span></div>
+<div class="ann-line"><span class="acode">    for length in range(n, 0, -1):          </span><span class="aann">← Try from longest to shortest</span></div>
+<div class="ann-line"><span class="acode">        seen = set()</span></div>
+<div class="ann-line"><span class="acode">        for i in range(n - length + 1):     </span><span class="aann">← O(n) windows per length</span></div>
+<div class="ann-line"><span class="acode">            sub = s[i:i+length]             </span><span class="aann">← O(L) string slice — the O(n³) culprit</span></div>
+<div class="ann-line"><span class="acode">            if sub in seen: return sub      </span><span class="aann">← First match is the longest duplicate</span></div>
+<div class="ann-line"><span class="acode">            seen.add(sub)</span></div>
+<div class="ann-line"><span class="acode">    return ""</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Brute Force:</strong> Time O(n³) — n lengths × n windows × O(n) hash of string slice. TLE on n=30,000.<br>
+        <strong>Binary Search + Rolling Hash:</strong> Time O(n log n) — O(log n) binary search rounds × O(n) rolling hash check. Space O(n) for the seen-set.<br>
+        <strong>Suffix Array (advanced):</strong> Time O(n log n) or O(n) with SA-IS. Space O(n). More complex to implement — not expected in interviews.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Brute Force and Its Bottleneck</div>
+        <p style="font-size:14px;color:var(--text)">"The brute force tries all O(n²) substrings and stores them in a set. Checking membership is O(L) for string hashing. Total: O(n³). For n=30,000 that's 27 billion operations — won't work. The bottleneck is the number of substrings we check."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Spot the Monotone Property → Binary Search on Length</div>
+        <p style="font-size:14px;color:var(--text)">"I notice: if a duplicate of length k exists, then length k−1 also works. This monotone structure means I can binary search on the length. Instead of checking ALL lengths, I do O(log n) rounds. Each round I just need to check: 'does any window of length mid appear twice?'"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Recognize the Feasibility Check Bottleneck → Rolling Hash</div>
+        <p style="font-size:14px;color:var(--text)">"The feasibility check — finding if any substring of length L repeats — requires comparing all n windows. Naively that's O(n·L). To make it O(n), I use Rabin-Karp rolling hash: compute the first window's hash in O(L), then slide in O(1) per step. Total check: O(n). Total solution: O(n log n)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Address Hash Collision Risk</div>
+        <p style="font-size:14px;color:var(--text)">"Use a large Mersenne prime like 2^61−1. When hashes collide, confirm with actual string comparison. Alternatively, use double hashing with two independent (BASE, MOD) pairs — reduces false positive probability to ~1/MOD² ≈ 10^−37."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"I see the monotone property: if length k has a duplicate, length k-1 does too.<br>
+That means I can binary search on the length — O(log n) rounds.<br>
+For each candidate length mid, I need to check in O(n) if any window repeats.<br>
+I'll use Rabin-Karp rolling hash: O(L) to build the first hash, then O(1) per slide.<br>
+Store all hashes in a set. A collision means a duplicate — confirm with string equality.<br>
+Total: O(n log n) time, O(n) space. BASE=131, MOD=2^61−1 for collision resistance."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if we want ALL duplicate substrings?"</strong> → Run check for every length; collect all matches. O(n² log n) — suffix array is better.</li>
+        <li><strong>"What if characters are Unicode (not just lowercase a-z)?"</strong> → Use ord(c) directly; just choose BASE > max Unicode code point.</li>
+        <li><strong>"Can you solve it with suffix arrays?"</strong> → Build SA + LCP array in O(n log n); answer is max LCP value. More code complexity, same complexity.</li>
+        <li><strong>"How do you handle hash collisions provably?"</strong> → Double hashing or confirm with string comparison (shown in code).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: s = "banana"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- String visualization -->
+      <div style="margin-bottom:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">String: "banana"</div>
+      <div class="str-row" id="str-cells"></div>
+      <div class="idx-row-viz" id="str-idx"></div>
+
+      <!-- Window label row -->
+      <div style="margin-top:14px;margin-bottom:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">Window highlight</div>
+      <div id="window-label" style="font-family:var(--mono);font-size:13px;color:var(--blue-mid);font-weight:600;min-height:20px"> </div>
+
+      <!-- Hash display -->
+      <div id="hash-display" class="hash-display" style="margin-top:10px">
+        <span class="hash-label">Current Hash</span>
+        <span class="hash-val" id="hv-current">—</span>
+        <span class="hash-detail" id="hv-detail"> </span>
+      </div>
+      <div id="seen-display" style="font-size:12px;color:var(--text2);margin-top:8px;font-family:var(--mono)">seen: {}</div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-lo">
+          <span class="var-name">lo</span>
+          <span class="var-val" id="vv-lo">1</span>
+        </div>
+        <div class="var-box" id="vb-hi">
+          <span class="var-name">hi</span>
+          <span class="var-val" id="vv-hi">5</span>
+        </div>
+        <div class="var-box" id="vb-mid">
+          <span class="var-name">mid</span>
+          <span class="var-val" id="vv-mid">—</span>
+        </div>
+        <div class="var-box" id="vb-ans">
+          <span class="var-name">best</span>
+          <span class="var-val" id="vv-ans">""</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">lo, hi = 1, n - 1</div>
+      <div class="code-line" id="cl-1">ans = ""</div>
+      <div class="code-line" id="cl-2">while lo &lt;= hi:</div>
+      <div class="code-line" id="cl-3">    mid = (lo + hi) // 2</div>
+      <div class="code-line" id="cl-4">    result = check(mid)  # build hash for first window</div>
+      <div class="code-line" id="cl-5">    result = check(mid)  # roll hash over remaining windows</div>
+      <div class="code-line" id="cl-6">    result = check(mid)  # hash seen → duplicate found!</div>
+      <div class="code-line" id="cl-7">    if result:  # feasible</div>
+      <div class="code-line" id="cl-8">        ans = result; lo = mid + 1  # try longer</div>
+      <div class="code-line" id="cl-9">    else:  # infeasible</div>
+      <div class="code-line" id="cl-10">        hi = mid - 1  # try shorter</div>
+      <div class="code-line" id="cl-11">return ans</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 14</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the binary search + rolling hash algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-win"></div> Current window</div>
+      <div class="legend-item"><div class="legend-swatch sw-ma"></div> Duplicate match (first occurrence)</div>
+      <div class="legend-item"><div class="legend-swatch sw-mb"></div> Duplicate match (second occurrence)</div>
+      <div class="legend-item"><div class="legend-swatch sw-done"></div> Processed / outside window</div>
+      <div class="legend-item"><div class="legend-swatch sw-res"></div> Final answer</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Extensions                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Binary search on the answer requires a monotone feasibility function — here: "if length k works, k−1 works too"</div>
+      <div class="takeaway">Rabin-Karp rolling hash computes each new window hash in O(1), making the check O(n) instead of O(n²)</div>
+      <div class="takeaway">Use a Mersenne prime MOD for fast modular arithmetic and near-zero collision probability</div>
+      <div class="takeaway">Always verify hash matches with actual string comparison to handle the rare collision case</div>
+      <div class="takeaway">Binary search runs O(log n) rounds × O(n) check = O(n log n) total — 100× faster than brute force for n=30,000</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force</td>
+          <td class="mark-bad">O(n³)</td>
+          <td>O(n²)</td>
+          <td>TLE for n &gt; 1000</td>
+        </tr>
+        <tr>
+          <td><strong>Binary Search + Rolling Hash ✓</strong></td>
+          <td class="mark-good">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Optimal for interviews; practical and implementable</td>
+        </tr>
+        <tr>
+          <td>Suffix Array + LCP</td>
+          <td class="mark-good">O(n log n)</td>
+          <td>O(n)</td>
+          <td>Asymptotically equal but complex; not expected in interviews</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize: Binary Search on Answer</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Find the maximum/minimum value of X" — binary search on X, check feasibility</li>
+        <li>Feasibility function must be monotone (threshold behavior)</li>
+        <li>Checking one value is cheap but checking all is too slow</li>
+        <li>Classic examples: Koko Eating Bananas, Capacity to Ship Packages, Minimum Days to Make Bouquets</li>
+      </ul>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🎯 When to Recognize: Rabin-Karp Rolling Hash</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Fixed-length window substring comparison (O(L) → O(1) per slide)</li>
+        <li>Check if any of n windows repeats</li>
+        <li>Pattern P in text T (classic string search)</li>
+        <li>Classic examples: Repeated DNA Sequences, Longest Repeated Substring, Find All Anagrams</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: Binary Search + Rabin-Karp)</div>
+      <div class="related-item"><strong>Repeated DNA Sequences</strong><span class="related-diff diff-med">Medium</span> — Fixed L=10 rolling hash; find all substrings appearing 3+ times (#187)</div>
+      <div class="related-item"><strong>Longest Repeated Substring</strong><span class="related-diff diff-hard">Hard</span> — Direct sibling problem; same technique but different constraint (#)</div>
+      <div class="related-item"><strong>Koko Eating Bananas</strong><span class="related-diff diff-med">Medium</span> — Binary search on answer; O(n) feasibility check (#875)</div>
+      <div class="related-item"><strong>Capacity to Ship Packages Within D Days</strong><span class="related-diff diff-med">Medium</span> — Binary search on capacity; O(n) greedy check (#1011)</div>
+      <div class="related-item"><strong>Find the Duplicate Number</strong><span class="related-diff diff-med">Medium</span> — Binary search on value + count-based feasibility (#287)</div>
+      <div class="related-item"><strong>Minimum Window Substring</strong><span class="related-diff diff-hard">Hard</span> — Sliding window with character matching; similar window reasoning (#76)</div>
+      <div class="related-item"><strong>Longest Happy Prefix</strong><span class="related-diff diff-hard">Hard</span> — Rolling hash for prefix = suffix matching; Rabin-Karp on both ends (#1392)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 9 (Binary Search) + Section 2 (String Processing)<br>
+      Sub-Pattern: <strong>Binary Search + Rabin-Karp</strong> · Source: Analysis (composite technique)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+const STR = "banana";
+const N = STR.length;
+
+/* Step data for the walkthrough
+   We walk through:
+   - Init
+   - Round 1: mid=3 → check("ana") found
+   - Round 2: mid=4 → no duplicate
+   - Converge → return "ana"
+*/
+const steps = [
+  {
+    id:0,phase:'init',phaseLabel:'INIT',phaseClass:'phase-init',
+    lo:1,hi:5,mid:null,ans:'""',
+    window:null,matchA:null,matchB:null,
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:0,
+    title:'Initialize Binary Search',
+    text:'s = "banana" (n=6). We binary search on length L in range [1, n-1] = [1, 5]. lo=1, hi=5. We want the largest L for which a duplicate substring of that length exists.'
+  },
+  {
+    id:1,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    lo:1,hi:5,mid:3,ans:'""',
+    window:null,matchA:null,matchB:null,
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:3,
+    title:'Round 1: mid = (1+5)//2 = 3',
+    text:'First binary search round. mid = (1+5)//2 = 3. We ask: "Does any substring of length 3 appear twice in banana?" Call check(3).'
+  },
+  {
+    id:2,phase:'hash',phaseLabel:'CHECK L=3',phaseClass:'phase-hash',
+    lo:1,hi:5,mid:3,ans:'""',
+    window:[0,2],matchA:null,matchB:null,
+    hashCurrent:'H₀',hashDetail:'hash("ban") = 98*131² + 97*131 + 110 mod MOD',seenMap:{'H₀':0},
+    activeLine:4,
+    title:'check(3): Build hash for s[0:3] = "ban"',
+    text:'Compute rolling hash for the first window "ban". Use Horner\'s method: h = ((98*131 + 97)*131 + 110) mod MOD. Store H₀ → index 0 in seen. No collision yet.'
+  },
+  {
+    id:3,phase:'hash',phaseLabel:'CHECK L=3',phaseClass:'phase-hash',
+    lo:1,hi:5,mid:3,ans:'""',
+    window:[1,3],matchA:null,matchB:null,
+    hashCurrent:'H₁',hashDetail:'Roll: remove b, add a → hash("ana")',seenMap:{'H₀':0,'H₁':1},
+    activeLine:5,
+    title:'check(3): Roll to s[1:4] = "ana"',
+    text:'Slide window right by 1. Rolling update: H₁ = (H₀ * 131 - ord("b") * 131³ + ord("a")) mod MOD. This is hash("ana"). H₁ not in seen → store H₁ → index 1.'
+  },
+  {
+    id:4,phase:'hash',phaseLabel:'CHECK L=3',phaseClass:'phase-hash',
+    lo:1,hi:5,mid:3,ans:'""',
+    window:[2,4],matchA:null,matchB:null,
+    hashCurrent:'H₂',hashDetail:'Roll: remove a, add n → hash("nan")',seenMap:{'H₀':0,'H₁':1,'H₂':2},
+    activeLine:5,
+    title:'check(3): Roll to s[2:5] = "nan"',
+    text:'Slide again. H₂ = hash("nan"). H₂ not in seen → store H₂ → index 2. Three windows checked, no collision yet.'
+  },
+  {
+    id:5,phase:'hash',phaseLabel:'CHECK L=3',phaseClass:'phase-hash',
+    lo:1,hi:5,mid:3,ans:'""',
+    window:[3,5],matchA:[1,3],matchB:[3,5],
+    hashCurrent:'H₃ = H₁',hashDetail:'COLLISION! hash("ana") already in seen at index 1',seenMap:{'H₀':0,'H₁':1,'H₂':2,'H₃=H₁':3},
+    activeLine:6,
+    title:'check(3): Roll to s[3:6] = "ana" → COLLISION!',
+    text:'H₃ = hash("ana") = H₁ — already in seen at index 1! Confirm: s[1:4] == s[3:6]? "ana" == "ana" ✓. Duplicate found! Return "ana".'
+  },
+  {
+    id:6,phase:'found',phaseLabel:'FEASIBLE',phaseClass:'phase-found',
+    lo:4,hi:5,mid:3,ans:'"ana"',
+    window:null,matchA:[1,3],matchB:[3,5],
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:8,
+    title:'check(3) returned "ana" → update best, lo = mid+1 = 4',
+    text:'check(3) found duplicate "ana". This length is feasible. ans = "ana". Try longer: lo = 3+1 = 4. Now search in [4, 5].'
+  },
+  {
+    id:7,phase:'bs',phaseLabel:'BINARY SEARCH',phaseClass:'phase-bs',
+    lo:4,hi:5,mid:4,ans:'"ana"',
+    window:null,matchA:null,matchB:null,
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:3,
+    title:'Round 2: mid = (4+5)//2 = 4',
+    text:'Next round. mid = (4+5)//2 = 4. Ask: "Does any substring of length 4 appear twice?" Call check(4). Windows of length 4: "bana", "anan", "nana".'
+  },
+  {
+    id:8,phase:'hash',phaseLabel:'CHECK L=4',phaseClass:'phase-hash',
+    lo:4,hi:5,mid:4,ans:'"ana"',
+    window:[0,3],matchA:null,matchB:null,
+    hashCurrent:'H₀',hashDetail:'hash("bana")',seenMap:{'H₀':0},
+    activeLine:4,
+    title:'check(4): First window s[0:4] = "bana"',
+    text:'Build hash for "bana". Store H₀ → 0. Not seen before.'
+  },
+  {
+    id:9,phase:'hash',phaseLabel:'CHECK L=4',phaseClass:'phase-hash',
+    lo:4,hi:5,mid:4,ans:'"ana"',
+    window:[1,4],matchA:null,matchB:null,
+    hashCurrent:'H₁',hashDetail:'hash("anan")',seenMap:{'H₀':0,'H₁':1},
+    activeLine:5,
+    title:'check(4): Roll to s[1:5] = "anan"',
+    text:'Roll hash: remove "b", add "n" → hash("anan") = H₁. H₁ not in seen → store H₁ → 1.'
+  },
+  {
+    id:10,phase:'hash',phaseLabel:'CHECK L=4',phaseClass:'phase-hash',
+    lo:4,hi:5,mid:4,ans:'"ana"',
+    window:[2,5],matchA:null,matchB:null,
+    hashCurrent:'H₂',hashDetail:'hash("nana") — not in seen',seenMap:{'H₀':0,'H₁':1,'H₂':2},
+    activeLine:5,
+    title:'check(4): Roll to s[2:6] = "nana"',
+    text:'Roll hash: remove "a", add "a" → hash("nana") = H₂. H₂ not in seen → store H₂ → 2. All windows of length 4 checked. No collision. Return "".'
+  },
+  {
+    id:11,phase:'bs',phaseLabel:'INFEASIBLE',phaseClass:'phase-bs',
+    lo:4,hi:3,mid:4,ans:'"ana"',
+    window:null,matchA:null,matchB:null,
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:10,
+    title:'check(4) returned "" → hi = mid-1 = 3',
+    text:'No duplicate of length 4 exists. hi = 4-1 = 3. Now lo=4 > hi=3. Binary search loop exits!'
+  },
+  {
+    id:12,phase:'bs',phaseLabel:'CONVERGED',phaseClass:'phase-bs',
+    lo:4,hi:3,mid:null,ans:'"ana"',
+    window:null,matchA:null,matchB:null,
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:2,
+    title:'Binary search converged (lo > hi)',
+    text:'lo=4 > hi=3. The while condition lo ≤ hi is False. Loop exits. The maximum feasible length was 3. Best answer recorded is "ana".'
+  },
+  {
+    id:13,phase:'result',phaseLabel:'RETURN',phaseClass:'phase-result',
+    lo:4,hi:3,mid:null,ans:'"ana"',
+    window:null,matchA:[1,3],matchB:[3,5],
+    hashCurrent:'—',hashDetail:'',seenMap:{},
+    activeLine:11,
+    title:'Return "ana" ✓',
+    text:'Return ans = "ana". This is the longest substring that appears at least twice in "banana". It appears at index 1 ("ana" = s[1:4]) and at index 3 ("ana" = s[3:6]).'
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  const strRow = document.getElementById('str-cells');
+  const idxRow = document.getElementById('str-idx');
+  for (let i = 0; i < N; i++) {
+    const c = document.createElement('div');
+    c.className = 'str-cell normal';
+    c.id = 'sc-' + i;
+    c.textContent = STR[i];
+    strRow.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-cell';
+    ix.textContent = i;
+    idxRow.appendChild(ix);
+  }
+
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+
+  // ── String cells ──
+  for (let i = 0; i < N; i++) {
+    const cell = document.getElementById('sc-' + i);
+    cell.className = 'str-cell';
+
+    if (step.phase === 'result') {
+      if (step.matchA && i >= step.matchA[0] && i <= step.matchA[1]) {
+        cell.classList.add('match-a');
+      } else if (step.matchB && i >= step.matchB[0] && i <= step.matchB[1]) {
+        cell.classList.add('match-b');
+      } else {
+        cell.classList.add('done');
+      }
+    } else if (step.matchA && step.matchB) {
+      if (i >= step.matchA[0] && i <= step.matchA[1]) {
+        cell.classList.add('match-a');
+      } else if (i >= step.matchB[0] && i <= step.matchB[1]) {
+        cell.classList.add('match-b');
+      } else {
+        cell.classList.add('done');
+      }
+    } else if (step.window && i >= step.window[0] && i <= step.window[1]) {
+      cell.classList.add('window');
+    } else {
+      cell.classList.add('normal');
+    }
+  }
+
+  // ── Window label ──
+  const wlEl = document.getElementById('window-label');
+  if (step.window) {
+    const sub = STR.substring(step.window[0], step.window[1] + 1);
+    wlEl.textContent = `Window s[${step.window[0]}:${step.window[1]+1}] = "${sub}"`;
+  } else if (step.matchA && step.matchB) {
+    wlEl.textContent = `Match: "${STR.substring(step.matchA[0], step.matchA[1]+1)}" at [${step.matchA[0]},${step.matchA[1]}] and [${step.matchB[0]},${step.matchB[1]}]`;
+  } else {
+    wlEl.textContent = ' ';
+  }
+
+  // ── Hash display ──
+  document.getElementById('hv-current').textContent = step.hashCurrent;
+  document.getElementById('hv-detail').textContent = step.hashDetail;
+
+  // ── Seen map ──
+  const seenKeys = Object.keys(step.seenMap);
+  const seenStr = seenKeys.length === 0 ? 'seen: {}' :
+    'seen: {' + seenKeys.map(k => `${k}→${step.seenMap[k]}`).join(', ') + '}';
+  document.getElementById('seen-display').textContent = seenStr;
+
+  // ── Variable tracker ──
+  const setVar = (id, val, changed) => {
+    const el = document.getElementById('vb-' + id);
+    document.getElementById('vv-' + id).textContent = String(val);
+    el.classList.toggle('changed', changed);
+  };
+  const prev = current > 0 ? steps[current - 1] : null;
+  setVar('lo', step.lo, prev && step.lo !== prev.lo);
+  setVar('hi', step.hi, prev && step.hi !== prev.hi);
+  setVar('mid', step.mid !== null ? step.mid : '—', prev && step.mid !== prev.mid);
+  setVar('ans', step.ans, prev && step.ans !== prev.ans);
+
+  // ── Code panel ──
+  for (let i = 0; i <= 11; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>

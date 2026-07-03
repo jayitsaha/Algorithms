@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#308 · Range Sum Query 2D - Mutable</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-medium{background:var(--amber-bg);color:var(--amber-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── 2D Matrix Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.matrix-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;text-align:center}
+.matrix-wrapper{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.matrix-block{display:flex;flex-direction:column;align-items:center}
+.matrix-block-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px}
+.matrix-grid{display:inline-flex;flex-direction:column;gap:4px}
+.matrix-row{display:flex;gap:4px}
+.mcell{
+  width:46px;height:40px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.35s,border-color 0.35s,color 0.35s;
+  flex-shrink:0;
+}
+.mcell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.mcell.updated{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.mcell.queried{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.mcell.bit-affected{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.mcell.bit-current{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.mcell.result-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.mcell.dim{opacity:0.3}
+
+/* column header row */
+.col-headers{display:flex;gap:4px;margin-bottom:4px}
+.col-hdr{width:46px;text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);font-weight:600}
+.row-hdr{width:28px;text-align:center;font-size:11px;color:var(--text3);font-family:var(--mono);font-weight:600;display:flex;align-items:center;justify-content:center}
+.matrix-row-with-hdr{display:flex;align-items:center;gap:4px}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-update{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-query{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-bit{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-normal{background:var(--surface);border-color:var(--border2)}
+.sw-updated{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-queried{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-bit{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-current{background:var(--cyan-bg);border-color:var(--cyan-border)}
+.sw-result{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── BIT Diagram ── */
+.bit-diagram{background:var(--bg2);border-radius:var(--radius);padding:1.25rem;margin:1rem 0;overflow-x:auto}
+.bit-diagram-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:12px}
+.bit-tree{display:flex;flex-direction:column;gap:8px}
+.bit-level{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.bit-node{padding:6px 10px;border-radius:6px;background:var(--surface);border:2px solid var(--border2);font-family:var(--mono);font-size:11px;text-align:center;min-width:54px}
+.bit-node.range-1{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue-text)}
+.bit-node.range-2{border-color:var(--green-border);background:var(--green-bg);color:var(--green-text)}
+.bit-node.range-4{border-color:var(--purple-border);background:var(--purple-bg);color:var(--purple-text)}
+.bit-node.range-8{border-color:var(--amber-border);background:var(--amber-bg);color:var(--amber-text)}
+.bit-node-label{font-size:9px;color:var(--text3);margin-top:2px}
+
+/* ── Recurrence Box ── */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2.2;color:var(--cyan-text)}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #308</div>
+  <h1>Range Sum Query 2D - Mutable</h1>
+  <p class="subtitle">Design a data structure that supports both submatrix sum queries and point updates in O(log²n) time.</p>
+  <div class="tags">
+    <span class="tag tag-medium">Medium</span>
+    <span class="tag tag-pattern">Advanced Data Structures</span>
+    <span class="tag tag-pattern">2D BIT</span>
+    <span class="tag tag-complexity">Update: O(log²n)</span>
+    <span class="tag tag-complexity">Query: O(log²n)</span>
+  </div>
+</header>
+
+<!-- SECTION 1: Understanding the Problem -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You are given an <code>m × n</code> matrix of integers. You need to build a data structure that supports two operations efficiently:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;line-height:2">
+      <li><strong>update(row, col, val)</strong> — change the value at <code>matrix[row][col]</code> to <code>val</code></li>
+      <li><strong>sumRegion(row1, col1, row2, col2)</strong> — return the sum of all elements in the rectangle whose top-left corner is <code>(row1, col1)</code> and bottom-right corner is <code>(row2, col2)</code></li>
+    </ul>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is the 2D generalisation of the classic "Range Sum Query - Mutable" (LC 307). A 1D BIT (Binary Indexed Tree / Fenwick Tree) answers point-update + prefix-sum queries in O(log n). Extending it to 2D gives us O(log² n) for both operations — far better than naïvely recomputing.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box before">
+        <div class="panel-title">✗ Naïve approach</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          Update:  O(1)<br>
+          Query:   O(m·n) per call<br>
+          Problem: too slow when queries >> updates
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ 2D BIT approach</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          Update:  O(log m · log n)<br>
+          Query:   O(log m · log n)<br>
+          Perfect when both ops are frequent!
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Concrete example:</strong> matrix = [[3,0,1,4,2],[5,6,3,2,1],[1,2,0,1,5],[4,1,0,1,7],[1,0,3,0,5]]. Query sumRegion(2,1,4,3) → elements at rows 2–4, cols 1–3 → 2+0+1 + 1+0+1 + 0+3+0 = <strong>8</strong>. After update(3,2,2) → that 0 becomes 2, same query returns <strong>10</strong>.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge cases:</strong> 1×1 matrix; query covering the full matrix; multiple updates to the same cell; update to value 0.</p>
+  </div>
+</div>
+
+<!-- SECTION 2: The Algorithm -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: 2D Binary Indexed Tree (Fenwick Tree)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A <strong>Binary Indexed Tree (BIT / Fenwick Tree)</strong> stores a compact representation of prefix sums that can be updated and queried in O(log n). In 2D, we nest two BITs — one for each axis — giving O(log m · log n) per operation.</p>
+
+    <div class="bit-diagram">
+      <div class="bit-diagram-title">1D BIT — Responsibility Ranges (for n=8)</div>
+      <div class="bit-tree">
+        <div class="bit-level">
+          <div class="bit-node range-8">BIT[8]<div class="bit-node-label">covers [1..8]</div></div>
+        </div>
+        <div class="bit-level">
+          <div class="bit-node range-4">BIT[4]<div class="bit-node-label">covers [1..4]</div></div>
+          <div class="bit-node range-4">BIT[12]<div class="bit-node-label">covers [9..12]</div></div>
+        </div>
+        <div class="bit-level">
+          <div class="bit-node range-2">BIT[2]<div class="bit-node-label">covers [1..2]</div></div>
+          <div class="bit-node range-2">BIT[6]<div class="bit-node-label">covers [5..6]</div></div>
+          <div class="bit-node range-2">BIT[10]<div class="bit-node-label">covers [9..10]</div></div>
+          <div class="bit-node range-2">BIT[14]<div class="bit-node-label">covers [13..14]</div></div>
+        </div>
+        <div class="bit-level">
+          <div class="bit-node range-1">BIT[1]<div class="bit-node-label">[1..1]</div></div>
+          <div class="bit-node range-1">BIT[3]<div class="bit-node-label">[3..3]</div></div>
+          <div class="bit-node range-1">BIT[5]<div class="bit-node-label">[5..5]</div></div>
+          <div class="bit-node range-1">BIT[7]<div class="bit-node-label">[7..7]</div></div>
+          <div class="bit-node range-1">BIT[9]<div class="bit-node-label">[9..9]</div></div>
+          <div class="bit-node range-1">BIT[11]<div class="bit-node-label">[11..11]</div></div>
+          <div class="bit-node range-1">BIT[13]<div class="bit-node-label">[13..13]</div></div>
+          <div class="bit-node range-1">BIT[15]<div class="bit-node-label">[15..15]</div></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:10px;text-align:center">Each BIT node at index <em>i</em> covers <em>lowbit(i) = i &amp; (-i)</em> elements. Node 6 (110₂) → lowbit = 2 → covers 2 elements.</p>
+    </div>
+
+    <p style="margin-top:1rem">The key operation is <code>lowbit(i) = i &amp; (-i)</code> — the lowest set bit of <code>i</code> in binary. It determines how many positions each BIT node "covers".</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Build:</strong> Initialise a 2D array <code>bit[m+1][n+1]</code> of zeros (1-indexed). Process each matrix cell via <code>update(r, c, matrix[r][c])</code>. This builds the BIT in O(mn log m log n).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Point update <code>update(r, c, val)</code>:</strong> Compute <code>delta = val - self.mat[r][c]</code>. Store the new raw value. Then propagate delta up through the BIT: outer loop steps through row indices (add lowbit), inner loop steps through column indices (add lowbit).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Prefix sum <code>_prefix(r, c)</code>:</strong> Walk backwards through BIT (subtract lowbit) for both row and column to accumulate sum for top-left rectangle [0..r][0..c].</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Region sum query:</strong> Use the inclusion-exclusion principle: <code>sumRegion = prefix(r2,c2) - prefix(r1-1,c2) - prefix(r2,c1-1) + prefix(r1-1,c1-1)</code>.</span>
+      </div>
+    </div>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">📐 Core BIT Formulas</div>
+      <div class="recurrence-formula">
+        lowbit(i) = i &amp; (-i)              ← isolates lowest set bit<br><br>
+        Update  (r→r+lowbit(r)):  bit[r][c] += delta<br>
+        Query   (r→r-lowbit(r)):  sum       += bit[r][c]
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Inclusion-Exclusion for 2D</div>
+      <p>sumRegion(r1,c1,r2,c2) = prefix(r2,c2) − prefix(r1−1,c2) − prefix(r2,c1−1) + prefix(r1−1,c1−1)</p>
+      <p style="margin-top:6px;font-size:13px;color:var(--green-text)">Think of it like Venn diagrams: you subtract the two strips that extend beyond your region, then add back the corner you subtracted twice.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: Why It Works -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p><code>bit[i][j]</code> stores the sum of matrix values in the 2D "responsibility rectangle" whose bottom-right corner is <code>(i, j)</code> and which spans <code>lowbit(i)</code> rows and <code>lowbit(j)</code> columns.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why O(log n) per axis?</strong> When you query prefix(r, c), you walk from <code>r</code> towards 0 by repeatedly subtracting <code>lowbit(r)</code>. Each step removes at least one bit from <code>r</code>'s binary representation, so after at most log₂(n) steps, r reaches 0. Same for columns. Total: O(log m · log n).</p>
+
+    <p style="margin-top:0.75rem"><strong>Why does the update propagate correctly?</strong> When we add <code>lowbit(i)</code> to move to the next BIT node, we "tell" all nodes whose responsibility window contains index <code>i</code> about the change. The parent-child relationship in BIT guarantees every ancestor is updated exactly once.</p>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">Query path for prefix(6)</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:1.9">
+          i=6 (110): sum += bit[6], i=4<br>
+          i=4 (100): sum += bit[4], i=0<br>
+          stop. Total: 2 steps.
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Update path for index 5</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:1.9">
+          i=5 (101): bit[5]+=d, i=6<br>
+          i=6 (110): bit[6]+=d, i=8<br>
+          i=8 (1000): bit[8]+=d, done.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases handled:</strong> 1-indexed BIT sidesteps the lowbit(0)=0 infinite-loop. Single-cell queries work because prefix(r,c) − prefix(r-1,c) − prefix(r,c-1) + prefix(r-1,c-1) = exactly one cell.</p>
+  </div>
+</div>
+
+<!-- SECTION 4: The Code (Annotated) -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — 2D BIT (Interview Pick)</strong></p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">class NumMatrix:                                        </span><span class="aann">← class wraps BIT state</span></div>
+      <div class="ann-line"><span class="acode">  def __init__(self, matrix):                          </span><span class="aann">← constructor builds BIT</span></div>
+      <div class="ann-line"><span class="acode">    self.m = len(matrix)                               </span><span class="aann">← rows count</span></div>
+      <div class="ann-line"><span class="acode">    self.n = len(matrix[0])                            </span><span class="aann">← cols count</span></div>
+      <div class="ann-line"><span class="acode">    self.mat = [[0]*(self.n) for _ in range(self.m)]   </span><span class="aann">← stores raw values (0-indexed)</span></div>
+      <div class="ann-line"><span class="acode">    self.bit = [[0]*(self.n+1) for _ in range(self.m+1)]</span><span class="aann">← BIT is 1-indexed → +1 padding</span></div>
+      <div class="ann-line"><span class="acode">    for r in range(self.m):                            </span><span class="aann">← build BIT from matrix</span></div>
+      <div class="ann-line"><span class="acode">      for c in range(self.n):                          </span></div>
+      <div class="ann-line"><span class="acode">        self._add(r+1, c+1, matrix[r][c])              </span><span class="aann">← 1-indexed BIT add</span></div>
+      <div class="ann-line"><span class="acode">        self.mat[r][c] = matrix[r][c]                  </span><span class="aann">← remember raw value for delta calc</span></div>
+      <div class="ann-line"><span class="acode">                                                       </span></div>
+      <div class="ann-line"><span class="acode">  def _add(self, r, c, delta):                         </span><span class="aann">← propagate delta up through BIT</span></div>
+      <div class="ann-line"><span class="acode">    i = r                                              </span></div>
+      <div class="ann-line"><span class="acode">    while i &lt;= self.m:                                 </span><span class="aann">← traverse rows upward</span></div>
+      <div class="ann-line"><span class="acode">      j = c                                            </span></div>
+      <div class="ann-line"><span class="acode">      while j &lt;= self.n:                               </span><span class="aann">← traverse cols upward</span></div>
+      <div class="ann-line"><span class="acode">        self.bit[i][j] += delta                        </span><span class="aann">← update BIT node</span></div>
+      <div class="ann-line"><span class="acode">        j += j &amp; (-j)                                  </span><span class="aann">← j += lowbit(j) → next col node</span></div>
+      <div class="ann-line"><span class="acode">      i += i &amp; (-i)                                    </span><span class="aann">← i += lowbit(i) → next row node</span></div>
+      <div class="ann-line"><span class="acode">                                                       </span></div>
+      <div class="ann-line"><span class="acode">  def update(self, row, col, val):                     </span><span class="aann">← public update (0-indexed input)</span></div>
+      <div class="ann-line"><span class="acode">    delta = val - self.mat[row][col]                   </span><span class="aann">← change amount, not new value</span></div>
+      <div class="ann-line"><span class="acode">    self.mat[row][col] = val                           </span><span class="aann">← store new raw value</span></div>
+      <div class="ann-line"><span class="acode">    self._add(row+1, col+1, delta)                     </span><span class="aann">← propagate (convert to 1-indexed)</span></div>
+      <div class="ann-line"><span class="acode">                                                       </span></div>
+      <div class="ann-line"><span class="acode">  def _prefix(self, r, c):                             </span><span class="aann">← prefix sum [0..r][0..c] (1-indexed)</span></div>
+      <div class="ann-line"><span class="acode">    total = 0                                          </span></div>
+      <div class="ann-line"><span class="acode">    i = r                                              </span></div>
+      <div class="ann-line"><span class="acode">    while i &gt; 0:                                       </span><span class="aann">← walk rows backwards</span></div>
+      <div class="ann-line"><span class="acode">      j = c                                            </span></div>
+      <div class="ann-line"><span class="acode">      while j &gt; 0:                                     </span><span class="aann">← walk cols backwards</span></div>
+      <div class="ann-line"><span class="acode">        total += self.bit[i][j]                        </span><span class="aann">← accumulate BIT node value</span></div>
+      <div class="ann-line"><span class="acode">        j -= j &amp; (-j)                                  </span><span class="aann">← j -= lowbit(j) → prev col node</span></div>
+      <div class="ann-line"><span class="acode">      i -= i &amp; (-i)                                    </span><span class="aann">← i -= lowbit(i) → prev row node</span></div>
+      <div class="ann-line"><span class="acode">    return total                                       </span></div>
+      <div class="ann-line"><span class="acode">                                                       </span></div>
+      <div class="ann-line"><span class="acode">  def sumRegion(self, r1, c1, r2, c2):                </span><span class="aann">← public query (0-indexed)</span></div>
+      <div class="ann-line"><span class="acode">    return (self._prefix(r2+1, c2+1)                  </span></div>
+      <div class="ann-line"><span class="acode">          - self._prefix(r1, c2+1)                    </span><span class="aann">← subtract top strip</span></div>
+      <div class="ann-line"><span class="acode">          - self._prefix(r2+1, c1)                    </span><span class="aann">← subtract left strip</span></div>
+      <div class="ann-line"><span class="acode">          + self._prefix(r1, c1))                     </span><span class="aann">← add back double-subtracted corner</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Forgetting Delta vs Value</div>
+      <p>The BIT stores <em>deltas</em>, not absolute values. When you call <code>update(row, col, val)</code>, you must compute <code>delta = val - old_value</code> and propagate only the delta. This is why we store <code>self.mat</code> — to know what was there before.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Index Offset: 0-indexed input, 1-indexed BIT</div>
+      <p>LeetCode calls <code>update(row, col, val)</code> and <code>sumRegion(r1,c1,r2,c2)</code> with 0-indexed positions, but the BIT itself is 1-indexed (so lowbit never gets called on 0). Always add +1 when writing to/reading from the BIT.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — 2D Prefix Sum (No Updates)</strong> — included for comparison; cannot handle updates efficiently:</p>
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">  # Build: O(mn), Query: O(1), Update: O(mn) — BAD for mutable</span></div>
+      <div class="ann-line"><span class="acode">  prefix[i+1][j+1] = matrix[i][j]</span></div>
+      <div class="ann-line"><span class="acode">                    + prefix[i][j+1] + prefix[i+1][j]</span></div>
+      <div class="ann-line"><span class="acode">                    - prefix[i][j]</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — 2D Segment Tree</strong> — O(mn) space, O(log m log n) per op, but harder to code under pressure; use 2D BIT in interviews.</p>
+  </div>
+</div>
+
+<!-- SECTION 5: Algorithm Deep-Dive -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🔬 Algorithm Deep-Dive: 2D Binary Indexed Tree</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Origin:</strong> The Binary Indexed Tree (BIT) was introduced by Peter Fenwick in 1994 (hence also called a Fenwick Tree) as a space-efficient alternative to segment trees for prefix sum queries with point updates. The 2D extension naturally nests two BITs.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Core Invariant</div>
+      <p><code>bit[i][j]</code> holds the sum of all original matrix values <code>mat[r][c]</code> where <code>i - lowbit(i) &lt; r ≤ i</code> and <code>j - lowbit(j) &lt; c ≤ j</code>. In other words, each BIT cell is responsible for a specific rectangular "chunk" of the original matrix.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why lowbit works:</strong> In binary, <code>lowbit(i) = i &amp; (-i)</code> isolates the least-significant set bit. For <code>i = 6 = 110₂</code>, <code>lowbit(6) = 010₂ = 2</code>, meaning BIT[6] covers 2 elements. For the update path, adding lowbit moves to the next ancestor. For the query path, subtracting lowbit moves to the previous disjoint region.</p>
+
+    <table class="cmp-table" style="margin-top:1rem">
+      <thead><tr><th>i (decimal)</th><th>i (binary)</th><th>lowbit(i)</th><th>Responsibility window</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>001</td><td>1</td><td>[1..1] — 1 element</td></tr>
+        <tr><td>2</td><td>010</td><td>2</td><td>[1..2] — 2 elements</td></tr>
+        <tr><td>3</td><td>011</td><td>1</td><td>[3..3] — 1 element</td></tr>
+        <tr><td>4</td><td>100</td><td>4</td><td>[1..4] — 4 elements</td></tr>
+        <tr><td>5</td><td>101</td><td>1</td><td>[5..5] — 1 element</td></tr>
+        <tr><td>6</td><td>110</td><td>2</td><td>[5..6] — 2 elements</td></tr>
+        <tr><td>8</td><td>1000</td><td>8</td><td>[1..8] — 8 elements</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1rem"><strong>Generalization:</strong> BIT is perfect whenever you need <em>both</em> prefix-range queries and point updates. Use a Segment Tree instead when you need range updates (lazy propagation) or non-associative operations (like max/min with range updates).</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 When to Recognize 2D BIT</div>
+      <p>Problem signals: "given a 2D grid", "support update(row, col, val)", "support sumRegion(r1,c1,r2,c2)", "O(log n) time required for each operation". If the problem says "immutable", use 2D prefix sum instead — it's simpler and O(1) per query.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: Interview Strategy -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>Signals: two operations (update + query), 2D grid, both must be efficient. This screams "data structure design problem". The 2D nature with sub-rectangle sums points to BIT or Segment Tree.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Start with the 1D Simpler Version</div>
+        <p>Say: "I know the 1D version — LC 307 Range Sum Query Mutable uses a 1D BIT for O(log n) update + prefix-sum." Then: "Can I extend BIT to 2D?" The answer is yes — just nest the column loop inside the row loop.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Derive the Key Operations</div>
+        <p>Write the lowbit operation first. Derive update (add lowbit) and query (subtract lowbit). State the invariant: BIT[i][j] covers a rectangular block. Apply inclusion-exclusion for region queries.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Handle the Index Offset Cleanly</div>
+        <p>Immediately establish: "I'll keep self.mat for raw values (0-indexed) and self.bit 1-indexed with +1 padding." This avoids bugs in the interview.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: State Complexity</div>
+        <p>Build: O(mn log m log n). Update: O(log m log n). Query: O(log m log n). Space: O(mn). Compare to naïve: update O(1) + query O(mn) — BIT wins when queries are frequent.</p>
+      </div>
+    </div>
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The problem requires frequent updates AND range sum queries in 2D.<br>
+A naïve 2D prefix sum has O(1) query but O(mn) rebuild on every update — too slow.<br>
+I'll use a 2D Binary Indexed Tree (Fenwick Tree), which gives O(log m · log n) for both.<br>
+The core trick is lowbit(i) = i &amp; (-i) — it tells us how many elements each BIT node covers.<br>
+For region queries, I apply 2D inclusion-exclusion using four prefix-sum calls.<br>
+I'll store the raw matrix separately to compute deltas on update."
+      </div>
+    </div>
+    <div class="concept-box insight" style="margin-top:1rem">
+      <div class="concept-box-title">💡 Follow-Up Questions to Anticipate</div>
+      <ul style="margin-left:1.25rem;line-height:2">
+        <li>"Can you extend to range updates?" → Need Segment Tree with lazy propagation.</li>
+        <li>"What about max queries?" → BIT only works with invertible operations (sum). Use Segment Tree for max.</li>
+        <li>"Memory-optimize?" → BIT already uses O(mn) — same as the matrix itself.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: Interactive Walkthrough -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:1rem">We walk through building a 4×4 BIT, then performing an update and a sumRegion query. The left panel shows the raw matrix; the right panel shows the BIT state. Highlighted BIT cells show which nodes are being touched at each step.</p>
+
+    <div class="viz-area">
+      <div class="matrix-wrapper">
+        <div class="matrix-block">
+          <div class="matrix-block-title">Raw Matrix (0-indexed)</div>
+          <div class="col-headers" id="mat-col-hdrs"></div>
+          <div id="mat-grid"></div>
+        </div>
+        <div class="matrix-block">
+          <div class="matrix-block-title">BIT (1-indexed)</div>
+          <div class="col-headers" id="bit-col-hdrs"></div>
+          <div id="bit-grid"></div>
+        </div>
+      </div>
+
+      <div class="var-tracker">
+        <div class="var-box" id="vb-op"><span class="var-name">Operation</span><span class="var-val" id="vv-op">—</span></div>
+        <div class="var-box" id="vb-r"><span class="var-name">Row i</span><span class="var-val" id="vv-r">—</span></div>
+        <div class="var-box" id="vb-c"><span class="var-name">Col j</span><span class="var-val" id="vv-c">—</span></div>
+        <div class="var-box" id="vb-delta"><span class="var-name">Delta / Sum</span><span class="var-val" id="vv-delta">—</span></div>
+      </div>
+
+      <div class="code-panel" id="code-panel">
+        <div class="code-line">def _add(r, c, delta):               # propagate delta</div>
+        <div class="code-line">  i = r</div>
+        <div class="code-line">  while i &lt;= m:                       # outer: rows</div>
+        <div class="code-line">    j = c</div>
+        <div class="code-line">    while j &lt;= n:                     # inner: cols</div>
+        <div class="code-line">      bit[i][j] += delta              # update BIT node</div>
+        <div class="code-line">      j += j &amp; (-j)                    # next col</div>
+        <div class="code-line">    i += i &amp; (-i)                      # next row</div>
+        <div class="code-line"> </div>
+        <div class="code-line">def _prefix(r, c):                   # prefix sum</div>
+        <div class="code-line">  total, i = 0, r</div>
+        <div class="code-line">  while i &gt; 0:                        # walk rows back</div>
+        <div class="code-line">    j = c</div>
+        <div class="code-line">    while j &gt; 0:                      # walk cols back</div>
+        <div class="code-line">      total += bit[i][j]             # accumulate</div>
+        <div class="code-line">      j -= j &amp; (-j)                    # prev col</div>
+        <div class="code-line">    i -= i &amp; (-i)                      # prev row</div>
+        <div class="code-line">  return total</div>
+        <div class="code-line"> </div>
+        <div class="code-line">def sumRegion(r1,c1,r2,c2):          # 4-prefix calls</div>
+        <div class="code-line">  return (prefix(r2+1,c2+1)</div>
+        <div class="code-line">         -prefix(r1,c2+1)</div>
+        <div class="code-line">         -prefix(r2+1,c1)</div>
+        <div class="code-line">         +prefix(r1,c1))</div>
+      </div>
+
+      <div class="info-card">
+        <div id="phase-badge" class="phase-badge phase-init">INIT</div>
+        <div id="step-counter" class="step-counter">Step 1 of 14</div>
+        <div id="step-title" class="step-title">Building the BIT</div>
+        <div id="step-body" class="step-body">We start with a 4×4 matrix. The BIT is 5×5 (1-indexed). We call _add for each cell to build initial state.</div>
+      </div>
+
+      <div class="progress-dots" id="progress-dots"></div>
+      <div class="controls">
+        <button class="btn" id="btn-prev" onclick="go(-1)">← Prev</button>
+        <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+        <button class="btn" onclick="reset()">Reset</button>
+      </div>
+      <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch sw-normal"></div>Normal</div>
+        <div class="legend-item"><div class="legend-swatch sw-updated"></div>Being Updated</div>
+        <div class="legend-item"><div class="legend-swatch sw-bit"></div>BIT Nodes Touched</div>
+        <div class="legend-item"><div class="legend-swatch sw-current"></div>Current BIT Node</div>
+        <div class="legend-item"><div class="legend-swatch sw-queried"></div>Queried Region</div>
+        <div class="legend-item"><div class="legend-swatch sw-result"></div>Result</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8: Summary -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">8</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">A 2D BIT gives O(log m · log n) for both point-update and rectangle-sum queries.</div>
+      <div class="takeaway"><code>lowbit(i) = i &amp; (-i)</code> is the single operation that makes BIT work: it defines each node's responsibility window.</div>
+      <div class="takeaway">Store raw matrix values separately — updates propagate <em>deltas</em>, not new values, into the BIT.</div>
+      <div class="takeaway">Region queries reduce to 4 prefix-sum calls via 2D inclusion-exclusion: top-right − top-strip − left-strip + top-left-corner.</div>
+      <div class="takeaway">The BIT is 1-indexed; always add +1 when converting from the 0-indexed LeetCode API.</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use 2D BIT</div>
+      <ul style="margin-left:1.25rem;line-height:2">
+        <li>2D grid with frequent <strong>point updates</strong> + <strong>prefix/rectangle sum queries</strong></li>
+        <li>Need O(log² n) per operation (BIT is simpler to code than 2D Segment Tree)</li>
+        <li>Operations are prefix-sum based (not range-update, not max/min — use Seg Tree then)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Range Sum Query - Mutable</strong><span class="related-diff diff-med">Medium</span> — 1D BIT, the direct prerequisite; master this first (LC 307)</div>
+      <div class="related-item"><strong>Range Sum Query 2D - Immutable</strong><span class="related-diff diff-med">Medium</span> — Static 2D prefix sum (no BIT needed); use when no updates (LC 304)</div>
+      <div class="related-item"><strong>Count of Smaller Numbers After Self</strong><span class="related-diff diff-hard">Hard</span> — 1D BIT + coordinate compression for counting inversions (LC 315)</div>
+      <div class="related-item"><strong>Number of Pairs Satisfying Inequality</strong><span class="related-diff diff-hard">Hard</span> — BIT + merge sort; same BIT traversal pattern (LC 2426)</div>
+      <div class="related-item"><strong>Falling Squares</strong><span class="related-diff diff-hard">Hard</span> — Segment tree with lazy propagation; upgrade from BIT for range updates (LC 699)</div>
+      <div class="related-item"><strong>The Skyline Problem</strong><span class="related-diff diff-hard">Hard</span> — Line sweep + multiset/Seg tree; related advanced structure usage (LC 218)</div>
+      <div class="related-item"><strong>Matrix Block Sum</strong><span class="related-diff diff-med">Medium</span> — Static 2D prefix sum; good warmup before this problem (LC 1314)</div>
+    </div>
+
+    <p style="margin-top:1rem;font-size:13.5px;color:var(--text2)">These problems share the core technique: <strong>leveraging binary structure (lowbit) to make prefix operations efficient under mutation</strong>.</p>
+
+    <div class="concept-box key-concept" style="margin-top:1rem">
+      <div class="concept-box-title">📚 Reference: DSA_Patterns_and_SubPatterns_Guide.md Section 20.1</div>
+      <p>Main Pattern: Advanced Data Structures — Sub-Pattern: 2D BIT (Binary Indexed Tree)</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- page-wrapper -->
+
+<script>
+// ── 4×4 matrix for the walkthrough ──
+// mat = [[3,0,1,4],[5,6,3,2],[1,2,0,1],[4,1,0,1]]
+const MAT = [[3,0,1,4],[5,6,3,2],[1,2,0,1],[4,1,0,1]];
+const M=4, N=4;
+
+// We'll track BIT state across steps
+// bit is 1-indexed [1..4][1..4], we store as 5x5 array
+function makeZero(){return Array.from({length:M+1},()=>Array(N+1).fill(0));}
+
+// Pre-compute BIT states for each step
+// Steps will represent key moments in building + one update + one query
+
+const STEPS = [
+  {
+    phase:"init", phaseClass:"phase-init", activeLine:-1,
+    title:"Setup: 4×4 matrix, 5×5 BIT",
+    text:"We start with mat=[[3,0,1,4],[5,6,3,2],[1,2,0,1],[4,1,0,1]]. The BIT is (m+1)×(n+1) = 5×5, all zeros. We build the BIT by calling _add(r+1, c+1, mat[r][c]) for each cell.",
+    op:"BUILD",rVal:"—",cVal:"—",deltaVal:"—",
+    matHighlight:[],
+    bitHighlight:[],
+    bitState:makeZero()
+  }
+];
+
+// Simulate building BIT step by step — key cells: (0,0)=3, (0,2)=1, (1,1)=6, update(2,2,9 was 0), then query
+function addToBIT(bit, r1, c1, delta){
+  let i=r1;
+  while(i<=M){
+    let j=c1;
+    while(j<=N){
+      bit[i][j]+=delta;
+      j+=j&(-j);
+    }
+    i+=i&(-i);
+  }
+}
+
+// Build BIT from entire matrix first (for display)
+let fullBIT = makeZero();
+for(let r=0;r<M;r++) for(let c=0;c<N;c++) addToBIT(fullBIT, r+1, c+1, MAT[r][c]);
+
+// Step 2: add mat[0][0]=3 → bit affects (1,1),(1,2),(1,4),(2,1),(2,2),(2,4),(4,1),(4,2),(4,4)
+let bit2=makeZero(); addToBIT(bit2,1,1,3);
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:5,
+  title:"_add(1,1, delta=3): Processing mat[0][0]=3",
+  text:"Row i=1, Col j=1: bit[1][1]+=3. lowbit(1)=1 → j=2: bit[1][2]+=3. lowbit(2)=2 → j=4: bit[1][4]+=3. Done inner. lowbit(1)=1 → i=2: repeat cols. Continue to i=4.",
+  op:"_add", rVal:"1", cVal:"1", deltaVal:"+3",
+  matHighlight:[[0,0]],
+  bitHighlight:[[1,1],[1,2],[1,4],[2,1],[2,2],[2,4],[4,1],[4,2],[4,4]],
+  bitCurrent:[1,1],
+  bitState: bit2
+});
+
+// Step 3: After adding row 0 entirely
+let bit3=makeZero();
+for(let c=0;c<N;c++) addToBIT(bit3,1,c+1,MAT[0][c]);
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:5,
+  title:"After building entire row 0 of BIT",
+  text:"We've called _add(1,c+1,mat[0][c]) for c=0..3. Values 3,0,1,4 have been propagated. The BIT nodes for row band i=1 now carry partial sums of row 0. Notice BIT[1][4] now holds 3+0+1+4=8 (covers all cols).",
+  op:"BUILD", rVal:"1", cVal:"1→4", deltaVal:"3,0,1,4",
+  matHighlight:[[0,0],[0,1],[0,2],[0,3]],
+  bitHighlight:[[1,1],[1,2],[1,3],[1,4],[2,1],[2,2],[2,3],[2,4],[4,1],[4,2],[4,3],[4,4]],
+  bitState: bit3
+});
+
+// Step 4: After adding row 1
+let bit4=makeZero();
+for(let r=0;r<2;r++) for(let c=0;c<N;c++) addToBIT(bit4,r+1,c+1,MAT[r][c]);
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:5,
+  title:"After building rows 0–1 of BIT",
+  text:"Row 1 values [5,6,3,2] added. Now BIT[2][*] nodes accumulate 2 rows worth of data (rows 1–2 in 1-indexed). BIT[2][2] covers rows [1..2] × cols [1..2] → 3+0+5+6=14.",
+  op:"BUILD", rVal:"2", cVal:"1→4", deltaVal:"5,6,3,2",
+  matHighlight:[[1,0],[1,1],[1,2],[1,3]],
+  bitHighlight:[[2,1],[2,2],[2,3],[2,4],[4,1],[4,2],[4,3],[4,4]],
+  bitState: bit4
+});
+
+// Step 5: Full BIT built
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:7,
+  title:"BIT fully built from all 4 rows",
+  text:"All 16 values processed. The BIT now encodes prefix sums for the entire matrix. BIT[4][4] = sum of all elements = 3+0+1+4+5+6+3+2+1+2+0+1+4+1+0+1 = 34. Ready for queries and updates!",
+  op:"BUILD", rVal:"done", cVal:"done", deltaVal:"Σ=34",
+  matHighlight:[],
+  bitHighlight:[[4,4]],
+  bitCurrent:[4,4],
+  bitState: JSON.parse(JSON.stringify(fullBIT))
+});
+
+// Step 6: sumRegion(0,0,1,1) query — prefix(2,2)
+let bit6=JSON.parse(JSON.stringify(fullBIT));
+STEPS.push({
+  phase:"query", phaseClass:"phase-query", activeLine:20,
+  title:"sumRegion(0,0,1,1): Start with prefix(2,2)",
+  text:"We use: prefix(r2+1,c2+1) - prefix(r1,c2+1) - prefix(r2+1,c1) + prefix(r1,c1) = prefix(2,2) - prefix(0,2) - prefix(2,0) + prefix(0,0). First call: prefix(2,2). Walk i=2→0, j=2→0.",
+  op:"QUERY", rVal:"2", cVal:"2", deltaVal:"=?",
+  matHighlight:[[0,0],[0,1],[1,0],[1,1]],
+  bitHighlight:[[2,2],[2,1],[1,2],[1,1]],
+  bitCurrent:[2,2],
+  bitState: bit6
+});
+
+// Step 7: prefix(2,2) computed
+STEPS.push({
+  phase:"query", phaseClass:"phase-query", activeLine:14,
+  title:"prefix(2,2) = 20",
+  text:"i=2: j=2 → total+=bit[2][2]=14 (covers rows 1-2, cols 1-2), j=1 → total+=bit[2][1]=8 (rows 1-2, col 1), j=0 done. i=1: j=2 → total+=bit[1][2] (hmm wait: 3+0=3), j=1 total+=bit[1][1]=3, j=0. Result: 14+8-8+3=? Actually prefix(2,2)=3+0+5+6=14. Correct!",
+  op:"QUERY", rVal:"0", cVal:"0", deltaVal:"=14",
+  matHighlight:[[0,0],[0,1],[1,0],[1,1]],
+  bitHighlight:[[2,2],[2,1]],
+  bitCurrent:[2,1],
+  bitState: bit6
+});
+
+// Step 8: sumRegion final result
+STEPS.push({
+  phase:"result", phaseClass:"phase-result", activeLine:21,
+  title:"sumRegion(0,0,1,1) = 14",
+  text:"prefix(2,2)=14, prefix(0,2)=0, prefix(2,0)=0, prefix(0,0)=0. Result = 14 - 0 - 0 + 0 = 14. The top-left 2×2 submatrix [3,0;5,6] sums to 14. ✓",
+  op:"RESULT", rVal:"—", cVal:"—", deltaVal:"=14",
+  matHighlight:[[0,0],[0,1],[1,0],[1,1]],
+  bitHighlight:[],
+  bitState: bit6
+});
+
+// Step 9: update(2, 2, 9) — mat[2][2] was 0, new value 9
+let bit9=JSON.parse(JSON.stringify(fullBIT));
+addToBIT(bit9, 3, 3, 9-0); // delta = 9
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:0,
+  title:"update(2, 2, val=9): delta = 9 - 0 = 9",
+  text:"mat[2][2] was 0. New value = 9. delta = 9 - 0 = 9. We store mat[2][2]=9 and call _add(3, 3, 9) in 1-indexed BIT coordinates.",
+  op:"UPDATE", rVal:"3", cVal:"3", deltaVal:"+9",
+  matHighlight:[[2,2]],
+  bitHighlight:[[3,3],[3,4],[4,3],[4,4]],
+  bitCurrent:[3,3],
+  bitState: bit9
+});
+
+// Step 10: _add propagation for (3,3,9)
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:5,
+  title:"_add(3,3,9): i=3, j=3 → bit[3][3]+=9",
+  text:"lowbit(3)=1 → j=4: bit[3][4]+=9. Inner loop done (j>n=4 stops). lowbit(3)=1 → i=4: j=3, bit[4][3]+=9, j=4: bit[4][4]+=9. Done. Four BIT nodes updated.",
+  op:"_add", rVal:"3→4", cVal:"3→4", deltaVal:"+9",
+  matHighlight:[[2,2]],
+  bitHighlight:[[3,3],[3,4],[4,3],[4,4]],
+  bitCurrent:[4,4],
+  bitState: bit9
+});
+
+// Step 11: verify updated sum
+STEPS.push({
+  phase:"update", phaseClass:"phase-update", activeLine:7,
+  title:"BIT updated — only 4 nodes changed",
+  text:"After update(2,2,9): only BIT[3][3], BIT[3][4], BIT[4][3], BIT[4][4] increased by 9. All other BIT values unchanged. This is the power of BIT — O(log 4 · log 4)=4 ops, not O(16).",
+  op:"UPDATE", rVal:"done", cVal:"done", deltaVal:"+9 done",
+  matHighlight:[[2,2]],
+  bitHighlight:[[3,3],[3,4],[4,3],[4,4]],
+  bitState: bit9
+});
+
+// Step 12: sumRegion(2,1,3,3) after update
+STEPS.push({
+  phase:"query", phaseClass:"phase-query", activeLine:19,
+  title:"sumRegion(2,1,3,3) after update: 4 prefix calls",
+  text:"Query: rows 2-3, cols 1-3 (0-indexed). Formula: prefix(4,4) - prefix(2,4) - prefix(4,1) + prefix(2,1). This gives us the bottom-right 2×3 submatrix sum including the updated cell.",
+  op:"QUERY", rVal:"2→3", cVal:"1→3", deltaVal:"=?",
+  matHighlight:[[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]],
+  bitHighlight:[[4,4],[4,3],[4,2],[4,1],[3,4],[3,3],[3,2],[3,1]],
+  bitState: bit9
+});
+
+// Step 13: compute result
+// mat[2][1]=2, mat[2][2]=9(updated), mat[2][3]=1, mat[3][1]=1, mat[3][2]=0, mat[3][3]=1
+// sum = 2+9+1+1+0+1 = 14
+STEPS.push({
+  phase:"query", phaseClass:"phase-query", activeLine:22,
+  title:"Computing: prefix(4,4) - prefix(2,4) - prefix(4,1) + prefix(2,1)",
+  text:"prefix(4,4) = entire matrix sum = 34+9=43. prefix(2,4) = top 2 rows sum = 3+0+1+4+5+6+3+2=24. prefix(4,1) = col 0 sum = 3+5+1+4=13. prefix(2,1) = top-left 2×1 = 3+5=8. Result = 43 - 24 - 13 + 8 = 14.",
+  op:"QUERY", rVal:"—", cVal:"—", deltaVal:"=14",
+  matHighlight:[[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]],
+  bitHighlight:[],
+  bitState: bit9
+});
+
+// Step 14: final result
+STEPS.push({
+  phase:"result", phaseClass:"phase-result", activeLine:22,
+  title:"sumRegion(2,1,3,3) = 14 ✓",
+  text:"2+9+1+1+0+1 = 14. The 2D BIT correctly accounts for the update at (2,2) — it changed from 0 to 9, adding 9 to the sum. Total operations: O(log4·log4) = O(4) BIT node touches per operation.",
+  op:"RESULT", rVal:"—", cVal:"—", deltaVal:"=14",
+  matHighlight:[[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]],
+  bitHighlight:[[3,3],[3,4],[4,3],[4,4]],
+  bitState: bit9
+});
+
+// ── Render ──
+let curStep = 0;
+const totalSteps = STEPS.length;
+
+function buildGrids(){
+  // column headers for mat
+  const matColHdrs=document.getElementById('mat-col-hdrs');
+  matColHdrs.innerHTML='<div style="width:28px"></div>';
+  for(let c=0;c<N;c++) matColHdrs.innerHTML+=`<div class="col-hdr">${c}</div>`;
+  // column headers for bit
+  const bitColHdrs=document.getElementById('bit-col-hdrs');
+  bitColHdrs.innerHTML='<div style="width:28px"></div>';
+  for(let c=1;c<=N;c++) bitColHdrs.innerHTML+=`<div class="col-hdr">${c}</div>`;
+
+  // mat grid
+  const matGrid=document.getElementById('mat-grid');
+  matGrid.innerHTML='';
+  for(let r=0;r<M;r++){
+    const rowDiv=document.createElement('div');
+    rowDiv.className='matrix-row-with-hdr';
+    rowDiv.innerHTML=`<div class="row-hdr">${r}</div>`;
+    for(let c=0;c<N;c++){
+      const cell=document.createElement('div');
+      cell.className='mcell normal';
+      cell.id=`mat-${r}-${c}`;
+      cell.textContent=MAT[r][c];
+      rowDiv.appendChild(cell);
+    }
+    matGrid.appendChild(rowDiv);
+  }
+
+  // BIT grid (1-indexed display, rows 1..4, cols 1..4)
+  const bitGrid=document.getElementById('bit-grid');
+  bitGrid.innerHTML='';
+  for(let r=1;r<=M;r++){
+    const rowDiv=document.createElement('div');
+    rowDiv.className='matrix-row-with-hdr';
+    rowDiv.innerHTML=`<div class="row-hdr">${r}</div>`;
+    for(let c=1;c<=N;c++){
+      const cell=document.createElement('div');
+      cell.className='mcell normal';
+      cell.id=`bit-${r}-${c}`;
+      cell.textContent='0';
+      rowDiv.appendChild(cell);
+    }
+    bitGrid.appendChild(rowDiv);
+  }
+}
+
+function buildDots(){
+  const container=document.getElementById('progress-dots');
+  container.innerHTML='';
+  for(let i=0;i<totalSteps;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    d.onclick=(()=>{const idx=i;return()=>goTo(idx);})();
+    container.appendChild(d);
+  }
+}
+
+function render(){
+  const s=STEPS[curStep];
+
+  // mat cells
+  for(let r=0;r<M;r++) for(let c=0;c<N;c++){
+    const el=document.getElementById(`mat-${r}-${c}`);
+    const hl=s.matHighlight.some(([rr,cc])=>rr===r&&cc===c);
+    el.className='mcell '+(hl?'updated':'normal');
+    // Show current mat values (after update if applicable)
+    let val=MAT[r][c];
+    if(curStep>=9 && r===2 && c===2) val=9; // update applied
+    el.textContent=val;
+  }
+
+  // BIT cells
+  for(let r=1;r<=M;r++) for(let c=1;c<=N;c++){
+    const el=document.getElementById(`bit-${r}-${c}`);
+    const hl=s.bitHighlight.some(([rr,cc])=>rr===r&&cc===c);
+    const isCurrent=s.bitCurrent&&s.bitCurrent[0]===r&&s.bitCurrent[1]===c;
+    let cls='mcell ';
+    if(isCurrent) cls+='bit-current';
+    else if(s.phase==='result' && hl) cls+='result-cell';
+    else if(s.phase==='query' && hl) cls+='queried';
+    else if(hl) cls+='bit-affected';
+    else cls+='normal';
+    el.className=cls;
+    el.textContent=s.bitState[r][c];
+  }
+
+  // var tracker
+  const vars=[
+    {id:'vb-op',vid:'vv-op',val:s.op},
+    {id:'vb-r',vid:'vv-r',val:s.rVal},
+    {id:'vb-c',vid:'vv-c',val:s.cVal},
+    {id:'vb-delta',vid:'vv-delta',val:s.deltaVal},
+  ];
+  vars.forEach(v=>{
+    document.getElementById(v.vid).textContent=v.val;
+  });
+
+  // code panel
+  const lines=document.querySelectorAll('#code-panel .code-line');
+  lines.forEach((l,i)=>l.classList.toggle('active',i===s.activeLine));
+
+  // info card
+  const badge=document.getElementById('phase-badge');
+  badge.className='phase-badge '+s.phaseClass;
+  badge.textContent=s.phase.toUpperCase();
+  document.getElementById('step-counter').textContent=`Step ${curStep+1} of ${totalSteps}`;
+  document.getElementById('step-title').textContent=s.title;
+  document.getElementById('step-body').textContent=s.text;
+
+  // dots
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===curStep);
+    d.classList.toggle('visited',i<curStep);
+  });
+
+  // buttons
+  document.getElementById('btn-prev').disabled=curStep===0;
+  document.getElementById('btn-next').disabled=curStep===totalSteps-1;
+}
+
+function go(dir){goTo(curStep+dir);}
+function goTo(i){curStep=Math.max(0,Math.min(totalSteps-1,i));render();}
+function reset(){goTo(0);}
+
+function toggle(header){
+  const content=header.nextElementSibling;
+  const icon=header.querySelector('.collapse-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform=content.classList.contains('collapsed')?'rotate(-90deg)':'';
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') go(1);
+  if(e.key==='ArrowLeft') go(-1);
+  if(e.key==='r'||e.key==='R') reset();
+});
+
+buildGrids();
+buildDots();
+render();
+</script>
+</body>
+</html>

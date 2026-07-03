@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#2426 · Number of Pairs Satisfying Inequality</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── BIT Visualization ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* Array rows */
+.array-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+.cells-row{display:flex;gap:4px;flex-wrap:nowrap;align-items:flex-end}
+.cell{
+  width:50px;height:50px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;position:relative;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.queried{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.updated{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.cell.found{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.processing{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:4px}
+.idx-slot{width:50px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* BIT tree visualization */
+.bit-section{margin-top:1.5rem}
+.bit-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+.bit-row{display:flex;gap:4px;flex-wrap:nowrap;align-items:center}
+.bit-cell{
+  width:50px;height:36px;border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text2);
+  transition:background 0.3s,border-color 0.3s;
+  flex-shrink:0;
+}
+.bit-cell.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.bit-cell.queried{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.bit-cell-val{font-size:13px;font-weight:700}
+.bit-cell-idx{font-size:9px;color:var(--text3);margin-top:1px}
+
+/* Pair counter */
+.pair-section{margin-top:1.25rem;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pair-badge{background:var(--green-bg);border:2px solid var(--green-border);border-radius:var(--radius);padding:8px 16px;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green-text)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-query{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-update{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-active{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-queried{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-updated{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-found{background:var(--green-bg);border-color:var(--green-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── BIT Diagram ── */
+.bit-diagram{background:var(--bg2);border-radius:var(--radius);padding:1.25rem;margin:1rem 0;overflow-x:auto}
+.bit-diagram-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;text-align:center}
+.bit-tree-row{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+.bit-node{min-width:56px;height:40px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;border:2px solid}
+.bit-node.level-0{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.bit-node.level-1{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.bit-node.level-2{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.bit-node.level-3{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.bit-node-label{font-size:9px;opacity:0.7;margin-top:1px}
+
+/* Recurrence box */
+.recurrence-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.recurrence-title{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--cyan-mid);margin-bottom:8px}
+.recurrence-formula{font-family:var(--mono);font-size:13px;line-height:2}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #2426</div>
+  <h1>Number of Pairs Satisfying Inequality</h1>
+  <p class="subtitle">Given arrays nums1, nums2 and integer diff, count pairs (i,j) where i &lt; j and nums1[i] − nums1[j] ≤ nums2[i] − nums2[j] + diff.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Advanced Data Structures</span>
+    <span class="tag tag-pattern">BIT + Merge Sort</span>
+    <span class="tag tag-complexity">Time: O(n log n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We're given two integer arrays <code>nums1</code> and <code>nums2</code> of the same length <code>n</code>, plus an integer <code>diff</code>. We want to count all pairs <code>(i, j)</code> where <strong>i &lt; j</strong> and the inequality <code>nums1[i] − nums1[j] ≤ nums2[i] − nums2[j] + diff</code> holds.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Transformation</div>
+      <p>Rearrange the inequality: <code>nums1[i] − nums1[j] ≤ nums2[i] − nums2[j] + diff</code><br>
+      Move terms: <code>(nums1[i] − nums2[i]) − (nums1[j] − nums2[j]) ≤ diff</code><br>
+      Define <strong>A[k] = nums1[k] − nums2[k]</strong> for every k. The condition becomes:<br>
+      <strong>A[i] − A[j] ≤ diff</strong>, equivalently <strong>A[i] − diff ≤ A[j]</strong>.<br>
+      Now for each j, we count how many previous i's satisfy: <code>A[j] ≥ A[i] − diff</code>.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Valid Pair: A[i]=3, A[j]=2, diff=1</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          A[i] − A[j] = 3 − 2 = 1<br>
+          1 ≤ diff (1) → <strong>Valid!</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Invalid: A[i]=5, A[j]=1, diff=1</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          A[i] − A[j] = 5 − 1 = 4<br>
+          4 &gt; diff (1) → <strong>Invalid</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> n=1 (zero pairs possible), all values identical (all pairs valid if diff≥0), large negative diff (no pairs), all differences equal (all n*(n-1)/2 pairs valid).</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why This Is Hard</div>
+      <p>A brute-force O(n²) approach checks every (i,j) pair. With n up to 10⁵, that's 10¹⁰ operations — too slow. We need O(n log n) using either a BIT (Binary Indexed Tree / Fenwick Tree) with coordinate compression, or an enhanced merge sort that counts inversions as it splits.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: BIT with Coordinate Compression</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>After the transformation to array A[], we need: for each j, count how many indices i &lt; j satisfy <code>A[j] ≥ A[i] − diff</code>, i.e., <code>A[i] ≤ A[j] + diff</code>. This is a classic "count elements seen so far with value ≤ threshold" — perfect for a BIT (Fenwick Tree).</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Transform:</strong> Compute A[k] = nums1[k] − nums2[k] for all k. The problem reduces to counting pairs (i &lt; j) where A[i] ≤ A[j] + diff.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Coordinate compress:</strong> BIT indices must be positive integers. Map all distinct values of A[] (plus A[j]+diff thresholds) to indices 1..m using sorted rank.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Sweep left to right (j = 0..n-1):</strong> For each j, query the BIT for "how many elements inserted so far have value ≤ A[j] + diff". Add the count to the answer. Then insert A[j] into the BIT.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return answer:</strong> The accumulated count is the number of valid pairs.</span>
+      </div>
+    </div>
+
+    <div class="bit-diagram">
+      <div class="bit-diagram-title">BIT Structure — BIT[i] stores count of A values mapped to positions in this subtree</div>
+      <div class="bit-tree-row">
+        <div class="bit-node level-3"><span>BIT[8]</span><span class="bit-node-label">covers 1-8</span></div>
+      </div>
+      <div class="bit-tree-row">
+        <div class="bit-node level-2"><span>BIT[4]</span><span class="bit-node-label">covers 1-4</span></div>
+        <div class="bit-node level-2"><span>BIT[6]</span><span class="bit-node-label">covers 5-6</span></div>
+      </div>
+      <div class="bit-tree-row">
+        <div class="bit-node level-1"><span>BIT[2]</span><span class="bit-node-label">covers 1-2</span></div>
+        <div class="bit-node level-0"><span>BIT[3]</span><span class="bit-node-label">covers 3</span></div>
+        <div class="bit-node level-0"><span>BIT[5]</span><span class="bit-node-label">covers 5</span></div>
+        <div class="bit-node level-1"><span>BIT[7]</span><span class="bit-node-label">covers 7</span></div>
+      </div>
+      <div class="bit-tree-row">
+        <div class="bit-node level-0"><span>BIT[1]</span><span class="bit-node-label">covers 1</span></div>
+        <div style="width:56px"></div>
+        <div style="width:56px"></div>
+        <div style="width:56px"></div>
+        <div style="width:56px"></div>
+        <div style="width:56px"></div>
+        <div style="width:56px"></div>
+        <div class="bit-node level-0"><span>BIT[8]</span><span class="bit-node-label">covers 8</span></div>
+      </div>
+    </div>
+
+    <p>Each BIT query (prefix sum up to index k) takes O(log m) time. Each update takes O(log m). With n elements, total time is <strong>O(n log n)</strong>.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Alternative: Merge Sort Inversion Counting</div>
+      <p>The same problem can be solved via modified merge sort. During the merge step, when we merge two halves, we count how many elements in the left half satisfy A[i] ≤ A[j] + diff for each A[j] in the right half. Since both halves are sorted, a two-pointer scan handles this in O(n) per level, giving O(n log n) overall.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Algorithm Deep-Dive — BIT & Merge Sort -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">🔬 Algorithm Deep-Dive: BIT & Merge Sort Inversion Counting</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Binary Indexed Tree (Fenwick Tree)</strong> — invented by Peter Fenwick in 1994. It answers prefix-sum queries and point-updates in O(log n) time and O(n) space, making it a compact alternative to a Segment Tree for cumulative frequency problems.</p>
+
+    <div class="recurrence-box">
+      <div class="recurrence-title">🔐 BIT Core Invariant</div>
+      <div class="recurrence-formula">
+        BIT[i] = frequency of all elements with compressed index in range [i − lowbit(i) + 1, i]<br>
+        where <span style="color:var(--cyan-mid)">lowbit(i) = i &amp; (−i)</span> — the lowest set bit of i<br>
+        Query(k) = sum BIT[k] + BIT[k − lowbit(k)] + ... (remove lowest bit each time)<br>
+        Update(i) = BIT[i] += 1, BIT[i + lowbit(i)] += 1, ... (propagate up)
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why BIT Works Here</div>
+      <p>After coordinate compression, each A[j] maps to an integer rank r. Query(rank(A[j]+diff)) gives the count of all previously-inserted values with rank ≤ rank(A[j]+diff), which is exactly the count of i &lt; j with A[i] ≤ A[j]+diff. The tree structure lets us maintain this prefix sum dynamically with logarithmic overhead.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Merge Sort Inversion Counting</strong> — a classic Divide &amp; Conquer technique. The insight: during merge sort, when we merge a sorted left half L and sorted right half R, for any element R[j], all elements in L that are "too large" are ALSO "too large" for all future R[k] (k&gt;j). We use a pointer p that advances monotonically, giving O(n) work per merge level.</p>
+
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def merge_count(A, diff):              </span><span class="aann">← divide and conquer entry</span></div>
+<div class="ann-line"><span class="acode">    if len(A) &lt;= 1: return 0, A       </span><span class="aann">← base case</span></div>
+<div class="ann-line"><span class="acode">    mid = len(A) // 2                   </span><span class="aann">← split</span></div>
+<div class="ann-line"><span class="acode">    lc, L = merge_count(A[:mid], diff)</span><span class="aann">← recurse left</span></div>
+<div class="ann-line"><span class="acode">    rc, R = merge_count(A[mid:], diff)</span><span class="aann">← recurse right</span></div>
+<div class="ann-line"><span class="acode">    count = lc + rc                     </span><span class="aann">← accumulate subproblem counts</span></div>
+<div class="ann-line"><span class="acode">    p = 0                               </span><span class="aann">← pointer into L</span></div>
+<div class="ann-line"><span class="acode">    for rj in R:                        </span><span class="aann">← for each right element</span></div>
+<div class="ann-line"><span class="acode">        while p &lt; len(L) and L[p] &lt;= rj + diff:</span><span class="aann">← advance p while valid</span></div>
+<div class="ann-line"><span class="acode">            p += 1                      </span><span class="aann">← p valid elements in L satisfy condition</span></div>
+<div class="ann-line"><span class="acode">        count += p                      </span><span class="aann">← all L[0..p-1] are valid for this rj</span></div>
+<div class="ann-line"><span class="acode">    merged = sorted(L + R)             </span><span class="aann">← merge for next level</span></div>
+<div class="ann-line"><span class="acode">    return count, merged</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 When to Recognize These Patterns</div>
+      <ul style="margin-top:0.5rem;padding-left:1.25rem;line-height:2">
+        <li><strong>BIT:</strong> "Count elements seen so far with value ≤ X / ≥ X" — classic BIT + coordinate compression</li>
+        <li><strong>Merge Sort Count:</strong> "Count cross-half pairs satisfying ordering condition" — modified merge sort</li>
+        <li><strong>Both appear when:</strong> counting pairs/inversions, rank queries on streaming data</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — BIT + Coordinate Compression (Interview Pick, O(n log n))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def numberOfPairs(nums1, nums2, diff):                 </span><span class="aann">← main function</span></div>
+<div class="ann-line"><span class="acode">    A = [a - b for a, b in zip(nums1, nums2)]          </span><span class="aann">← transform: A[k] = nums1[k] - nums2[k]</span></div>
+<div class="ann-line"><span class="acode">    # Coordinate compression                                                            </span></div>
+<div class="ann-line"><span class="acode">    vals = sorted(set(A + [a + diff for a in A]))      </span><span class="aann">← all values that appear in queries/updates</span></div>
+<div class="ann-line"><span class="acode">    rank = {v: i+1 for i, v in enumerate(vals)}        </span><span class="aann">← 1-indexed rank map (BIT needs ≥ 1)</span></div>
+<div class="ann-line"><span class="acode">    m = len(vals)                                       </span><span class="aann">← BIT size</span></div>
+<div class="ann-line"><span class="acode">    bit = [0] * (m + 1)                                </span><span class="aann">← BIT array (1-indexed)</span></div>
+<div class="ann-line"><span class="acode">    def update(i):                                      </span><span class="aann">← point-update: add 1 at index i</span></div>
+<div class="ann-line"><span class="acode">        while i &lt;= m:                                  </span><span class="aann">← propagate up via lowest set bit</span></div>
+<div class="ann-line"><span class="acode">            bit[i] += 1                                 </span></div>
+<div class="ann-line"><span class="acode">            i += i &amp; (-i)                              </span><span class="aann">← i += lowbit(i) moves to parent</span></div>
+<div class="ann-line"><span class="acode">    def query(i):                                       </span><span class="aann">← prefix sum: count elements with rank ≤ i</span></div>
+<div class="ann-line"><span class="acode">        s = 0                                           </span></div>
+<div class="ann-line"><span class="acode">        while i &gt; 0:                                   </span><span class="aann">← traverse down via lowest set bit</span></div>
+<div class="ann-line"><span class="acode">            s += bit[i]                                 </span></div>
+<div class="ann-line"><span class="acode">            i -= i &amp; (-i)                              </span><span class="aann">← i -= lowbit(i) removes lowest bit</span></div>
+<div class="ann-line"><span class="acode">        return s                                        </span></div>
+<div class="ann-line"><span class="acode">    ans = 0                                             </span></div>
+<div class="ann-line"><span class="acode">    for a in A:                                         </span><span class="aann">← sweep left to right</span></div>
+<div class="ann-line"><span class="acode">        # query: count i&lt;j where A[i] &lt;= a + diff      </span></div>
+<div class="ann-line"><span class="acode">        threshold_rank = rank[a + diff]                 </span><span class="aann">← upper bound rank for this j's threshold</span></div>
+<div class="ann-line"><span class="acode">        ans += query(threshold_rank)                    </span><span class="aann">← count previously-seen values ≤ threshold</span></div>
+<div class="ann-line"><span class="acode">        update(rank[a])                                 </span><span class="aann">← insert current A[j] into BIT</span></div>
+<div class="ann-line"><span class="acode">    return ans</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why include a+diff in coordinate compression?</div>
+      <p>When we query for "count of values ≤ a+diff", we need <code>a+diff</code> to have a valid rank in our mapping. If we only compress values of A[], a+diff might not be in the map. We include both A[k] and A[k]+diff for all k in the compression set to guarantee all query thresholds are mapped.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why query BEFORE update (not after)?</div>
+      <p>For each j, we count pairs (i, j) where i &lt; j. If we insert A[j] first then query, we'd also count the pair (j, j), which is invalid (requires i ≠ j). Querying first ensures only the strictly-previous elements are counted.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Merge Sort Inversion Counting (O(n log n) alternative)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def numberOfPairs(nums1, nums2, diff):                 </span></div>
+<div class="ann-line"><span class="acode">    A = [a - b for a, b in zip(nums1, nums2)]          </span></div>
+<div class="ann-line"><span class="acode">    def merge_sort(arr):                               </span></div>
+<div class="ann-line"><span class="acode">        if len(arr) &lt;= 1: return 0, arr               </span><span class="aann">← base: single element, 0 pairs</span></div>
+<div class="ann-line"><span class="acode">        mid = len(arr) // 2                             </span></div>
+<div class="ann-line"><span class="acode">        lc, left  = merge_sort(arr[:mid])              </span><span class="aann">← sort left half, count its pairs</span></div>
+<div class="ann-line"><span class="acode">        rc, right = merge_sort(arr[mid:])              </span><span class="aann">← sort right half, count its pairs</span></div>
+<div class="ann-line"><span class="acode">        count = lc + rc                                 </span><span class="aann">← pairs entirely in one half</span></div>
+<div class="ann-line"><span class="acode">        p = 0                                           </span><span class="aann">← pointer into left half</span></div>
+<div class="ann-line"><span class="acode">        for rj in right:                               </span><span class="aann">← for each right element (index j)</span></div>
+<div class="ann-line"><span class="acode">            while p &lt; len(left) and left[p] &lt;= rj + diff:</span><span class="aann">← advance while L[p] ≤ rj+diff</span></div>
+<div class="ann-line"><span class="acode">                p += 1                                  </span></div>
+<div class="ann-line"><span class="acode">            count += p                                  </span><span class="aann">← all left[0..p-1] satisfy condition</span></div>
+<div class="ann-line"><span class="acode">        merged = []                                     </span><span class="aann">← standard merge for sorted order</span></div>
+<div class="ann-line"><span class="acode">        i = j = 0                                      </span></div>
+<div class="ann-line"><span class="acode">        while i &lt; len(left) and j &lt; len(right):       </span></div>
+<div class="ann-line"><span class="acode">            if left[i] &lt;= right[j]: merged.append(left[i]); i += 1</span></div>
+<div class="ann-line"><span class="acode">            else: merged.append(right[j]); j += 1      </span></div>
+<div class="ann-line"><span class="acode">        merged += left[i:] + right[j:]                 </span></div>
+<div class="ann-line"><span class="acode">        return count, merged                            </span></div>
+<div class="ann-line"><span class="acode">    ans, _ = merge_sort(A)                             </span></div>
+<div class="ann-line"><span class="acode">    return ans                                          </span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Brute Force:</strong> Time O(n²), Space O(1)<br>
+        <strong>BIT + Coordinate Compression:</strong> Time O(n log n), Space O(n)<br>
+        <strong>Merge Sort Count:</strong> Time O(n log n), Space O(n) (recursion stack + temp arrays)<br>
+        <strong>Interview Pick:</strong> BIT approach — cleaner code, direct extension of classic pattern
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Algebraically Simplify</div>
+        <p style="font-size:14px;color:var(--text)">"The condition involves four arrays combined. Let me simplify: rearranging the inequality gives <code>(nums1[i]-nums2[i]) ≤ (nums1[j]-nums2[j]) + diff</code>. If I define A[k] = nums1[k]-nums2[k], the problem becomes: count pairs i&lt;j where A[i] ≤ A[j]+diff."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Recognize the Pattern</div>
+        <p style="font-size:14px;color:var(--text)">"This is 'count previous elements ≤ threshold'. That's a prefix-count query — BIT. Or I can think of it as counting modified inversions — Merge Sort. With n up to 10⁵, I need O(n log n). BIT with coordinate compression is my first choice."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Handle Coordinate Compression</div>
+        <p style="font-size:14px;color:var(--text)">"BIT needs positive integer indices, but A[k] can be negative. I collect all unique values (A[k] and A[k]+diff for all k), sort them, and assign 1-based ranks. Now I work in rank-space. The relative ordering is preserved, so prefix queries still give correct counts."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Propose the Sweep</div>
+        <p style="font-size:14px;color:var(--text)">"I sweep j from 0 to n-1. For each j: query BIT up to rank(A[j]+diff) to count valid i's; add to answer; then insert A[j] into BIT. The order — query first, then insert — ensures i &lt; j."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+        "First let me simplify the condition. Defining A[k] = nums1[k] - nums2[k], it reduces to
+counting pairs i&lt;j where A[i] - A[j] ≤ diff. Brute force is O(n²) — too slow.
+
+I notice that for each j, I need 'how many previous values A[i] are ≤ A[j]+diff'. That's
+a prefix count on a dynamically-growing set — a Binary Indexed Tree handles this in
+O(log n) per operation.
+
+Since A values can be negative, I'll coordinate-compress them to 1-based integer ranks.
+I need to include both A[k] and A[k]+diff in the compression to cover all query thresholds.
+
+Sweep j=0..n-1: query BIT(rank(A[j]+diff)), add to answer, then insert rank(A[j]).
+Total: O(n log n) time, O(n) space."
+      </div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistakes to Avoid</div>
+      <ul style="padding-left:1.25rem;line-height:2;margin-top:0.5rem">
+        <li>Forgetting to include A[k]+diff in coordinate compression (causes KeyError on query)</li>
+        <li>Updating BIT before querying (counts (j,j) pairs, off by n)</li>
+        <li>Using 0-indexed BIT (lowbit(0) = 0, causing infinite loop)</li>
+        <li>Not handling duplicate values in coordinate compression (use a set)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="color:var(--text2);font-size:13.5px;margin-bottom:0.75rem">
+      Example: <code>nums1=[3,2,5], nums2=[2,2,1], diff=1</code>.<br>
+      A = [1, 0, 4]. We count pairs (i,j) i&lt;j with A[i] ≤ A[j]+1.<br>
+      Pairs: (0,1): 1≤0+1=1 ✓; (0,2): 1≤4+1=5 ✓; (1,2): 0≤4+1=5 ✓ → Answer = 3
+    </p>
+
+    <!-- A array display -->
+    <div class="viz-area">
+      <div class="array-label">Array A = nums1 − nums2</div>
+      <div class="cells-row" id="a-cells"></div>
+      <div class="idx-row" id="a-idx"></div>
+
+      <div class="bit-section">
+        <div class="bit-title">BIT (after coordinate compression: A vals+thresholds → ranks 1..5)</div>
+        <div class="bit-row" id="bit-cells"></div>
+        <div class="idx-row" id="bit-idx"></div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-j"><span class="var-name">j (current)</span><span class="var-val" id="vv-j">—</span></div>
+        <div class="var-box" id="vb-aj"><span class="var-name">A[j]</span><span class="var-val" id="vv-aj">—</span></div>
+        <div class="var-box" id="vb-thr"><span class="var-name">threshold</span><span class="var-val" id="vv-thr">—</span></div>
+        <div class="var-box" id="vb-qres"><span class="var-name">query result</span><span class="var-val" id="vv-qres">—</span></div>
+        <div class="var-box" id="vb-ans"><span class="var-name">answer</span><span class="var-val" id="vv-ans">0</span></div>
+      </div>
+    </div>
+
+    <!-- Interactive Code Panel -->
+    <div class="code-panel" id="code-panel">
+      <div class="code-line" data-line="0">A = [a - b for a, b in zip(nums1, nums2)]</div>
+      <div class="code-line" data-line="1">vals = sorted(set(A + [a + diff for a in A]))</div>
+      <div class="code-line" data-line="2">rank = {v: i+1 for i, v in enumerate(vals)}</div>
+      <div class="code-line" data-line="3">bit = [0] * (m + 1)</div>
+      <div class="code-line" data-line="4">for a in A:  # j = current index</div>
+      <div class="code-line" data-line="5">    threshold_rank = rank[a + diff]</div>
+      <div class="code-line" data-line="6">    ans += query(threshold_rank)   # count i &lt; j with A[i] ≤ a+diff</div>
+      <div class="code-line" data-line="7">    update(rank[a])               # insert A[j] into BIT</div>
+      <div class="code-line" data-line="8">return ans</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div id="phase-badge" class="phase-badge phase-init">INIT</div>
+      <div class="step-counter" id="step-counter">Step 0 of 12</div>
+      <div class="step-title" id="step-title">Setup</div>
+      <div class="step-body" id="step-body">Compute A = nums1 − nums2 = [1, 0, 4]. Coordinate-compress all values. BIT initialized to zeros.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch sw-active"></span>Current j</div>
+      <div class="legend-item"><span class="legend-swatch sw-queried"></span>BIT queried</div>
+      <div class="legend-item"><span class="legend-swatch sw-updated"></span>BIT updated</div>
+      <div class="legend-item"><span class="legend-swatch sw-found"></span>Valid pair found</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Algebraic simplification (A[k] = nums1[k]−nums2[k]) collapses a 4-array problem into a 1D counting problem</div>
+      <div class="takeaway">BIT (Fenwick Tree) gives O(log n) prefix-count queries and point-updates — ideal for "count previous elements ≤ threshold"</div>
+      <div class="takeaway">Coordinate compression maps arbitrary (possibly negative) values to 1-based ranks, satisfying BIT's index constraints</div>
+      <div class="takeaway">Always include both A[k] and A[k]+diff in the compression — queries need ranks for threshold values, not just element values</div>
+      <div class="takeaway">Query before insert to enforce the i &lt; j constraint — never count self-pairs</div>
+      <div class="takeaway">Merge Sort inversion counting is an elegant alternative requiring no coordinate compression, but slightly more complex code</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use BIT + Coordinate Compression</div>
+      <ul style="padding-left:1.25rem;line-height:2;margin-top:0.5rem">
+        <li>Counting pairs/elements satisfying an ordering condition dynamically</li>
+        <li>Rank queries on a stream of integers (online algorithm)</li>
+        <li>Problems reducible to "count how many previous values fall in range [lo, hi]"</li>
+        <li>Values can be large/negative — compress to small positive integers first</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Related Problems using the same technique:</strong></p>
+    <div class="related-list">
+      <div class="related-item">
+        <strong>Count of Smaller Numbers After Self</strong><span class="related-diff diff-hard">Hard</span>
+        — BIT + coordinate compression for reverse-direction count
+      </div>
+      <div class="related-item">
+        <strong>Reverse Pairs</strong><span class="related-diff diff-hard">Hard</span>
+        — Modified merge sort counting pairs where nums[i] &gt; 2*nums[j]
+      </div>
+      <div class="related-item">
+        <strong>Count of Range Sum</strong><span class="related-diff diff-hard">Hard</span>
+        — Merge sort variant for prefix-sum range queries
+      </div>
+      <div class="related-item">
+        <strong>Range Sum Query - Mutable</strong><span class="related-diff diff-med">Medium</span>
+        — Classic BIT (or Segment Tree) for range-sum with point updates
+      </div>
+      <div class="related-item">
+        <strong>Number of Pairs Satisfying Inequality (general)</strong><span class="related-diff diff-hard">Hard</span>
+        — Same BIT sweep pattern, adjust the threshold formula
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .page-wrapper -->
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+// Example: nums1=[3,2,5], nums2=[2,2,1], diff=1
+// A = [1, 0, 4]
+// Coordinate compression:
+//   values in A: {0, 1, 4}
+//   thresholds A[k]+diff: {1+1=2, 0+1=1, 4+1=5}
+//   all unique sorted: [0, 1, 2, 4, 5] → ranks: 0→1, 1→2, 2→3, 4→4, 5→5
+// rank map: {0:1, 1:2, 2:3, 4:4, 5:5}
+const A_ARR = [1, 0, 4];
+const DIFF = 1;
+const RANKS = {0:1, 1:2, 2:3, 4:4, 5:5};
+const M = 5; // BIT size
+const N = 3; // length of A
+
+const steps = [
+  {
+    activeLine: 0, phase: 'phase-init', phaseLabel: 'SETUP',
+    j: -1, aj: '—', threshold: '—', qresult: '—', ans: 0,
+    aHighlight: [-1],
+    bitHighlight: [],
+    bitVals: [0,0,0,0,0],
+    changedVars: [],
+    title: 'Compute A = nums1 − nums2',
+    body: 'A[0]=3−2=1, A[1]=2−2=0, A[2]=5−1=4. The problem is now: count pairs i<j where A[i] ≤ A[j]+1.'
+  },
+  {
+    activeLine: 1, phase: 'phase-init', phaseLabel: 'SETUP',
+    j: -1, aj: '—', threshold: '—', qresult: '—', ans: 0,
+    aHighlight: [-1],
+    bitHighlight: [],
+    bitVals: [0,0,0,0,0],
+    changedVars: [],
+    title: 'Coordinate Compression',
+    body: 'Collect all unique values: A[]={0,1,4} and thresholds A[k]+1={1,1,5} → sorted unique: [0,1,2,4,5]. Assign ranks: 0→1, 1→2, 2→3, 4→4, 5→5. BIT size m=5.'
+  },
+  {
+    activeLine: 3, phase: 'phase-init', phaseLabel: 'INIT',
+    j: -1, aj: '—', threshold: '—', qresult: '—', ans: 0,
+    aHighlight: [-1],
+    bitHighlight: [],
+    bitVals: [0,0,0,0,0],
+    changedVars: [],
+    title: 'Initialize BIT to all zeros',
+    body: 'BIT[1..5] = [0,0,0,0,0]. All prefix sums are 0 — no elements inserted yet.'
+  },
+  {
+    activeLine: 4, phase: 'phase-query', phaseLabel: 'j=0',
+    j: 0, aj: 1, threshold: '—', qresult: '—', ans: 0,
+    aHighlight: [0],
+    bitHighlight: [],
+    bitVals: [0,0,0,0,0],
+    changedVars: ['j','aj'],
+    title: 'j=0: Process A[0]=1',
+    body: 'We are at index j=0 (A[j]=1). First we query: how many previously-inserted elements have value ≤ A[0]+diff = 1+1 = 2? BIT is empty, so the answer is 0.'
+  },
+  {
+    activeLine: 5, phase: 'phase-query', phaseLabel: 'j=0',
+    j: 0, aj: 1, threshold: 2, qresult: '—', ans: 0,
+    aHighlight: [0],
+    bitHighlight: [2,3], // ranks 2 and 3 are queried (prefix up to rank of threshold=2 → rank 3)
+    bitVals: [0,0,0,0,0],
+    changedVars: ['threshold'],
+    title: 'j=0: Compute threshold rank',
+    body: 'threshold = A[0]+diff = 1+1 = 2. rank(2) = 3. Query BIT prefix sum up to rank 3 (covering values ≤ 2). BIT is empty → query(3) = 0.'
+  },
+  {
+    activeLine: 6, phase: 'phase-query', phaseLabel: 'j=0',
+    j: 0, aj: 1, threshold: 2, qresult: 0, ans: 0,
+    aHighlight: [0],
+    bitHighlight: [],
+    bitVals: [0,0,0,0,0],
+    changedVars: ['qresult'],
+    title: 'j=0: Query returns 0 (BIT empty)',
+    body: 'query(rank=3) = 0. No previous elements → 0 pairs found so far. ans += 0 → ans=0.'
+  },
+  {
+    activeLine: 7, phase: 'phase-update', phaseLabel: 'j=0 UPDATE',
+    j: 0, aj: 1, threshold: 2, qresult: 0, ans: 0,
+    aHighlight: [0],
+    bitHighlight: [1], // rank(1)=2, update positions 2 then 4
+    bitVals: [0,1,0,1,0],
+    changedVars: [],
+    title: 'j=0: Insert A[0]=1 into BIT',
+    body: 'rank(A[0]) = rank(1) = 2. update(2): BIT[2]+=1 (covers index 2), then BIT[2+lowbit(2)=4]+=1. BIT now = [0,1,0,1,0]. A[0] is now in the structure.'
+  },
+  {
+    activeLine: 4, phase: 'phase-query', phaseLabel: 'j=1',
+    j: 1, aj: 0, threshold: '—', qresult: '—', ans: 0,
+    aHighlight: [1],
+    bitHighlight: [],
+    bitVals: [0,1,0,1,0],
+    changedVars: ['j','aj'],
+    title: 'j=1: Process A[1]=0',
+    body: 'Move to j=1, A[j]=0. Query: how many i<1 have A[i] ≤ 0+1 = 1? threshold=1, rank(1)=2.'
+  },
+  {
+    activeLine: 5, phase: 'phase-query', phaseLabel: 'j=1',
+    j: 1, aj: 0, threshold: 1, qresult: '—', ans: 0,
+    aHighlight: [1],
+    bitHighlight: [1,2], // query prefix up to rank 2
+    bitVals: [0,1,0,1,0],
+    changedVars: ['threshold'],
+    title: 'j=1: threshold = 0+1=1, rank=2',
+    body: 'query(2): traverse BIT indices 2 → 2−lowbit(2)=0 (stop). Sum = BIT[2] = 1. So 1 previous element has value ≤ 1. That element is A[0]=1 ✓. A[0]−A[1]=1−0=1 ≤ diff=1.'
+  },
+  {
+    activeLine: 6, phase: 'phase-query', phaseLabel: 'j=1',
+    j: 1, aj: 0, threshold: 1, qresult: 1, ans: 1,
+    aHighlight: [0,1],
+    bitHighlight: [],
+    bitVals: [0,1,0,1,0],
+    changedVars: ['qresult','ans'],
+    title: 'j=1: Found 1 valid pair! ans=1',
+    body: 'query(2)=1. ans += 1 → ans=1. Pair (0,1): A[0]=1, A[1]=0. Check: 1−0=1 ≤ diff=1 ✓. Valid pair confirmed!'
+  },
+  {
+    activeLine: 7, phase: 'phase-update', phaseLabel: 'j=1 UPDATE',
+    j: 1, aj: 0, threshold: 1, qresult: 1, ans: 1,
+    aHighlight: [1],
+    bitHighlight: [0], // rank(0)=1, update: BIT[1]+=1, BIT[2]+=1, BIT[4]+=1
+    bitVals: [1,2,0,2,0],
+    changedVars: [],
+    title: 'j=1: Insert A[1]=0 into BIT',
+    body: 'rank(0)=1. update(1): BIT[1]+=1 → BIT[1]=1; then i=1+lowbit(1)=2, BIT[2]+=1 → BIT[2]=2; then i=2+lowbit(2)=4, BIT[4]+=1 → BIT[4]=2. BIT=[1,2,0,2,0].'
+  },
+  {
+    activeLine: 4, phase: 'phase-query', phaseLabel: 'j=2',
+    j: 2, aj: 4, threshold: '—', qresult: '—', ans: 1,
+    aHighlight: [2],
+    bitHighlight: [],
+    bitVals: [1,2,0,2,0],
+    changedVars: ['j','aj'],
+    title: 'j=2: Process A[2]=4',
+    body: 'j=2, A[j]=4. Query: count i<2 with A[i] ≤ 4+1=5. rank(5)=5. query(5).'
+  },
+  {
+    activeLine: 5, phase: 'phase-query', phaseLabel: 'j=2',
+    j: 2, aj: 4, threshold: 5, qresult: '—', ans: 1,
+    aHighlight: [2],
+    bitHighlight: [4], // query prefix sum up to rank 5: traverse 5→4→0
+    bitVals: [1,2,0,2,0],
+    changedVars: ['threshold'],
+    title: 'j=2: threshold=5, rank=5. Query BIT prefix up to 5',
+    body: 'query(5): BIT[5]=0; then i=5−lowbit(5)=4, BIT[4]=2. Sum=0+2=2. 2 previous elements have value ≤ 5. Both A[0]=1 and A[1]=0 satisfy the condition!'
+  },
+  {
+    activeLine: 6, phase: 'phase-result', phaseLabel: 'j=2',
+    j: 2, aj: 4, threshold: 5, qresult: 2, ans: 3,
+    aHighlight: [0,1,2],
+    bitHighlight: [],
+    bitVals: [1,2,0,2,0],
+    changedVars: ['qresult','ans'],
+    title: 'j=2: Found 2 more pairs! ans=3',
+    body: 'query(5)=2. ans += 2 → ans=3. Pairs: (0,2): 1−4=−3≤1 ✓; (1,2): 0−4=−4≤1 ✓. Final answer = 3!'
+  }
+];
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let cur = 0;
+
+// ─── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const s = steps[cur];
+
+  // A array cells
+  const aCells = document.getElementById('a-cells');
+  aCells.innerHTML = '';
+  const aIdx = document.getElementById('a-idx');
+  aIdx.innerHTML = '';
+  A_ARR.forEach((v, i) => {
+    const cl = document.createElement('div');
+    const isHighlighted = s.aHighlight.includes(i);
+    const isCurrent = i === s.j;
+    cl.className = 'cell ' + (isCurrent ? 'active' : isHighlighted ? 'found' : 'normal');
+    cl.textContent = v;
+    aCells.appendChild(cl);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot';
+    ix.textContent = `A[${i}]`;
+    aIdx.appendChild(ix);
+  });
+
+  // BIT cells
+  const bitCells = document.getElementById('bit-cells');
+  bitCells.innerHTML = '';
+  const bitIdx = document.getElementById('bit-idx');
+  bitIdx.innerHTML = '';
+  const bitLabels = ['0→1','1→2','2→3','4→4','5→5'];
+  s.bitVals.forEach((v, i) => {
+    const bc = document.createElement('div');
+    const highlighted = s.bitHighlight.includes(i);
+    bc.className = 'bit-cell ' + (highlighted ? (s.phase === 'phase-update' ? 'active' : 'queried') : '');
+    bc.innerHTML = `<span class="bit-cell-val">${v}</span>`;
+    bitCells.appendChild(bc);
+    const bix = document.createElement('div');
+    bix.className = 'idx-slot';
+    bix.innerHTML = `r${i+1}<br><span style="font-size:9px">${bitLabels[i]}</span>`;
+    bitIdx.appendChild(bix);
+  });
+
+  // Variable tracker
+  const vars = [
+    {id:'vb-j', valId:'vv-j', val: s.j === -1 ? '—' : s.j, changed: s.changedVars.includes('j')},
+    {id:'vb-aj', valId:'vv-aj', val: s.aj, changed: s.changedVars.includes('aj')},
+    {id:'vb-thr', valId:'vv-thr', val: s.threshold, changed: s.changedVars.includes('threshold')},
+    {id:'vb-qres', valId:'vv-qres', val: s.qresult, changed: s.changedVars.includes('qresult')},
+    {id:'vb-ans', valId:'vv-ans', val: s.ans, changed: s.changedVars.includes('ans')},
+  ];
+  vars.forEach(v => {
+    document.getElementById(v.id).className = 'var-box' + (v.changed ? ' changed' : '');
+    document.getElementById(v.valId).textContent = v.val;
+  });
+
+  // Code panel
+  document.querySelectorAll('.code-line').forEach(el => {
+    el.classList.remove('active');
+    if (parseInt(el.dataset.line) === s.activeLine) el.classList.add('active');
+  });
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + s.phase;
+  badge.textContent = s.phaseLabel;
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  const next = cur + dir;
+  if (next >= 0 && next < steps.length) { cur = next; render(); }
+}
+
+function reset() { cur = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = '';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

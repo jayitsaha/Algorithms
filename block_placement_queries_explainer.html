@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#3161 · Block Placement Queries</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Segment Tree Diagram ── */
+.seg-tree{display:flex;flex-direction:column;align-items:center;gap:8px;margin:1.25rem 0;padding:1.25rem;background:var(--bg2);border-radius:var(--radius)}
+.seg-row{display:flex;gap:8px;justify-content:center}
+.seg-node{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:44px;border-radius:8px;border:2px solid var(--blue-border);background:var(--blue-bg);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue-text);transition:all 0.3s}
+.seg-node.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.seg-node.queried{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.seg-node.obstacle{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.seg-node-label{font-size:9px;color:var(--text3);font-family:var(--sans);margin-top:2px}
+.seg-connector{width:1px;height:14px;background:var(--border2);margin:0 auto}
+
+/* ── Timeline viz ── */
+.timeline-viz{display:flex;align-items:flex-end;gap:4px;padding:1rem;background:var(--bg2);border-radius:var(--radius);margin:1rem 0;overflow-x:auto}
+.tl-cell{min-width:36px;height:36px;border-radius:6px;border:2px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);transition:all 0.3s;flex-shrink:0}
+.tl-cell.obstacle{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid)}
+.tl-cell.block-fit{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.tl-cell.block-no{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.tl-cell.queried{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.tl-cell.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.tl-idx{text-align:center;font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-query{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-obstacle{background:var(--red-bg);color:var(--red-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.phase-search{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-obstacle{background:var(--red-bg);border-color:var(--red-border)}
+.sw-query{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-fit{background:var(--green-bg);border-color:var(--green-border)}
+.sw-active{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Segment Tree Block viz ── */
+.seg-viz-wrap{overflow-x:auto;padding:1rem;background:var(--bg2);border-radius:var(--radius);margin:1rem 0}
+.seg-row-wrap{display:flex;flex-direction:column;gap:6px}
+.seg-level{display:flex;gap:4px;justify-content:center}
+.sn{display:flex;flex-direction:column;align-items:center;width:58px;height:46px;border-radius:8px;border:2px solid var(--border2);background:var(--surface);cursor:default;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text);transition:all 0.25s;flex-shrink:0}
+.sn span.sn-val{font-size:14px}
+.sn span.sn-range{font-size:8px;color:var(--text3)}
+.sn.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.sn.active .sn-range{color:var(--amber-mid)}
+.sn.has-obs{background:var(--red-bg);border-color:var(--red-border);color:var(--red-mid)}
+.sn.has-obs .sn-range{color:var(--red-border)}
+.sn.query-cover{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #3161</div>
+  <h1>Block Placement Queries</h1>
+  <p class="subtitle">Given obstacle placement and block-size queries on a number line [0, N], determine for each query the maximum block width that fits in any gap before the query position.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">Advanced Data Structures</span>
+    <span class="tag tag-pattern">Segment Tree</span>
+    <span class="tag tag-complexity">Time: O(Q log N)</span>
+    <span class="tag tag-complexity">Space: O(N)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You have an infinite number line. Position <strong>0</strong> always has an implicit obstacle. You receive a sequence of queries:</p>
+    <ul style="margin:0.75rem 0 0.75rem 1.5rem;font-size:14px;line-height:2">
+      <li><strong>Type 1: Place an obstacle</strong> — <code>[1, x]</code> places an obstacle at position <code>x</code>.</li>
+      <li><strong>Type 2: Block query</strong> — <code>[2, x, sz]</code> asks: can a block of size <code>sz</code> fit anywhere in the range <code>[0, x]</code> without touching an obstacle?</li>
+    </ul>
+
+    <p>A block of size <code>sz</code> fits in a gap if the gap (distance between consecutive obstacles) is <strong>strictly greater than</strong> <code>sz</code>. We answer <code>true</code> or <code>false</code> for each type-2 query.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The problem reduces to: given the set of obstacles placed so far, what is the <strong>maximum gap</strong> between any two consecutive obstacles in the range <code>[0, x]</code>? If <code>max_gap > sz</code>, return true. We need a data structure that answers this "maximum gap in a prefix" query after dynamic obstacle insertions.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Block Fits</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--green-text);line-height:2">
+          Obstacles: [0, 3, 8]<br>
+          Gaps: 3, 5<br>
+          Query [2, 10, 4]<br>
+          max_gap=5 &gt; sz=4 → <strong>True</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">✗ Block Doesn't Fit</div>
+        <p style="font-family:var(--mono);font-size:12px;color:var(--red-text);line-height:2">
+          Obstacles: [0, 3, 6, 8]<br>
+          Gaps: 3, 3, 2<br>
+          Query [2, 10, 4]<br>
+          max_gap=3 &lt; sz=4 → <strong>False</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Key subtleties:</strong></p>
+    <ul style="margin:0.5rem 0 0 1.5rem;font-size:14px;line-height:2">
+      <li>Position 0 is always an obstacle (acts as the left boundary).</li>
+      <li>For a type-2 query at position <code>x</code>, we also treat <code>x</code> itself as a right boundary — the maximum gap is computed from obstacles in <code>[0, x]</code> PLUS a virtual obstacle at <code>x</code>.</li>
+      <li>Queries are processed <strong>online</strong> — obstacles accumulate across queries.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: Offline Sort + Segment Tree on Max Gap</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>We process queries <strong>offline</strong> — sort all events by position, then sweep left to right. As we encounter obstacles, we update a segment tree that tracks the <strong>maximum gap</strong> in any prefix. For each type-2 query at position <code>x</code>, we query the segment tree for the maximum gap in <code>[0, x]</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Coordinate compress:</strong> Collect all x-values from both query types. Sort and deduplicate. Map to indices 1..M. This lets the segment tree work on indices instead of large x values.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Segment tree on gaps:</strong> Build a segment tree over positions 1..M. Each leaf <code>i</code> stores the gap between obstacle at position <code>i</code> and its predecessor obstacle. Internal nodes store the <strong>maximum</strong> gap in their range. Initially all leaves = 0 (no obstacles except 0).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Sort events by x:</strong> Sort all type-1 (obstacles) and type-2 (queries) events by their x-coordinate. Process in order.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Type-1 (obstacle at x):</strong> Find x's predecessor in the sorted obstacle set. The gap that previously existed between predecessor and successor is now split. Update the segment tree: remove old gap, add two smaller gaps.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Type-2 (query x, sz):</strong> The answer is whether <code>seg.query_max(1, idx(x)) > sz</code>, where <code>idx(x)</code> is x's compressed index. We also account for the gap from the last obstacle to x itself.</span>
+      </div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why Offline Works Here</div>
+      <p>By sorting all queries by x, we can maintain a sorted set of obstacles and sweep through them once. Each obstacle insertion splits exactly one gap into two — a classic "interval management" pattern that the segment tree handles in O(log N).</p>
+    </div>
+
+    <!-- Segment Tree Diagram -->
+    <p style="margin-top:1rem;font-weight:600;font-size:14px">Segment Tree Structure (max gap in prefix):</p>
+    <div class="seg-viz-wrap">
+      <div class="seg-row-wrap">
+        <div class="seg-level">
+          <div class="sn"><span class="sn-val">5</span><span class="sn-range">[0,8]</span></div>
+        </div>
+        <div class="seg-level">
+          <div class="sn"><span class="sn-val">3</span><span class="sn-range">[0,4]</span></div>
+          <div class="sn has-obs"><span class="sn-val">5</span><span class="sn-range">[5,8]</span></div>
+        </div>
+        <div class="seg-level">
+          <div class="sn"><span class="sn-val">3</span><span class="sn-range">[0,2]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[3,4]</span></div>
+          <div class="sn has-obs"><span class="sn-val">5</span><span class="sn-range">[5,6]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[7,8]</span></div>
+        </div>
+        <div class="seg-level">
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[0]</span></div>
+          <div class="sn"><span class="sn-val">3</span><span class="sn-range">[1,2]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[3]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[4]</span></div>
+          <div class="sn has-obs"><span class="sn-val">5</span><span class="sn-range">[5,6]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[7]</span></div>
+          <div class="sn"><span class="sn-val">0</span><span class="sn-range">[8]</span></div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:8px">Each node stores the max gap within its range. Red nodes contain large gaps.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Algorithm Deep-Dive: Segment Tree   -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">🔬 Algorithm Deep-Dive: Segment Tree</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A <strong>Segment Tree</strong> is a binary tree where each node stores an aggregate (sum, min, max, GCD, etc.) over a contiguous subarray. It supports both <em>point updates</em> and <em>range queries</em> in <strong>O(log N)</strong> time.</p>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🏛️ Origin &amp; Use Cases</div>
+      <p>Segment trees were formalized in computational geometry in the 1970s. They are the workhorse for problems requiring <strong>dynamic range queries</strong> — where the array changes between queries. Classic problems: range sum with updates, range min/max with updates, lazy propagation for range updates.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Core Invariant:</strong> Every internal node <code>v</code> covering range <code>[l, r]</code> stores <code>aggregate(arr[l..r])</code>. After any point update at index <code>i</code>, exactly <code>O(log N)</code> nodes (the path from leaf <code>i</code> to root) need to be refreshed.</p>
+
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">class SegTree:</span></div>
+<div class="ann-line"><span class="acode">    def __init__(self, n):</span></div>
+<div class="ann-line"><span class="acode">        self.n = n</span></div>
+<div class="ann-line"><span class="acode">        self.tree = [0] * (4 * n)  </span><span class="aann">← 4n size is safe for any n</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def update(self, node, start, end, idx, val):</span></div>
+<div class="ann-line"><span class="acode">        if start == end:            </span><span class="aann">← Leaf node: store the value directly</span></div>
+<div class="ann-line"><span class="acode">            self.tree[node] = val</span></div>
+<div class="ann-line"><span class="acode">            return</span></div>
+<div class="ann-line"><span class="acode">        mid = (start + end) // 2</span></div>
+<div class="ann-line"><span class="acode">        if idx &lt;= mid:</span></div>
+<div class="ann-line"><span class="acode">            self.update(2*node, start, mid, idx, val)</span></div>
+<div class="ann-line"><span class="acode">        else:</span></div>
+<div class="ann-line"><span class="acode">            self.update(2*node+1, mid+1, end, idx, val)</span></div>
+<div class="ann-line"><span class="acode">        self.tree[node] = max(self.tree[2*node], self.tree[2*node+1])  </span><span class="aann">← Pull up</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">    def query(self, node, start, end, l, r):</span></div>
+<div class="ann-line"><span class="acode">        if r &lt; start or end &lt; l:   </span><span class="aann">← Out of range: return identity (0 for max)</span></div>
+<div class="ann-line"><span class="acode">            return 0</span></div>
+<div class="ann-line"><span class="acode">        if l &lt;= start and end &lt;= r: </span><span class="aann">← Fully covered: return this node's value</span></div>
+<div class="ann-line"><span class="acode">            return self.tree[node]</span></div>
+<div class="ann-line"><span class="acode">        mid = (start + end) // 2</span></div>
+<div class="ann-line"><span class="acode">        return max(self.query(2*node, start, mid, l, r),</span></div>
+<div class="ann-line"><span class="acode">                   self.query(2*node+1, mid+1, end, l, r))</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why O(log N) Range Query Works</div>
+      <p>The query range <code>[l, r]</code> can intersect at most <code>O(log N)</code> nodes at each level of the tree. Nodes fully covered by <code>[l, r]</code> return immediately; nodes partially covered recurse. The recursion tree has depth <code>log N</code> and visits at most <code>4 log N</code> nodes total.</p>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistakes with Segment Trees</div>
+      <ul style="margin-left:1rem;font-size:14px;line-height:2">
+        <li><strong>Array size:</strong> Always allocate <code>4*n</code> nodes. Using <code>2*n</code> is common but can overflow for non-power-of-2 sizes.</li>
+        <li><strong>Identity element:</strong> For max queries, return 0 (or -∞) when out of range. For min, return +∞. Getting this wrong corrupts all answers.</li>
+        <li><strong>1-indexed vs 0-indexed:</strong> Be consistent — the root is at index 1, left child at <code>2*node</code>, right at <code>2*node+1</code>.</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:0.5rem"><strong>Generalizations:</strong> Segment trees extend to <em>lazy propagation</em> (range updates in O(log N)), <em>persistent segment trees</em> (keep all historical versions), and <em>2D segment trees</em> (for 2D range queries). Recognizing "dynamic range query" is the trigger to reach for this tool.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: Why It Works: The Invariant         -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At all times, <code>seg.tree[node]</code> for a node covering range <code>[l, r]</code> equals the <strong>maximum gap between consecutive obstacles</strong> whose right endpoint falls in <code>[l, r]</code>. This allows O(log N) max-gap queries over any prefix <code>[0, x]</code>.</p>
+    </div>
+
+    <p><strong>Why splitting works correctly:</strong> When obstacle at position <code>x</code> is inserted:</p>
+    <ol style="margin:0.75rem 0 0.75rem 1.5rem;font-size:14px;line-height:2">
+      <li>Find predecessor <code>prev</code> and successor <code>next</code> in the sorted obstacle set.</li>
+      <li>The gap <code>(next - prev)</code> was stored at the compressed index of <code>next</code>. Set it to <code>next - x</code>.</li>
+      <li>Store <code>x - prev</code> at the compressed index of <code>x</code>.</li>
+      <li>The two updates take O(log N) each via the segment tree.</li>
+    </ol>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The Boundary Trick for Type-2 Queries</div>
+      <p>For a query <code>[2, x, sz]</code>, the block must fit within <code>[0, x]</code>. We treat <code>x</code> as a virtual right boundary. So we compute: gap from last obstacle before <code>x</code> to <code>x</code> itself (<code>x - prev_obstacle</code>), AND the maximum gap from the segment tree in <code>[0, idx(x)-1]</code>. The answer is <code>max(these two) > sz</code>.</p>
+    </div>
+
+    <p><strong>Edge cases:</strong> If no obstacles have been placed (only position 0 exists), the only gap is from 0 to x, which is x itself. For obstacles at x's position, that gap contributes 0 to the right side. The segment tree always returns the correct max because it only contains committed obstacles.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — Offline + Coordinate Compression + Segment Tree (Interview Pick)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">from sortedcontainers import SortedList</span></div>
+<div class="ann-line"><span class="acode">class Solution:</span></div>
+<div class="ann-line"><span class="acode">    def getResults(self, queries):</span></div>
+<div class="ann-line"><span class="acode">        # Collect all x-coords; 0 is always an obstacle</span></div>
+<div class="ann-line"><span class="acode">        xs = sorted(set([0] + [q[1] for q in queries]))  </span><span class="aann">← Coordinate compression</span></div>
+<div class="ann-line"><span class="acode">        rank = {v: i+1 for i, v in enumerate(xs)}       </span><span class="aann">← 1-indexed rank map</span></div>
+<div class="ann-line"><span class="acode">        n = len(xs)</span></div>
+<div class="ann-line"><span class="acode">        tree = [0] * (4 * n)                             </span><span class="aann">← Segment tree: max gap</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">        def update(node, s, e, idx, val):</span></div>
+<div class="ann-line"><span class="acode">            if s == e: tree[node] = val; return</span></div>
+<div class="ann-line"><span class="acode">            mid = (s + e) // 2</span></div>
+<div class="ann-line"><span class="acode">            if idx &lt;= mid: update(2*node, s, mid, idx, val)</span></div>
+<div class="ann-line"><span class="acode">            else:          update(2*node+1, mid+1, e, idx, val)</span></div>
+<div class="ann-line"><span class="acode">            tree[node] = max(tree[2*node], tree[2*node+1])</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">        def query(node, s, e, l, r):                     </span><span class="aann">← Max gap in range [l,r]</span></div>
+<div class="ann-line"><span class="acode">            if r &lt; s or e &lt; l: return 0</span></div>
+<div class="ann-line"><span class="acode">            if l &lt;= s and e &lt;= r: return tree[node]</span></div>
+<div class="ann-line"><span class="acode">            mid = (s + e) // 2</span></div>
+<div class="ann-line"><span class="acode">            return max(query(2*node, s, mid, l, r),</span></div>
+<div class="ann-line"><span class="acode">                       query(2*node+1, mid+1, e, l, r))</span></div>
+<div class="ann-line"><span class="acode"></span></div>
+<div class="ann-line"><span class="acode">        obstacles = SortedList([0])                      </span><span class="aann">← Always start with obstacle at 0</span></div>
+<div class="ann-line"><span class="acode">        ans = []</span></div>
+<div class="ann-line"><span class="acode">        for q in queries:</span></div>
+<div class="ann-line"><span class="acode">            x = q[1]</span></div>
+<div class="ann-line"><span class="acode">            if q[0] == 1:                                </span><span class="aann">← Type 1: place obstacle at x</span></div>
+<div class="ann-line"><span class="acode">                idx = obstacles.bisect_left(x)           </span><span class="aann">← Find insertion point</span></div>
+<div class="ann-line"><span class="acode">                if idx == len(obstacles) or obstacles[idx] != x:</span></div>
+<div class="ann-line"><span class="acode">                    prev = obstacles[idx - 1]            </span><span class="aann">← Left neighbor obstacle</span></div>
+<div class="ann-line"><span class="acode">                    succ = obstacles[idx] if idx &lt; len(obstacles) else None</span></div>
+<div class="ann-line"><span class="acode">                    obstacles.add(x)</span></div>
+<div class="ann-line"><span class="acode">                    update(1, 1, n, rank[x], x - prev)  </span><span class="aann">← Gap: x to its left neighbor</span></div>
+<div class="ann-line"><span class="acode">                    if succ is not None:</span></div>
+<div class="ann-line"><span class="acode">                        update(1, 1, n, rank[succ], succ - x) </span><span class="aann">← Shrink succ's gap</span></div>
+<div class="ann-line"><span class="acode">            else:                                        </span><span class="aann">← Type 2: can block of sz fit in [0,x]?</span></div>
+<div class="ann-line"><span class="acode">                sz = q[2]</span></div>
+<div class="ann-line"><span class="acode">                prev_obs = obstacles[obstacles.bisect_right(x) - 1]</span></div>
+<div class="ann-line"><span class="acode">                gap_to_x = x - prev_obs                 </span><span class="aann">← Gap from last obstacle to x</span></div>
+<div class="ann-line"><span class="acode">                max_gap = max(gap_to_x,</span></div>
+<div class="ann-line"><span class="acode">                              query(1, 1, n, 1, rank[x]))  </span><span class="aann">← Max gap in all of [0,x]</span></div>
+<div class="ann-line"><span class="acode">                ans.append(max_gap &gt; sz)                </span><span class="aann">← True if block fits</span></div>
+<div class="ann-line"><span class="acode">        return ans</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why SortedList for obstacles?</div>
+      <p><code>SortedList</code> (from <code>sortedcontainers</code>) gives O(log N) insert and predecessor queries. You could also use Python's <code>bisect</code> module on a plain list for O(log N) search with O(N) insert — acceptable for interview, but O(N) insert is too slow for the hard constraint. In interviews, mention both and use bisect if library not allowed.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force (for intuition only, TLE)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def getResults_brute(queries):</span></div>
+<div class="ann-line"><span class="acode">    obstacles = sorted({0})</span></div>
+<div class="ann-line"><span class="acode">    ans = []</span></div>
+<div class="ann-line"><span class="acode">    for q in queries:</span></div>
+<div class="ann-line"><span class="acode">        if q[0] == 1:</span></div>
+<div class="ann-line"><span class="acode">            import bisect; bisect.insort(obstacles, q[1])  </span><span class="aann">← O(N) insert</span></div>
+<div class="ann-line"><span class="acode">        else:</span></div>
+<div class="ann-line"><span class="acode">            x, sz = q[1], q[2]</span></div>
+<div class="ann-line"><span class="acode">            obs_in_range = [o for o in obstacles if o &lt;= x] + [x]</span></div>
+<div class="ann-line"><span class="acode">            max_gap = max(obs_in_range[i]-obs_in_range[i-1]  </span><span class="aann">← O(N) scan</span></div>
+<div class="ann-line"><span class="acode">                          for i in range(1, len(obs_in_range)))</span></div>
+<div class="ann-line"><span class="acode">            ans.append(max_gap &gt; sz)</span></div>
+<div class="ann-line"><span class="acode">    return ans                                            </span><span class="aann">← O(Q*N) overall — TLE</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Optimal (Segment Tree):</strong> Time O(Q log Q) for sorting + O(Q log N) for queries = O(Q log Q). Space O(N) for segment tree + O(Q) for SortedList.<br>
+        <strong>Brute Force:</strong> Time O(Q · N) for N obstacles and Q queries. Fails for N, Q up to 5×10⁴.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Reframe the Core Question</div>
+        <p style="font-size:14px;color:var(--text)">"For each type-2 query at x: what is the largest gap between consecutive obstacles in [0, x]?" This is a <strong>dynamic range-max query</strong> — the classic signal for a segment tree.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose Brute Force</div>
+        <p style="font-size:14px;color:var(--text)">"Maintain a sorted list of obstacles. For each type-2 query, scan all obstacles ≤ x to find the max gap. O(Q·N) — too slow for 5×10⁴ queries."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Identify the Bottleneck</div>
+        <p style="font-size:14px;color:var(--text)">"The bottleneck is finding max gap in a prefix after each obstacle insertion. If I precompute gaps and store them in a max segment tree, both operations become O(log N)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Coordinate Compress</div>
+        <p style="font-size:14px;color:var(--text)">"x-values can be up to 5×10⁴, but there are at most Q distinct values. Map them to 1..Q ranks. The segment tree works on these compressed indices — O(Q log Q) total."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Handle the Boundary Gap</div>
+        <p style="font-size:14px;color:var(--text)">"For type-2, also consider the gap from the last obstacle before x to x itself — this gap exists even if x has no obstacle. Take max of this and the segment tree result."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"Let me restate: for a block of size sz to fit in [0, x], I need some gap between consecutive obstacles in that range to be strictly greater than sz.<br>
+So the question is: what is max(gap) over all consecutive obstacle pairs in [0, x]?<br>
+This is a dynamic range-max query — segment tree is perfect.<br>
+I'll coordinate-compress x-values, build a segment tree where each leaf stores the gap to its left obstacle, and internal nodes store the max in their range.<br>
+Each obstacle insert: split one gap into two — two O(log N) updates.<br>
+Each type-2 query: O(log N) range-max query plus O(log N) predecessor search.<br>
+Overall: O(Q log Q) time, O(Q) space."
+      </div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if obstacles can be removed?"</strong> → Need a different structure (order-statistic tree or lazy segment tree with deletion)</li>
+        <li><strong>"What if queries are online (no offline trick)?"</strong> → Still works — we process queries in arrival order with the same segment tree</li>
+        <li><strong>"Can you use a Fenwick tree instead?"</strong> → No — Fenwick trees support prefix sum, not prefix max (unless values are non-decreasing)</li>
+        <li><strong>"How would lazy propagation help?"</strong> → Not needed here; each update touches O(log N) nodes with simple point updates</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Example: queries = [[1,7],[2,8,2],[2,3,1],[1,2],[2,4,2]]<br>
+    Number line positions: 0–10. Obstacle always at 0.</p>
+
+    <!-- Timeline Visualization -->
+    <div id="timeline" class="timeline-viz"></div>
+
+    <!-- Variable Tracker -->
+    <div class="var-tracker">
+      <div class="var-box" id="vb-phase">
+        <span class="var-name">Phase</span>
+        <span class="var-val" id="vv-phase">–</span>
+      </div>
+      <div class="var-box" id="vb-obs">
+        <span class="var-name">Obstacles</span>
+        <span class="var-val" id="vv-obs">{0}</span>
+      </div>
+      <div class="var-box" id="vb-maxgap">
+        <span class="var-name">Max Gap</span>
+        <span class="var-val" id="vv-maxgap">–</span>
+      </div>
+      <div class="var-box" id="vb-ans">
+        <span class="var-name">Answer</span>
+        <span class="var-val" id="vv-ans">–</span>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel" id="code-panel">
+      <div class="code-line" id="cl-0">obstacles = SortedList([0])   # implicit obstacle at 0</div>
+      <div class="code-line" id="cl-1">for q in queries:</div>
+      <div class="code-line" id="cl-2">    x = q[1]</div>
+      <div class="code-line" id="cl-3">    if q[0] == 1:  # obstacle</div>
+      <div class="code-line" id="cl-4">        prev = obstacles[bisect(x)-1]</div>
+      <div class="code-line" id="cl-5">        obstacles.add(x)</div>
+      <div class="code-line" id="cl-6">        update(rank[x], x - prev)</div>
+      <div class="code-line" id="cl-7">        update(rank[succ], succ - x)  # shrink succ gap</div>
+      <div class="code-line" id="cl-8">    else:  # block query</div>
+      <div class="code-line" id="cl-9">        prev_obs = last obstacle &lt;= x</div>
+      <div class="code-line" id="cl-10">        gap_to_x = x - prev_obs</div>
+      <div class="code-line" id="cl-11">        max_gap = max(gap_to_x, seg.query(0, rank[x]))</div>
+      <div class="code-line" id="cl-12">        ans.append(max_gap > sz)</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">Init</span>
+      <div class="step-counter" id="step-counter">Step 1 of 13</div>
+      <div class="step-title" id="step-title">Initialize</div>
+      <div class="step-body" id="step-body">Position 0 always has an obstacle. Our sorted obstacle set starts as {0}. The segment tree is empty — no gaps stored yet.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-obstacle"></div>Obstacle</div>
+      <div class="legend-item"><div class="legend-swatch sw-query"></div>Query position</div>
+      <div class="legend-item"><div class="legend-swatch sw-fit"></div>Block fits here</div>
+      <div class="legend-item"><div class="legend-swatch sw-active"></div>Active / processing</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 8: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">8</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Dynamic range-max after point updates = Segment Tree</div>
+      <div class="takeaway">Each obstacle insertion splits one gap into two — O(log N) with seg tree</div>
+      <div class="takeaway">Coordinate compression keeps the tree small when x-values are sparse</div>
+      <div class="takeaway">Always handle the boundary: gap from last obstacle to query position x</div>
+      <div class="takeaway">SortedList (or bisect) finds predecessor in O(log N) for gap computation</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Use Segment Tree</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>Need range aggregate (sum / min / max / GCD) with point or range updates</li>
+        <li>Both operations must be O(log N), not O(N)</li>
+        <li>Array changes between queries (otherwise prefix arrays suffice)</li>
+        <li>Keywords: "after each update, what is the max/min/sum in range [l, r]?"</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div class="related-item"><strong>Range Sum Query - Mutable</strong> <span class="related-diff diff-med">Medium</span> — Classic seg tree / Fenwick tree on sum</div>
+      <div class="related-item"><strong>The Skyline Problem</strong> <span class="related-diff diff-hard">Hard</span> — Segment tree on max height with sweep line</div>
+      <div class="related-item"><strong>Count of Smaller Numbers After Self</strong> <span class="related-diff diff-hard">Hard</span> — Segment tree / Fenwick for rank queries</div>
+      <div class="related-item"><strong>Falling Squares</strong> <span class="related-diff diff-hard">Hard</span> — Segment tree with lazy propagation for interval max</div>
+      <div class="related-item"><strong>Rectangle Area II</strong> <span class="related-diff diff-hard">Hard</span> — Coordinate compress + seg tree for area sweep</div>
+      <div class="related-item"><strong>Minimum Interval to Include Each Query</strong> <span class="related-diff diff-hard">Hard</span> — Offline sort + seg tree / heap</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Reference</div>
+      <p>Main Pattern: Advanced Data Structures → Sub-Pattern: Segment Tree<br>
+      See DSA_Patterns_and_SubPatterns_Guide.md for more problems in this family.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- .page-wrapper -->
+
+<script>
+// ─────────── Step Data ───────────
+// Timeline: positions 0–10, cells show state
+// Queries: [[1,7],[2,8,2],[2,3,1],[1,2],[2,4,2]]
+const N = 11;
+const steps = [
+  {
+    phase:'init', phaseClass:'phase-init', activeLine:0,
+    title:'Initialize: obstacle at 0',
+    body:'Position 0 always has an obstacle. Sorted obstacle set = {0}. Segment tree stores no gaps yet.',
+    obstacles:[0], queryPos:null, queryRange:null, blockSz:null,
+    maxGap:'–', answer:'–',
+    obs_label:'{0}', changed:[]
+  },
+  {
+    phase:'obstacle', phaseClass:'phase-obstacle', activeLine:2,
+    title:'Query [1,7]: Place obstacle at x=7',
+    body:'Processing type-1 query: place an obstacle at position 7. We look up the predecessor of 7 in our sorted set {0}. The predecessor is 0.',
+    obstacles:[0], queryPos:7, queryRange:null, blockSz:null,
+    maxGap:'–', answer:'–',
+    obs_label:'{0}', changed:['phase']
+  },
+  {
+    phase:'obstacle', phaseClass:'phase-obstacle', activeLine:4,
+    title:'Find predecessor of 7: prev=0',
+    body:'Before inserting 7, we find its left neighbor: prev=0. The gap from 0 to 7 is 7. We also look for a successor — none exists (7 is the rightmost). So we only need to store gap=7 at rank[7].',
+    obstacles:[0], queryPos:7, queryRange:null, blockSz:null,
+    maxGap:'–', answer:'–',
+    obs_label:'{0}', changed:[]
+  },
+  {
+    phase:'obstacle', phaseClass:'phase-obstacle', activeLine:6,
+    title:'Insert obstacle at 7; update seg tree',
+    body:'Add 7 to the sorted set. Update seg tree at rank[7] with gap = 7 - 0 = 7. The maximum gap in [0,7] is now 7.',
+    obstacles:[0,7], queryPos:7, queryRange:null, blockSz:null,
+    maxGap:'7', answer:'–',
+    obs_label:'{0,7}', changed:['obs','maxgap']
+  },
+  {
+    phase:'query', phaseClass:'phase-query', activeLine:8,
+    title:'Query [2,8,2]: Can block sz=2 fit in [0,8]?',
+    body:'Processing type-2 query. x=8, sz=2. We need the maximum gap in [0,8]. First, find the last obstacle ≤ 8: that\'s 7. Gap from 7 to x=8 is 8-7=1.',
+    obstacles:[0,7], queryPos:8, queryRange:[0,8], blockSz:2,
+    maxGap:'–', answer:'–',
+    obs_label:'{0,7}', changed:['phase','ans']
+  },
+  {
+    phase:'query', phaseClass:'phase-query', activeLine:11,
+    title:'Query seg tree for max gap in [0, idx(8)]',
+    body:'Seg tree query for prefix up to rank[8]: returns 7 (the gap 0→7). Also gap_to_x = 8-7=1. max_gap = max(1, 7) = 7. Is 7 > 2? YES → True!',
+    obstacles:[0,7], queryPos:8, queryRange:[0,8], blockSz:2,
+    maxGap:'7', answer:'True ✓',
+    obs_label:'{0,7}', changed:['maxgap','ans']
+  },
+  {
+    phase:'query', phaseClass:'phase-query', activeLine:8,
+    title:'Query [2,3,1]: Can block sz=1 fit in [0,3]?',
+    body:'x=3, sz=1. Last obstacle ≤ 3: that\'s 0. gap_to_x = 3-0=3. Seg tree query for [0, rank[3]]: we have no obstacle in (0,3], so max gap from tree = 0. max_gap = max(3, 0) = 3. Is 3 > 1? YES → True!',
+    obstacles:[0,7], queryPos:3, queryRange:[0,3], blockSz:1,
+    maxGap:'3', answer:'True ✓',
+    obs_label:'{0,7}', changed:['phase','maxgap','ans']
+  },
+  {
+    phase:'obstacle', phaseClass:'phase-obstacle', activeLine:2,
+    title:'Query [1,2]: Place obstacle at x=2',
+    body:'Type-1 query: place obstacle at 2. Predecessor of 2 in {0,7} is 0. Successor is 7. Old gap at rank[7] was 7 (from 0→7). Now we split it: new gap at rank[2] = 2-0=2, update gap at rank[7] = 7-2=5.',
+    obstacles:[0,7], queryPos:2, queryRange:null, blockSz:null,
+    maxGap:'–', answer:'–',
+    obs_label:'{0,7}', changed:['phase','ans']
+  },
+  {
+    phase:'obstacle', phaseClass:'phase-obstacle', activeLine:6,
+    title:'Update seg tree: gaps split by obstacle at 2',
+    body:'After inserting 2: seg tree at rank[2] ← 2 (gap 0→2). Seg tree at rank[7] ← 5 (gap 2→7). Max gap in tree is now 5.',
+    obstacles:[0,2,7], queryPos:2, queryRange:null, blockSz:null,
+    maxGap:'5', answer:'–',
+    obs_label:'{0,2,7}', changed:['obs','maxgap']
+  },
+  {
+    phase:'query', phaseClass:'phase-query', activeLine:8,
+    title:'Query [2,4,2]: Can block sz=2 fit in [0,4]?',
+    body:'x=4, sz=2. Last obstacle ≤ 4: that\'s 2. gap_to_x = 4-2=2. Seg tree query for [0, rank[4]]: max of gaps at rank[2]=2, rank[3] if any, etc. The max in prefix [0,4] from tree = 2 (gap 0→2). max_gap = max(2, 2) = 2. Is 2 > 2? NO → False.',
+    obstacles:[0,2,7], queryPos:4, queryRange:[0,4], blockSz:2,
+    maxGap:'2', answer:'False ✗',
+    obs_label:'{0,2,7}', changed:['phase','maxgap','ans']
+  },
+  {
+    phase:'result', phaseClass:'phase-result', activeLine:12,
+    title:'Final Answers',
+    body:'Answers collected: [True, True, False]. Query [2,8,2]→True (gap=7>2). Query [2,3,1]→True (gap=3>1). Query [2,4,2]→False (gap=2 not > 2). The segment tree efficiently tracked the maximum gap as obstacles were added.',
+    obstacles:[0,2,7], queryPos:null, queryRange:null, blockSz:null,
+    maxGap:'done', answer:'[T,T,F]',
+    obs_label:'{0,2,7}', changed:['ans']
+  }
+];
+
+let cur = 0;
+
+function buildTimeline(step) {
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  for (let i = 0; i <= 10; i++) {
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'center';
+    const cell = document.createElement('div');
+    cell.className = 'tl-cell';
+    cell.textContent = i;
+    if (step.obstacles && step.obstacles.includes(i)) {
+      cell.classList.add('obstacle');
+    } else if (step.queryRange && i > step.queryRange[0] && i < step.queryRange[1]) {
+      cell.classList.add('block-fit');
+    }
+    if (step.queryPos === i) cell.classList.add('queried');
+    if (step.queryPos === i && step.phase === 'obstacle') cell.classList.add('active');
+    const idx = document.createElement('div');
+    idx.className = 'tl-idx';
+    idx.textContent = i;
+    wrap.appendChild(cell);
+    wrap.appendChild(idx);
+    tl.appendChild(wrap);
+  }
+}
+
+function render() {
+  const s = steps[cur];
+  buildTimeline(s);
+
+  // Var tracker
+  const fields = {obs: s.obs_label, maxgap: s.maxGap, ans: s.answer, phase: s.phase};
+  Object.entries(fields).forEach(([k, v]) => {
+    const box = document.getElementById('vb-' + k);
+    const val = document.getElementById('vv-' + k);
+    if (!box || !val) return;
+    val.textContent = v;
+    box.className = 'var-box' + (s.changed && s.changed.includes(k) ? ' changed' : '');
+  });
+
+  // Code panel
+  for (let i = 0; i <= 12; i++) {
+    const el = document.getElementById('cl-' + i);
+    if (el) el.className = 'code-line' + (s.activeLine === i ? ' active' : '');
+  }
+
+  // Info card
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + s.phaseClass;
+  badge.textContent = s.phase.charAt(0).toUpperCase() + s.phase.slice(1);
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-body').textContent = s.body;
+
+  // Progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  steps.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' visited' : '');
+    d.onclick = () => { cur = i; render(); };
+    dots.appendChild(d);
+  });
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  render();
+}
+
+function reset() { cur = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+render();
+</script>
+</body>
+</html>

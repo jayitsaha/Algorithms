@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1392 · Longest Happy Prefix</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+
+/* ── String visualization ── */
+.str-section{display:flex;align-items:flex-start;gap:12px;margin-bottom:1rem}
+.str-label-box{min-width:80px;height:44px;display:flex;align-items:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;padding-top:22px}
+.str-col{display:flex;flex-direction:column}
+.ptr-row{display:flex;gap:4px;min-height:24px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:38px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:9px;font-weight:700;border-radius:4px;padding:2px 5px;line-height:1.4;white-space:nowrap}
+.ptr-prefix{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-suffix{background:var(--green-bg);color:var(--green-mid)}
+.ptr-match{background:var(--amber-bg);color:var(--amber-mid)}
+.ptr-cur{background:var(--purple-bg);color:var(--purple-mid)}
+
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:38px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.prefix-match{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.suffix-match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.current{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.mismatch{background:var(--red-bg);border-color:var(--red-border);color:var(--red-text)}
+.cell.match-both{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-text)}
+.cell.result-cell{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+
+.idx-row{display:flex;gap:4px;margin-top:4px}
+.idx-slot{width:38px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── KMP table ── */
+.kmp-table-wrap{margin:1rem 0;overflow-x:auto}
+.kmp-tbl{border-collapse:collapse;font-family:var(--mono);font-size:13px}
+.kmp-tbl th,.kmp-tbl td{padding:8px 12px;text-align:center;border:1px solid var(--border)}
+.kmp-tbl th{background:var(--bg2);font-weight:600;font-size:12px;font-family:var(--sans)}
+.kmp-tbl td.filled{background:var(--blue-bg);color:var(--blue-mid);font-weight:700}
+.kmp-tbl td.computing{background:var(--amber-bg);color:var(--amber-mid);font-weight:700}
+.kmp-tbl td.mismatch-cell{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:12px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 16px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);min-width:32px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-match{background:var(--green-bg);color:var(--green-mid)}
+.phase-fallback{background:var(--amber-bg);color:var(--amber-mid)}
+.phase-result{background:var(--cyan-bg);color:var(--cyan-mid);border:1px solid var(--cyan-border)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-prefix{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-suffix{background:var(--green-bg);border-color:var(--green-border)}
+.sw-cur{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-mismatch{background:var(--red-bg);border-color:var(--red-border)}
+.sw-result{background:var(--amber-bg);border-color:var(--amber-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+
+/* ── KMP failure table ── */
+.failure-table{display:flex;flex-direction:column;gap:4px;margin:1rem 0}
+.fail-row{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.fail-label{min-width:80px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--text3);background:var(--bg2);border-right:1px solid var(--border);font-family:var(--sans);display:flex;align-items:center}
+.fail-cells{display:flex;flex:1}
+.fail-cell{flex:1;padding:8px 4px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:600;border-right:1px solid var(--border);min-width:32px}
+.fail-cell:last-child{border-right:none}
+.fail-cell.zero{color:var(--text3)}
+.fail-cell.positive{color:var(--blue-mid);background:var(--blue-bg)}
+
+/* ── Deep dive box ── */
+.deepdive-box{background:var(--cyan-bg);border:2px solid var(--cyan-border);border-radius:var(--radius);padding:1.25rem;margin:1rem 0}
+.deepdive-title{font-size:13px;font-weight:700;color:var(--cyan-mid);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #1392</div>
+  <h1>Longest Happy Prefix</h1>
+  <p class="subtitle">Find the longest string that is both a proper prefix and a proper suffix of s — the KMP failure function in disguise.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">KMP Failure Function</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>A <strong>happy prefix</strong> is a string that is simultaneously a <em>proper prefix</em> and a <em>proper suffix</em> of <code>s</code>. "Proper" means it cannot be the entire string <code>s</code> itself — it must be strictly shorter.</p>
+
+    <p style="margin-top:0.75rem">We want the <strong>longest</strong> such string (or <code>""</code> if none exists).</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>This is <em>exactly</em> what the <strong>KMP failure function</strong> (also called the "partial match table" or "prefix function") computes at its last position. The failure function at index <code>i</code> gives the length of the longest proper prefix of <code>s[0..i]</code> that is also a suffix of <code>s[0..i]</code>. We just need that value for index <code>n-1</code> (the whole string).</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: s = "level"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          Prefix "l" == Suffix "l" ✓<br>
+          Prefix "le" vs Suffix "el" ✗<br>
+          Prefix "lev" vs Suffix "vel" ✗<br>
+          <strong>Answer: "l"</strong>
+        </p>
+      </div>
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: s = "aaaa"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.9">
+          "a" == suffix "a" ✓<br>
+          "aa" == suffix "aa" ✓<br>
+          "aaa" == suffix "aaa" ✓<br>
+          <strong>Answer: "aaa"</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Edge cases:</strong> A single character (no proper prefix/suffix → return <code>""</code>). All same characters like <code>"aaa"</code> → answer is <code>"aa"</code> (length n−1). No match possible like <code>"abcd"</code> → return <code>""</code>.</p>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ "Proper" is Critical</div>
+      <p>The prefix/suffix must be <em>shorter than the whole string</em>. For <code>"aaa"</code>, the answer is <code>"aa"</code> (length 2), NOT <code>"aaa"</code> (length 3 — that's the whole string).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: KMP Failure Function</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The KMP failure function (prefix function) <code>fail[i]</code> stores the <strong>length of the longest proper prefix of <code>s[0..i]</code> that is also a suffix</strong>. We build this table in O(n) and read off <code>fail[n-1]</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Initialize:</strong> Create array <code>fail</code> of length <code>n</code> filled with zeros. Set <code>k = 0</code> (length of current matching prefix). <code>fail[0] = 0</code> always (single char has no proper prefix).</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Iterate i from 1 to n−1:</strong> Try to extend the current match: if <code>s[i] == s[k]</code>, increment <code>k</code> and set <code>fail[i] = k</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>On mismatch (s[i] != s[k]):</strong> Don't reset to zero! Fall back via <code>k = fail[k-1]</code> to try a shorter prefix. Keep falling back until <code>k == 0</code> or a match is found.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>If k == 0 and still mismatch:</strong> Set <code>fail[i] = 0</code> — no proper prefix matches here.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">5</span>
+        <span class="step-text"><strong>Answer:</strong> Return <code>s[:fail[n-1]]</code> — the first <code>fail[n-1]</code> characters of <code>s</code>.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem">The <strong>fallback via <code>fail[k-1]</code></strong> is the non-obvious key step. When we have a mismatch, we don't abandon all progress. We know that <code>s[0..k-1]</code> matches <code>s[i-k..i-1]</code>. The failure function tells us the longest proper prefix of <code>s[0..k-1]</code> that's also a suffix — so we can try extending that shorter match instead of restarting from zero.</p>
+
+    <div class="deepdive-box">
+      <div class="deepdive-title">🔬 KMP Failure Function — Algorithm Deep-Dive</div>
+      <p style="margin-bottom:0.75rem"><strong>Origin:</strong> Knuth, Morris, and Pratt (1977). The failure function was designed to avoid redundant character comparisons in string pattern matching. It preprocesses the pattern in O(m) so that searching a text of length n takes O(n+m) total — no quadratic worst case.</p>
+      <p style="margin-bottom:0.75rem"><strong>Core Invariant:</strong> At every index <code>i</code>, <code>fail[i]</code> = length of the longest proper prefix of <code>s[0..i]</code> that equals a suffix of <code>s[0..i]</code>. This is always in the range <code>[0, i]</code>.</p>
+      <p style="margin-bottom:0.75rem"><strong>Why O(n) time despite the nested loop?</strong> The pointer <code>k</code> can increase by at most 1 per outer iteration (when there's a match), and it can only decrease via fallbacks. Since <code>k</code> can never go below 0, the total number of decreases across all iterations is bounded by the total number of increases — which is at most <code>n</code>. So the total work is O(n) amortized.</p>
+      <p style="margin-bottom:0.75rem"><strong>Why it works:</strong> The fallback <code>k = fail[k-1]</code> says: "I know the first <code>k</code> characters match. The longest border (prefix=suffix) of those <code>k</code> characters has length <code>fail[k-1]</code>. So I can restart matching from there." This exploits the self-similarity structure of the string.</p>
+      <p><strong>When to recognize it:</strong> Any problem asking about the relationship between prefixes and suffixes of a single string. Signals: "longest prefix that is also a suffix", "does string have a period", "pattern matching without backtracking".</p>
+    </div>
+
+    <!-- Static failure function example -->
+    <p style="margin-top:1rem;font-weight:700">Failure Function for s = "aabaabaab":</p>
+    <div class="failure-table">
+      <div class="fail-row">
+        <div class="fail-label">Index i</div>
+        <div class="fail-cells">
+          <div class="fail-cell">0</div><div class="fail-cell">1</div><div class="fail-cell">2</div><div class="fail-cell">3</div><div class="fail-cell">4</div><div class="fail-cell">5</div><div class="fail-cell">6</div><div class="fail-cell">7</div><div class="fail-cell">8</div>
+        </div>
+      </div>
+      <div class="fail-row">
+        <div class="fail-label">Char s[i]</div>
+        <div class="fail-cells">
+          <div class="fail-cell">a</div><div class="fail-cell">a</div><div class="fail-cell">b</div><div class="fail-cell">a</div><div class="fail-cell">a</div><div class="fail-cell">b</div><div class="fail-cell">a</div><div class="fail-cell">a</div><div class="fail-cell">b</div>
+        </div>
+      </div>
+      <div class="fail-row">
+        <div class="fail-label">fail[i]</div>
+        <div class="fail-cells">
+          <div class="fail-cell zero">0</div><div class="fail-cell positive">1</div><div class="fail-cell zero">0</div><div class="fail-cell positive">1</div><div class="fail-cell positive">2</div><div class="fail-cell positive">3</div><div class="fail-cell positive">4</div><div class="fail-cell positive">5</div><div class="fail-cell positive">6</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--text2)">fail[8] = 6, so the answer is s[:6] = <strong>"aabaaб"</strong>... actually s[:6] = "aabaab". The prefix "aabaab" == suffix "aabaab" ✓</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works                        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: The Invariant</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>At the start of each iteration (processing index <code>i</code>), <code>k</code> holds the length of the longest proper prefix of <code>s[0..i-1]</code> that is also a suffix. Equivalently, <code>s[0..k-1] == s[i-k..i-1]</code>.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Base case:</strong> At <code>i = 1</code>, <code>k = 0</code> (no prefix of a single character). The invariant holds trivially.</p>
+
+    <p style="margin-top:0.75rem"><strong>Inductive step (match):</strong> If <code>s[i] == s[k]</code>, then the border of length <code>k</code> for <code>s[0..i-1]</code> can be extended by one character. So <code>fail[i] = k + 1</code>. We increment <code>k</code> to maintain the invariant for the next iteration.</p>
+
+    <p style="margin-top:0.75rem"><strong>Inductive step (mismatch):</strong> We know <code>s[0..k-1] == s[i-k..i-1]</code>. We want the next shorter border of <code>s[0..k-1]</code>, which has length <code>fail[k-1]</code>. This is valid because <code>s[0..fail[k-1]-1]</code> is both a prefix and suffix of <code>s[0..k-1]</code> — meaning it's also a suffix of <code>s[0..i-1]</code>. We try extending this shorter match next.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Why the Fallback Chain Terminates</div>
+      <p>Each fallback strictly decreases <code>k</code> (since <code>fail[k-1] &lt; k</code> always — a border is strictly shorter than the string). So the chain <code>k → fail[k-1] → fail[fail[k-1]-1] → ...</code> must reach 0 in finite steps. At <code>k == 0</code> with a mismatch, <code>fail[i] = 0</code> (no border) and we move on.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Correctness of the answer:</strong> <code>fail[n-1]</code> gives the length of the longest proper prefix of the <em>entire string</em> <code>s</code> that equals a suffix. This is exactly the longest happy prefix. We return <code>s[:fail[n-1]]</code>.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="ann-code">
+      <div class="ann-line"><span class="acode">def longestPrefix(s: str) -> str:</span> <span class="aann">— function signature</span></div>
+      <div class="ann-line"><span class="acode">    n = len(s)</span> <span class="aann">— cache length to avoid repeated calls</span></div>
+      <div class="ann-line"><span class="acode">    fail = [0] * n</span> <span class="aann">— failure function array; fail[i] = length of longest border of s[0..i]</span></div>
+      <div class="ann-line"><span class="acode">    k = 0</span> <span class="aann">— k = length of current candidate border being tracked</span></div>
+      <div class="ann-line"><span class="acode">    for i in range(1, n):</span> <span class="aann">— start from 1 (fail[0] is always 0)</span></div>
+      <div class="ann-line"><span class="acode">        while k > 0 and s[i] != s[k]:</span> <span class="aann">— mismatch: fall back to next shorter border</span></div>
+      <div class="ann-line"><span class="acode">            k = fail[k - 1]</span> <span class="aann">— key KMP step: skip to the longest border of the current border</span></div>
+      <div class="ann-line"><span class="acode">        if s[i] == s[k]:</span> <span class="aann">— match! we can extend the border by one character</span></div>
+      <div class="ann-line"><span class="acode">            k += 1</span> <span class="aann">— border grows: s[0..k-1] == s[i-k+1..i]</span></div>
+      <div class="ann-line"><span class="acode">        fail[i] = k</span> <span class="aann">— record: longest border of s[0..i] has length k</span></div>
+      <div class="ann-line"><span class="acode">    return s[:fail[n - 1]]</span> <span class="aann">— the border of the whole string = the longest happy prefix</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Common Mistake: Resetting k to 0 on Mismatch</div>
+      <p>Many beginners write <code>else: k = 0</code> instead of the <code>while k &gt; 0: k = fail[k-1]</code> fallback. This is wrong! It turns an O(n) algorithm into O(n²) and produces incorrect results for strings like <code>"aabaabaab"</code>. The whole power of KMP is in the fallback chain.</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 Brute Force Comparison</div>
+      <p>A naive O(n²) approach would try every prefix length from <code>n-1</code> down to <code>1</code> and check if <code>s[:L] == s[n-L:]</code>. Each comparison is O(L), giving O(n²) total. For <code>n = 100,000</code> that's 10 billion operations — KMP does it in 100,000.</p>
+    </div>
+
+    <table class="cmp-table">
+      <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Brute Force (try all lengths)</td><td class="mark-bad">O(n²)</td><td>O(1)</td><td>TLE on large inputs</td></tr>
+        <tr><td>Rolling Hash (Rabin-Karp)</td><td class="mark-good">O(n)</td><td>O(1)</td><td>O(n) expected, hash collisions possible</td></tr>
+        <tr><td><strong>KMP Failure Function</strong></td><td class="mark-good">O(n)</td><td>O(n)</td><td>Exact, no hash collisions, interview pick</td></tr>
+        <tr><td>Z-Algorithm</td><td class="mark-good">O(n)</td><td>O(n)</td><td>Alternative O(n) approach</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Recognize the Pattern</div>
+        <p>The problem says "prefix that equals a suffix." This is the defining property of a <strong>border</strong> in string algorithms. Whenever you see this, think KMP failure function. The signals: "longest prefix = suffix", "pattern has period", "overlap of prefix and suffix".</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Establish the Brute Force Baseline</div>
+        <p>State: "A naive approach tries all lengths from n−1 down to 1, comparing <code>s[:L]</code> with <code>s[n-L:]</code>. This is O(n²). For n up to 10⁵, we need O(n)."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Connect to KMP</div>
+        <p>State: "I recognize this as the KMP prefix function / failure function. It computes, for each index i, the longest proper prefix of s[0..i] that equals a suffix — which is precisely what we need at index n−1."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Explain the Fallback</div>
+        <p>The interviewer will likely probe: "Why <code>k = fail[k-1]</code> instead of <code>k = 0</code>?" Answer: "When we have a mismatch at length k, we don't abandon everything. We fall back to the longest border of the first k characters — which is already a suffix of what we matched — and try extending that shorter prefix instead."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Prove O(n) Amortized</div>
+        <p>State: "k can increase by at most 1 per outer iteration (n total increases). Each fallback strictly decreases k. So total fallbacks ≤ total increases ≤ n. The while loop across all iterations runs O(n) total — not O(n) per outer iteration."</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"The key observation is that 'longest prefix that equals a suffix' is exactly the border
+ of a string, and the KMP failure function computes this for every prefix in O(n) time.
+
+ I'll build the failure function: maintain k = current border length. For each character,
+ if it extends the border, increment k. On mismatch, fall back via fail[k-1] — this is
+ the critical non-obvious step that gives us O(n) amortized complexity.
+
+ The answer is s[:fail[n-1]].
+
+ Time: O(n). Space: O(n) for the fail array.
+
+ Follow-up variants: 'Does the string have a period?' → check if n % (n - fail[n-1]) == 0.
+ 'String matching in text?' → KMP search using this same fail array."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p style="font-size:13.5px;color:var(--text2);margin-bottom:0.75rem">Tracing s = <strong>"ababab"</strong> through the KMP failure function. Watch how <code>fail[]</code> fills and the fallback works.</p>
+
+    <div class="viz-area">
+      <!-- String display -->
+      <div class="str-section">
+        <div class="str-label-box">s</div>
+        <div class="str-col">
+          <div class="ptr-row" id="ptr-row">
+            <!-- pointers inserted by JS -->
+          </div>
+          <div class="cells-row" id="cells-row">
+            <!-- cells inserted by JS -->
+          </div>
+          <div class="idx-row" id="idx-row">
+            <!-- indices inserted by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Failure table display -->
+      <div style="margin-top:1.5rem">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px">Failure Function Table</div>
+        <div class="failure-table">
+          <div class="fail-row">
+            <div class="fail-label">Index i</div>
+            <div class="fail-cells" id="fail-indices"></div>
+          </div>
+          <div class="fail-row">
+            <div class="fail-label">s[i]</div>
+            <div class="fail-cells" id="fail-chars"></div>
+          </div>
+          <div class="fail-row">
+            <div class="fail-label">fail[i]</div>
+            <div class="fail-cells" id="fail-values"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable tracker -->
+      <div class="var-tracker" id="var-tracker">
+        <div class="var-box" id="vb-i"><span class="var-name">i</span><span class="var-val" id="vv-i">—</span></div>
+        <div class="var-box" id="vb-k"><span class="var-name">k</span><span class="var-val" id="vv-k">0</span></div>
+        <div class="var-box" id="vb-si"><span class="var-name">s[i]</span><span class="var-val" id="vv-si">—</span></div>
+        <div class="var-box" id="vb-sk"><span class="var-name">s[k]</span><span class="var-val" id="vv-sk">—</span></div>
+        <div class="var-box" id="vb-fi"><span class="var-name">fail[i]</span><span class="var-val" id="vv-fi">—</span></div>
+      </div>
+
+      <!-- Code panel -->
+      <div class="code-panel" id="code-panel">
+        <div class="code-line" id="cl0">def longestPrefix(s: str) -> str:</div>
+        <div class="code-line" id="cl1">    n = len(s); fail = [0] * n; k = 0</div>
+        <div class="code-line" id="cl2">    for i in range(1, n):</div>
+        <div class="code-line" id="cl3">        while k > 0 and s[i] != s[k]:</div>
+        <div class="code-line" id="cl4">            k = fail[k - 1]  # fallback</div>
+        <div class="code-line" id="cl5">        if s[i] == s[k]:</div>
+        <div class="code-line" id="cl6">            k += 1</div>
+        <div class="code-line" id="cl7">        fail[i] = k</div>
+        <div class="code-line" id="cl8">    return s[:fail[n - 1]]</div>
+      </div>
+
+      <!-- Info card -->
+      <div class="info-card">
+        <div id="phase-badge" class="phase-badge phase-init">INIT</div>
+        <div class="step-counter" id="step-counter">Step 0 of 15</div>
+        <div class="step-title" id="step-title">Starting State</div>
+        <div class="step-body" id="step-body">We initialize fail = [0,0,0,0,0,0] and k = 0. fail[0] is always 0 because a single character has no proper prefix.</div>
+      </div>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="btn-next" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-cur"></div> Current i</div>
+      <div class="legend-item"><div class="legend-swatch sw-prefix"></div> Matched prefix (s[k])</div>
+      <div class="legend-item"><div class="legend-swatch sw-suffix"></div> Matched suffix end</div>
+      <div class="legend-item"><div class="legend-swatch sw-mismatch"></div> Mismatch</div>
+      <div class="legend-item"><div class="legend-swatch sw-result"></div> Result border</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary & Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">The longest happy prefix IS the KMP failure function value at position n−1</div>
+      <div class="takeaway">The fallback <code>k = fail[k-1]</code> is the crucial non-obvious step — never reset to 0</div>
+      <div class="takeaway">The algorithm is O(n) amortized because k increases by at most 1 per step and decreases are bounded by increases</div>
+      <div class="takeaway">Borders of a string form a "chain": each is a border of the previous, accessible via the fail array</div>
+      <div class="takeaway">Same fail array powers full KMP string search — this problem is essentially the preprocessing step</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize KMP Failure Function</div>
+      <ul style="padding-left:1.25rem;line-height:2">
+        <li>Problem involves "prefix that equals a suffix" of a single string</li>
+        <li>String pattern matching without backtracking</li>
+        <li>"Does the string consist of repeating units?"</li>
+        <li>Finding overlaps between string and its reverse (palindrome applications)</li>
+        <li>O(n) requirement for what would naively be O(n²)</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-weight:700;margin-bottom:8px;font-size:14px">Related Problems (same KMP technique)</div>
+      <div class="related-item"><strong>Repeated Substring Pattern</strong><span class="related-diff diff-easy">Easy</span> — Check if s is made of repeating copies: fail[n-1] &gt; 0 and n % (n - fail[n-1]) == 0</div>
+      <div class="related-item"><strong>Shortest Palindrome</strong><span class="related-diff diff-hard">Hard</span> — Run KMP on s + "#" + reverse(s); fail table reveals the longest palindromic prefix</div>
+      <div class="related-item"><strong>Find the Index of the First Occurrence in a String</strong><span class="related-diff diff-easy">Easy</span> — Full KMP: build fail table for needle, search in haystack in O(n+m)</div>
+      <div class="related-item"><strong>Longest Duplicate Substring</strong><span class="related-diff diff-hard">Hard</span> — Same suffix/prefix idea but via binary search + rolling hash</div>
+      <div class="related-item"><strong>Number of Distinct Substrings in a String</strong><span class="related-diff diff-med">Medium</span> — Suffix array / rolling hash — closely related string boundary thinking</div>
+      <div class="related-item"><strong>Stream of Characters</strong><span class="related-diff diff-hard">Hard</span> — Aho-Corasick (KMP generalized to multiple patterns) applied online</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Pattern Classification</div>
+      <p><strong>Main Pattern:</strong> String Processing (Section 2 of DSA_Patterns_and_SubPatterns_Guide.md)<br>
+      <strong>Sub-Pattern:</strong> KMP Failure Function (Guide Section 2.3 — String Matching Algorithms)<br>
+      <strong>Verified Source:</strong> DSA_Patterns_and_SubPatterns_Guide.md Section 2.3, row: "Longest Happy Prefix | Hard | KMP Failure Function"</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrapper -->
+
+<script>
+const S = "ababab";
+const n = S.length;
+
+// Pre-compute the full fail array steps for animation
+// s = "ababab": fail = [0,0,1,2,3,4]
+// Steps: init, then i=1..5
+
+const steps = [
+  {
+    i: null, k: 0, si: "—", sk: "—", fi: "—",
+    cells: Array(n).fill("normal"),
+    ptrs: {i: -1, k: 0},
+    failFilled: [null,null,null,null,null,null],
+    activeLine: 1,
+    phase: "INIT", phaseClass: "phase-init",
+    title: "Initialize",
+    body: "fail = [0,0,0,0,0,0], k = 0. fail[0] = 0 always (single character 'a' has no proper prefix that equals a suffix). We start iterating from i = 1."
+  },
+  {
+    i: 1, k: 0, si: "b", sk: "a", fi: null,
+    cells: ["normal","current","normal","normal","normal","normal"],
+    ptrs: {i: 1, k: 0},
+    failFilled: [0,null,null,null,null,null],
+    activeLine: 2,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=1: Check s[1]='b' vs s[k=0]='a'",
+    body: "k=0, so the while loop doesn't execute (k must be >0 to fallback). We check: s[1]='b' == s[0]='a'? No — mismatch. So k stays 0 and fail[1] = 0."
+  },
+  {
+    i: 1, k: 0, si: "b", sk: "a", fi: 0,
+    cells: ["normal","mismatch","normal","normal","normal","normal"],
+    ptrs: {i: 1, k: 0},
+    failFilled: [0,0,null,null,null,null],
+    activeLine: 7,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=1: Set fail[1] = 0",
+    body: "s[1]='b' ≠ s[0]='a', no match, k unchanged at 0. fail[1] = 0. No border of length 1 for 'ab' — 'a' ≠ 'b'."
+  },
+  {
+    i: 2, k: 0, si: "a", sk: "a", fi: null,
+    cells: ["prefix-match","done","current","normal","normal","normal"],
+    ptrs: {i: 2, k: 0},
+    failFilled: [0,0,null,null,null,null],
+    activeLine: 5,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=2: Check s[2]='a' vs s[k=0]='a'",
+    body: "k=0, while loop skipped. Check s[2]='a' == s[0]='a'? YES — match! We extend the border: k becomes 1. This means prefix 'a' == suffix 'a' (the last character of s[0..2]='aba')."
+  },
+  {
+    i: 2, k: 1, si: "a", sk: "a", fi: 1,
+    cells: ["prefix-match","done","suffix-match","normal","normal","normal"],
+    ptrs: {i: 2, k: 1},
+    failFilled: [0,0,1,null,null,null],
+    activeLine: 7,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=2: Set fail[2] = 1 (border = 'a')",
+    body: "k incremented to 1. fail[2] = 1. The string 'aba' has a border of length 1: prefix 'a' equals suffix 'a'. Next, k=1 — we'll try to extend this border at i=3."
+  },
+  {
+    i: 3, k: 1, si: "b", sk: "b", fi: null,
+    cells: ["prefix-match","done","done","current","normal","normal"],
+    ptrs: {i: 3, k: 1},
+    failFilled: [0,0,1,null,null,null],
+    activeLine: 5,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=3: Check s[3]='b' vs s[k=1]='b'",
+    body: "k=1, while loop skipped. Check s[3]='b' == s[1]='b'? YES — match! We extend: k becomes 2. Prefix 'ab' == suffix 'ab' in s[0..3]='abab'. The border grows!"
+  },
+  {
+    i: 3, k: 2, si: "b", sk: "b", fi: 2,
+    cells: ["prefix-match","prefix-match","done","suffix-match","normal","normal"],
+    ptrs: {i: 3, k: 2},
+    failFilled: [0,0,1,2,null,null],
+    activeLine: 7,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=3: Set fail[3] = 2 (border = 'ab')",
+    body: "k=2, fail[3] = 2. The string 'abab' has a border of length 2: prefix 'ab' equals suffix 'ab'. We're on a streak! k=2 for the next iteration."
+  },
+  {
+    i: 4, k: 2, si: "a", sk: "a", fi: null,
+    cells: ["prefix-match","prefix-match","done","done","current","normal"],
+    ptrs: {i: 4, k: 2},
+    failFilled: [0,0,1,2,null,null],
+    activeLine: 5,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=4: Check s[4]='a' vs s[k=2]='a'",
+    body: "k=2, while skipped. Check s[4]='a' == s[2]='a'? YES — match! k becomes 3. Prefix 'aba' == suffix 'aba' in s[0..4]='ababa'."
+  },
+  {
+    i: 4, k: 3, si: "a", sk: "a", fi: 3,
+    cells: ["prefix-match","prefix-match","prefix-match","done","suffix-match","normal"],
+    ptrs: {i: 4, k: 3},
+    failFilled: [0,0,1,2,3,null],
+    activeLine: 7,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=4: Set fail[4] = 3 (border = 'aba')",
+    body: "k=3, fail[4] = 3. String 'ababa' has border 'aba'. Prefix 'aba' == suffix 'aba'. The pattern is clear: in 'ababab', borders grow by 1 each time we match."
+  },
+  {
+    i: 5, k: 3, si: "b", sk: "b", fi: null,
+    cells: ["prefix-match","prefix-match","prefix-match","done","done","current"],
+    ptrs: {i: 5, k: 3},
+    failFilled: [0,0,1,2,3,null],
+    activeLine: 5,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=5: Check s[5]='b' vs s[k=3]='b'",
+    body: "k=3, while skipped. Check s[5]='b' == s[3]='b'? YES — match! k becomes 4. Prefix 'abab' == suffix 'abab' in the full string 'ababab'."
+  },
+  {
+    i: 5, k: 4, si: "b", sk: "b", fi: 4,
+    cells: ["prefix-match","prefix-match","prefix-match","prefix-match","done","suffix-match"],
+    ptrs: {i: 5, k: 4},
+    failFilled: [0,0,1,2,3,4],
+    activeLine: 7,
+    phase: "BUILD", phaseClass: "phase-build",
+    title: "i=5: Set fail[5] = 4 (border = 'abab')",
+    body: "k=4, fail[5] = 4. The whole string 'ababab' has a border of length 4. fail = [0,0,1,2,3,4]. Now we return s[:fail[5]] = s[:4] = 'abab'."
+  },
+  {
+    i: 5, k: 4, si: "b", sk: "b", fi: 4,
+    cells: ["result-cell","result-cell","result-cell","result-cell","done","done"],
+    ptrs: {i: 5, k: 4},
+    failFilled: [0,0,1,2,3,4],
+    activeLine: 8,
+    phase: "RESULT", phaseClass: "phase-result",
+    title: "✓ Result: s[:fail[5]] = s[:4] = 'abab'",
+    body: "fail[n-1] = fail[5] = 4. Return s[:4] = 'abab'. Verify: prefix 'abab' == suffix 'abab' in 'ababab' ✓. This is the longest happy prefix!"
+  }
+];
+
+let cur = 0;
+
+function renderStep(st) {
+  // Cells
+  const cells = document.getElementById('cells-row');
+  cells.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell ' + st.cells[i];
+    c.textContent = S[i];
+    cells.appendChild(c);
+  }
+  // Indices
+  const idxRow = document.getElementById('idx-row');
+  idxRow.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('div');
+    d.className = 'idx-slot';
+    d.textContent = i;
+    idxRow.appendChild(d);
+  }
+  // Pointers
+  const ptrRow = document.getElementById('ptr-row');
+  ptrRow.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'ptr-slot';
+    if (st.ptrs && st.ptrs.i === i) {
+      const lbl = document.createElement('div');
+      lbl.className = 'ptr-lbl ptr-cur';
+      lbl.textContent = 'i';
+      slot.appendChild(lbl);
+    }
+    if (st.ptrs && st.ptrs.k === i && st.ptrs.k !== st.ptrs.i) {
+      const lbl = document.createElement('div');
+      lbl.className = 'ptr-lbl ptr-prefix';
+      lbl.textContent = 'k';
+      slot.appendChild(lbl);
+    }
+    ptrRow.appendChild(slot);
+  }
+
+  // Fail table
+  const fIdx = document.getElementById('fail-indices');
+  const fChars = document.getElementById('fail-chars');
+  const fVals = document.getElementById('fail-values');
+  fIdx.innerHTML = ''; fChars.innerHTML = ''; fVals.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const di = document.createElement('div'); di.className = 'fail-cell'; di.textContent = i; fIdx.appendChild(di);
+    const dc = document.createElement('div'); dc.className = 'fail-cell'; dc.textContent = S[i]; fChars.appendChild(dc);
+    const dv = document.createElement('div');
+    const val = st.failFilled[i];
+    if (val === null) { dv.className = 'fail-cell'; dv.textContent = '?'; }
+    else if (val === 0) { dv.className = 'fail-cell zero'; dv.textContent = '0'; }
+    else { dv.className = 'fail-cell positive'; dv.textContent = val; }
+    fVals.appendChild(dv);
+  }
+
+  // Variables
+  const prevSt = cur > 0 ? steps[cur - 1] : null;
+  setVar('i', st.i === null ? '—' : st.i, prevSt && prevSt.i !== st.i);
+  setVar('k', st.k, prevSt && prevSt.k !== st.k);
+  setVar('si', st.si, prevSt && prevSt.si !== st.si);
+  setVar('sk', st.sk, prevSt && prevSt.sk !== st.sk);
+  setVar('fi', st.fi === null ? '—' : st.fi, prevSt && prevSt.fi !== st.fi);
+
+  // Code
+  for (let l = 0; l <= 8; l++) {
+    document.getElementById('cl' + l).classList.toggle('active', l === st.activeLine);
+  }
+
+  // Info card
+  document.getElementById('phase-badge').textContent = st.phase;
+  document.getElementById('phase-badge').className = 'phase-badge ' + st.phaseClass;
+  document.getElementById('step-counter').textContent = `Step ${cur + 1} of ${steps.length}`;
+  document.getElementById('step-title').textContent = st.title;
+  document.getElementById('step-body').textContent = st.body;
+
+  // Controls
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+
+  // Dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === cur ? ' active' : (i < cur ? ' visited' : ''));
+    d.onclick = (function(idx){ return function(){ cur = idx; renderStep(steps[cur]); }; })(i);
+    dots.appendChild(d);
+  }
+}
+
+function setVar(id, val, changed) {
+  const el = document.getElementById('vv-' + id);
+  const box = document.getElementById('vb-' + id);
+  el.textContent = val;
+  box.classList.toggle('changed', !!changed);
+}
+
+function go(dir) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + dir));
+  renderStep(steps[cur]);
+}
+
+function reset() { cur = 0; renderStep(steps[0]); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    icon.style.transform = '';
+  } else {
+    content.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// Init
+renderStep(steps[0]);
+</script>
+</body>
+</html>

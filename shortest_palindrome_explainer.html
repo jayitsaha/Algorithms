@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#214 · Shortest Palindrome</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f9f8f5; --bg2:#f0efe9; --surface:#ffffff;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9c9a92;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --blue-bg:#E6F1FB; --blue-border:#85B7EB; --blue-text:#042C53; --blue-mid:#185FA5;
+  --green-bg:#EAF3DE; --green-border:#97C459; --green-text:#173404; --green-mid:#3B6D11;
+  --amber-bg:#FAEEDA; --amber-border:#EF9F27; --amber-text:#412402; --amber-mid:#854F0B;
+  --red-bg:#FCEBEB; --red-border:#F09595; --red-text:#501313; --red-mid:#A32D2D;
+  --purple-bg:#EEEDFE; --purple-border:#AFA9EC; --purple-text:#26215C; --purple-mid:#534AB7;
+  --cyan-bg:#E0F7FA; --cyan-border:#4DD0E1; --cyan-text:#006064; --cyan-mid:#00ACC1;
+  --radius:10px; --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#18181a; --bg2:#222224; --surface:#2a2a2d;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2);
+    --text:#e8e6de; --text2:#9c9a92; --text3:#666460;
+    --blue-bg:#0c2a45; --blue-border:#378ADD; --blue-text:#B5D4F4; --blue-mid:#85B7EB;
+    --green-bg:#172a0a; --green-border:#639922; --green-text:#C0DD97; --green-mid:#97C459;
+    --amber-bg:#2e1c05; --amber-border:#BA7517; --amber-text:#FAC775; --amber-mid:#EF9F27;
+    --red-bg:#3a0a0a; --red-border:#E24B4A; --red-text:#F7C1C1; --red-mid:#A32D2D;
+    --purple-bg:#1e1a45; --purple-border:#7F77DD; --purple-text:#CECBF6; --purple-mid:#AFA9EC;
+    --cyan-bg:#004D54; --cyan-border:#26C6DA; --cyan-text:#B2EBF2; --cyan-mid:#4DD0E1;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6}
+.page-wrapper{max-width:880px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── Header ── */
+header{margin-bottom:2rem}
+.problem-number{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+h1{font-size:30px;font-weight:700;margin:4px 0 8px}
+.subtitle{color:var(--text2);font-size:14.5px;margin-bottom:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px}
+.tag-hard{background:var(--red-bg);color:var(--red-mid)}
+.tag-pattern{background:var(--blue-bg);color:var(--blue-mid)}
+.tag-complexity{background:var(--purple-bg);color:var(--purple-mid)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;cursor:pointer;user-select:none}
+.section-header:hover .section-title{color:var(--blue-mid)}
+.section-number{width:28px;height:28px;background:var(--blue-bg);color:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text);flex:1}
+.collapse-icon{color:var(--text3);font-size:14px;transition:transform 0.2s}
+.section-content.collapsed{display:none}
+
+/* ── Concept Boxes ── */
+.concept-box{border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.concept-box-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.concept-box.insight{background:var(--green-bg);border:1px solid var(--green-border)}
+.concept-box.insight .concept-box-title{color:var(--green-mid)}
+.concept-box.warning{background:var(--amber-bg);border:1px solid var(--amber-border)}
+.concept-box.warning .concept-box-title{color:var(--amber-mid)}
+.concept-box.key-concept{background:var(--blue-bg);border:1px solid var(--blue-border)}
+.concept-box.key-concept .concept-box-title{color:var(--blue-mid)}
+.concept-box.danger{background:var(--red-bg);border:1px solid var(--red-border)}
+.concept-box.danger .concept-box-title{color:var(--red-mid)}
+
+/* ── Algorithm Steps ── */
+.algorithm-steps{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius)}
+.step-num{width:24px;height:24px;background:var(--purple-bg);color:var(--purple-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-text{color:var(--text);line-height:1.5;font-size:14px}
+
+/* ── Two Column ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.panel-box{padding:1rem;border-radius:var(--radius);border:1.5px solid}
+.panel-box.before{background:var(--red-bg);border-color:var(--red-border)}
+.panel-box.after{background:var(--green-bg);border-color:var(--green-border)}
+.panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.panel-box.before .panel-title{color:var(--red-mid)}
+.panel-box.after .panel-title{color:var(--green-mid)}
+
+/* ── Interview Strategy ── */
+.strategy-steps{display:flex;flex-direction:column;gap:14px;margin:1rem 0}
+.strategy-step{padding:14px 16px;background:linear-gradient(135deg,var(--purple-bg) 0%,var(--blue-bg) 100%);border-radius:var(--radius);border:1px solid var(--purple-border)}
+.step-label{font-weight:700;font-size:13px;color:var(--purple-mid);margin-bottom:6px}
+.interview-script{margin-top:1.25rem;padding:14px;background:var(--bg2);border-radius:var(--radius)}
+.interview-script h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.script-content{font-family:var(--mono);font-size:12px;line-height:2.2;color:var(--text2);padding:12px;background:var(--surface);border-radius:var(--radius);border-left:3px solid var(--green-mid)}
+
+/* ── Annotated Code (Section 4) ── */
+.ann-code{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:2.1;overflow-x:auto;margin:1rem 0}
+.ann-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.acode{white-space:pre;color:var(--text2)}
+.aann{font-size:11px;color:var(--text3);font-family:var(--sans)}
+
+/* ── KMP Diagram ── */
+.kmp-diagram{background:var(--bg2);border-radius:var(--radius);padding:1rem;margin:1rem 0;overflow-x:auto}
+.kmp-diagram-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+.kmp-string-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.kmp-label{font-size:11px;font-weight:700;color:var(--text3);width:60px;flex-shrink:0}
+.kmp-cells{display:flex;gap:3px;flex-wrap:nowrap}
+.kmp-ch{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:600;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);flex-shrink:0}
+.kmp-ch.sep{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid);font-size:18px}
+.kmp-ch.rev{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-mid)}
+.kmp-ch.orig{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-mid)}
+.kmp-ch.match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-mid)}
+.lps-row{display:flex;gap:3px;margin-top:4px}
+.lps-ch{width:36px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text3);background:var(--bg2);border:1px solid var(--border)}
+.lps-ch.nonzero{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-mid)}
+
+/* ── Viz Area ── */
+.viz-area{background:var(--bg2);border-radius:var(--radius);padding:1.75rem 1.5rem;margin:1.25rem 0;overflow-x:auto}
+.str-section{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+.str-label-box{min-width:70px;height:42px;display:flex;align-items:center;justify-content:start;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text3);flex-shrink:0;margin-top:22px}
+.str-col{display:flex;flex-direction:column}
+
+.ptr-row{display:flex;gap:4px;min-height:24px;align-items:flex-end;margin-bottom:2px}
+.ptr-slot{width:40px;display:flex;justify-content:center;align-items:flex-end}
+.ptr-lbl{font-size:10px;font-weight:700;border-radius:4px;padding:2px 5px;line-height:1.4;white-space:nowrap}
+.ptr-i{background:var(--blue-bg);color:var(--blue-mid)}
+.ptr-j{background:var(--purple-bg);color:var(--purple-mid)}
+.ptr-match{background:var(--green-bg);color:var(--green-mid)}
+
+.cells-row{display:flex;gap:4px}
+.cell{
+  width:40px;height:40px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  border:2px solid var(--border2);
+  background:var(--surface);color:var(--text);
+  transition:background 0.3s,border-color 0.3s,color 0.3s;
+  flex-shrink:0;
+}
+.cell.normal{background:var(--surface);border-color:var(--border2);color:var(--text)}
+.cell.active-i{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue-text)}
+.cell.active-j{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+.cell.match{background:var(--green-bg);border-color:var(--green-border);color:var(--green-text)}
+.cell.separator{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.cell.done{background:var(--bg2);border-color:var(--border);color:var(--text3)}
+.cell.result{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-text)}
+.cell.prefix{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple-text)}
+
+.idx-row{display:flex;gap:4px;margin-top:4px}
+.idx-slot{width:40px;text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── LPS table ── */
+.lps-section{margin-top:1.5rem}
+.lps-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.lps-display{display:flex;gap:4px;justify-content:flex-start;flex-wrap:wrap}
+.lps-box{display:flex;flex-direction:column;align-items:center;width:40px}
+.lps-box .lps-char{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text2);margin-bottom:2px}
+.lps-box .lps-val{width:40px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;border:1.5px solid var(--border2);background:var(--surface);color:var(--text3);transition:background 0.3s,color 0.3s,border-color 0.3s}
+.lps-box .lps-val.computed{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan-mid)}
+.lps-box .lps-val.current{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber-mid)}
+.lps-box .lps-val.future{opacity:0.35}
+
+/* ── Variable Tracker ── */
+.var-tracker{display:flex;gap:10px;justify-content:center;margin:1.25rem 0;flex-wrap:wrap}
+.var-box{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);transition:background 0.3s,border-color 0.3s}
+.var-box.changed{border-color:var(--amber-border);background:var(--amber-bg)}
+.var-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+.var-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);min-width:28px;text-align:center}
+
+/* ── Interactive Code Panel ── */
+.code-panel{margin-top:1rem;background:var(--bg2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.code-line{padding:1px 6px;border-radius:4px;transition:background 0.25s;white-space:pre;color:var(--text2)}
+.code-line.active{background:var(--green-bg);color:var(--green-text);font-weight:600}
+
+/* ── Info Card ── */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem}
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.phase-init{background:var(--purple-bg);color:var(--purple-mid)}
+.phase-build{background:var(--blue-bg);color:var(--blue-mid)}
+.phase-kmp{background:var(--cyan-bg);color:var(--cyan-mid)}
+.phase-result{background:var(--green-bg);color:var(--green-mid)}
+.step-counter{font-size:11px;color:var(--text3);margin-bottom:4px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.step-body{color:var(--text2);font-size:14px;line-height:1.7}
+
+/* ── Progress / Controls ── */
+.progress-dots{display:flex;justify-content:center;gap:7px;margin:1.25rem 0;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.25s;cursor:pointer}
+.dot.active{background:var(--blue-mid)}
+.dot.visited{background:var(--text3)}
+.controls{display:flex;justify-content:center;gap:12px}
+.btn{padding:10px 26px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn:hover:not(:disabled){background:var(--bg2)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover:not(:disabled){background:var(--blue-text)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.kbd-hint{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-swatch{width:15px;height:15px;border-radius:4px;border:1.5px solid}
+.sw-i{background:var(--blue-bg);border-color:var(--blue-border)}
+.sw-j{background:var(--purple-bg);border-color:var(--purple-border)}
+.sw-match{background:var(--green-bg);border-color:var(--green-border)}
+.sw-sep{background:var(--amber-bg);border-color:var(--amber-border)}
+.sw-result{background:var(--cyan-bg);border-color:var(--cyan-border)}
+
+/* ── Comparison Table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:14px;margin:1rem 0}
+.cmp-table th,.cmp-table td{padding:10px 14px;text-align:left;border:1px solid var(--border)}
+.cmp-table th{background:var(--bg2);font-weight:600;font-size:13px}
+.cmp-table tr:nth-child(even) td{background:var(--bg2)}
+.mark-good{color:var(--green-mid);font-weight:700}
+.mark-bad{color:var(--red-mid);font-weight:700}
+
+/* ── Takeaways / Related ── */
+.takeaways{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.takeaway{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:14px;color:var(--text)}
+.takeaway::before{content:'✓';font-weight:700;color:var(--green-mid);flex-shrink:0}
+.related-list{display:flex;flex-direction:column;gap:8px;margin:1rem 0}
+.related-item{padding:10px 14px;background:var(--bg2);border-radius:var(--radius);font-size:13.5px;border-left:3px solid var(--blue-border)}
+.related-item strong{color:var(--text)}
+.related-diff{font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff-easy{background:var(--green-bg);color:var(--green-mid)}
+.diff-med{background:var(--amber-bg);color:var(--amber-mid)}
+.diff-hard{background:var(--red-bg);color:var(--red-mid)}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<header>
+  <div class="problem-number">LeetCode #214</div>
+  <h1>Shortest Palindrome</h1>
+  <p class="subtitle">Given a string s, find the shortest palindrome you can find by adding characters in front of it.</p>
+  <div class="tags">
+    <span class="tag tag-hard">Hard</span>
+    <span class="tag tag-pattern">String Processing</span>
+    <span class="tag tag-pattern">KMP</span>
+    <span class="tag tag-complexity">Time: O(n)</span>
+    <span class="tag tag-complexity">Space: O(n)</span>
+  </div>
+</header>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 1: Understanding the Problem           -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">1</span>
+    <span class="section-title">Understanding the Problem</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>You are given a string <code>s</code> and allowed to add <strong>any characters in front of it</strong> (prepend). Your goal is to make the result a palindrome while adding as few characters as possible.</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Key Insight</div>
+      <p>The shortest palindrome is formed by finding the <strong>longest palindromic prefix</strong> of <code>s</code>. The characters you must prepend are the <em>reverse of the suffix that isn't part of that palindromic prefix</em>.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:1rem">
+      <div class="panel-box after">
+        <div class="panel-title">✓ Example: s = "aacecaaa"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--green-text);line-height:1.8">
+          Longest palindromic prefix: "aacecaa"<br>
+          Remaining suffix: "a"<br>
+          Prepend reverse("a") = "a"<br>
+          Result: <strong>"aaacecaaa"</strong>
+        </p>
+      </div>
+      <div class="panel-box before">
+        <div class="panel-title">Another: s = "abcd"</div>
+        <p style="font-family:var(--mono);font-size:12.5px;color:var(--red-text);line-height:1.8">
+          Longest palindromic prefix: "a"<br>
+          Remaining suffix: "bcd"<br>
+          Prepend reverse("bcd") = "dcb"<br>
+          Result: <strong>"dcbabcd"</strong>
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Why prepend and not append?</strong> We are forced to add only in front. Adding to the back would be a different (easier) problem. The challenge is that the front of the string must "extend" an already-palindromic prefix.</p>
+
+    <p style="margin-top:0.75rem"><strong>Edge Cases:</strong> Empty string → return "". String already a palindrome → return as-is. Single character → already palindrome. All-same characters like "aaaa" → already palindrome.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 2: The Algorithm                       -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">2</span>
+    <span class="section-title">The Algorithm: KMP Failure Function on s + "#" + reverse(s)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p>The naive O(n²) approach: try every prefix of <code>s</code>, check if it is a palindrome, keep the longest. We can do better with a clever KMP trick.</p>
+
+    <p style="margin-top:0.75rem">We construct a special combined string: <strong><code>t = s + "#" + reverse(s)</code></strong>. Then we compute KMP's failure function (prefix-suffix table) over <code>t</code>. The <strong>last value</strong> of the failure function tells us the length of the longest palindromic prefix of <code>s</code>.</p>
+
+    <div class="algorithm-steps">
+      <div class="algo-step">
+        <span class="step-num">1</span>
+        <span class="step-text"><strong>Reverse s</strong> to get <code>rev</code>. Build combined string <code>t = s + "#" + rev</code>. The "#" separator is a character not in s — it prevents false-positive matches that would cross the boundary.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">2</span>
+        <span class="step-text"><strong>Compute the KMP failure function</strong> (LPS array — Longest Proper Prefix that is also a Suffix) for the combined string <code>t</code>. This runs in O(n) time.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">3</span>
+        <span class="step-text"><strong>Read off the answer</strong>: <code>lps[-1]</code> gives the length of the longest palindromic prefix of <code>s</code>. The portion of <code>s</code> beyond that length is <code>s[lps[-1]:]</code>. Prepend its reverse to <code>s</code>.</span>
+      </div>
+      <div class="algo-step">
+        <span class="step-num">4</span>
+        <span class="step-text"><strong>Return</strong> <code>s[lps[-1]:][::-1] + s</code>. We reverse the non-palindromic suffix and prepend it.</span>
+      </div>
+    </div>
+
+    <div class="kmp-diagram">
+      <div class="kmp-diagram-title">Why t = s + "#" + reverse(s) reveals the longest palindromic prefix</div>
+      <div class="kmp-string-row">
+        <span class="kmp-label">s =</span>
+        <div class="kmp-cells">
+          <div class="kmp-ch orig">a</div><div class="kmp-ch orig">b</div><div class="kmp-ch orig">a</div><div class="kmp-ch orig">c</div><div class="kmp-ch orig">d</div>
+        </div>
+      </div>
+      <div class="kmp-string-row">
+        <span class="kmp-label">rev(s) =</span>
+        <div class="kmp-cells">
+          <div class="kmp-ch rev">d</div><div class="kmp-ch rev">c</div><div class="kmp-ch rev">a</div><div class="kmp-ch rev">b</div><div class="kmp-ch rev">a</div>
+        </div>
+      </div>
+      <div class="kmp-string-row">
+        <span class="kmp-label">t =</span>
+        <div class="kmp-cells">
+          <div class="kmp-ch orig">a</div><div class="kmp-ch orig">b</div><div class="kmp-ch orig">a</div><div class="kmp-ch orig">c</div><div class="kmp-ch orig">d</div>
+          <div class="kmp-ch sep">#</div>
+          <div class="kmp-ch rev">d</div><div class="kmp-ch rev">c</div><div class="kmp-ch rev match">a</div><div class="kmp-ch rev match">b</div><div class="kmp-ch rev match">a</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-top:10px">The last 3 chars of t ("aba" from rev) match the first 3 chars of t ("aba" from s). This means "aba" is both a prefix of s AND a prefix of reverse(s) — which means "aba" is a palindrome that starts at position 0 of s!</p>
+      <div class="lps-row" style="margin-top:10px">
+        <div class="lps-ch">0</div><div class="lps-ch">0</div><div class="lps-ch">1</div><div class="lps-ch">0</div><div class="lps-ch">0</div>
+        <div class="lps-ch">0</div>
+        <div class="lps-ch">0</div><div class="lps-ch">0</div><div class="lps-ch nonzero">1</div><div class="lps-ch nonzero">2</div><div class="lps-ch nonzero">3</div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:6px">LPS array for t. Last value = 3 → palindromic prefix of s has length 3 ("aba"). Prepend reverse("cd") = "dc" → answer: "dcabAcd" → wait, s = "abacd" → answer = "dcaba" + "cd" → "dcabacd"</p>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔑 Why the "#" Separator Matters</div>
+      <p>Without "#", the prefix of <code>s</code> could falsely match characters from the reversed half that shouldn't cross the boundary. The "#" is a sentinel — it forces any match to be entirely within the original <code>s</code> portion or the reversed portion, never spanning both.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 3: Why It Works (KMP Deep-Dive)        -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">3</span>
+    <span class="section-title">Why It Works: KMP Failure Function Deep-Dive</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">🔐 The Invariant</div>
+      <p>The KMP failure function <code>lps[i]</code> stores the length of the <strong>longest proper prefix of t[0..i] that is also a suffix</strong>. A "proper" prefix is shorter than the full string itself.</p>
+    </div>
+
+    <p><strong>KMP Algorithm — Origin and Purpose:</strong> Invented by Donald Knuth, Vaughan Pratt, and James Morris in 1977. Originally designed for pattern matching in O(n + m) time without backtracking. Its key structure — the failure function — captures the self-similarity of the pattern string: "if the current comparison fails at position j, how far back can we restart without re-examining already-compared characters?"</p>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 The Core Invariant of KMP Failure Function</div>
+      <p>For each position <code>i</code> in the string, <code>lps[i]</code> = length of the longest proper prefix of <code>t[0..i]</code> that is also a suffix of <code>t[0..i]</code>. This is computed in O(n) time using a two-pointer approach: pointer <code>i</code> marches forward, pointer <code>j</code> tracks the length of the current matching prefix.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>Why does lps[-1] give the palindromic prefix length?</strong></p>
+    <p style="margin-top:0.25rem">Consider <code>t = s + "#" + rev(s)</code>. A palindromic prefix of <code>s</code> of length <code>k</code> reads the same forward and backward. So <code>s[0..k-1] == reverse(s[0..k-1]) == rev[-k:]</code>. This means <code>s[0..k-1]</code> appears both as a prefix of <code>t</code> (from the <code>s</code> part) and as a suffix of <code>t</code> (from the <code>rev(s)</code> part). That is exactly what the LPS array measures — the longest prefix that is also a suffix! The "#" prevents any match longer than <code>len(s)</code>.</p>
+
+    <p style="margin-top:0.75rem"><strong>Building the failure function:</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def kmp_failure(t):                       </span><span class="aann">← build LPS array for combined string t</span></div>
+<div class="ann-line"><span class="acode">    n = len(t)</span></div>
+<div class="ann-line"><span class="acode">    lps = [0] * n                         </span><span class="aann">← lps[0] always 0 (no proper prefix)</span></div>
+<div class="ann-line"><span class="acode">    j = 0                                 </span><span class="aann">← j: length of previous longest prefix-suffix</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, n):                 </span><span class="aann">← i scans forward through t</span></div>
+<div class="ann-line"><span class="acode">        while j > 0 and t[i] != t[j]:    </span><span class="aann">← mismatch: fall back using lps itself!</span></div>
+<div class="ann-line"><span class="acode">            j = lps[j - 1]               </span><span class="aann">← brilliant: skip to next candidate</span></div>
+<div class="ann-line"><span class="acode">        if t[i] == t[j]:                 </span><span class="aann">← match: extend the prefix-suffix</span></div>
+<div class="ann-line"><span class="acode">            j += 1</span></div>
+<div class="ann-line"><span class="acode">        lps[i] = j                       </span><span class="aann">← record length at this position</span></div>
+<div class="ann-line"><span class="acode">    return lps</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ The "Fall Back" Step is the Heart of KMP</div>
+      <p>When a mismatch happens at position <code>j</code>, we don't reset to 0. Instead we set <code>j = lps[j-1]</code>. Why? Because we know the last <code>lps[j-1]</code> characters already matched. We reuse that knowledge. This is what gives KMP its O(n) amortized cost — <code>j</code> can only increase at most <code>n</code> total times, so the total fallback steps is also bounded by <code>n</code>.</p>
+    </div>
+
+    <p style="margin-top:0.75rem"><strong>When to recognize KMP applies:</strong> (1) You need to search for a pattern in a text, (2) You need to find the longest prefix of A that matches a suffix of B, (3) You need to find repeated structure in a string (like the minimum period), (4) Any "prefix meets suffix" question where naive O(n²) is too slow.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 4: The Code (Annotated)                -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">4</span>
+    <span class="section-title">The Code (Annotated)</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <p><strong>Solution 1 — KMP on Combined String (Optimal, O(n))</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def shortestPalindrome(s: str) -> str:</span></div>
+<div class="ann-line"><span class="acode">    if not s: return s                     </span><span class="aann">← edge case: empty string</span></div>
+<div class="ann-line"><span class="acode">    rev = s[::-1]                          </span><span class="aann">← reverse of s</span></div>
+<div class="ann-line"><span class="acode">    t = s + "#" + rev                      </span><span class="aann">← combined string with sentinel separator</span></div>
+<div class="ann-line"><span class="acode">    n = len(t)</span></div>
+<div class="ann-line"><span class="acode">    lps = [0] * n                          </span><span class="aann">← failure function array</span></div>
+<div class="ann-line"><span class="acode">    j = 0</span></div>
+<div class="ann-line"><span class="acode">    for i in range(1, n):                  </span><span class="aann">← compute failure function</span></div>
+<div class="ann-line"><span class="acode">        while j > 0 and t[i] != t[j]:     </span><span class="aann">← mismatch: fall back</span></div>
+<div class="ann-line"><span class="acode">            j = lps[j - 1]</span></div>
+<div class="ann-line"><span class="acode">        if t[i] == t[j]:</span></div>
+<div class="ann-line"><span class="acode">            j += 1</span></div>
+<div class="ann-line"><span class="acode">        lps[i] = j</span></div>
+<div class="ann-line"><span class="acode">    longest_pal_prefix = lps[-1]           </span><span class="aann">← last LPS value = palindromic prefix length</span></div>
+<div class="ann-line"><span class="acode">    suffix = s[longest_pal_prefix:]        </span><span class="aann">← the non-palindromic tail of s</span></div>
+<div class="ann-line"><span class="acode">    return suffix[::-1] + s               </span><span class="aann">← prepend reverse of suffix</span></div>
+    </div>
+
+    <div class="concept-box warning">
+      <div class="concept-box-title">⚠️ Why Reverse the Suffix (Not s)?</div>
+      <p>We prepend <code>suffix[::-1]</code>, not <code>rev</code>. We only need to prepend the characters that make the result a palindrome — those are exactly the characters in <code>s[longest_pal_prefix:]</code> reversed. Prepending the full <code>rev</code> would over-add characters.</p>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 2 — Brute Force O(n²)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def shortestPalindrome_brute(s: str) -> str:</span></div>
+<div class="ann-line"><span class="acode">    def is_palindrome(t):                  </span><span class="aann">← helper: O(n) palindrome check</span></div>
+<div class="ann-line"><span class="acode">        return t == t[::-1]</span></div>
+<div class="ann-line"><span class="acode">    for i in range(len(s), -1, -1):       </span><span class="aann">← try longest prefix first</span></div>
+<div class="ann-line"><span class="acode">        if is_palindrome(s[:i]):          </span><span class="aann">← O(n) check at each of O(n) positions → O(n²)</span></div>
+<div class="ann-line"><span class="acode">            return s[i:][::-1] + s        </span><span class="aann">← prepend reverse of remaining suffix</span></div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>Solution 3 — Rabin-Karp Rolling Hash O(n)</strong></p>
+    <div class="ann-code">
+<div class="ann-line"><span class="acode">def shortestPalindrome_hash(s: str) -> str:</span></div>
+<div class="ann-line"><span class="acode">    base, mod = 26, 10**9 + 7</span></div>
+<div class="ann-line"><span class="acode">    fwd = rev_h = 0; power = 1; best = 0  </span><span class="aann">← track forward and backward hashes</span></div>
+<div class="ann-line"><span class="acode">    for i, c in enumerate(s):</span></div>
+<div class="ann-line"><span class="acode">        fwd = (fwd * base + ord(c)) % mod </span><span class="aann">← forward hash of s[0..i]</span></div>
+<div class="ann-line"><span class="acode">        rev_h = (rev_h + ord(c) * power) % mod  </span><span class="aann">← reverse hash of s[0..i]</span></div>
+<div class="ann-line"><span class="acode">        power = power * base % mod</span></div>
+<div class="ann-line"><span class="acode">        if fwd == rev_h:                  </span><span class="aann">← hashes match → s[0..i] is a palindrome</span></div>
+<div class="ann-line"><span class="acode">            best = i + 1                  </span><span class="aann">← track longest palindromic prefix seen</span></div>
+<div class="ann-line"><span class="acode">    return s[best:][::-1] + s            </span><span class="aann">← same answer construction</span></div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">💡 Complexity Summary</div>
+      <p>
+        <strong>Brute Force:</strong> Time O(n²), Space O(n) — too slow for large inputs<br>
+        <strong>KMP:</strong> Time O(n), Space O(n) — optimal and guaranteed correct<br>
+        <strong>Rabin-Karp Hash:</strong> Time O(n) expected, Space O(1) extra — hash collisions possible (rare with large prime mod)
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 5: Interview Strategy                  -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">5</span>
+    <span class="section-title">🎤 Interview Strategy: How to Arrive at This</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="strategy-steps">
+      <div class="strategy-step">
+        <div class="step-label">Step 1: Reframe the Problem</div>
+        <p style="font-size:14px;color:var(--text)">Say: "We can only add characters to the front. Adding the minimum means we need to touch as few characters as possible. Ideally, a long prefix of s is already a palindrome — then we only reverse the short remaining suffix and prepend it."</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 2: Propose the O(n²) Solution First</div>
+        <p style="font-size:14px;color:var(--text)">Start with brute force: try every prefix from longest to shortest, check if it's a palindrome with <code>s[:i] == s[:i][::-1]</code>, return once found. This is O(n²) and correct. The interviewer will ask you to optimize.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 3: Identify the Bottleneck</div>
+        <p style="font-size:14px;color:var(--text)">The bottleneck is checking "is this prefix a palindrome?" for each of n prefixes. Each check is O(n). We need an O(n) way to find the longest palindromic prefix.</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 4: Connect to KMP / String Matching</div>
+        <p style="font-size:14px;color:var(--text)">Hint yourself: "A prefix of s is a palindrome if and only if it equals its own reverse. That means s's prefix matches a suffix of reverse(s). Finding the longest prefix of X that equals a suffix of Y — that's a string matching problem, solvable with KMP's failure function!"</p>
+      </div>
+      <div class="strategy-step">
+        <div class="step-label">Step 5: Construct t = s + "#" + rev(s)</div>
+        <p style="font-size:14px;color:var(--text)">By concatenating with a separator, the KMP failure function on t tells you the length of the longest proper prefix of t (which is a prefix of s) that is also a suffix of t (which is a substring of rev(s)). The last LPS value is exactly the length of the longest palindromic prefix.</p>
+      </div>
+    </div>
+
+    <div class="interview-script">
+      <h4>🗣️ What to Say to the Interviewer</h4>
+      <div class="script-content">
+"We can only prepend characters. Minimum additions means finding the longest palindromic prefix of s.<br>
+Brute force: try every prefix, check palindrome — O(n²).<br>
+Key observation: a prefix of s of length k is a palindrome iff s[0..k-1] == rev(s)[-k:].<br>
+So the longest palindromic prefix of s = longest prefix of s that matches a suffix of rev(s).<br>
+That's exactly what KMP's failure function computes on t = s + '#' + rev(s).<br>
+lps[-1] gives the length. Prepend reverse of s[lps[-1]:] to s.<br>
+Time O(n), Space O(n)."</div>
+    </div>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🔮 Likely Follow-up Questions</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li><strong>"What if you could also append?"</strong> → Then it's the longest palindromic substring starting at index 0 or ending at n-1.</li>
+        <li><strong>"What's the longest palindromic substring in general?"</strong> → Manacher's Algorithm O(n) (#5)</li>
+        <li><strong>"Implement KMP search (not just failure function)"</strong> → Use the LPS array to search pattern in text</li>
+        <li><strong>"What if the string is a stream?"</strong> → Rolling hash approach works; KMP doesn't without buffer</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 6: Interactive Walkthrough             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card" id="walkthrough">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">6</span>
+    <span class="section-title">Interactive Walkthrough: s = "aacecaa"</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+
+    <div class="viz-area">
+      <!-- Combined String t -->
+      <div class="str-section">
+        <div class="str-label-box" style="font-size:11px">t (combined)</div>
+        <div class="str-col">
+          <div class="ptr-row" id="t-ptrs"></div>
+          <div class="cells-row" id="t-cells"></div>
+          <div class="idx-row" id="t-idx"></div>
+        </div>
+      </div>
+
+      <!-- LPS Array -->
+      <div class="lps-section">
+        <div class="lps-section-title">LPS (Failure Function) array</div>
+        <div class="lps-display" id="lps-display"></div>
+      </div>
+
+      <!-- Variable Tracker -->
+      <div class="var-tracker">
+        <div class="var-box" id="vb-i">
+          <span class="var-name">i</span>
+          <span class="var-val" id="vv-i">—</span>
+        </div>
+        <div class="var-box" id="vb-j">
+          <span class="var-name">j</span>
+          <span class="var-val" id="vv-j">—</span>
+        </div>
+        <div class="var-box" id="vb-lps">
+          <span class="var-name">lps[i]</span>
+          <span class="var-val" id="vv-lps">—</span>
+        </div>
+        <div class="var-box" id="vb-palLen">
+          <span class="var-name">pal_len</span>
+          <span class="var-val" id="vv-palLen">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="code-panel">
+      <div class="code-line" id="cl-0">def shortestPalindrome(s):</div>
+      <div class="code-line" id="cl-1">    rev = s[::-1]</div>
+      <div class="code-line" id="cl-2">    t = s + "#" + rev</div>
+      <div class="code-line" id="cl-3">    lps = [0] * len(t)</div>
+      <div class="code-line" id="cl-4">    j = 0</div>
+      <div class="code-line" id="cl-5">    for i in range(1, len(t)):</div>
+      <div class="code-line" id="cl-6">        while j > 0 and t[i] != t[j]:</div>
+      <div class="code-line" id="cl-7">            j = lps[j - 1]</div>
+      <div class="code-line" id="cl-8">        if t[i] == t[j]:</div>
+      <div class="code-line" id="cl-9">            j += 1</div>
+      <div class="code-line" id="cl-10">        lps[i] = j</div>
+      <div class="code-line" id="cl-11">    longest_pal_prefix = lps[-1]</div>
+      <div class="code-line" id="cl-12">    return s[lps[-1]:][::-1] + s</div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="phase-badge" id="phase-badge">INIT</span>
+      <div class="step-counter" id="step-counter">Step 1 / 18</div>
+      <div class="step-title" id="step-title">Welcome</div>
+      <div class="step-body" id="step-body">Press Next or use the arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn" id="prev-btn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="go(1)">Next →</button>
+      <button class="btn" onclick="reset()">↺ Reset</button>
+    </div>
+    <div class="kbd-hint">Use ← → arrow keys to navigate</div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-i"></div> i (forward scanner)</div>
+      <div class="legend-item"><div class="legend-swatch sw-j"></div> j (prefix pointer)</div>
+      <div class="legend-item"><div class="legend-swatch sw-match"></div> Matched prefix-suffix</div>
+      <div class="legend-item"><div class="legend-swatch sw-sep"></div> Separator "#"</div>
+      <div class="legend-item"><div class="legend-swatch sw-result"></div> Final palindrome</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── -->
+<!-- SECTION 7: Summary & Key Takeaways             -->
+<!-- ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="section-number">7</span>
+    <span class="section-title">Summary &amp; Key Takeaways</span>
+    <span class="collapse-icon">▾</span>
+  </div>
+  <div class="section-content">
+    <div class="takeaways">
+      <div class="takeaway">Prepend minimum = find longest palindromic prefix, then prepend the reverse of the remaining suffix</div>
+      <div class="takeaway">Build t = s + "#" + reverse(s); KMP's lps[-1] gives the palindromic prefix length in O(n)</div>
+      <div class="takeaway">The "#" separator prevents cross-boundary spurious matches in the failure function</div>
+      <div class="takeaway">KMP failure function falls back using itself — j = lps[j-1] — giving amortized O(n) computation</div>
+      <div class="takeaway">Same pattern works for: shortest rotation to make a string equal to another, minimum period of a string</div>
+    </div>
+
+    <table class="cmp-table" style="margin-top:1.5rem">
+      <thead>
+        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Brute Force</td>
+          <td class="mark-bad">O(n²)</td>
+          <td>O(n)</td>
+          <td>Check every prefix; correct but TLE</td>
+        </tr>
+        <tr>
+          <td><strong>KMP Failure Function ✓</strong></td>
+          <td class="mark-good">O(n)</td>
+          <td>O(n)</td>
+          <td>Optimal; exact; always correct</td>
+        </tr>
+        <tr>
+          <td>Rabin-Karp Hash</td>
+          <td class="mark-good">O(n) expected</td>
+          <td class="mark-good">O(1) extra</td>
+          <td>Hash collisions possible; probabilistic</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="concept-box insight">
+      <div class="concept-box-title">🎯 When to Recognize the KMP / Prefix-Suffix Pattern</div>
+      <ul style="margin-left:1rem;margin-top:0.5rem;font-size:14px;line-height:2.2">
+        <li>"Find the longest prefix of A that is also a suffix of B" → build t = A + "#" + B, KMP</li>
+        <li>"Does string P repeat with period k?" → KMP on P, check lps[-1]</li>
+        <li>"Find all occurrences of pattern in text" → KMP pattern search</li>
+        <li>"Check if s is a rotation of t" → KMP on t + "#" + t, search s</li>
+        <li>Any "palindromic prefix/suffix" question where O(n²) is too slow</li>
+      </ul>
+    </div>
+
+    <div class="related-list">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Related Problems (same sub-pattern: KMP on combined string)</div>
+      <div class="related-item"><strong>Implement strStr (Needle in Haystack)</strong><span class="related-diff diff-easy">Easy</span> — Classic KMP pattern search (#28)</div>
+      <div class="related-item"><strong>Repeated Substring Pattern</strong><span class="related-diff diff-easy">Easy</span> — KMP LPS to find minimum period (#459)</div>
+      <div class="related-item"><strong>Longest Happy Prefix</strong><span class="related-diff diff-hard">Hard</span> — Direct KMP failure function application (#1392)</div>
+      <div class="related-item"><strong>Palindrome Pairs</strong><span class="related-diff diff-hard">Hard</span> — Find all pairs of words forming palindromes using reversed matches (#336)</div>
+      <div class="related-item"><strong>Longest Palindromic Substring</strong><span class="related-diff diff-med">Medium</span> — Palindrome detection with expand around center or Manacher's (#5)</div>
+      <div class="related-item"><strong>Palindromic Substrings</strong><span class="related-diff diff-med">Medium</span> — Count all palindromic substrings (#647)</div>
+      <div class="related-item"><strong>Find the Index of the First Occurrence in a String</strong><span class="related-diff diff-easy">Easy</span> — KMP search: O(n+m) pattern matching (#28)</div>
+    </div>
+
+    <div class="concept-box key-concept">
+      <div class="concept-box-title">📚 Reference</div>
+      <p>DSA_Patterns_and_SubPatterns_Guide.md — Section 2 (String Processing)<br>
+      Sub-Pattern: <strong>KMP on s + "#" + reverse(s)</strong> · Source: Analysis (new classification) + Guide Section 2</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ── Data ──
+const T_STR = "aacecaa#aacecaa".split(''); // s="aacecaa", rev="aacecaa" (palindrome itself!)
+// Actually let's use s="aacecaaa" for a more interesting demo
+// s = "aacecaaa", rev = "aaacecaa", t = "aacecaaa#aaacecaa"
+const S = "aacecaaa";
+const REV_S = "aaacecaa";
+const T_CHARS = (S + "#" + REV_S).split('');
+const T_LEN = T_CHARS.length; // 17
+
+// Pre-computed LPS for "aacecaaa#aaacecaa"
+// t: a a c e c a a a # a a a c e c a a
+// i: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+// lps:0 1 0 0 0 1 2 3 0  1  2  3  0  0  0  1  2... wait let me compute carefully
+// Actually for s="aacecaaa", the longest palindromic prefix is "aacecaa" (7 chars)
+// So lps[-1] should be 7
+// Let me hard-code the correct LPS values computed from the actual KMP algorithm
+const LPS_VALS = [0, 1, 0, 0, 0, 1, 2, 2, 0, 1, 2, 2, 0, 0, 0, 1, 7];
+// Explanation: t = "aacecaaa#aaacecaa"
+// i=0: lps[0]=0
+// i=1: t[1]='a'==t[0]='a' → j=1, lps[1]=1
+// i=2: t[2]='c'!=t[1]='a' → fall j=lps[0]=0; t[2]='c'!=t[0]='a' → lps[2]=0
+// i=3: t[3]='e'!=t[0]='a' → lps[3]=0
+// i=4: t[4]='c'!=t[0]='a' → lps[4]=0
+// i=5: t[5]='a'==t[0]='a' → j=1, lps[5]=1
+// i=6: t[6]='a'==t[1]='a' → j=2, lps[6]=2
+// i=7: t[7]='a'==t[2]='c'? No. fall j=lps[1]=1; t[7]='a'==t[1]='a'? Yes → j=2, lps[7]=2
+// i=8: t[8]='#'!=t[2]='c' → fall j=lps[1]=1; t[8]='#'!=t[1]='a' → fall j=0; lps[8]=0
+// i=9: t[9]='a'==t[0]='a' → j=1, lps[9]=1
+// i=10: t[10]='a'==t[1]='a' → j=2, lps[10]=2
+// i=11: t[11]='a'==t[2]='c'? No. fall j=lps[1]=1; t[11]='a'==t[1]='a' → j=2, lps[11]=2
+// i=12: t[12]='c'==t[2]='c' → j=3, lps[12]=3...
+// Hmm let me recheck s="aacecaaa" carefully
+// s: a a c e c a a a
+// rev: a a a c e c a a
+// t: a a c e c a a a # a a a c e c a a
+//    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+// i=0: lps=0
+// i=1: t[1]=a==t[0]=a → j=1, lps[1]=1
+// i=2: t[2]=c, j=1, t[1]=a≠c → j=lps[0]=0; t[2]=c≠t[0]=a → lps[2]=0
+// i=3: t[3]=e, j=0, t[3]=e≠t[0]=a → lps[3]=0
+// i=4: t[4]=c, j=0, t[4]=c≠t[0]=a → lps[4]=0
+// i=5: t[5]=a, j=0, t[5]=a==t[0]=a → j=1, lps[5]=1
+// i=6: t[6]=a, j=1, t[6]=a==t[1]=a → j=2, lps[6]=2
+// i=7: t[7]=a, j=2, t[7]=a vs t[2]=c → mismatch; j=lps[1]=1; t[7]=a==t[1]=a → j=2, lps[7]=2
+// i=8: t[8]=#, j=2, t[8]=# vs t[2]=c → mismatch; j=lps[1]=1; t[8]=# vs t[1]=a → mismatch; j=lps[0]=0; t[8]=# vs t[0]=a → mismatch; lps[8]=0
+// i=9: t[9]=a, j=0, t[9]=a==t[0]=a → j=1, lps[9]=1
+// i=10: t[10]=a, j=1, t[10]=a==t[1]=a → j=2, lps[10]=2
+// i=11: t[11]=a, j=2, t[11]=a vs t[2]=c → mismatch; j=lps[1]=1; t[11]=a==t[1]=a → j=2, lps[11]=2
+// i=12: t[12]=c, j=2, t[12]=c==t[2]=c → j=3, lps[12]=3
+// i=13: t[13]=e, j=3, t[13]=e==t[3]=e → j=4, lps[13]=4
+// i=14: t[14]=c, j=4, t[14]=c==t[4]=c → j=5, lps[14]=5
+// i=15: t[15]=a, j=5, t[15]=a==t[5]=a → j=6, lps[15]=6
+// i=16: t[16]=a, j=6, t[16]=a==t[6]=a → j=7, lps[16]=7
+// CORRECT: lps[-1] = 7 → palindromic prefix = s[0..6] = "aacecaa" (7 chars)
+// suffix = s[7:] = "a" → reverse = "a" → prepend "a" → "a" + "aacecaaa" = "aaacecaaa"
+
+const CORRECT_LPS = [0, 1, 0, 0, 0, 1, 2, 2, 0, 1, 2, 2, 3, 4, 5, 6, 7];
+
+const steps = [
+  {
+    id: 0, phase: 'init', phaseLabel: 'INIT', phaseClass: 'phase-init',
+    i: -1, j: 0, lpsUpTo: -1, activeLine: 0,
+    title: 'Setup: s = "aacecaaa"',
+    text: 'Input: s = "aacecaaa". We build the combined string t = s + "#" + reverse(s) = "aacecaaa#aaacecaa". This 17-character string is the input to KMP\'s failure function. We will compute the LPS (Longest Proper Prefix = Suffix) array for t.',
+    changed: []
+  },
+  {
+    id: 1, phase: 'build', phaseLabel: 'BUILD t', phaseClass: 'phase-build',
+    i: -1, j: 0, lpsUpTo: -1, activeLine: 2,
+    title: 'Construct t = s + "#" + rev(s)',
+    text: 't = "aacecaaa" + "#" + "aaacecaa" = "aacecaaa#aaacecaa". Length 17. The "#" at position 8 is the sentinel separator — it can\'t appear in any palindromic prefix match because "#" is not in s.',
+    changed: []
+  },
+  {
+    id: 2, phase: 'build', phaseLabel: 'INIT LPS', phaseClass: 'phase-build',
+    i: 0, j: 0, lpsUpTo: 0, activeLine: 4,
+    title: 'lps[0] = 0, j = 0',
+    text: 'Initialize: lps[0] = 0 always (no proper prefix can equal the full 1-char string). j = 0 means "current matching prefix length is 0". We start i at 1 and scan forward.',
+    changed: ['lps']
+  },
+  {
+    id: 3, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 1, j: 1, lpsUpTo: 1, activeLine: 8,
+    title: 'i=1: t[1]="a" == t[0]="a" → j=1, lps[1]=1',
+    text: 'i=1, j=0. t[1]="a" matches t[0]="a" — they are equal! Increment j to 1. Set lps[1] = j = 1. This says: the first 2 characters "aa" have a prefix-suffix of length 1 (both are "a").',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 4, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 2, j: 0, lpsUpTo: 2, activeLine: 10,
+    title: 'i=2: t[2]="c" ≠ t[1]="a" → fall back → lps[2]=0',
+    text: 'i=2, j=1. t[2]="c" ≠ t[j=1]="a". Mismatch! Fall back: j = lps[j-1] = lps[0] = 0. Now t[2]="c" ≠ t[0]="a". Still no match. lps[2] = 0. The prefix "aac" has no proper prefix that is also a suffix.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 5, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 3, j: 0, lpsUpTo: 3, activeLine: 10,
+    title: 'i=3: t[3]="e" ≠ t[0]="a" → lps[3]=0',
+    text: 'i=3, j=0. t[3]="e" ≠ t[0]="a". No match. lps[3] = 0. "aace" has no matching prefix-suffix.',
+    changed: ['i', 'lps']
+  },
+  {
+    id: 6, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 4, j: 0, lpsUpTo: 4, activeLine: 10,
+    title: 'i=4: t[4]="c" ≠ t[0]="a" → lps[4]=0',
+    text: 'i=4, j=0. t[4]="c" ≠ t[0]="a". No match. lps[4] = 0. No self-overlap so far in the prefix.',
+    changed: ['i', 'lps']
+  },
+  {
+    id: 7, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 5, j: 1, lpsUpTo: 5, activeLine: 8,
+    title: 'i=5: t[5]="a" == t[0]="a" → j=1, lps[5]=1',
+    text: 'i=5, j=0. t[5]="a" matches t[0]="a". j becomes 1. lps[5] = 1. The string "aaceca" has a prefix-suffix match of length 1 (the lone "a" at start and end).',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 8, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 6, j: 2, lpsUpTo: 6, activeLine: 8,
+    title: 'i=6: t[6]="a" == t[1]="a" → j=2, lps[6]=2',
+    text: 'i=6, j=1. t[6]="a" matches t[1]="a". j becomes 2. lps[6] = 2. "aacecaa" has a prefix "aa" that also appears as its last 2 characters. We are building towards "aacecaa" being a palindrome!',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 9, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 7, j: 2, lpsUpTo: 7, activeLine: 6,
+    title: 'i=7: t[7]="a" vs t[j=2]="c" → mismatch, fall back to j=1, match! lps[7]=2',
+    text: 'i=7, j=2. t[7]="a" ≠ t[2]="c". Mismatch! Fall: j = lps[1] = 1. Now t[7]="a" == t[1]="a". Match! j becomes 2. lps[7] = 2. The fallback avoids starting from scratch — we reuse the overlap knowledge.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 10, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 8, j: 0, lpsUpTo: 8, activeLine: 6,
+    title: 'i=8: t[8]="#" (separator) → falls back all the way to 0',
+    text: 'i=8 is the "#" separator. j=2: t[8]="#" ≠ t[2]="c". Fall: j=lps[1]=1. t[8]="#" ≠ t[1]="a". Fall: j=lps[0]=0. t[8]="#" ≠ t[0]="a". No match. lps[8] = 0. The separator completely blocks any cross-boundary match.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 11, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 9, j: 1, lpsUpTo: 9, activeLine: 8,
+    title: 'i=9: t[9]="a" == t[0]="a" → j=1, lps[9]=1',
+    text: 'Now we are in the reversed-s portion. i=9, j=0. t[9]="a" matches t[0]="a". j=1, lps[9]=1. The reversed string starts matching the original prefix.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 12, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 12, j: 3, lpsUpTo: 12, activeLine: 8,
+    title: 'i=10,11,12: "aac" builds up prefix match → lps[12]=3',
+    text: 'Continuing: i=10: t[10]="a"==t[1]="a" → j=2, lps[10]=2. i=11: t[11]="a" vs t[2]="c" → fall back, j=1; t[11]="a"==t[1]="a" → j=2, lps[11]=2. i=12: t[12]="c"==t[2]="c" → j=3, lps[12]=3. We now have a match of length 3: "aac".',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 13, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 13, j: 4, lpsUpTo: 13, activeLine: 8,
+    title: 'i=13: t[13]="e" == t[3]="e" → j=4, lps[13]=4',
+    text: 'i=13, j=3. t[13]="e" matches t[3]="e". j=4, lps[13]=4. The match grows: "aace" at the front is matching "aace" at the tail of the combined string.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 14, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 14, j: 5, lpsUpTo: 14, activeLine: 8,
+    title: 'i=14: t[14]="c" == t[4]="c" → j=5, lps[14]=5',
+    text: 'i=14, j=4. t[14]="c" matches t[4]="c". j=5, lps[14]=5. Match length 5: "aacec" is matched at both ends.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 15, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 15, j: 6, lpsUpTo: 15, activeLine: 8,
+    title: 'i=15: t[15]="a" == t[5]="a" → j=6, lps[15]=6',
+    text: 'i=15, j=5. t[15]="a" matches t[5]="a". j=6, lps[15]=6. Match length 6: "aaceca" is matched.',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 16, phase: 'kmp', phaseLabel: 'KMP', phaseClass: 'phase-kmp',
+    i: 16, j: 7, lpsUpTo: 16, activeLine: 8,
+    title: 'i=16: t[16]="a" == t[6]="a" → j=7, lps[16]=7 ← KEY!',
+    text: 'i=16, j=6. t[16]="a" matches t[6]="a". j=7. lps[16] = 7. This is the last position! lps[-1] = 7 means the longest palindromic prefix of s = "aacecaaa" has length 7. That prefix is "aacecaa" (the first 7 characters).',
+    changed: ['i', 'j', 'lps']
+  },
+  {
+    id: 17, phase: 'result', phaseLabel: 'RESULT', phaseClass: 'phase-result',
+    i: -1, j: 7, lpsUpTo: 16, activeLine: 12,
+    title: 'Answer: prepend reverse(s[7:]) = "a" → "aaacecaaa"',
+    text: 'lps[-1] = 7. The palindromic prefix is s[0:7] = "aacecaa". The remaining suffix is s[7:] = "a". Reverse it: "a". Prepend to s: "a" + "aacecaaa" = "aaacecaaa". This is the shortest palindrome! Only 1 character was added.',
+    changed: ['result']
+  }
+];
+
+let current = 0;
+
+function buildDom() {
+  // Build t string cells
+  const tPtrs = document.getElementById('t-ptrs');
+  const tCells = document.getElementById('t-cells');
+  const tIdxRow = document.getElementById('t-idx');
+  T_CHARS.forEach((ch, i) => {
+    const ps = document.createElement('div');
+    ps.className = 'ptr-slot'; ps.id = 'tp-' + i;
+    tPtrs.appendChild(ps);
+    const c = document.createElement('div');
+    c.className = 'cell normal'; c.id = 'tc-' + i;
+    c.textContent = ch;
+    if (ch === '#') c.className = 'cell separator';
+    tCells.appendChild(c);
+    const ix = document.createElement('div');
+    ix.className = 'idx-slot'; ix.textContent = i;
+    tIdxRow.appendChild(ix);
+  });
+
+  // Build LPS display
+  const lpsDisplay = document.getElementById('lps-display');
+  T_CHARS.forEach((ch, i) => {
+    const box = document.createElement('div');
+    box.className = 'lps-box';
+    box.innerHTML = '<div class="lps-char">' + ch + '</div><div class="lps-val future" id="lv-' + i + '">?</div>';
+    lpsDisplay.appendChild(box);
+  });
+
+  // Build progress dots
+  const pd = document.getElementById('progress-dots');
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = 'dot-' + i;
+    d.onclick = (function(idx){ return function(){ current = idx; render(); }; })(i);
+    pd.appendChild(d);
+  }
+}
+
+function render() {
+  const step = steps[current];
+  const lpsUpTo = step.lpsUpTo;
+  const curI = step.i;
+  const curJ = step.j;
+
+  // ── t cells ──
+  T_CHARS.forEach((ch, i) => {
+    const cell = document.getElementById('tc-' + i);
+    const ptr  = document.getElementById('tp-' + i);
+    ptr.innerHTML = '';
+    if (step.phase === 'result') {
+      cell.className = (lpsUpTo >= i) ? 'cell match' : 'cell result';
+    } else if (ch === '#') {
+      cell.className = 'cell separator';
+    } else if (i === curI && i === curJ) {
+      cell.className = 'cell match';
+      const li = document.createElement('span');
+      li.className = 'ptr-lbl ptr-i'; li.textContent = 'i'; ptr.appendChild(li);
+      const lj = document.createElement('span');
+      lj.className = 'ptr-lbl ptr-j'; lj.textContent = 'j'; ptr.appendChild(lj);
+    } else if (i === curI) {
+      cell.className = 'cell active-i';
+      const l = document.createElement('span');
+      l.className = 'ptr-lbl ptr-i'; l.textContent = 'i'; ptr.appendChild(l);
+    } else if (i === curJ && curJ > 0 && curI > 0) {
+      cell.className = 'cell active-j';
+      const l = document.createElement('span');
+      l.className = 'ptr-lbl ptr-j'; l.textContent = 'j'; ptr.appendChild(l);
+    } else if (i < curI && curI > 0) {
+      cell.className = 'cell done';
+    } else {
+      cell.className = (ch === '#') ? 'cell separator' : 'cell normal';
+    }
+  });
+
+  // ── LPS display ──
+  T_CHARS.forEach((ch, i) => {
+    const lv = document.getElementById('lv-' + i);
+    if (i > lpsUpTo) {
+      lv.className = 'lps-val future';
+      lv.textContent = '?';
+    } else if (i === lpsUpTo && step.phase !== 'init') {
+      lv.className = 'lps-val current';
+      lv.textContent = CORRECT_LPS[i];
+    } else {
+      lv.className = 'lps-val computed';
+      lv.textContent = CORRECT_LPS[i];
+    }
+  });
+
+  // ── Code panel ──
+  for (let i = 0; i <= 12; i++) {
+    const cl = document.getElementById('cl-' + i);
+    if (cl) cl.classList.toggle('active', i === step.activeLine);
+  }
+
+  // ── Info card ──
+  const badge = document.getElementById('phase-badge');
+  badge.className = 'phase-badge ' + step.phaseClass;
+  badge.textContent = step.phaseLabel;
+  document.getElementById('step-counter').textContent = 'Step ' + (current + 1) + ' / ' + steps.length;
+  document.getElementById('step-title').textContent = step.title;
+  document.getElementById('step-body').textContent = step.text;
+
+  // ── Variable tracker ──
+  const iVal = curI >= 0 ? String(curI) : '—';
+  const jVal = String(curJ);
+  const lpsVal = lpsUpTo >= 0 ? String(CORRECT_LPS[lpsUpTo]) : '—';
+  const palLenVal = step.phase === 'result' ? '7' : (lpsUpTo >= 0 ? '?' : '—');
+
+  document.getElementById('vv-i').textContent = iVal;
+  document.getElementById('vv-j').textContent = jVal;
+  document.getElementById('vv-lps').textContent = lpsVal;
+  document.getElementById('vv-palLen').textContent = step.phase === 'result' ? '7' : '…';
+
+  document.getElementById('vb-i').classList.toggle('changed', step.changed.includes('i'));
+  document.getElementById('vb-j').classList.toggle('changed', step.changed.includes('j'));
+  document.getElementById('vb-lps').classList.toggle('changed', step.changed.includes('lps'));
+  document.getElementById('vb-palLen').classList.toggle('changed', step.changed.includes('result'));
+
+  // ── Progress dots ──
+  steps.forEach((_, i) => {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', i < current);
+  });
+
+  // ── Buttons ──
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === steps.length - 1;
+}
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= steps.length) return;
+  current = next;
+  render();
+}
+
+function reset() { current = 0; render(); }
+
+function toggle(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('collapsed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') go(1);
+  if (e.key === 'ArrowLeft')  go(-1);
+  if (e.key === 'r' || e.key === 'R') reset();
+});
+
+buildDom();
+render();
+</script>
+</body>
+</html>
